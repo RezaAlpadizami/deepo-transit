@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { MenuIcon, UserCircleIcon } from '@heroicons/react/solid';
+import { UserCircleIcon } from '@heroicons/react/solid';
 
 import Context from '../context';
 import menuItem from '../navigation/menu-item';
@@ -13,10 +13,10 @@ function Header() {
 
   return (
     <header className="flex p-5 border-b">
-      <MenuIcon className="w-6 h-6 p-px cursor-pointer hover:bg-slate-100" onClick={() => store.toggleDrawer()} />
-      <Link to="/" className="mx-3">
+      {/* <MenuIcon className="w-6 h-6 p-px cursor-pointer hover:bg-slate-100" onClick={() => store.toggleDrawer()} /> */}
+      <div className="mx-3 mt-0.5 cursor-pointer" onClick={() => store.toggleDrawer()}>
         <img src={logo} alt="logo" />
-      </Link>
+      </div>
       <ul className="flex ml-5 flex-auto">
         {menuItem
           .filter(item => item.showmenu)

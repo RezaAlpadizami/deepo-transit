@@ -50,8 +50,8 @@ function DataTable(props) {
   };
 
   return (
-    <div className="overflow-x-auto relative border-1 mt-4">
-      <table {...getTableProps()} className="table-auto w-full text-sm text-left text-gray-500  border">
+    <div className="overflow-x-auto relative px-6 pb-11 bg-white rounded-b-3xl">
+      <table {...getTableProps()} className="table-auto w-full text-sm text-left text-gray-500 border-t">
         <thead className="text-xs text-black uppercase bg-thead">
           {headerGroups.map(headerGroup => (
             <tr {...headerGroup.getHeaderGroupProps()}>
@@ -86,29 +86,29 @@ function DataTable(props) {
       {loading && (
         <div className="w-full">
           <div className="">
-            <div className=" border-b border-x border-gray-300 p-3 bg-white">
+            <div className=" border-b border-gray-300 p-3 bg-white">
               <div className="animate-pulse rounded-full w-64 bg-slate-200 h-3" />
             </div>
-            <div className="border-b border-x border-gray-300 p-3 bg-gray-50">
+            <div className="border-b border-gray-300 p-3 bg-gray-50">
               <div className="rounded-full bg-slate-200 h-3 w-80" />
             </div>
-            <div className=" border-b border-x border-gray-300 p-3 bg-white">
+            <div className=" border-b border-gray-300 p-3 bg-white">
               <div className="animate-pulse rounded-full w-52 bg-slate-200 h-3" />
             </div>
-            <div className="border-b border-x border-gray-300 p-3 bg-gray-50">
+            <div className="border-b border-gray-300 p-3 bg-gray-50">
               <div className="rounded-full bg-slate-200 h-3 w-60" />
             </div>
-            <div className=" border-b border-x border-gray-300 p-3 bg-white">
+            <div className=" border-b border-gray-300 p-3 bg-white">
               <div className="animate-pulse rounded-full w-64 bg-slate-200 h-3" />
             </div>
-            <div className="border-b border-x border-gray-300 p-3 bg-gray-50">
+            <div className="border-b border-gray-300 p-3 bg-gray-50">
               <div className="rounded-full bg-slate-200 h-3 w-56" />
             </div>
           </div>
         </div>
       )}
 
-      <nav className="flex justify-end items-center bg-white pl-4 border-x border-b" aria-label="Table navigation">
+      <nav className="flex justify-end items-center bg-white pl-4" aria-label="Table navigation">
         {/* still be maintained temporarily, if there is a design change in the future */}
         {/* <span className="text-sm font-normal text-gray-500">
           {totalData <= 0 ? null : (
