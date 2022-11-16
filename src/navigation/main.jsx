@@ -48,7 +48,13 @@ function Content() {
           }
           if (item.routes && item.routes.length > 0) {
             item.routes.forEach(routes => {
-              comp.push(<Route exact={routes.exact} path={routes.route} element={<routes.component />} />);
+              comp.push(
+                <Route
+                  exact={routes.exact}
+                  path={routes.route}
+                  element={<routes.component route={routes.route} displayName={routes.displayName} />}
+                />
+              );
 
               if (routes.routes && routes.routes.length > 0) {
                 routes.routes.forEach(routes2 => {
