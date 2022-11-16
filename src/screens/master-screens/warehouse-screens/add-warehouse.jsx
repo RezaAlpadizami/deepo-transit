@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import { Button } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import LoadingHover from '../../../components/loading-hover-component';
+// import LoadingHover from '../../../components/loading-hover-component';
 
-import { WarehouseApi } from '../../../services/api-master';
+// import { WarehouseApi } from '../../../services/api-master';
 
 // import Datatable from '../../../components/datatable-component';
 import Input from '../../../components/input-component';
@@ -14,11 +14,11 @@ import Input from '../../../components/input-component';
 import DatePicker from '../../../components/datepicker-component';
 
 function Screen() {
-  const navigate = useNavigate();
+  //   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(false);
-  const [errrorMessage, setErrorMessage] = useState(null);
-  const [showAlert, setShowAlert] = useState(false);
+  //   const [loading, setLoading] = useState(false);
+  //   const [errrorMessage, setErrorMessage] = useState(null);
+  //   const [showAlert, setShowAlert] = useState(false);
   //   const [data, setData] = useState([]);
   //   const [totalData, setTotalData] = useState([]);
   const phoneRegExp =
@@ -44,40 +44,36 @@ function Screen() {
     resolver: yupResolver(schema),
   });
 
-  //   useEffect(() => {
-  //     getData();
-  //   }, []);
+  //   const onSubmitWarehouse = data => {
+  //     setLoading(true);
+  //     WarehouseApi.store({
+  //       name: data.name,
+  //       code: data.code,
+  //       address: data.address,
+  //       phone: data.phone,
+  //       capacity: data.capacity,
+  //       last_stock_opname: data.last_stock_opname,
+  //       location: data.location,
+  //     })
+  //       .then(() => {
+  //         setLoading(false);
+  //         navigate('/master/warehouse');
+  //       })
+  //       .catch(error => {
+  //         setLoading(false);
+  //         setErrorMessage(error.message);
+  //         setShowAlert(true);
+  //       });
+  //   };
 
-  const onSubmitWarehouse = data => {
-    setLoading(true);
-    WarehouseApi.store({
-      name: data.name,
-      code: data.code,
-      address: data.address,
-      phone: data.phone,
-      capacity: data.capacity,
-      last_stock_opname: data.last_stock_opname,
-      location: data.location,
-    })
-      .then(() => {
-        setLoading(false);
-        navigate('/master/warehouse');
-      })
-      .catch(error => {
-        setLoading(false);
-        setErrorMessage(error.message);
-        setShowAlert(true);
-      });
-  };
-
-  const handleCloseButton = () => {
-    setShowAlert(false);
-    reset();
-  };
+  //   const handleCloseButton = () => {
+  //     setShowAlert(false);
+  //     reset();
+  //   };
 
   return (
     <div className="">
-      {showAlert && (
+      {/* {showAlert && (
         <span className="p-2 bg-[#E25450] rounded-[8px] text-center text-white text-[12px]">
           {errrorMessage}{' '}
           <button
@@ -88,8 +84,8 @@ function Screen() {
             <span className="ml-3 font-bold">Tutup</span>
           </button>
         </span>
-      )}
-      <form onSubmit={handleSubmit(onSubmitWarehouse)}>
+      )} */}
+      <form onSubmit={handleSubmit(d => console.log(d))}>
         <div className="flex mb-12">
           <h1 className="font-bold text-3xl">Add Warehouse</h1>
           <div className="flex-1" />
@@ -138,7 +134,7 @@ function Screen() {
           </Button>
         </div> */}
       </form>
-      {loading && <LoadingHover fixed />}
+      {/* {loading && <LoadingHover fixed />} */}
     </div>
   );
 }
