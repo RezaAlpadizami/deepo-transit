@@ -5,12 +5,13 @@ import { Button } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
-import { CityApi } from '../../../services/api-master';
+// import { CityApi } from '../../../services/api-master';
 
 import Datatable from '../../../components/datatable-component';
 import Input from '../../../components/input-component';
 // import Select from '../../../components/select-component';
 import DatePicker from '../../../components/datepicker-component';
+import warehouseApi from '../../../services/api-master/resources/warehouse-api';
 // import Textarea from '../../../components/textarea-component';
 
 function Screen() {
@@ -19,6 +20,10 @@ function Screen() {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
   const [totalData, setTotalData] = useState([]);
+  const [filterData, setFilterData] = useState({
+    limit: 5,
+    offset: 0,
+  });
 
   const schema = yup.object().shape({
     name: yup.string().nullable().required(),
@@ -39,11 +44,16 @@ function Screen() {
 
   useEffect(() => {
     getData();
+  }, [JSON.stringify(filterData)]);
+
+  useEffect(() => {
+    setFilterData({ ...filterData });
   }, []);
 
-  const getData = (page = 1) => {
+  const getData = () => {
     setLoading(true);
-    CityApi.get({ page })
+    warehouseApi
+      .get({ ...filterData })
       .then(data => {
         console.log('data', data);
         setLoading(false);

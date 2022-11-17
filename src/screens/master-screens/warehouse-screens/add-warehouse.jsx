@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-// import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-// import LoadingHover from '../../../components/loading-hover-component';
+import LoadingHover from '../../../components/loading-hover-component';
 
-// import { WarehouseApi } from '../../../services/api-master';
+import { WarehouseApi } from '../../../services/api-master';
 
 // import Datatable from '../../../components/datatable-component';
 import Input from '../../../components/input-component';
@@ -14,11 +14,11 @@ import Input from '../../../components/input-component';
 import DatePicker from '../../../components/datepicker-component';
 
 function Screen() {
-  //   const navigate = useNavigate();
+  const navigate = useNavigate();
 
-  //   const [loading, setLoading] = useState(false);
-  //   const [errrorMessage, setErrorMessage] = useState(null);
-  //   const [showAlert, setShowAlert] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errrorMessage, setErrorMessage] = useState([null]);
+  const [showAlert, setShowAlert] = useState(false);
   //   const [data, setData] = useState([]);
   //   const [totalData, setTotalData] = useState([]);
   const phoneRegExp =
@@ -29,7 +29,7 @@ function Screen() {
     code: yup.string().nullable().required(),
     address: yup.string().nullable().required(),
     phone: yup.string().matches(phoneRegExp, 'Phone number is not valid'),
-    capacity: yup.string().nullable().required(),
+    capacity: yup.number().nullable().required(),
     last_stock_opname: yup.date().nullable().required(),
     location: yup.string().nullable().required(),
   });
@@ -44,48 +44,52 @@ function Screen() {
     resolver: yupResolver(schema),
   });
 
-  //   const onSubmitWarehouse = data => {
-  //     setLoading(true);
-  //     WarehouseApi.store({
-  //       name: data.name,
-  //       code: data.code,
-  //       address: data.address,
-  //       phone: data.phone,
-  //       capacity: data.capacity,
-  //       last_stock_opname: data.last_stock_opname,
-  //       location: data.location,
-  //     })
-  //       .then(() => {
-  //         setLoading(false);
-  //         navigate('/master/warehouse');
-  //       })
-  //       .catch(error => {
-  //         setLoading(false);
-  //         setErrorMessage(error.message);
-  //         setShowAlert(true);
-  //       });
-  //   };
+  const onSubmitWarehouse = data => {
+    console.log('data', data);
+    setLoading(true);
+    WarehouseApi.store({
+      name: data.name,
+      code: data.code,
+      address: data.address,
+      phone: data.phone,
+      capacity: data.capacity,
+      last_stock_opname: data.last_stock_opname,
+      location: data.location,
+    })
+      .then(() => {
+        setLoading(false);
+        navigate('/master/warehouse');
+      })
+      .catch(error => {
+        console.log(error);
+        setLoading(false);
+        setErrorMessage(error.status);
+        setShowAlert(true);
+      });
+  };
 
-  //   const handleCloseButton = () => {
-  //     setShowAlert(false);
-  //     reset();
-  //   };
+  const handleCloseButton = () => {
+    setShowAlert(false);
+    reset();
+  };
 
   return (
     <div className="">
-      {/* {showAlert && (
-        <span className="p-2 bg-[#E25450] rounded-[8px] text-center text-white text-[12px]">
-          {errrorMessage}{' '}
-          <button
-            className="bg-transparent text-[13px] font-semibold leading-none outline-none focus:outline-none"
-            onClick={() => handleCloseButton()}
-            type="button"
-          >
-            <span className="ml-3 font-bold">Tutup</span>
-          </button>
-        </span>
-      )} */}
-      <form onSubmit={handleSubmit(d => console.log(d))}>
+      {showAlert && (
+        <div className="flex justify-center">
+          <span className="p-2 bg-[#E25450] rounded-[8px] text-center text-white text-[12px] items-center">
+            {errrorMessage}{' '}
+            <button
+              className="bg-transparent text-[13px] font-semibold leading-none outline-none focus:outline-none"
+              onClick={() => handleCloseButton()}
+              type="button"
+            >
+              <span className="ml-3 font-bold">Tutup</span>
+            </button>
+          </span>
+        </div>
+      )}
+      <form onSubmit={handleSubmit(onSubmitWarehouse)}>
         <div className="flex mb-12">
           <h1 className="font-bold text-3xl">Add Warehouse</h1>
           <div className="flex-1" />
@@ -123,18 +127,8 @@ function Screen() {
           />
           <Input name="location" label="Location" register={register} errors={errors} />
         </div>
-
-        {/* <div className="flex gap-2">
-          <div className="flex-1" />
-          <Button type="button" size="sm" width="24" onClick={() => reset()} colorScheme="blackAlpha" variant="outline">
-            Reset
-          </Button>
-          <Button type="submit" size="sm" width="24" colorScheme="primary">
-            Filter
-          </Button>
-        </div> */}
       </form>
-      {/* {loading && <LoadingHover fixed />} */}
+      {loading && <LoadingHover fixed />}
     </div>
   );
 }
