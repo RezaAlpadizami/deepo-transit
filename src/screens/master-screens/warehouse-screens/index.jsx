@@ -26,10 +26,12 @@ function Screen() {
   });
 
   const schema = yup.object().shape({
-    name: yup.string().nullable().required(),
-    terrain: yup.string().nullable().required(),
-    diameter: yup.string().nullable().required(),
-    gravity: yup.string().nullable().required(),
+    name: yup.string(),
+    code: yup.string(),
+    phone: yup.string(),
+    capacity: yup.number(),
+    location: yup.string(),
+    last_stock_opname: yup.date(),
   });
 
   const {
@@ -57,8 +59,8 @@ function Screen() {
       .then(data => {
         console.log('data', data);
         setLoading(false);
-        setData(data.results);
-        setTotalData(data.count);
+        setData(data.data);
+        setTotalData(data.query.total);
       })
       .catch(e => {
         setLoading(false);
@@ -160,10 +162,11 @@ function Screen() {
         </div>
         <Datatable
           column={[
+            { header: 'Code', value: 'code' },
             { header: 'Name', value: 'name' },
-            { header: 'Terrain', value: 'terrain' },
-            { header: 'Diameter', value: 'diameter' },
-            { header: 'Gravity', value: 'gravity' },
+            { header: 'Capacity', value: 'capacity', type: 'percent' },
+            { header: 'Location', value: 'location' },
+            { header: 'Last Stock Opname', value: 'last_stock_opname', type: 'date' },
           ]}
           data={data}
           totalData={totalData}

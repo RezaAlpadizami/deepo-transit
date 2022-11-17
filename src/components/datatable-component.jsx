@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 // import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/solid';
 import { useTable, useSortBy, usePagination } from 'react-table';
 import { observer } from 'mobx-react-lite';
+import Moment from 'moment';
 
 function DataTable(props) {
   const {
@@ -33,6 +34,16 @@ function DataTable(props) {
         return {
           Header: d.header,
           accessor: d.value,
+          Cell: props => {
+            const { value } = props;
+            if (d.type === 'date') {
+              return Moment(value).format('DD MMM, YYYY');
+            }
+            if (d.type === 'percent') {
+              return `${value}%`;
+            }
+            return value;
+          },
         };
       }),
     [JSON.stringify(propsColumn)]
