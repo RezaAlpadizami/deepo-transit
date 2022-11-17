@@ -1,10 +1,11 @@
 import React from 'react';
-import { HomeIcon, UserCircleIcon } from '@heroicons/react/solid';
+import { HomeIcon } from '@heroicons/react/solid';
 
 const NotFound = React.lazy(() => import('../screens/home-screens/404'));
 const Home = React.lazy(() => import('../screens/home-screens/index'));
 const MasterCity = React.lazy(() => import('../screens/master-screens/city/index'));
-const MasterCityAdd = React.lazy(() => import('../screens/master-screens/city/add'));
+const StorageScreensAdd = React.lazy(() => import('../screens/master-screens/storage-screens/add-storage'));
+const StorageScreens = React.lazy(() => import('../screens/master-screens/storage-screens/index'));
 
 export default [
   {
@@ -23,37 +24,26 @@ export default [
     showmenu: true,
     exact: true,
     route: '/master',
-    component: MasterCity,
+    component: StorageScreens,
     routes: [
       {
-        displayName: 'City',
+        displayName: 'Storage',
         icon: HomeIcon,
-        name: 'master-city',
+        name: 'master-storage',
         role: 'master',
         showmenu: true,
         exact: true,
-        route: '/master/city',
-        component: MasterCity,
+        route: '/master/storage',
+        component: StorageScreens,
         routes: [
           {
-            displayName: 'Add City',
-            icon: UserCircleIcon,
-            name: 'master-city-add',
-            role: 'master',
-            showmenu: true,
-            exact: true,
-            route: '/master/city/add',
-            component: MasterCityAdd,
-          },
-          {
-            displayName: 'Delete',
-            icon: UserCircleIcon,
-            name: 'master-city-delete',
+            displayName: 'Add Storage',
+            name: 'storage-add',
             role: 'master',
             showmenu: false,
             exact: true,
-            route: '/master/city/delete',
-            component: MasterCityAdd,
+            route: '/master/storage/add',
+            component: StorageScreensAdd,
           },
         ],
       },
@@ -65,7 +55,7 @@ export default [
         showmenu: true,
         exact: true,
         route: '/master/country',
-        component: MasterCity,
+        component: StorageScreens,
       },
       {
         displayName: 'X',

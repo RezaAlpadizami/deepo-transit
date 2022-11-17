@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/solid';
-import { useTable, useSortBy } from 'react-table';
+// import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/solid';
+import { useTable, useSortBy, usePagination } from 'react-table';
 import { observer } from 'mobx-react-lite';
 
 function DataTable(props) {
@@ -10,15 +10,20 @@ function DataTable(props) {
     onChangePage = () => {},
     totalData = 0,
     limit = 10,
+    offset = 0,
     loading = false,
   } = props;
 
-  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(1);
   const [lastPage, setLastPage] = useState(1);
 
   useEffect(() => {
     setLastPage(Math.ceil(totalData / limit));
   }, [totalData, limit]);
+
+  useEffect(() => {
+    setPages(offset / limit + 1);
+  }, [offset]);
 
   const data = React.useMemo(() => propsData, [JSON.stringify(propsData)]);
 
@@ -33,20 +38,21 @@ function DataTable(props) {
     [JSON.stringify(propsColumn)]
   );
 
-  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({ columns, data }, useSortBy);
+  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable(
+    { columns, data },
+    useSortBy,
+    usePagination
+  );
 
   const changePage = page => {
-    setPage(page);
+    setPages(page);
     onChangePage(page);
   };
 
   return (
-    <div className="overflow-x-auto relative border-1 mt-4">
-      <table
-        {...getTableProps()}
-        className="table-auto w-full text-sm text-left text-gray-500 dark:text-gray-400 border"
-      >
-        <thead className="text-xs text-black uppercase bg-thead dark:bg-gray-700 dark:text-gray-400">
+    <div className="overflow-x-auto relative px-6 pb-11 bg-white rounded-b-3xl">
+      <table {...getTableProps()} className="table-auto w-full text-sm text-left text-gray-500 border-t">
+        <thead className="text-xs text-black uppercase bg-thead">
           {headerGroups.map(headerGroup => (
             <tr {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map(column => (
@@ -64,9 +70,7 @@ function DataTable(props) {
               return (
                 <tr
                   {...row.getRowProps()}
-                  className={`${
-                    i % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                  } border-b hover:bg-slate-100 dark:bg-gray-900 dark:border-gray-700`}
+                  className={`${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} border-b hover:bg-slate-100`}
                 >
                   {row.cells.map(cell => (
                     <td {...cell.getCellProps()} className="py-2 px-6">
@@ -82,55 +86,60 @@ function DataTable(props) {
       {loading && (
         <div className="w-full">
           <div className="">
-            <div className=" border-b border-x border-gray-300 p-3 bg-white">
+            <div className=" border-b border-gray-300 p-3 bg-white">
               <div className="animate-pulse rounded-full w-64 bg-slate-200 h-3" />
             </div>
-            <div className="border-b border-x border-gray-300 p-3 bg-gray-50">
+            <div className="border-b border-gray-300 p-3 bg-gray-50">
               <div className="rounded-full bg-slate-200 h-3 w-80" />
             </div>
-            <div className=" border-b border-x border-gray-300 p-3 bg-white">
+            <div className=" border-b border-gray-300 p-3 bg-white">
               <div className="animate-pulse rounded-full w-52 bg-slate-200 h-3" />
             </div>
-            <div className="border-b border-x border-gray-300 p-3 bg-gray-50">
+            <div className="border-b border-gray-300 p-3 bg-gray-50">
               <div className="rounded-full bg-slate-200 h-3 w-60" />
             </div>
-            <div className=" border-b border-x border-gray-300 p-3 bg-white">
+            <div className=" border-b border-gray-300 p-3 bg-white">
               <div className="animate-pulse rounded-full w-64 bg-slate-200 h-3" />
             </div>
-            <div className="border-b border-x border-gray-300 p-3 bg-gray-50">
+            <div className="border-b border-gray-300 p-3 bg-gray-50">
               <div className="rounded-full bg-slate-200 h-3 w-56" />
             </div>
           </div>
         </div>
       )}
 
-      <nav className="flex justify-between items-center bg-white pl-4 border-x border-b" aria-label="Table navigation">
-        <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-          Showing{' '}
-          <span className="font-semibold text-gray-900 dark:text-white">
-            {limit * (page - 1) + 1}-{page * limit}
-          </span>{' '}
-          of <span className="font-semibold text-gray-900 dark:text-white">{totalData}</span>
-        </span>
-        <ul className="inline-flex items-center text-sm -space-x-px">
-          <li>
+      <nav className="flex justify-end items-center bg-white pl-4" aria-label="Table navigation">
+        {/* still be maintained temporarily, if there is a design change in the future */}
+        {/* <span className="text-sm font-normal text-gray-500">
+          {totalData <= 0 ? null : (
+            <>
+              Showing
+              <span className="font-semibold text-gray-900">
+                {limit * (page - 1) + 1}-{page * limit}
+              </span>{' '}
+              of <span className="font-semibold text-gray-900">{totalData}</span>
+            </>
+          )}
+        </span> */}
+        <ul className="inline-flex items-center text-sm -space-x-px py-4 mr-8">
+          {/* <li>
             <button
               type="button"
               disabled={page === 1}
               onClick={() => (page === 1 ? {} : changePage(page - 1))}
-              className="block py-2 px-3 ml-0 leading-tight text-gray-500 bg-white disabled:text-gray-300 disabled:hover:bg-white hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+              className="block py-2 px-3 ml-0 leading-tight text-gray-500 bg-white disabled:text-gray-300 disabled:hover:bg-white hover:bg-gray-100 hover:text-gray-700"
             >
               <span className="sr-only">Previous</span>
               <ChevronLeftIcon className="w-5 h-5" />
             </button>
-          </li>
-          {lastPage > 7 && page > 4 && (
+          </li> */}
+          {lastPage > 7 && pages >= 4 && (
             <>
               <li>
                 <button
                   type="button"
                   onClick={() => changePage(1)}
-                  className="py-2 px-3 leading-tight text-gray-500 bg-white  hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                  className="py-2 px-3 leading-tight text-black rounded-lg bg-gray-100 mr-1  hover:bg-gray-700 hover:text-white"
                 >
                   1
                 </button>
@@ -138,38 +147,42 @@ function DataTable(props) {
               <li>
                 <button
                   type="button"
-                  className="py-2 px-3 leading-tight text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                  className="py-2 px-3 leading-tight text-black rounded-lg mr-0.5 bg-gray-100 hover:bg-gray-700 hover:text-white"
                 >
                   ...
                 </button>
               </li>
             </>
           )}
-          {Array(lastPage > 7 && lastPage - page <= 3 ? 5 : lastPage > 7 && page > 4 ? 3 : lastPage > 7 ? 5 : lastPage)
+          {Array(
+            lastPage > 7 && lastPage - pages < 3 ? 5 : lastPage > 7 && pages >= 4 ? 3 : lastPage > 7 ? 5 : lastPage
+          )
             .fill('')
             .map((_, i) => {
-              const p = lastPage > 7 && lastPage - page <= 3 ? lastPage - 4 : lastPage > 7 && page > 4 ? page - 1 : 1;
+              const p =
+                lastPage > 7 && lastPage - pages < 3 ? lastPage - 4 : lastPage > 7 && pages >= 4 ? pages - 1 : 1;
+
               return (
                 <li>
                   <button
                     type="button"
-                    disabled={page === i + p}
+                    disabled={pages === i + p}
                     onClick={() => changePage(i + p)}
                     className={`${
-                      page === i + p ? 'bg-gray-200' : 'bg-white'
-                    } py-2 px-3 leading-tight text-gray-500  hover:bg-gray-100 disabled:text-gray-400 disabled:hover:bg-gray-200 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white`}
+                      pages === i + p ? 'bg-gray-700 text-white' : 'bg-white'
+                    } py-2 px-3 mx-0.5 leading-tight text-black bg-gray-100 rounded-lg hover:bg-gray-700 hover:text-white disabled:text-white`}
                   >
                     {i + p}
                   </button>
                 </li>
               );
             })}
-          {lastPage > 7 && lastPage - page > 3 && (
+          {lastPage > 7 && lastPage - pages >= 3 && (
             <>
               <li>
                 <button
                   type="button"
-                  className="py-2 px-3 leading-tight text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                  className="py-2 px-3 mr-1 ml-0.5 leading-tight text-black rounded-lg bg-gray-100 hover:bg-gray-700 hover:text-white"
                 >
                   ...
                 </button>
@@ -178,24 +191,24 @@ function DataTable(props) {
                 <button
                   type="button"
                   onClick={() => changePage(lastPage)}
-                  className="py-2 px-3 leading-tight text-gray-500 bg-white  hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                  className="py-2 px-3 leading-tight text-black rounded-lg bg-gray-100 hover:bg-gray-700 hover:text-white"
                 >
                   {lastPage}
                 </button>
               </li>
             </>
           )}
-          <li>
+          {/* <li>
             <button
               type="button"
               disabled={page === lastPage}
               onClick={() => (page === lastPage ? {} : changePage(page + 1))}
-              className="block py-2 px-3 leading-tight text-gray-500 bg-white disabled:text-gray-300 disabled:hover:bg-white hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+              className="block py-2 px-3 leading-tight text-gray-500 bg-white disabled:text-gray-300 disabled:hover:bg-white hover:bg-gray-100 hover:text-gray-700"
             >
               <span className="sr-only">Next</span>
               <ChevronRightIcon className="w-5 h-5" />
             </button>
-          </li>
+          </li> */}
         </ul>
       </nav>
     </div>

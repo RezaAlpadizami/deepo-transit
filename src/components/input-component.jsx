@@ -17,10 +17,10 @@ function InputComponent(props) {
   return (
     <div className="flex-auto w-full">
       <div>
-        <label htmlFor={name} className="text-sm font-light text-gray-600 block ml-1">
+        <label htmlFor={name} className="text-sm font-light text-black block ml-1">
           {label}
         </label>
-        <div className="mt-1 flex  shadow-sm">
+        <div className="mt-1 flex">
           <Input
             {...register(name)}
             bg="white"
@@ -33,7 +33,7 @@ function InputComponent(props) {
             name={name}
             id={name}
             isInvalid={errors[name]}
-            className="w-full text-sm rounded-md border-gray-300 px-3 py-1"
+            className="w-full text-sm rounded-full border-gray-400 px-5 py-5"
             placeholder={placeholder}
           />
         </div>
