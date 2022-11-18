@@ -5,11 +5,13 @@ import { useTable, useRowSelect, usePagination, useSortBy } from 'react-table';
 import { observer } from 'mobx-react-lite';
 import Swal from 'sweetalert2';
 import XLSX from 'xlsx';
+import Moment from 'moment';
 import { saveAs } from 'file-saver';
 import Toolbar from './action-toolbar-component';
 import { hasProperty } from '../utils/helper';
 import { Checkbox } from './checkbox-component';
 import TableComponent from './table-component';
+import LoadingHover from './loading-component';
 
 function DataTable(props) {
   const {
@@ -29,11 +31,7 @@ function DataTable(props) {
 
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
-  const [filterData, setFilterData] = useState({
-    limit: 5,
-    offset: 0,
-  });
-  console.log(filterData);
+  const [loadingHover, setLoadingHover] = useState(false);
 
   useEffect(() => {
     setLastPage(Math.ceil(totalData / limit));
@@ -47,6 +45,13 @@ function DataTable(props) {
         return {
           Header: d.header,
           accessor: d.value,
+          Cell: props => {
+            const { value } = props;
+            if (d.type === 'date') {
+              return Moment(value).format('DD MMM YYYY');
+            }
+            return value;
+          },
         };
       }),
     [JSON.stringify(propsColumn)]
@@ -158,48 +163,41 @@ function DataTable(props) {
     }
     return false;
   };
+
   const deleteData = () => {
-    api
-      .delete('id')
-      .then(() => {
-        setFilterData(prevState => ({
-          ...prevState,
-          offset: 0,
-        }));
+    Promise.allSettled([
+      selectedFlatRows.map(d => {
+        return new Promise((resolve, reject) => {
+          api
+            .delete(d.values.id)
+            .then(r => resolve(r))
+            .catch(e => reject(e));
+        });
+      }),
+    ]).then(result => {
+      const success = [];
+      const failed = [];
+      result.forEach(r => {
+        if (r.status === 'fulfilled') {
+          success.push(true);
+          setLoadingHover(false);
+        } else {
+          result.reason.data.error.api.map(m => failed.push(m));
+        }
+      });
+
+      if (success.length > 0) {
         Swal.fire({ text: 'Data Deleted Successfully', icon: 'success' });
-      })
-      .catch(error => Swal.fire({ text: error?.message, icon: 'error' }));
+      } else if (failed.length > 0) {
+        Swal.fire({ text: 'Something Went Wrong', icon: 'success' });
+      }
+    });
   };
-  // const toDataURL = (url, name) => {
-  //   return fetch(url)
-  //     .then(response => {
-  //       Swal.fire('OK', `${name} berhasil di Download`, 'success');
-  //       return response.blob();
-  //     })
-  //     .catch(error => {
-  //       Swal.fire('Oops', error?.message, 'error');
-  //     })
-  //     .then(blob => {
-  //       return URL.createObjectURL(blob);
-  //     });
-  // };
+
   const download = () => {
-    // if (api) {
-    //   api
-    //     .then(res => {
-    //       const url = URL.createObjectURL(new Blob([res.data]));
-    //       const link = document.createElement('a');
-    //       link.href = url;
-    //       link.setAttribute('download', `${to.displayName}.xlsx`);
-    //       document.body.appendChild(link);
-    //       link.click();
-    //     })
-    //     .catch(error => {
-    //       Swal.fire({ text: error, icon: 'error' });
-    //     });
-    // } else {
+    setLoadingHover(true);
     const wb = XLSX.utils.table_to_book(document.getElementById('mytable'), {
-      sheet: 'C09',
+      sheet: `${name}`,
     });
     const wbout = XLSX.write(wb, { bookType: 'xlsx', bookSST: true, type: 'binary' });
     function s2ab(data) {
@@ -209,15 +207,18 @@ function DataTable(props) {
       for (let i = 0; i < data.length; i++) view[i] = data.charCodeAt(i) & 0xff;
       return buf;
     }
+    setTimeout(() => {
+      setLoadingHover(false);
+    }, 500);
     return saveAs(new Blob([s2ab(wbout)], { type: 'application/octet-stream' }), `${name}.xlsx`);
-    // }
   };
 
   return (
     <>
+      <LoadingHover visible={loadingHover} />
       {download && (
         <div style={{ display: 'none' }}>
-          <TableComponent id="mytable" data={data} header={propsColumn.filter(i => i.value)} />
+          <TableComponent id="mytable" data={data || loading} header={propsColumn.filter(i => i.value)} />
         </div>
       )}
 

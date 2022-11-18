@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import copy from 'copy-to-clipboard';
-import { Button } from '@chakra-ui/react';
+import { Button, Modal, ModalContent, useDisclosure, ModalOverlay, ModalHeader, ModalBody } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { DocumentDownloadIcon, EyeIcon, TrashIcon, ClipboardListIcon, ViewGridIcon } from '@heroicons/react/solid';
 import ShowHide from './show-hide-component';
+import DeletedList from './delete-list-component';
 import { getNestedObject } from '../utils/helper';
 
 const button = 'border-black border-2 ml-3';
@@ -23,31 +24,38 @@ function ActionToolbar(props) {
     copyItem,
   } = props;
   const navigate = useNavigate();
+  const { onClose, isOpen, onOpen } = useDisclosure();
   const [showHide, setShowHide] = useState(false);
-
   const onView = () => {
     if (navTo) {
       navigate(`${navTo?.path}/${navTo?.id}/show`);
     }
   };
 
-  const confirmationDelete = () => {
-    Swal.fire({
-      title: `Delete Data`,
-      text: 'Are You sure want to delete this data?',
-      padding: 20,
-      showCancelButton: true,
-      buttonsStyling: false,
-      confirmButtonColor: '#246EE5',
-      cancelButtonColor: '#FFFFFF',
-      confirmButtonText: `<p class="text-[#246EE5] rounded-[8px] text-[#FFFFFF] bg-[#246EE5] px-5 py-2 m-2 hover:bg-blue-700">Delete</p>`,
-      cancelButtonText: `<p class="text-[#246EE5] rounded-[8px] text-[#246EE5] border border-[#246EE5] px-5 py-2 hover:bg-gray-200">Cancel</p>`,
-      reverseButtons: true,
-    }).then(confirmation => {
-      if (confirmation.isDismissed) return;
-      if (confirmation.isConfirmed) onDelete();
-    });
-  };
+  // const confirmationDelete = () => {
+  // Swal.fire({
+  //   customClass: {
+  //     container: 'popup-delete-confirmation',
+  //   },
+  //   html: `
+  //     <div class="flex">
+  //       <p class="px-4 mb-4">Are you sure want to delete this data?</p>
+  //     </div>
+  //       ${ReactDOMServer.renderToStaticMarkup(<DeletedList datas={selectedData} columnsData={columns} />)}
+  //     </div>
+  //   </div>`,
+  //   confirmButtonText: 'DELETE DATA',
+  //   cancelButtonText: 'CANCEL',
+  //   showCancelButton: true,
+  //   reverseButtons: true,
+  //   cancelButtonClass: 'btn-outline-danger',
+  //   confirmButtonColor: '#B51313',
+  //   width: '50%',
+  // }).then(confirmation => {
+  //   if (confirmation.isDismissed) return;
+  //   if (confirmation.isConfirmed) onDelete();
+  // });
+  // };
   const onCopy = () => {
     let text = '';
     copyItem.forEach(val => {
@@ -71,15 +79,21 @@ function ActionToolbar(props) {
     copy(text, {
       format: 'text/plain',
     });
-    Swal.fire({
-      customClass: {
-        container: 'popup-info-confirmation',
-      },
-      icon: 'info',
-      text: 'Copy to Clipboard',
-      timer: 1500,
-      timerProgressBar: true,
+    const Toast = Swal.mixin({
+      toast: true,
+      position: 'top-end',
       showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      didOpen: toast => {
+        toast.addEventListener('mouseenter', Swal.stopTimer);
+        toast.addEventListener('mouseleave', Swal.resumeTimer);
+      },
+    });
+
+    Toast.fire({
+      icon: 'info',
+      title: 'Copy to Clipboard',
     });
   };
 
@@ -104,13 +118,12 @@ function ActionToolbar(props) {
         <Button
           leftIcon={<TrashIcon size="xl" className="w-5" />}
           className={button}
-          onClick={confirmationDelete}
+          onClick={onOpen}
           disabled={selectedData.length === 0}
         >
           Delete
         </Button>
       )}
-
       {copyClipboard && (
         <Button
           leftIcon={<ClipboardListIcon size="xl" className="w-5" />}
@@ -138,6 +151,38 @@ function ActionToolbar(props) {
           />
         </>
       )}
+      <Modal isCentered onClose={onClose} isOpen={isOpen} motionPreset="slideInBottom">
+        <ModalOverlay />
+        <ModalContent className=" max-w-[70%] max-h-[70%] py-10 h-[60%]">
+          <ModalHeader>
+            <div className="flex">
+              <p className="text-sm font-semibold ml-5"> Are you sure want to delete this data ?</p>
+              <div className="flex-1" />
+              <Button
+                className="rounded-full bg-[#aaa] outline outline-offset-2 outline-[#1F2022]"
+                colorScheme="blue"
+                mr={3}
+                onClick={onClose}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="rounded-full bg-[#232323] text-[#fff]"
+                variant="blue"
+                onClick={() => {
+                  onDelete();
+                  onClose();
+                }}
+              >
+                Delete Data
+              </Button>
+            </div>
+          </ModalHeader>
+          <ModalBody>
+            <DeletedList datas={selectedData} columnsData={columns} />
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </>
   );
 }
