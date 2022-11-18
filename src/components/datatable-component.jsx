@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from 'react';
 // import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/solid';
+import { useLocation } from 'react-router-dom';
 import { useTable, useSortBy, usePagination } from 'react-table';
 import { observer } from 'mobx-react-lite';
 import Moment from 'moment';
+import { Link } from '@chakra-ui/react';
+
+// import { useForm } from 'react-hook-form';
 
 function DataTable(props) {
   const {
@@ -13,8 +17,24 @@ function DataTable(props) {
     limit = 10,
     offset = 0,
     loading = false,
+    // hasSelectionAction,
+    hasViewAction,
+    action,
   } = props;
 
+  // const {
+  // control,
+  // register,
+  // reset,
+  // formState: { errors },
+  // } = useForm({
+  //   defaultValues: {
+  //     action: '',
+  //   },
+  // });
+
+  // const navigate = useNavigate();
+  const location = useLocation();
   const [pages, setPages] = useState(1);
   const [lastPage, setLastPage] = useState(1);
 
@@ -25,6 +45,12 @@ function DataTable(props) {
   useEffect(() => {
     setPages(offset / limit + 1);
   }, [offset]);
+
+  // const onClickSelectionChange = (val, id) => {
+  //   if (val.id === id) {
+  //     // setDataId(id);
+  //   }
+  // };
 
   const data = React.useMemo(() => propsData, [JSON.stringify(propsData)]);
 
@@ -60,6 +86,15 @@ function DataTable(props) {
     onChangePage(page);
   };
 
+  // const handleActionChange = e => {
+  //   const type = e.target.value;
+  //   if (type === 'view') {
+  //     navigate('/master/warehouse/add');
+  //   }
+  //   reset();
+  //   return false;
+  // };
+
   return (
     <div className="overflow-x-auto relative px-6 pb-11 bg-white rounded-b-3xl">
       <table {...getTableProps()} className="table-auto w-full text-sm text-left text-gray-500 border-t">
@@ -71,6 +106,11 @@ function DataTable(props) {
                   {column.render('Header')}
                 </th>
               ))}
+              {hasViewAction && (
+                <th className="py-3 px-6" width={150}>
+                  {' '}
+                </th>
+              )}
             </tr>
           ))}
         </thead>
@@ -88,6 +128,14 @@ function DataTable(props) {
                       {cell.render('Cell')}
                     </td>
                   ))}
+
+                  {hasViewAction && (
+                    <td className="py-1 px-6 border-none hover: text-blue-400 no-underline">
+                      <Link type="button" className="mr-4" href={`${location.pathname}/${row.original.id}`}>
+                        View Detail
+                      </Link>
+                    </td>
+                  )}
                 </tr>
               );
             })}

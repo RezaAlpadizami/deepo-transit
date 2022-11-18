@@ -6,6 +6,9 @@ const NotFound = React.lazy(() => import('../screens/home-screens/404'));
 const Home = React.lazy(() => import('../screens/home-screens/index'));
 const MasterWarhouse = React.lazy(() => import('../screens/master-screens/warehouse-screens/index'));
 const MasterWarehouseAdd = React.lazy(() => import('../screens/master-screens/warehouse-screens/add-warehouse'));
+const MasterWarehouseView = React.lazy(() =>
+  import('../screens/master-screens/warehouse-screens/view-detail-warehouse')
+);
 
 export default [
   {
@@ -45,16 +48,15 @@ export default [
             route: '/master/warehouse/add',
             component: MasterWarehouseAdd,
           },
-          //   {
-          //     displayName: 'Delete',
-          //     icon: UserCircleIcon,
-          //     name: 'master-city-delete',
-          //     role: 'master',
-          //     showmenu: false,
-          //     exact: true,
-          //     route: '/master/city/delete',
-          //     component: MasterCityAdd,
-          //   },
+          {
+            displayName: 'View Detail Warehouse',
+            name: 'warehouse-view',
+            role: 'master',
+            showmenu: false,
+            exact: true,
+            route: '/master/warehouse/:id',
+            component: MasterWarehouseView,
+          },
         ],
       },
       {

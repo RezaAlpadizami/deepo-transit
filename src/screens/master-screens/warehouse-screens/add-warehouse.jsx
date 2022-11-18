@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+
 import { Button } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+
 import LoadingHover from '../../../components/loading-hover-component';
-
 import { WarehouseApi } from '../../../services/api-master';
-
-// import Datatable from '../../../components/datatable-component';
 import Input from '../../../components/input-component';
-// import Select from '../../../components/select-component';
 import DatePicker from '../../../components/datepicker-component';
 
 function Screen() {
@@ -19,8 +17,7 @@ function Screen() {
   const [loading, setLoading] = useState(false);
   const [errrorMessage, setErrorMessage] = useState([null]);
   const [showAlert, setShowAlert] = useState(false);
-  //   const [data, setData] = useState([]);
-  //   const [totalData, setTotalData] = useState([]);
+
   const phoneRegExp =
     /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/;
 
@@ -45,7 +42,6 @@ function Screen() {
   });
 
   const onSubmitWarehouse = data => {
-    console.log('data', data);
     setLoading(true);
     WarehouseApi.store({
       name: data.name,
