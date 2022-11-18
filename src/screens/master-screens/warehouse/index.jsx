@@ -3,34 +3,11 @@ import { useForm } from 'react-hook-form';
 import { Button } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-
-import { CityApi } from '../../../services/api-master';
-
+import Swal from 'sweetalert2';
+import { WarehouseApi } from '../../../services/api-master';
 import Datatable from '../../../components/datatable-component';
 import Input from '../../../components/input-component';
 
-const dummy = [
-  {
-    id: 1,
-    warehouse_code: 'W1',
-    warehouse_name: 'WarehouseName',
-    warehouse_location: 'Jakardah',
-    warehouse_address: 'Equity Tower lt. 250',
-    warehouse_capacity: '100',
-    last_stock_date: '2022-11-15T16:08:23+07:00',
-    warehouse_phone: '08123456789',
-  },
-  {
-    id: 2,
-    warehouse_code: 'MS 2',
-    warehouse_name: 'Moon Storage',
-    warehouse_location: 'JakSel',
-    warehouse_address: 'Treasury Tower lt. 250',
-    warehouse_capacity: '200',
-    last_stock_date: '2022-11-15T16:08:23+07:00',
-    warehouse_phone: '08123456789',
-  },
-];
 function Screen(props) {
   const { route, displayName } = props;
 
@@ -61,15 +38,15 @@ function Screen(props) {
 
   const getData = (page = 1) => {
     setLoading(true);
-    setData(dummy);
-    setTotalData(dummy.length);
-    CityApi.get({ page })
-      .then(() => {
+    WarehouseApi.get({ page })
+      .then(res => {
+        setData(res.data);
+        setTotalData(res.query.total);
         setLoading(false);
       })
       .catch(e => {
         setLoading(false);
-        console.log(e);
+        Swal.fire({ text: e?.message, icon: 'error' });
       });
   };
 
@@ -101,13 +78,13 @@ function Screen(props) {
         <Datatable
           columns={[
             { header: 'Id', value: 'id', copy: true },
-            { header: 'Wareouse Code', value: 'warehouse_code', copy: true },
-            { header: 'Wareouse Name', value: 'warehouse_name', copy: true },
-            { header: 'Wareouse Location', value: 'warehouse_location', copy: true },
-            { header: 'Wareouse Address', value: 'warehouse_address', copy: true },
-            { header: 'Warehouse Capacity', value: 'warehouse_capacity', copy: true },
-            { header: 'Last Stock Date', value: 'last_stock_date', copy: true },
-            { header: 'Warehouse Phone', value: 'warehouse_phone', copy: true },
+            { header: 'Wareouse Code', value: 'code', copy: true },
+            { header: 'Wareouse Name', value: 'name', copy: true },
+            { header: 'Wareouse Location', value: 'location', copy: true },
+            { header: 'Wareouse Address', value: 'address', copy: true },
+            { header: 'Warehouse Capacity', value: 'capacity', copy: true },
+            { header: 'Last Stock Date', value: 'last_stock_opname', copy: true, type: 'date' },
+            { header: 'Warehouse Phone', value: 'phone', copy: true },
           ]}
           toolbar={{
             action: {
@@ -118,7 +95,7 @@ function Screen(props) {
               'save-to-excel': true,
             },
           }}
-          api={CityApi}
+          api={WarehouseApi}
           to={route}
           data={data}
           name={displayName}

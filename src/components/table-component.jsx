@@ -68,13 +68,6 @@ const styles = {
 
 function MyDocument(props) {
   const { data, header } = props;
-  //   console.log('MAAAAOP', Object.keys(data.map(i => i)));
-  //   let key = '';
-  //   header.forEach(i => {
-  //     key = i.value;
-  //   });
-  //   console.log('KEEEEEYS', key);
-  //   const counter = 0;
   return (
     <div id="mytable">
       <table>
@@ -85,30 +78,18 @@ function MyDocument(props) {
             })}
           </tr>
           {data?.forEach((d, i) => {
-            // console.log('dddddd', d);
-            // // console.log('[]', d[i]);
-            // // console.log('findindex', d.indexOf);
-            // const key = Object.keys(d);
-
-            // key.forEach(i => {
-            //   console.log('ii', i);
-            //   ++counter;
-            //   if(counter === header.length)
-            //   console.log('counter', counter);
-            // });
             return (
               <tr style={styles.divTableRow}>
                 <th style={{ ...styles.divTableCol, ...styles.labelText }}>{i + 1}</th>
-                <th style={{ ...styles.divTableCol, ...styles.labelText }}>{d.warehouse_code}</th>
-                <th style={{ ...styles.divTableCol, ...styles.labelText }}>{d.warehouse_name}</th>
-                <th style={{ ...styles.divTableCol, ...styles.labelText }}>{d.warehouse_location}</th>
-                <th style={{ ...styles.divTableCol, ...styles.labelText }}>{d.warehouse_address}</th>
-                <th style={{ ...styles.divTableCol, ...styles.labelText }}>{d.avg_destination_price}</th>
-                <th style={{ ...styles.divTableCol, ...styles.labelText }}>{d.warehouse_capacity}</th>
+                <th style={{ ...styles.divTableCol, ...styles.labelText }}>asd</th>
+                <th style={{ ...styles.divTableCol, ...styles.labelText }}>{d.name}</th>
+                <th style={{ ...styles.divTableCol, ...styles.labelText }}>{d.location}</th>
+                <th style={{ ...styles.divTableCol, ...styles.labelText }}>{d.address}</th>
+                <th style={{ ...styles.divTableCol, ...styles.labelText }}>{d.capacity}</th>
                 <th style={{ ...styles.divTableCol, ...styles.labelText }}>
-                  {Moment(d.last_stock_date).format('DD MM YYYY')}
+                  {Moment(d.last_stock_opname).format('DD MM YYYY')}
                 </th>
-                <th style={{ ...styles.divTableCol, ...styles.labelText }}>{d.warehouse_phone}</th>
+                <th style={{ ...styles.divTableCol, ...styles.labelText }}>{d.phone}</th>
               </tr>
             );
           })}
