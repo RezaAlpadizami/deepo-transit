@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { observer } from 'mobx-react-lite';
 import Moment from 'moment';
 import * as yup from 'yup';
 import Swal from 'sweetalert2';
@@ -11,11 +12,10 @@ import Datatable from '../../../components/datatable-component';
 import Input from '../../../components/input-component';
 import Select from '../../../components/select-component';
 import TextArea from '../../../components/textarea-component';
-// import LoadSkeleton from '../../../components/skeleton-component';
+import LoadSkeleton from '../../../components/skeleton-component';
 
 function Screen(props) {
   const { route, displayName } = props;
-
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
   const [totalData, setTotalData] = useState([]);
@@ -85,7 +85,7 @@ function Screen(props) {
 
   return (
     <div className="">
-      {/* <LoadSkeleton /> */}
+      {loading && <LoadSkeleton />}
       <div className="flex">
         <h1 className="font-bold text-xl">{displayName}</h1>
         <div className="flex-1" />
@@ -160,4 +160,4 @@ function Screen(props) {
     </div>
   );
 }
-export default Screen;
+export default observer(Screen);

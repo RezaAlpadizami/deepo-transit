@@ -16,30 +16,30 @@ function LoadSkeleton() {
         <div className="animate-pulse flex">
           <div className="flex-1 space-y-6">
             <div className="flex">
-              <div className="h-8 bg-slate-500 rounded w-[15%]" />
+              <div className="h-8 bg-gray-300 rounded w-[15%]" />
               <div className="flex-1" />
-              <div className="h-10 bg-slate-500 rounded-full  w-[8%] " />
-              <div className="h-10 bg-slate-500 rounded-full w-[8%] ml-5 mr-10" />
+              <div className="h-10 bg-gray-300 rounded-full  w-[8%] " />
+              <div className="h-10 bg-gray-300 rounded-full w-[8%] ml-5 mr-10" />
             </div>
             <div className="pl-4 h-full">
               <div className="space-y-3 pt-5 w-[80%]">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="h-5 bg-slate-500 rounded col-span-1 w-20" />
-                  <div className="h-5 bg-slate-500 rounded col-span-1 w-20" />
+                  <div className="h-5 bg-gray-300 rounded col-span-1 w-20" />
+                  <div className="h-5 bg-gray-300 rounded col-span-1 w-20" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="h-6 bg-slate-500 rounded col-span-1" />
-                  <div className="h-6 bg-slate-500 rounded col-span-1" />
+                  <div className="h-6 bg-gray-300 rounded col-span-1" />
+                  <div className="h-6 bg-gray-300 rounded col-span-1" />
                 </div>
               </div>
               <div className="space-y-3 pt-12 w-[80%]">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="h-5 bg-slate-500 rounded col-span-1 w-20" />
-                  <div className="h-5 bg-slate-500 rounded col-span-1 w-20" />
+                  <div className="h-5 bg-gray-300 rounded col-span-1 w-20" />
+                  <div className="h-5 bg-gray-300 rounded col-span-1 w-20" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="h-6 bg-slate-500 rounded col-span-1" />
-                  <div className="h-20 bg-slate-500 rounded col-span-1" />
+                  <div className="h-6 bg-gray-300 rounded col-span-1" />
+                  <div className="h-20 bg-gray-300 rounded col-span-1" />
                 </div>
               </div>
             </div>

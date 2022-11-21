@@ -4,7 +4,8 @@ import { Button } from '@chakra-ui/react';
 import Swal from 'sweetalert2';
 
 function DeleteButton(props) {
-  const { api, id = 1, redirectUrl = '' } = props;
+  const { api, id = 1, redirectUrl } = props;
+  console.log('redirect', redirectUrl);
   const navigate = useNavigate();
 
   const deleteData = () => {

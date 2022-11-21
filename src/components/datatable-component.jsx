@@ -12,6 +12,7 @@ import { hasProperty } from '../utils/helper';
 import { Checkbox } from './checkbox-component';
 import TableComponent from './table-component';
 import LoadingHover from './loading-component';
+import LoadSkeleton from './skeleton-table-component';
 
 function DataTable(props) {
   const {
@@ -27,6 +28,7 @@ function DataTable(props) {
     api,
     checkbox,
     name,
+    // load,
   } = props;
 
   const [page, setPage] = useState(1);
@@ -215,6 +217,7 @@ function DataTable(props) {
 
   return (
     <>
+      {loading && <LoadSkeleton />}
       <LoadingHover visible={loadingHover} />
       {download && (
         <div style={{ display: 'none' }}>

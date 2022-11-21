@@ -8,7 +8,7 @@ import ShowHide from './show-hide-component';
 import DeletedList from './delete-list-component';
 import { getNestedObject } from '../utils/helper';
 
-const button = 'border-black border-2 ml-3';
+const button = 'border-black border-2 ml-3 rounded-lg text-sm px-10';
 
 function ActionToolbar(props) {
   const {
@@ -76,14 +76,18 @@ function ActionToolbar(props) {
   return (
     <>
       {onDownload && (
-        <Button leftIcon={<DocumentDownloadIcon size="xl" className="w-5 " />} className={button} onClick={onDownload}>
+        <Button
+          leftIcon={<DocumentDownloadIcon className="w-5" />}
+          className={`${button} w-[11%]`}
+          onClick={onDownload}
+        >
           Save to Excel
         </Button>
       )}
       {view && (
         <Button
-          leftIcon={<EyeIcon size="xl" className="w-5" />}
-          className={button}
+          leftIcon={<EyeIcon className="w-4" />}
+          className={`${button} w-20`}
           onClick={onView}
           disabled={selectedData.length !== 1}
         >
@@ -92,8 +96,8 @@ function ActionToolbar(props) {
       )}
       {onDelete && (
         <Button
-          leftIcon={<TrashIcon size="xl" className="w-5" />}
-          className={button}
+          leftIcon={<TrashIcon className="w-4" />}
+          className={`${button} w-[7%]`}
           onClick={onOpen}
           disabled={selectedData.length === 0}
         >
@@ -102,8 +106,8 @@ function ActionToolbar(props) {
       )}
       {copyClipboard && (
         <Button
-          leftIcon={<ClipboardListIcon size="xl" className="w-5" />}
-          className={button}
+          leftIcon={<ClipboardListIcon className="w-4" />}
+          className={`${button} w-[14%]`}
           onClick={onCopy}
           disabled={selectedData.length === 0}
         >
@@ -113,11 +117,11 @@ function ActionToolbar(props) {
       {onShowHideColumn && (
         <>
           <Button
-            leftIcon={<ViewGridIcon size="xl" className="w-5" />}
-            className={button}
+            leftIcon={<ViewGridIcon className="w-4" />}
+            className={`${button} w-[15%]`}
             onClick={() => setShowHide(!showHide)}
           >
-            Show/Hide Columns
+            Show / Hide Column(s)
           </Button>
           <ShowHide
             getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
