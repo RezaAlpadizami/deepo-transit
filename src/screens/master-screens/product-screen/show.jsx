@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Button } from '@chakra-ui/react';
 import Swal from 'sweetalert2';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -6,11 +6,14 @@ import InputDetail from '../../../components/input-detail-component';
 import DeleteButton from '../../../components/delete-button-component';
 import { ProductApi } from '../../../services/api-master';
 
+import Context from '../../../context';
+
 function ShowScreen(props) {
   const { displayName } = props;
   const { id } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState();
+  const { store } = useContext(Context);
 
   useEffect(() => {
     ProductApi.find(id)
@@ -29,7 +32,10 @@ function ShowScreen(props) {
         <div>
           <DeleteButton api={ProductApi} />
           <Button
-            onClick={() => navigate(`/master/product/${id}/edit`)}
+            onClick={() => {
+              navigate(`/master/product/${id}/edit`);
+              store.setIsLoadEdit(true);
+            }}
             px={8}
             type="submit"
             className="ml-4 rounded-full bg-[#232323] text-[#fff]"
