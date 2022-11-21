@@ -149,7 +149,7 @@ function DataTable(props) {
     }
     return false;
   };
-  const shouldRenderToolbar = () => {
+  const renderToolbar = () => {
     if (!noToolbar && toolbar) {
       return (
         enableAction('view') ||
@@ -222,7 +222,7 @@ function DataTable(props) {
         </div>
       )}
 
-      {shouldRenderToolbar() && (
+      {renderToolbar() && (
         <Toolbar
           selectedData={selectedFlatRows}
           defaultShow={propsColumn}

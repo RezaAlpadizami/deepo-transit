@@ -1,13 +1,17 @@
 import React from 'react';
-import { HomeIcon, UserCircleIcon } from '@heroicons/react/solid';
+import { HomeIcon, UserCircleIcon, ArchiveIcon } from '@heroicons/react/solid';
 
 const NotFound = React.lazy(() => import('../screens/home-screens/404'));
 const Home = React.lazy(() => import('../screens/home-screens/index'));
 const MasterCity = React.lazy(() => import('../screens/master-screens/city/index'));
 const MasterCityAdd = React.lazy(() => import('../screens/master-screens/city/add'));
 
-const WareHouseScreen = React.lazy(() => import('../screens/master-screens/warehouse/index'));
-const WareHouseShowScreen = React.lazy(() => import('../screens/master-screens/warehouse/show'));
+const WareHouseScreen = React.lazy(() => import('../screens/master-screens/warehouse-screen/index'));
+const WareHouseShowScreen = React.lazy(() => import('../screens/master-screens/warehouse-screen/show'));
+const ProductScreen = React.lazy(() => import('../screens/master-screens/product-screen/index'));
+const ProductShowScreen = React.lazy(() => import('../screens/master-screens/product-screen/show'));
+const ProductAddScreen = React.lazy(() => import('../screens/master-screens/product-screen/add'));
+
 export default [
   {
     displayName: 'Home',
@@ -78,6 +82,48 @@ export default [
             exact: true,
             route: '/master/warehouse/:id/show',
             component: WareHouseShowScreen,
+          },
+        ],
+      },
+      {
+        displayName: 'Product',
+        icon: ArchiveIcon,
+        name: 'master-product',
+        role: 'master',
+        showmenu: true,
+        exact: true,
+        route: '/master/product',
+        component: ProductScreen,
+        routes: [
+          {
+            displayName: 'Detail Product',
+            icon: UserCircleIcon,
+            name: 'master-product-show',
+            role: 'master',
+            showmenu: false,
+            exact: true,
+            route: '/master/product/:id/show',
+            component: ProductShowScreen,
+          },
+          {
+            displayName: 'Add Product',
+            icon: UserCircleIcon,
+            name: 'master-product-show',
+            role: 'master',
+            showmenu: false,
+            exact: true,
+            route: '/master/product/add',
+            component: ProductAddScreen,
+          },
+          {
+            displayName: 'Edit Product',
+            icon: UserCircleIcon,
+            name: 'master-product-show',
+            role: 'master',
+            showmenu: false,
+            exact: true,
+            route: '/master/product/:id/edit',
+            component: ProductAddScreen,
           },
         ],
       },

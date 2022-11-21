@@ -58,7 +58,13 @@ function Content() {
 
               if (routes.routes && routes.routes.length > 0) {
                 routes.routes.forEach(routes2 => {
-                  comp.push(<Route exact={routes2.exact} path={routes2.route} element={<routes2.component />} />);
+                  comp.push(
+                    <Route
+                      exact={routes2.exact}
+                      path={routes2.route}
+                      element={<routes2.component route={routes2.route} displayName={routes2.displayName} />}
+                    />
+                  );
                 });
               }
             });
