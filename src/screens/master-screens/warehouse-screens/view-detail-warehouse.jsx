@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import Moment from 'moment';
 import { Button } from '@chakra-ui/react';
@@ -10,6 +10,7 @@ import { WarehouseApi } from '../../../services/api-master';
 
 function Screen() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
   //   const [errrorMessage, setErrorMessage] = useState([null]);
@@ -26,7 +27,6 @@ function Screen() {
     WarehouseApi.find(id)
       .then(res => {
         setLoading(false);
-        console.log('res', res);
         setDataWarehouseById(res);
       })
       .catch(error => {
@@ -52,9 +52,10 @@ function Screen() {
           paddingX={12}
           type="submit"
           size="sm"
+          onClick={() => navigate(`/master/warehouse/${id}/edit`)}
           className="bg-white border border-gray-500 text-gray-500 rounded-full border-3 py-4 px-6 mr-60 hover:text-white hover:bg-black"
         >
-          Save
+          Edit
         </Button>
       </div>
 

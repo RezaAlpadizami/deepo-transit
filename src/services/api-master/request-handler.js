@@ -102,7 +102,7 @@ export default class RequestHandler {
   update(id, body) {
     return new Promise((resolve, reject) => {
       api
-        .put(`${this.url}/${id}`, body, {
+        .put(`${this.url}/${id}/edit`, body, {
           params: {
             state: LocalStorage.get('is_mock') ? 'mock' : 'default',
           },

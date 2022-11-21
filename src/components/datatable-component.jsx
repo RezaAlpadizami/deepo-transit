@@ -19,7 +19,6 @@ function DataTable(props) {
     loading = false,
     // hasSelectionAction,
     hasViewAction,
-    action,
   } = props;
 
   // const {

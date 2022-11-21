@@ -9,6 +9,7 @@ const MasterWarehouseAdd = React.lazy(() => import('../screens/master-screens/wa
 const MasterWarehouseView = React.lazy(() =>
   import('../screens/master-screens/warehouse-screens/view-detail-warehouse')
 );
+const MasterWarehouseUpdate = React.lazy(() => import('../screens/master-screens/warehouse-screens/update-warehouse'));
 
 export default [
   {
@@ -56,6 +57,15 @@ export default [
             exact: true,
             route: '/master/warehouse/:id',
             component: MasterWarehouseView,
+          },
+          {
+            displayName: 'Edit Detail Warehouse',
+            name: 'warehouse-edit',
+            role: 'master',
+            showmenu: false,
+            exact: true,
+            route: '/master/warehouse/:id/edit',
+            component: MasterWarehouseUpdate,
           },
         ],
       },
