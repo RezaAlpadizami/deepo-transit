@@ -11,6 +11,7 @@ const WareHouseShowScreen = React.lazy(() => import('../screens/master-screens/w
 const ProductScreen = React.lazy(() => import('../screens/master-screens/product-screen/index'));
 const ProductShowScreen = React.lazy(() => import('../screens/master-screens/product-screen/show'));
 const ProductAddScreen = React.lazy(() => import('../screens/master-screens/product-screen/add'));
+const ProductEditScreen = React.lazy(() => import('../screens/master-screens/product-screen/edit'));
 
 export default [
   {
@@ -123,7 +124,7 @@ export default [
             showmenu: false,
             exact: true,
             route: '/master/product/:id/edit',
-            component: ProductAddScreen,
+            component: ProductEditScreen,
           },
         ],
       },
