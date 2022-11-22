@@ -8,21 +8,18 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
 import LoadingHover from '../../../components/loading-hover-component';
-import { StorageApi } from '../../../services/api-master';
+import { CategoryApi } from '../../../services/api-master';
 import Input from '../../../components/input-component';
-import Select from '../../../components/select-component';
 
-function Screen() {
+function Screen(props) {
+  const { displayName } = props;
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
 
   const schema = yup.object().shape({
-    bay: yup.string().nullable().required(),
     code: yup.string().nullable().required(),
-    rack_number: yup.string().nullable().required(),
-    warehouse_id: yup.number().nullable().required(),
-    level: yup.string().nullable().required(),
+    name: yup.string().nullable().required(),
   });
 
   const {
@@ -36,18 +33,15 @@ function Screen() {
 
   const onAddStorage = data => {
     setLoading(true);
-    StorageApi.store({
+    CategoryApi.store({
       code: data.code,
-      rack_number: data.rack_number,
-      bay: data.bay,
-      level: data.level,
-      warehouse_id: data.warehouse_id,
+      name: data.name,
     })
       .then(res => {
         console.log('res', res);
         setLoading(false);
         Swal.fire({ text: 'Successfully Saved', icon: 'success' });
-        navigate('/master/storage');
+        navigate('/master/category');
       })
       .catch(error => {
         setLoading(false);
@@ -59,7 +53,7 @@ function Screen() {
     <div className="">
       <form onSubmit={handleSubmit(onAddStorage)}>
         <div className="flex mb-12">
-          <h1 className="font-bold text-3xl">Add Storage</h1>
+          <h1 className="font-bold text-3xl">{displayName}</h1>
           <div className="flex-1" />
           <Button
             onClick={() => reset()}
@@ -81,22 +75,7 @@ function Screen() {
 
         <div className="grid items-start justify-items-center w-[80%] gap-4 gap-y-12 ml-6 mb-4 grid-cols-2 mt-4">
           <Input name="code" label="Code" register={register} errors={errors} />
-          <Input name="level" label="Level" register={register} errors={errors} />
-          <Input name="rack_number" label="Rack" register={register} errors={errors} />
-          <Select
-            name="warehouse_id"
-            label="Warehouse"
-            options={[
-              { value: 1, label: 'Gudang Pusat' },
-              { value: 2, label: 'Gudang Serpong' },
-              { value: 3, label: 'Gudang Cilegon' },
-              { value: 4, label: 'Gudang Jakarta Selatan' },
-            ]}
-            placeholder=""
-            register={register}
-            errors={errors}
-          />
-          <Input name="bay" label="Bay" register={register} errors={errors} />
+          <Input name="name" label="Category" register={register} errors={errors} />
         </div>
       </form>
       {loading && <LoadingHover fixed />}

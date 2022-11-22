@@ -105,7 +105,7 @@ function Screen(props) {
         <div className="flex gap-4 bg-white py-6 px-6 rounded-t-3xl">
           <Button
             type="button"
-            onClick={() => navigate('/master/storage/add')}
+            onClick={() => navigate('/master/category/add')}
             className="border border-gray-500 text-md rounded-xl border-3 py-1 px-4 bg-gray-200 hover:bg-black hover:text-white"
           >
             +Add Storage

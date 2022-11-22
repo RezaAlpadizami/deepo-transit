@@ -5,6 +5,7 @@ const NotFound = React.lazy(() => import('../screens/home-screens/404'));
 const Home = React.lazy(() => import('../screens/home-screens/index'));
 const MasterCity = React.lazy(() => import('../screens/master-screens/city/index'));
 const CategoryScreens = React.lazy(() => import('../screens/master-screens/category-screens/index'));
+const CategoryScreensAdd = React.lazy(() => import('../screens/master-screens/category-screens/add-category'));
 
 export default [
   {
@@ -34,17 +35,17 @@ export default [
         exact: true,
         route: '/master/category',
         component: CategoryScreens,
-        // routes: [
-        //   {
-        //     displayName: 'Add Storage',
-        //     name: 'storage-add',
-        //     role: 'master',
-        //     showmenu: false,
-        //     exact: true,
-        //     route: '/master/storage/add',
-        //     component: StorageScreensAdd,
-        //   },
-        // ],
+        routes: [
+          {
+            displayName: 'Add Category',
+            name: 'master-category-add',
+            role: 'master',
+            showmenu: false,
+            exact: true,
+            route: '/master/category/add',
+            component: CategoryScreensAdd,
+          },
+        ],
       },
       {
         displayName: 'X',
