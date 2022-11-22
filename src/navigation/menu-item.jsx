@@ -4,8 +4,9 @@ import { HomeIcon } from '@heroicons/react/solid';
 const NotFound = React.lazy(() => import('../screens/home-screens/404'));
 const Home = React.lazy(() => import('../screens/home-screens/index'));
 const MasterCity = React.lazy(() => import('../screens/master-screens/city/index'));
-const StorageScreensAdd = React.lazy(() => import('../screens/master-screens/storage-screens/add-storage'));
 const StorageScreens = React.lazy(() => import('../screens/master-screens/storage-screens/index'));
+const StorageScreensAdd = React.lazy(() => import('../screens/master-screens/storage-screens/add-storage'));
+const StorageScreensDetail = React.lazy(() => import('../screens/master-screens/storage-screens/detail-storage'));
 
 export default [
   {
@@ -23,8 +24,8 @@ export default [
     role: 'master',
     showmenu: true,
     exact: true,
-    route: '/master',
-    component: StorageScreens,
+    route: '/master/city',
+    component: MasterCity,
     routes: [
       {
         displayName: 'Storage',
@@ -38,12 +39,21 @@ export default [
         routes: [
           {
             displayName: 'Add Storage',
-            name: 'storage-add',
+            name: 'master-storage-add',
             role: 'master',
             showmenu: false,
             exact: true,
             route: '/master/storage/add',
             component: StorageScreensAdd,
+          },
+          {
+            displayName: 'Detail Storage',
+            name: 'master-storage-detail',
+            role: 'master',
+            showmenu: false,
+            exact: true,
+            route: '/master/storage/:id/detail',
+            component: StorageScreensDetail,
           },
         ],
       },

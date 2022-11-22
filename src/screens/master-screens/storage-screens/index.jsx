@@ -179,6 +179,7 @@ function Screen() {
           totalData={totalData}
           loading={loading}
           onChangePage={page => getDataStorage(page)}
+          hasViewAction
         />
       </div>
     </div>
