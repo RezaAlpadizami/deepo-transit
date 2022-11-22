@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 import { Button } from '@chakra-ui/react';
 import Swal from 'sweetalert2';
@@ -10,6 +10,7 @@ import { StorageApi } from '../../../services/api-master';
 
 function Screen() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
   const [dataStorageById, setDataStorageById] = useState([]);
@@ -47,6 +48,9 @@ function Screen() {
         <Button
           paddingX={12}
           type="submit"
+          onClick={() => {
+            navigate(`/master/storage/${id}/edit`);
+          }}
           size="sm"
           className="bg-white border border-gray-500 text-gray-500 rounded-full border-3 py-4 px-6 mr-60 hover:text-white hover:bg-black"
         >

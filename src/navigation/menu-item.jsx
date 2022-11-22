@@ -7,6 +7,7 @@ const MasterCity = React.lazy(() => import('../screens/master-screens/city/index
 const StorageScreens = React.lazy(() => import('../screens/master-screens/storage-screens/index'));
 const StorageScreensAdd = React.lazy(() => import('../screens/master-screens/storage-screens/add-storage'));
 const StorageScreensDetail = React.lazy(() => import('../screens/master-screens/storage-screens/detail-storage'));
+const StorageScreensEdit = React.lazy(() => import('../screens/master-screens/storage-screens/edit-storage'));
 
 export default [
   {
@@ -54,6 +55,15 @@ export default [
             exact: true,
             route: '/master/storage/:id/detail',
             component: StorageScreensDetail,
+          },
+          {
+            displayName: 'Update Storage',
+            name: 'master-storage-edit',
+            role: 'master',
+            showmenu: false,
+            exact: true,
+            route: '/master/storage/:id/edit',
+            component: StorageScreensEdit,
           },
         ],
       },

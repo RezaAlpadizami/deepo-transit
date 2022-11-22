@@ -21,10 +21,10 @@ function Screen() {
 
   const schema = yup.object().shape({
     code: yup.string().nullable(),
-    rack: yup.string().nullable(),
+    rack_number: yup.string().nullable(),
     bay: yup.string().nullable(),
     level: yup.string().nullable(),
-    warehouse: yup.string().nullable(),
+    warehouse_id: yup.string().nullable(),
   });
 
   const {
@@ -86,13 +86,13 @@ function Screen() {
       <form onSubmit={handleSubmit(onSubmitFilter)}>
         <div className="grid items-start justify-items-center w-full gap-4 gap-y-1 px-6 mb-4 grid-cols-3 mt-4">
           <Input name="code" label="Code" register={register} errors={errors} />
-          <Input name="rack" label="Rack" register={register} errors={errors} />
+          <Input name="rack_number" label="Rack" register={register} errors={errors} />
           <Input name="bay" label="Bay" register={register} errors={errors} />
         </div>
         <div className="grid items-start justify-items-center w-full gap-4 gap-y-1 px-6 mb-4 grid-cols-2 mt-4">
           <Input name="level" label="Level" register={register} errors={errors} />
           <Select
-            name="warehouse"
+            name="warehouse_id"
             label="Warehouse"
             options={[
               { value: 'pusat', label: 'Gudang Pusat' },
@@ -170,10 +170,11 @@ function Screen() {
         <Datatable
           checkbox
           column={[
-            { header: 'Name', value: 'name' },
-            { header: 'Terrain', value: 'terrain' },
-            { header: 'Diameter', value: 'diameter' },
-            { header: 'Gravity', value: 'gravity' },
+            { header: 'Code', value: 'code' },
+            { header: 'Rack', value: 'rack_number' },
+            { header: 'Bay', value: 'bay' },
+            { header: 'Level', value: 'level' },
+            { header: 'Warehouse', value: 'warehouse_id' },
           ]}
           data={data}
           totalData={totalData}
