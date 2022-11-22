@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@chakra-ui/react';
+
+import Swal from 'sweetalert2';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import LoadingHover from '../../../components/loading-hover-component';
 
+import LoadingHover from '../../../components/loading-hover-component';
 import { StorageApi } from '../../../services/api-master';
 import Input from '../../../components/input-component';
 import Select from '../../../components/select-component';
@@ -14,10 +16,6 @@ function Screen() {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
-  const [errrorMessage, setErrorMessage] = useState(null);
-  const [showAlert, setShowAlert] = useState(false);
-  //   const [data, setData] = useState([]);
-  //   const [totalData, setTotalData] = useState([]);
 
   const schema = yup.object().shape({
     bay: yup.string().nullable().required(),
@@ -49,34 +47,17 @@ function Screen() {
     })
       .then(() => {
         setLoading(false);
-        navigate('/master/warehouse');
+        Swal.fire({ text: 'Successfully Saved', icon: 'success' });
+        navigate('/master/storage');
       })
       .catch(error => {
         setLoading(false);
-        setErrorMessage(error.message);
-        setShowAlert(true);
+        Swal.fire({ text: error?.message, icon: 'error' });
       });
-  };
-
-  const handleCloseButton = () => {
-    setShowAlert(false);
-    reset();
   };
 
   return (
     <div className="">
-      {showAlert && (
-        <span className="p-2 bg-[#E25450] rounded-[8px] text-center text-white text-[12px]">
-          {errrorMessage}{' '}
-          <button
-            className="bg-transparent text-[13px] font-semibold leading-none outline-none focus:outline-none"
-            onClick={() => handleCloseButton()}
-            type="button"
-          >
-            <span className="ml-3 font-bold">Tutup</span>
-          </button>
-        </span>
-      )}
       <form onSubmit={handleSubmit(onAddStorage)}>
         <div className="flex mb-12">
           <h1 className="font-bold text-3xl">Add Storage</h1>
@@ -118,16 +99,6 @@ function Screen() {
           />
           <Input name="bay" label="Bay" register={register} errors={errors} />
         </div>
-
-        {/* <div className="flex gap-2">
-          <div className="flex-1" />
-          <Button type="button" size="sm" width="24" onClick={() => reset()} colorScheme="blackAlpha" variant="outline">
-            Reset
-          </Button>
-          <Button type="submit" size="sm" width="24" colorScheme="primary">
-            Filter
-          </Button>
-        </div> */}
       </form>
       {loading && <LoadingHover fixed />}
     </div>

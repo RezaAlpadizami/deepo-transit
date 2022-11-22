@@ -2,7 +2,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { extendTheme, ChakraProvider } from '@chakra-ui/react';
-import { io } from 'socket.io-client';
+// import { io } from 'socket.io-client';
 
 import './index.css';
 import Context from './context';
@@ -25,19 +25,19 @@ const theme = extendTheme({ colors });
 
 const store = RootStore.create({ isLogin: false });
 
-const socket = io(process.env.REACT_APP_SOCKET, {
-  reconnectionDelayMax: 10000,
-  auth: {
-    token: 'token',
-  },
-  transports: ['websocket'],
-});
+// const socket = io(process.env.REACT_APP_SOCKET, {
+//   reconnectionDelayMax: 10000,
+//   auth: {
+//     token: 'token',
+//   },
+//   transports: ['websocket'],
+// });
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <ChakraProvider theme={theme}>
-      <Context.Provider value={{ store, socket }}>
+      <Context.Provider value={{ store }}>
         <App />
       </Context.Provider>
     </ChakraProvider>

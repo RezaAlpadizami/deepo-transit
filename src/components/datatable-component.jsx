@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 // import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/solid';
-import { useTable, useSortBy, usePagination } from 'react-table';
+import { useTable, useSortBy, usePagination, useRowSelect } from 'react-table';
 import { observer } from 'mobx-react-lite';
+
+import { Checkbox } from './checkbox-component';
 
 function DataTable(props) {
   const {
@@ -10,8 +12,9 @@ function DataTable(props) {
     onChangePage = () => {},
     totalData = 0,
     limit = 10,
-    offset = 0,
+    // offset = 0,
     loading = false,
+    checkbox,
   } = props;
 
   const [pages, setPages] = useState(1);
@@ -21,9 +24,9 @@ function DataTable(props) {
     setLastPage(Math.ceil(totalData / limit));
   }, [totalData, limit]);
 
-  useEffect(() => {
-    setPages(offset / limit + 1);
-  }, [offset]);
+  // useEffect(() => {
+  //   setPages(offset / limit + 1);
+  // }, [offset]);
 
   const data = React.useMemo(() => propsData, [JSON.stringify(propsData)]);
 
@@ -33,6 +36,13 @@ function DataTable(props) {
         return {
           Header: d.header,
           accessor: d.value,
+          Cell: props => {
+            const { value } = props;
+            if (d.type === 'date') {
+              return Moment(value).format('DD MMM YYYY');
+            }
+            return value;
+          },
         };
       }),
     [JSON.stringify(propsColumn)]
@@ -41,7 +51,26 @@ function DataTable(props) {
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable(
     { columns, data },
     useSortBy,
-    usePagination
+    usePagination,
+    useRowSelect,
+    hooks => {
+      if (checkbox) {
+        hooks.visibleColumns.push(column => {
+          return [
+            {
+              id: 'selection',
+              Header: ({ getToggleAllRowsSelectedProps }) => (
+                <Checkbox {...getToggleAllRowsSelectedProps()} style={{ width: '15px', height: '15px' }} />
+              ),
+              Cell: ({ row }) => (
+                <Checkbox {...row.getToggleRowSelectedProps()} style={{ width: '15px', height: '15px' }} />
+              ),
+            },
+            ...column,
+          ];
+        });
+      }
+    }
   );
 
   const changePage = page => {

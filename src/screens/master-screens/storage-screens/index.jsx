@@ -5,13 +5,12 @@ import { Button } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
-import { CityApi } from '../../../services/api-master';
+import Moment from 'moment';
+import { StorageApi } from '../../../services/api-master';
 
 import Datatable from '../../../components/datatable-component';
 import Input from '../../../components/input-component';
 import Select from '../../../components/select-component';
-// import DatePicker from '../../../components/datepicker-component';
-// import Textarea from '../../../components/textarea-component';
 
 function Screen() {
   const navigate = useNavigate();
@@ -21,10 +20,10 @@ function Screen() {
   const [totalData, setTotalData] = useState([]);
 
   const schema = yup.object().shape({
-    code: yup.string().nullable().required(),
-    rack: yup.string().nullable().required(),
-    bay: yup.string().nullable().required(),
-    level: yup.string().nullable().required(),
+    code: yup.string().nullable(),
+    rack: yup.string().nullable(),
+    bay: yup.string().nullable(),
+    level: yup.string().nullable(),
     warehouse: yup.string().nullable(),
   });
 
@@ -32,20 +31,19 @@ function Screen() {
     register,
     handleSubmit,
     formState: { errors },
-    // reset,
+    reset,
   } = useForm({
     resolver: yupResolver(schema),
   });
 
   useEffect(() => {
-    getData();
+    getDataStorage();
   }, []);
 
-  const getData = (page = 1) => {
+  const getDataStorage = () => {
     setLoading(true);
-    CityApi.get({ page })
+    StorageApi.get()
       .then(data => {
-        console.log('data', data);
         setLoading(false);
         setData(data.results);
         setTotalData(data.count);
@@ -54,6 +52,26 @@ function Screen() {
         setLoading(false);
         console.log(e);
       });
+  };
+
+  const onSubmitFilter = data => {
+    Object.keys(data).forEach(dt => {
+      if (Object.hasOwnProperty.call(data, dt)) {
+        if (!data[dt]) {
+          delete data[dt];
+        }
+        if (data[dt] instanceof Date) {
+          if (dt.toLowerCase().includes('to')) {
+            data[dt] = Moment(data[dt]).endOf('day').format('YYYY-MM-DD');
+          } else {
+            data[dt] = Moment(data[dt]).startOf('day').format('YYYY-MM-DD');
+          }
+        } else {
+          // eslint-disable-next-line no-unused-expressions
+          data[dt];
+        }
+      }
+    });
   };
 
   return (
@@ -65,21 +83,11 @@ function Screen() {
           Tambah SKP
         </Button> */}
       </div>
-      <form onSubmit={handleSubmit(d => console.log(d))}>
+      <form onSubmit={handleSubmit(onSubmitFilter)}>
         <div className="grid items-start justify-items-center w-full gap-4 gap-y-1 px-6 mb-4 grid-cols-3 mt-4">
           <Input name="code" label="Code" register={register} errors={errors} />
           <Input name="rack" label="Rack" register={register} errors={errors} />
           <Input name="bay" label="Bay" register={register} errors={errors} />
-
-          {/* <DatePicker
-            name="last_stock-opname"
-            label="Last Stock Opname"
-            placeholder="Select Date"
-            register={register}
-            control={control}
-            errors={errors}
-          /> */}
-          {/* <Textarea name="age" label="Age" placeholder="Input Age" register={register} errors={errors} /> */}
         </div>
         <div className="grid items-start justify-items-center w-full gap-4 gap-y-1 px-6 mb-4 grid-cols-2 mt-4">
           <Input name="level" label="Level" register={register} errors={errors} />
@@ -98,15 +106,21 @@ function Screen() {
           />
         </div>
 
-        {/* <div className="flex gap-2">
+        <div className="flex gap-2 mb-4">
           <div className="flex-1" />
           <Button type="button" size="sm" width="24" onClick={() => reset()} colorScheme="blackAlpha" variant="outline">
             Reset
           </Button>
-          <Button type="submit" size="sm" width="24" colorScheme="primary">
+          <Button
+            type="submit"
+            size="sm"
+            width="24"
+            colorScheme="solid"
+            className="bg-gray-500 hover:bg-black text-white"
+          >
             Filter
           </Button>
-        </div> */}
+        </div>
       </form>
       <div>
         <div className="flex gap-4 bg-white py-6 px-6 rounded-t-3xl">
@@ -154,6 +168,7 @@ function Screen() {
           </Button>
         </div>
         <Datatable
+          checkbox
           column={[
             { header: 'Name', value: 'name' },
             { header: 'Terrain', value: 'terrain' },
@@ -163,7 +178,7 @@ function Screen() {
           data={data}
           totalData={totalData}
           loading={loading}
-          onChangePage={page => getData(page)}
+          onChangePage={page => getDataStorage(page)}
         />
       </div>
     </div>
