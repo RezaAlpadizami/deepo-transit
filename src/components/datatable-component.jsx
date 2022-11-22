@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unstable-nested-components */
 import React, { useEffect, useState } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/solid';
+import { ChevronLeftIcon, ChevronRightIcon, ArrowSmUpIcon, ArrowSmDownIcon } from '@heroicons/react/solid';
+
 import { useTable, useRowSelect, usePagination, useSortBy } from 'react-table';
 import { observer } from 'mobx-react-lite';
 import Swal from 'sweetalert2';
@@ -28,7 +29,7 @@ function DataTable(props) {
     api,
     checkbox,
     name,
-    // load,
+    onSort = () => {},
   } = props;
 
   const [page, setPage] = useState(1);
@@ -89,7 +90,7 @@ function DataTable(props) {
 
   const changePage = page => {
     setPage(page);
-    onChangePage(page);
+    onChangePage(page, (page - 1) * limit, selectedFlatRows);
   };
 
   const isActionToolbarExclude = action => {
@@ -248,11 +249,34 @@ function DataTable(props) {
           <thead className="text-xs text-black uppercase bg-thead dark:bg-gray-700 dark:text-gray-400">
             {headerGroups.map(headerGroup => (
               <tr {...headerGroup.getHeaderGroupProps()}>
-                {headerGroup.headers.map(column => (
-                  <th {...column.getHeaderProps(column.getSortByToggleProps())} className="py-3 px-6">
-                    {column.render('Header')}
-                  </th>
-                ))}
+                {headerGroup.headers.map(column => {
+                  return (
+                    <th {...column.getHeaderProps(column.getSortByToggleProps())} className="py-3 px-6">
+                      <div
+                        className="flex"
+                        onClick={() =>
+                          onSort({
+                            sort_by: column.id,
+                            sort_order: column.isSorted ? (column.isSortedDesc ? 'desc' : 'asc') : 'desc',
+                          })
+                        }
+                      >
+                        {column.render('Header')}
+                        <span>
+                          {column.isSorted ? (
+                            column.isSortedDesc ? (
+                              <ArrowSmDownIcon className="ml-2 h-4" />
+                            ) : (
+                              <ArrowSmUpIcon className="ml-2 h-4" />
+                            )
+                          ) : (
+                            ''
+                          )}
+                        </span>
+                      </div>
+                    </th>
+                  );
+                })}
               </tr>
             ))}
           </thead>

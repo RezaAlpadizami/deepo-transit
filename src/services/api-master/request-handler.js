@@ -49,7 +49,7 @@ export default class RequestHandler {
   get(params, url = this.url) {
     return new Promise((resolve, reject) => {
       api
-        .get(url, { ...params, state: LocalStorage.get('is_mock') ? 'mock' : 'default' })
+        .get(url, { ...params })
         .then(response => {
           if (response.ok) resolve(response.data);
           else {
