@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 import LoadingHover from '../../../components/loading-hover-component';
 import InputDetail from '../../../components/input-detail-component';
 import { StorageApi } from '../../../services/api-master';
+import DeleteButton from '../../../components/delete-button-component';
 
 function Screen() {
   const { id } = useParams();
@@ -37,14 +38,11 @@ function Screen() {
       <div className="flex mb-12">
         <h1 className="font-bold text-3xl">Detail Warehouse</h1>
         <div className="flex-1" />
-        <Button
-          onClick={() => {}}
-          paddingX={12}
-          size="sm"
-          className="bg-white border border-gray-500 text-gray-500 rounded-full border-3 py-4 px-6 mr-2 hover:text-white hover:bg-black"
-        >
-          Delete
-        </Button>
+        <DeleteButton
+          api={StorageApi}
+          afterSuccessDeleteTo="master/storage"
+          textConfirmButton="Are you sure want to remove this ?"
+        />
         <Button
           paddingX={12}
           type="submit"
@@ -52,7 +50,7 @@ function Screen() {
             navigate(`/master/storage/${id}/edit`);
           }}
           size="sm"
-          className="bg-white border border-gray-500 text-gray-500 rounded-full border-3 py-4 px-6 mr-60 hover:text-white hover:bg-black"
+          className="rounded-full bg-gray-700 hover:bg-black text-[#fff] mr-60"
         >
           Edit
         </Button>
