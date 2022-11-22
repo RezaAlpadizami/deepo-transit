@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-// import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/solid';
+import { useLocation } from 'react-router-dom';
 import { useTable, useSortBy, usePagination, useRowSelect } from 'react-table';
 import { observer } from 'mobx-react-lite';
+import Moment from 'moment';
+import { Link } from '@chakra-ui/react';
 
 import { Checkbox } from './checkbox-component';
 
@@ -12,11 +14,12 @@ function DataTable(props) {
     onChangePage = () => {},
     totalData = 0,
     limit = 10,
-    // offset = 0,
     loading = false,
+    hasViewAction,
     checkbox,
   } = props;
 
+  const location = useLocation();
   const [pages, setPages] = useState(1);
   const [lastPage, setLastPage] = useState(1);
 
@@ -89,6 +92,11 @@ function DataTable(props) {
                   {column.render('Header')}
                 </th>
               ))}
+              {hasViewAction && (
+                <th className="py-3 px-6" width={150}>
+                  {' '}
+                </th>
+              )}
             </tr>
           ))}
         </thead>
@@ -106,6 +114,14 @@ function DataTable(props) {
                       {cell.render('Cell')}
                     </td>
                   ))}
+
+                  {hasViewAction && (
+                    <td className="py-1 px-6 border-none hover: text-blue-400 no-underline">
+                      <Link type="button" className="mr-4" href={`${location.pathname}/${row.original.id}`}>
+                        View Detail
+                      </Link>
+                    </td>
+                  )}
                 </tr>
               );
             })}

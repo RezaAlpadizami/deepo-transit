@@ -4,8 +4,7 @@ import { HomeIcon } from '@heroicons/react/solid';
 const NotFound = React.lazy(() => import('../screens/home-screens/404'));
 const Home = React.lazy(() => import('../screens/home-screens/index'));
 const MasterCity = React.lazy(() => import('../screens/master-screens/city/index'));
-const StorageScreensAdd = React.lazy(() => import('../screens/master-screens/storage-screens/add-storage'));
-const StorageScreens = React.lazy(() => import('../screens/master-screens/storage-screens/index'));
+const CategoryScreens = React.lazy(() => import('../screens/master-screens/category-screens/index'));
 
 export default [
   {
@@ -24,38 +23,28 @@ export default [
     showmenu: true,
     exact: true,
     route: '/master',
-    component: StorageScreens,
+    component: MasterCity,
     routes: [
       {
-        displayName: 'Storage',
+        displayName: 'Category',
         icon: HomeIcon,
-        name: 'master-storage',
+        name: 'master-category',
         role: 'master',
         showmenu: true,
         exact: true,
-        route: '/master/storage',
-        component: StorageScreens,
-        routes: [
-          {
-            displayName: 'Add Storage',
-            name: 'storage-add',
-            role: 'master',
-            showmenu: false,
-            exact: true,
-            route: '/master/storage/add',
-            component: StorageScreensAdd,
-          },
-        ],
-      },
-      {
-        displayName: 'Country',
-        icon: HomeIcon,
-        name: 'master-country',
-        role: 'master',
-        showmenu: true,
-        exact: true,
-        route: '/master/country',
-        component: StorageScreens,
+        route: '/master/category',
+        component: CategoryScreens,
+        // routes: [
+        //   {
+        //     displayName: 'Add Storage',
+        //     name: 'storage-add',
+        //     role: 'master',
+        //     showmenu: false,
+        //     exact: true,
+        //     route: '/master/storage/add',
+        //     component: StorageScreensAdd,
+        //   },
+        // ],
       },
       {
         displayName: 'X',

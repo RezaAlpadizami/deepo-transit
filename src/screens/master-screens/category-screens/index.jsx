@@ -6,13 +6,13 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
 import Moment from 'moment';
-import { StorageApi } from '../../../services/api-master';
+import { CategoryApi } from '../../../services/api-master';
 
 import Datatable from '../../../components/datatable-component';
 import Input from '../../../components/input-component';
-import Select from '../../../components/select-component';
 
-function Screen() {
+function Screen(props) {
+  const { displayName } = props;
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
@@ -21,10 +21,7 @@ function Screen() {
 
   const schema = yup.object().shape({
     code: yup.string().nullable(),
-    rack: yup.string().nullable(),
-    bay: yup.string().nullable(),
-    level: yup.string().nullable(),
-    warehouse: yup.string().nullable(),
+    name: yup.string().nullable(),
   });
 
   const {
@@ -37,12 +34,12 @@ function Screen() {
   });
 
   useEffect(() => {
-    getDataStorage();
+    getDataCategory();
   }, []);
 
-  const getDataStorage = () => {
+  const getDataCategory = () => {
     setLoading(true);
-    StorageApi.get()
+    CategoryApi.get()
       .then(data => {
         setLoading(false);
         setData(data.results);
@@ -77,35 +74,17 @@ function Screen() {
   return (
     <div className="">
       <div className="flex">
-        <h1 className="font-bold text-xl">Storage</h1>
+        <h1 className="font-bold text-xl">{displayName}</h1>
         <div className="flex-1" />
         {/* <Button onClick={() => navigate('/master/city/add')} paddingX={12} size="sm" colorScheme="primary">
           Tambah SKP
         </Button> */}
       </div>
       <form onSubmit={handleSubmit(onSubmitFilter)}>
-        <div className="grid items-start justify-items-center w-full gap-4 gap-y-1 px-6 mb-4 grid-cols-3 mt-4">
-          <Input name="code" label="Code" register={register} errors={errors} />
-          <Input name="rack" label="Rack" register={register} errors={errors} />
-          <Input name="bay" label="Bay" register={register} errors={errors} />
-        </div>
         <div className="grid items-start justify-items-center w-full gap-4 gap-y-1 px-6 mb-4 grid-cols-2 mt-4">
-          <Input name="level" label="Level" register={register} errors={errors} />
-          <Select
-            name="warehouse"
-            label="Warehouse"
-            options={[
-              { value: 'pusat', label: 'Gudang Pusat' },
-              { value: 'serpong', label: 'Gudang Serpong' },
-              { value: 'cilegon', label: 'Gudang Cilegon' },
-              { value: 'jaksel', label: 'Gudang Jakarta Selatan' },
-            ]}
-            placeholder=""
-            register={register}
-            errors={errors}
-          />
+          <Input name="code" label="Code" register={register} errors={errors} />
+          <Input name="name" label="Category" register={register} errors={errors} />
         </div>
-
         <div className="flex gap-2 mb-4">
           <div className="flex-1" />
           <Button type="button" size="sm" width="24" onClick={() => reset()} colorScheme="blackAlpha" variant="outline">
@@ -170,15 +149,14 @@ function Screen() {
         <Datatable
           checkbox
           column={[
-            { header: 'Name', value: 'name' },
-            { header: 'Terrain', value: 'terrain' },
-            { header: 'Diameter', value: 'diameter' },
-            { header: 'Gravity', value: 'gravity' },
+            { header: 'Code', value: 'code' },
+            { header: 'Category', value: 'name' },
           ]}
           data={data}
           totalData={totalData}
           loading={loading}
-          onChangePage={page => getDataStorage(page)}
+          onChangePage={page => getDataCategory(page)}
+          hasViewAction
         />
       </div>
     </div>

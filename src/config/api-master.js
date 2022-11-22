@@ -1,5 +1,5 @@
 module.exports = {
   PLANET: 'planets',
   STARSHIP: 'starships',
-  STORAGE: 'storage',
+  CATEGORY: 'category',
 };
