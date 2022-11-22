@@ -8,6 +8,7 @@ const MasterCityAdd = React.lazy(() => import('../screens/master-screens/city/ad
 
 const WareHouseScreen = React.lazy(() => import('../screens/master-screens/warehouse-screen/index'));
 const WareHouseShowScreen = React.lazy(() => import('../screens/master-screens/warehouse-screen/show'));
+
 const ProductScreen = React.lazy(() => import('../screens/master-screens/product-screen/index'));
 const ProductShowScreen = React.lazy(() => import('../screens/master-screens/product-screen/show'));
 const ProductAddScreen = React.lazy(() => import('../screens/master-screens/product-screen/add'));
@@ -90,7 +91,7 @@ export default [
         displayName: 'Product',
         icon: ArchiveIcon,
         name: 'master-product',
-        role: 'master',
+        role: 'PRODUCT',
         showmenu: true,
         exact: true,
         route: '/master/product',
@@ -100,7 +101,7 @@ export default [
             displayName: 'Detail Product',
             icon: UserCircleIcon,
             name: 'master-product-show',
-            role: 'master',
+            role: 'PRODUCT',
             showmenu: false,
             exact: true,
             route: '/master/product/:id/show',
@@ -110,7 +111,7 @@ export default [
             displayName: 'Add Product',
             icon: UserCircleIcon,
             name: 'master-product-show',
-            role: 'master',
+            role: 'PRODUCT',
             showmenu: false,
             exact: true,
             route: '/master/product/add',
@@ -120,7 +121,7 @@ export default [
             displayName: 'Edit Product',
             icon: UserCircleIcon,
             name: 'master-product-show',
-            role: 'master',
+            role: 'PRODUCT',
             showmenu: false,
             exact: true,
             route: '/master/product/:id/edit',
