@@ -7,6 +7,7 @@ const MasterCity = React.lazy(() => import('../screens/master-screens/city/index
 const CategoryScreens = React.lazy(() => import('../screens/master-screens/category-screens/index'));
 const CategoryScreensAdd = React.lazy(() => import('../screens/master-screens/category-screens/add-category'));
 const CategoryScreensDetail = React.lazy(() => import('../screens/master-screens/category-screens/detail-category'));
+const CategoryScreensEdit = React.lazy(() => import('../screens/master-screens/category-screens/edit-category'));
 
 export default [
   {
@@ -54,6 +55,15 @@ export default [
             exact: true,
             route: '/master/category/:id/detail',
             component: CategoryScreensDetail,
+          },
+          {
+            displayName: 'Update Category',
+            name: 'master-category-edit',
+            role: 'master',
+            showmenu: false,
+            exact: true,
+            route: '/master/category/:id/edit',
+            component: CategoryScreensEdit,
           },
         ],
       },

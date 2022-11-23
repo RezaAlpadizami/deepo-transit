@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { Button } from '@chakra-ui/react';
 import Swal from 'sweetalert2';
@@ -10,6 +10,7 @@ import { CategoryApi } from '../../../services/api-master';
 
 function Screen(props) {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { displayName } = props;
 
   const [loading, setLoading] = useState(false);
@@ -49,6 +50,9 @@ function Screen(props) {
           paddingX={12}
           type="submit"
           size="sm"
+          onClick={() => {
+            navigate(`/master/category/${id}/edit`);
+          }}
           className="bg-white border border-gray-500 text-gray-500 rounded-full border-3 py-4 px-6 mr-60 hover:text-white hover:bg-black"
         >
           Edit
