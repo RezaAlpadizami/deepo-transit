@@ -51,7 +51,7 @@ function Screen(props) {
       })
       .catch(error => {
         setLoading(false);
-        Swal.fire({ text: error?.message, icon: 'error' });
+        Swal.fire({ text: error?.message || error?.data.title, icon: 'error' });
       });
   };
 
@@ -98,16 +98,12 @@ function Screen(props) {
             name="category"
             label="Category"
             placeholder="Pilih Category"
-            options={[
-              {
-                value: '',
-                label: 'Category Code',
-              },
-              {
-                value: '',
-                label: 'Category Name',
-              },
-            ]}
+            options={data.map(i => {
+              return {
+                value: i.id,
+                label: i.category,
+              };
+            })}
             register={register}
             errors={errors}
           />
