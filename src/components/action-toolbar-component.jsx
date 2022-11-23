@@ -23,6 +23,7 @@ function ActionToolbar(props) {
     columns,
     copyItem,
   } = props;
+
   const navigate = useNavigate();
   const { onClose, isOpen, onOpen } = useDisclosure();
   const [showHide, setShowHide] = useState(false);
@@ -32,40 +33,16 @@ function ActionToolbar(props) {
     }
   };
 
-  // const confirmationDelete = () => {
-  // Swal.fire({
-  //   customClass: {
-  //     container: 'popup-delete-confirmation',
-  //   },
-  //   html: `
-  //     <div class="flex">
-  //       <p class="px-4 mb-4">Are you sure want to delete this data?</p>
-  //     </div>
-  //       ${ReactDOMServer.renderToStaticMarkup(<DeletedList datas={selectedData} columnsData={columns} />)}
-  //     </div>
-  //   </div>`,
-  //   confirmButtonText: 'DELETE DATA',
-  //   cancelButtonText: 'CANCEL',
-  //   showCancelButton: true,
-  //   reverseButtons: true,
-  //   cancelButtonClass: 'btn-outline-danger',
-  //   confirmButtonColor: '#B51313',
-  //   width: '50%',
-  // }).then(confirmation => {
-  //   if (confirmation.isDismissed) return;
-  //   if (confirmation.isConfirmed) onDelete();
-  // });
-  // };
   const onCopy = () => {
     let text = '';
     copyItem.forEach(val => {
-      text += `${val.header}\t`;
+      text += `${val.Header}\t`;
     });
     selectedData.forEach(i => {
       text += '\n';
       const props = { ...i.original };
       copyItem.forEach(col => {
-        const getValue = getNestedObject(props, col.value.split('.'));
+        const getValue = getNestedObject(props, col.id.split('.'));
         text += `${
           getValue
             ? getValue

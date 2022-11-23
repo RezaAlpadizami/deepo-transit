@@ -220,6 +220,7 @@ function DataTable(props) {
           <TableComponent
             id="mytable"
             data={data}
+            columns={allColumns.filter(i => i.id !== 'selection' && i.isVisible === true)}
             keys={data.filter(i => i[columns.map(i => i.accessor)])}
             header={propsColumn.filter(i => i.value)}
           />
@@ -233,7 +234,7 @@ function DataTable(props) {
           getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
           columns={allColumns}
           navTo={{ path: to, id: selectedFlatRows?.find(i => i)?.original.id }}
-          copyItem={propsColumn.filter(i => i.copy)}
+          copyItem={allColumns.filter(i => i.id !== 'selection' && i.isVisible === true)}
           copyClipboard={enableAction('copy-to-clipboard')}
           view={enableAction('view')}
           onDelete={enableAction('delete') && deleteData}

@@ -2,22 +2,22 @@
 import React from 'react';
 
 function MyDocument(props) {
-  const { data, header } = props;
+  const { columns, data } = props;
 
   return (
     <div id="mytable">
       <table>
         <tbody>
           <tr>
-            {header.map(val => {
-              return <th>{val.header}</th>;
+            {columns.map(val => {
+              return <th>{val.Header}</th>;
             })}
           </tr>
           {data.map(d => {
             return (
               <tr>
-                {header.map(i => {
-                  return <th>{d[i.value]}</th>;
+                {columns.map(i => {
+                  return <th>{d[i.id]}</th>;
                 })}
               </tr>
             );

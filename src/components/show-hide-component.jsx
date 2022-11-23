@@ -23,7 +23,8 @@ function ShowHide(props) {
                   <Checkbox
                     {...column.getToggleHiddenProps()}
                     type="checkbox"
-                    style={{ width: '15px', height: '15px' }}
+                    style={{ width: '16px', height: '16px' }}
+                    disable={columns.filter(i => i.isVisible).length === 1 ? column.isVisible : false}
                   />
                   <label className="ml-2 uppercase" style={{ userSelect: 'none', paddingBottom: '2px' }}>
                     {column.Header}
