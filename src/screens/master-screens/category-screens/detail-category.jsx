@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@chakra-ui/react';
 import Swal from 'sweetalert2';
 
+import DeleteButton from '../../../components/delete-button-component';
 import LoadingHover from '../../../components/loading-hover-component';
 import InputDetail from '../../../components/input-detail-component';
 import { CategoryApi } from '../../../services/api-master';
@@ -38,14 +39,11 @@ function Screen(props) {
       <div className="flex mb-12">
         <h1 className="font-bold text-3xl">{displayName}</h1>
         <div className="flex-1" />
-        <Button
-          onClick={() => {}}
-          paddingX={12}
-          size="sm"
-          className="bg-white border border-gray-500 text-gray-500 rounded-full border-3 py-4 px-6 mr-2 hover:text-white hover:bg-black"
-        >
-          Delete
-        </Button>
+        <DeleteButton
+          api={CategoryApi}
+          afterSuccessDeleteTo="master/category"
+          textConfirmButton="Are you sure want to remove this ?"
+        />
         <Button
           paddingX={12}
           type="submit"
