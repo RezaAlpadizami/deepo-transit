@@ -56,7 +56,6 @@ function DataTable(props) {
       }),
     [JSON.stringify(propsColumn)]
   );
-
   const {
     getTableProps,
     getTableBodyProps,
@@ -215,10 +214,15 @@ function DataTable(props) {
 
   return (
     <>
-      <LoadingHover visible={loadingHover} />
+      <LoadingHover visible={loadingHover || loading} />
       {download && (
         <div style={{ display: 'none' }}>
-          <TableComponent id="mytable" data={data || loading} header={propsColumn.filter(i => i.value)} />
+          <TableComponent
+            id="mytable"
+            data={data}
+            keys={data.filter(i => i[columns.map(i => i.accessor)])}
+            header={propsColumn.filter(i => i.value)}
+          />
         </div>
       )}
 
