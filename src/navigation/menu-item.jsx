@@ -6,6 +6,7 @@ const Home = React.lazy(() => import('../screens/home-screens/index'));
 const MasterCity = React.lazy(() => import('../screens/master-screens/city/index'));
 const CategoryScreens = React.lazy(() => import('../screens/master-screens/category-screens/index'));
 const CategoryScreensAdd = React.lazy(() => import('../screens/master-screens/category-screens/add-category'));
+const CategoryScreensDetail = React.lazy(() => import('../screens/master-screens/category-screens/detail-category'));
 
 export default [
   {
@@ -44,6 +45,15 @@ export default [
             exact: true,
             route: '/master/category/add',
             component: CategoryScreensAdd,
+          },
+          {
+            displayName: 'Detail Category',
+            name: 'master-category-detail',
+            role: 'master',
+            showmenu: false,
+            exact: true,
+            route: '/master/category/:id/detail',
+            component: CategoryScreensDetail,
           },
         ],
       },
