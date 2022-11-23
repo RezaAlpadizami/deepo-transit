@@ -58,8 +58,11 @@ function ActionToolbar(props) {
     });
     const Toast = Swal.mixin({
       toast: true,
+      width: '18%',
       position: 'top-end',
       showConfirmButton: false,
+      background: '#FFC000',
+      padding: 6,
       timer: 3000,
       timerProgressBar: true,
       didOpen: toast => {
@@ -69,8 +72,9 @@ function ActionToolbar(props) {
     });
 
     Toast.fire({
-      icon: 'info',
-      title: 'Copy to Clipboard',
+      icon: 'warning',
+      iconColor: 'black',
+      title: '<h5>Copy to Clipboard</h5>',
     });
   };
 
