@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@chakra-ui/react';
@@ -7,38 +7,19 @@ import * as yup from 'yup';
 import Swal from 'sweetalert2';
 import LoadingHover from '../../../components/loading-component';
 import TextArea from '../../../components/textarea-component';
-import { ProductApi } from '../../../services/api-master';
+import { ProductApi, CategoryApi } from '../../../services/api-master';
 import Select from '../../../components/select-component';
 import Input from '../../../components/input-component';
 
 const schema = yup.object().shape({
   sku: yup.string().nullable().required(),
   product_name: yup.string().nullable().required(),
-  category_id: yup.string().required(),
+  category_id: yup.string().nullable().required(),
   product_desc: yup.string(),
 });
-const category = [
-  {
-    id: 1,
-    code: 'A1',
-    name: 'SATU',
-  },
-  {
-    id: 2,
-    code: 'A2',
-    name: 'DUA',
-  },
-  {
-    id: 3,
-    code: 'A3',
-    name: 'TIGA DUMMY',
-  },
-];
+
 function Screen(props) {
   const { route, displayName } = props;
-
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
 
   const {
     register,
@@ -48,6 +29,20 @@ function Screen(props) {
   } = useForm({
     resolver: yupResolver(schema),
   });
+
+  const navigate = useNavigate();
+  const [categoryData, setCategoryData] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    CategoryApi.get()
+      .then(res => {
+        setCategoryData(res.data);
+      })
+      .catch(error => {
+        Swal.fire({ text: error?.message || error?.originalError, icon: 'error' });
+      });
+  }, []);
 
   const onSubmit = data => {
     setLoading(true);
@@ -94,7 +89,7 @@ function Screen(props) {
           <Select
             name="category_id"
             label="Category"
-            options={category.map(i => {
+            options={categoryData?.map(i => {
               return {
                 value: i?.id,
                 label: `${i.code} - ${i.name}`,

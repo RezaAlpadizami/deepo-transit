@@ -4,14 +4,13 @@ import { Button } from '@chakra-ui/react';
 import Swal from 'sweetalert2';
 
 function DeleteButton(props) {
-  const { api, id = 1, redirectUrl } = props;
-  console.log('redirect', redirectUrl);
+  const { api, id, redirectUrl } = props;
+
   const navigate = useNavigate();
 
   const deleteData = () => {
     Swal.fire({
       title: `Delete Data`,
-      //   text: deleteConfirmationWording(mData),
       padding: 20,
       showCancelButton: true,
       buttonsStyling: false,

@@ -7,7 +7,7 @@ import { observer } from 'mobx-react-lite';
 import Moment from 'moment';
 import * as yup from 'yup';
 import Swal from 'sweetalert2';
-import { ProductApi } from '../../../services/api-master';
+import { ProductApi, CategoryApi } from '../../../services/api-master';
 import Datatable from '../../../components/datatable-component';
 import Input from '../../../components/input-component';
 import Select from '../../../components/select-component';
@@ -18,6 +18,7 @@ function Screen(props) {
   const { route, displayName } = props;
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
+  const [category, setCategory] = useState([]);
   const [totalData, setTotalData] = useState([]);
 
   const schema = yup.object().shape({
@@ -43,15 +44,27 @@ function Screen(props) {
 
   const getData = () => {
     setLoading(true);
-    ProductApi.get()
-      .then(res => {
-        setData(res.data);
-        setTotalData(res.query.total);
-        setLoading(false);
+    Promise.allSettled([
+      ProductApi.get().then(res => {
+        return { product: res };
+      }),
+      CategoryApi.get().then(res => {
+        return { category: res.data };
+      }),
+    ])
+      .then(result => {
+        if (result[0].status === 'fulfilled' && result[1].status === 'fulfilled') {
+          setData(result[0].value.product.data);
+          setTotalData(result[0].value.product.query.total);
+          setCategory(result[1].value.category);
+          setLoading(false);
+        } else {
+          setLoading(false);
+        }
       })
       .catch(error => {
         setLoading(false);
-        Swal.fire({ text: error?.message || error?.data.title, icon: 'error' });
+        Swal.fire({ text: error?.message || error?.originalError, icon: 'error' });
       });
   };
 
@@ -98,10 +111,10 @@ function Screen(props) {
             name="category"
             label="Category"
             placeholder="Pilih Category"
-            options={data.map(i => {
+            options={category?.map(i => {
               return {
                 value: i.id,
-                label: i.category,
+                label: `${i.code} - ${i.name}`,
               };
             })}
             register={register}
@@ -148,7 +161,7 @@ function Screen(props) {
           data={data}
           name={displayName}
           totalData={totalData}
-          loading={loading}
+          // loading={loading}
           checkbox
           onChangePage={page => getData(page)}
         />

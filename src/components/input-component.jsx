@@ -5,7 +5,7 @@ function InputComponent(props) {
   const {
     name,
     label,
-    maxLength = 100,
+    maxLength = '100',
     disabled,
     type = 'text',
     register,
