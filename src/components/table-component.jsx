@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 /* eslint-disable no-plusplus */
 import React from 'react';
 
@@ -9,15 +10,15 @@ function MyDocument(props) {
       <table>
         <tbody>
           <tr>
-            {columns.map(val => {
-              return <th>{val.Header}</th>;
+            {columns.map((val, i) => {
+              return <th key={i}>{val.Header}</th>;
             })}
           </tr>
-          {data.map(d => {
+          {data.map((d, idx) => {
             return (
-              <tr>
-                {columns.map(i => {
-                  return <th>{d[i.id]}</th>;
+              <tr key={idx}>
+                {columns.map((c, i) => {
+                  return <th key={i}>{d[c.id]}</th>;
                 })}
               </tr>
             );

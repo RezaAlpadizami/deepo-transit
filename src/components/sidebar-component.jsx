@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 import React, { useContext, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
@@ -33,9 +34,9 @@ function SidebarComponent() {
       <div className="">
         <ul className="text-white">
           {menuParent?.routes?.map(
-            d =>
+            (d, idx) =>
               d.showmenu && (
-                <Link to={d.route}>
+                <Link key={idx} to={d.route}>
                   <li
                     className={`${
                       findTree([d], location.pathname).length > 0
@@ -60,9 +61,9 @@ function SidebarComponent() {
                       }`}
                     >
                       {d.routes.map(
-                        r =>
+                        (r, i) =>
                           r.showmenu && (
-                            <Link to={r.route}>
+                            <Link key={i} to={r.route}>
                               <li
                                 className={`${
                                   findTree([r], location.pathname).length > 0 ? 'font-bold' : ''

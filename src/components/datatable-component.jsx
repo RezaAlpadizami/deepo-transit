@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 /* eslint-disable react/no-unstable-nested-components */
 import React, { useEffect, useState } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/solid';
@@ -248,10 +249,10 @@ function DataTable(props) {
           className="table-auto w-full text-sm text-left text-gray-500 dark:text-gray-400 border"
         >
           <thead className="text-xs text-black uppercase bg-thead dark:bg-gray-700 dark:text-gray-400">
-            {headerGroups.map(headerGroup => (
-              <tr {...headerGroup.getHeaderGroupProps()}>
-                {headerGroup.headers.map(column => (
-                  <th {...column.getHeaderProps(column.getSortByToggleProps())} className="py-3 px-6">
+            {headerGroups.map((headerGroup, idxgroup) => (
+              <tr key={idxgroup} {...headerGroup.getHeaderGroupProps()}>
+                {headerGroup.headers.map((column, columnidx) => (
+                  <th key={columnidx} {...column.getHeaderProps(column.getSortByToggleProps())} className="py-3 px-6">
                     {column.render('Header')}
                   </th>
                 ))}
@@ -265,13 +266,14 @@ function DataTable(props) {
                 // setSelectedData(selectedFlatRows);
                 return (
                   <tr
+                    key={i}
                     {...row.getRowProps()}
                     className={`${
                       i % 2 === 0 ? 'bg-white' : 'bg-gray-50'
                     } border-b hover:bg-slate-100 dark:bg-gray-900 dark:border-gray-700`}
                   >
-                    {row.cells.map(cell => (
-                      <td {...cell.getCellProps()} className="py-2 px-6">
+                    {row.cells.map((cell, idx) => (
+                      <td key={idx} {...cell.getCellProps()} className="py-2 px-6">
                         {cell.render('Cell')}
                       </td>
                     ))}
@@ -357,7 +359,7 @@ function DataTable(props) {
               .map((_, i) => {
                 const p = lastPage > 7 && lastPage - page <= 3 ? lastPage - 4 : lastPage > 7 && page > 4 ? page - 1 : 1;
                 return (
-                  <li>
+                  <li key={i}>
                     <button
                       type="button"
                       disabled={page === i + p}

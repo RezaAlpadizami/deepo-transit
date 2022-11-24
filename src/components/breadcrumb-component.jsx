@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 /* eslint-disable no-lonely-if */
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -16,8 +17,8 @@ export default function BreadcrumbComponent() {
 
   return (
     <Breadcrumb bg="#e2e7ef" color="#8e97a7" marginBottom={4} paddingX={4} paddingY={2} borderRadius={5} shadow="inner">
-      {menuTree.map(d => (
-        <BreadcrumbItem>
+      {menuTree.map((d, idx) => (
+        <BreadcrumbItem key={idx}>
           <BreadcrumbLink href={d.route}>{d.displayName}</BreadcrumbLink>
         </BreadcrumbItem>
       ))}
