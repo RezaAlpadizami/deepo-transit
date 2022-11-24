@@ -12,12 +12,28 @@ import Select from '../../../components/select-component';
 import Input from '../../../components/input-component';
 
 const schema = yup.object().shape({
-  code: yup.string().nullable().required(),
-  name: yup.string().nullable().required(),
-  category: yup.string().nullable().required(),
-  description: yup.string(),
+  sku: yup.string().nullable().required(),
+  product_name: yup.string().nullable().required(),
+  category_id: yup.string().required(),
+  product_desc: yup.string(),
 });
-
+const category = [
+  {
+    id: 1,
+    code: 'A1',
+    name: 'SATU',
+  },
+  {
+    id: 2,
+    code: 'A2',
+    name: 'DUA',
+  },
+  {
+    id: 3,
+    code: 'A3',
+    name: 'TIGA DUMMY',
+  },
+];
 function Screen(props) {
   const { route, displayName } = props;
 
@@ -26,7 +42,6 @@ function Screen(props) {
 
   const {
     register,
-    // control,
     handleSubmit,
     formState: { errors },
     reset,
@@ -37,10 +52,10 @@ function Screen(props) {
   const onSubmit = data => {
     setLoading(true);
     ProductApi.store({
-      name: data.name,
-      code: data.code,
-      category: data.category,
-      description: data.description,
+      sku: data.sku,
+      product_name: data.product_name,
+      category_id: Number(data.category_id),
+      product_desc: data.product_desc,
     })
       .then(() => {
         setLoading(false);
@@ -75,29 +90,21 @@ function Screen(props) {
         </div>
 
         <div className="grid items-start justify-items-center w-[80%] gap-4 gap-y-12 ml-6 mb-4 grid-cols-2 mt-4">
-          <Input name="code" label="Code" register={register} errors={errors} />
+          <Input name="sku" label="Sku" register={register} errors={errors} />
           <Select
-            name="category"
+            name="category_id"
             label="Category"
-            options={[
-              {
-                value: '1',
-                label: 'ID',
-              },
-              {
-                value: 'category_code',
-                label: 'Code',
-              },
-              {
-                value: 'category_name',
-                label: 'Name',
-              },
-            ]}
+            options={category.map(i => {
+              return {
+                value: i?.id,
+                label: `${i.code} - ${i.name}`,
+              };
+            })}
             register={register}
             errors={errors}
           />
-          <Input name="name" label="Name" register={register} errors={errors} />
-          <TextArea name="description" label="Description" register={register} errors={errors} />
+          <Input name="product_name" label="Name" register={register} errors={errors} />
+          <TextArea name="product_desc" label="Description" register={register} errors={errors} />
         </div>
       </form>
       {loading && <LoadingHover fixed />}
