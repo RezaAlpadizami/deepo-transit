@@ -62,7 +62,7 @@ function ActionToolbar(props) {
       position: 'top-end',
       showConfirmButton: false,
       background: '#FFC000',
-      padding: 6,
+      padding: '1 0',
       timer: 3000,
       timerProgressBar: true,
       didOpen: toast => {
@@ -73,7 +73,7 @@ function ActionToolbar(props) {
 
     Toast.fire({
       icon: 'warning',
-      iconColor: 'black',
+      iconColor: '#998032',
       title: '<h5>Copy to Clipboard</h5>',
     });
   };
@@ -134,7 +134,15 @@ function ActionToolbar(props) {
       )}
       <Modal isCentered onClose={onClose} isOpen={isOpen} motionPreset="slideInBottom">
         <ModalOverlay />
-        <ModalContent className=" max-w-[70%] max-h-[70%] py-10 h-[60%]">
+        <ModalContent
+          className={`max-w-[70%] max-h-[70%] absolute py-10 ${
+            selectedData.length === 1
+              ? 'h-[30%]'
+              : selectedData.length >= 2 && selectedData.length <= 5
+              ? 'h-[40%]'
+              : 'h-[60%] overflow-y-scroll'
+          } `}
+        >
           <ModalHeader>
             <div className="flex">
               <p className="text-sm font-semibold ml-5"> Are you sure want to delete this data ?</p>
@@ -159,7 +167,7 @@ function ActionToolbar(props) {
               </Button>
             </div>
           </ModalHeader>
-          <ModalBody>
+          <ModalBody className="mx-auto">
             <DeletedList datas={selectedData} columnsData={columns} />
           </ModalBody>
         </ModalContent>

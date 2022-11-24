@@ -11,7 +11,7 @@ function DeletedList(props) {
       <thead className=" bg-thead dark:bg-gray-700 dark:text-gray-400">
         <tr>
           {data.map(col => {
-            return <th className="uppercase text-[12px] px-5">{col.Header}</th>;
+            return <th className="uppercase text-base px-5">{col.Header}</th>;
           })}
         </tr>
       </thead>
@@ -21,7 +21,7 @@ function DeletedList(props) {
             <tr>
               {col.cells.map((cell, idx) => (
                 <td
-                  className={`text-[12px] px-5 text-center  border-b hover:bg-slate-100 dark:bg-gray-900 dark:border-gray-700 ${
+                  className={`text-base px-5 text-center  border-b hover:bg-slate-100 dark:bg-gray-900 dark:border-gray-700 ${
                     idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'
                   } `}
                 >

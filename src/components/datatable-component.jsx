@@ -214,7 +214,7 @@ function DataTable(props) {
 
   return (
     <>
-      <LoadingHover visible={loadingHover || loading} />
+      <LoadingHover visible={loadingHover} />
       {download && (
         <div style={{ display: 'none' }}>
           <TableComponent
