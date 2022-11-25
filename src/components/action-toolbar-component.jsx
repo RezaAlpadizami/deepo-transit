@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import copy from 'copy-to-clipboard';
-import { Button, Modal, ModalContent, useDisclosure, ModalOverlay, ModalHeader, ModalBody } from '@chakra-ui/react';
+import { Button } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { DocumentDownloadIcon, EyeIcon, TrashIcon, ClipboardListIcon, ViewGridIcon } from '@heroicons/react/solid';
+// Modal, ModalContent, useDisclosure, ModalOverlay, ModalHeader, ModalBody
+// import { DocumentDownloadIcon, EyeIcon, TrashIcon, ClipboardListIcon, ViewGridIcon } from '@heroicons/react/solid';
 import ShowHide from './show-hide-component';
 import DeletedList from './delete-list-component';
 import { getNestedObject } from '../utils/helper';
 
-const button = 'border-black border-2 ml-3';
+const button = 'bg-white border border-gray-500 text-md rounded-xl border-3 py-1 px-4 hover:bg-black hover:text-white';
 
 function ActionToolbar(props) {
   const {
@@ -22,10 +23,12 @@ function ActionToolbar(props) {
     getToggleHideAllColumnsProps,
     columns,
     copyItem,
+    onAdd,
+    onEdit,
   } = props;
 
   const navigate = useNavigate();
-  const { onClose, isOpen, onOpen } = useDisclosure();
+  const [onOpen, setOnOpen] = useState(false);
   const [showHide, setShowHide] = useState(false);
   const onView = () => {
     if (navTo) {
@@ -79,15 +82,29 @@ function ActionToolbar(props) {
   };
 
   return (
-    <>
-      {onDownload && (
-        <Button leftIcon={<DocumentDownloadIcon size="xl" className="w-5 " />} className={button} onClick={onDownload}>
-          Save to Excel
+    <div className="flex gap-4 bg-white py-6 px-6 rounded-t-3xl">
+      {onAdd && (
+        <Button
+          type="button"
+          onClick={() => navigate(`${navTo?.path}/add`)}
+          className="bg-white border border-gray-500 text-md rounded-xl border-3 py-1 px-4 hover:bg-black hover:text-white"
+        >
+          + Add Warehouse
+        </Button>
+      )}
+      {onEdit && (
+        <Button
+          // leftIcon={<EyeIcon size="xl" className="w-5" />}
+          className={button}
+          onClick={() => navigate(`${navTo?.path}/${selectedData?.find(i => i).original.id}/edit`)}
+          disabled={selectedData.length !== 1}
+        >
+          Edit
         </Button>
       )}
       {view && (
         <Button
-          leftIcon={<EyeIcon size="xl" className="w-5" />}
+          // leftIcon={<EyeIcon size="xl" className="w-5" />}
           className={button}
           onClick={onView}
           disabled={selectedData.length !== 1}
@@ -95,19 +112,29 @@ function ActionToolbar(props) {
           View
         </Button>
       )}
+
       {onDelete && (
         <Button
-          leftIcon={<TrashIcon size="xl" className="w-5" />}
+          // leftIcon={<TrashIcon size="xl" className="w-5" />}
           className={button}
-          onClick={onOpen}
+          onClick={() => setOnOpen(!onOpen)}
           disabled={selectedData.length === 0}
         >
           Delete
         </Button>
       )}
+      {onDownload && (
+        <Button
+          // leftIcon={<DocumentDownloadIcon size="xl" className="w-5 " />}
+          className={button}
+          onClick={onDownload}
+        >
+          Save to Excel
+        </Button>
+      )}
       {copyClipboard && (
         <Button
-          leftIcon={<ClipboardListIcon size="xl" className="w-5" />}
+          // leftIcon={<ClipboardListIcon size="xl" className="w-5" />}
           className={button}
           onClick={onCopy}
           disabled={selectedData.length === 0}
@@ -118,11 +145,11 @@ function ActionToolbar(props) {
       {onShowHideColumn && (
         <>
           <Button
-            leftIcon={<ViewGridIcon size="xl" className="w-5" />}
+            // leftIcon={<ViewGridIcon size="xl" className="w-5" />}
             className={button}
             onClick={() => setShowHide(!showHide)}
           >
-            Show/Hide Columns
+            Show / Hide Column(s)
           </Button>
           <ShowHide
             getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
@@ -132,47 +159,40 @@ function ActionToolbar(props) {
           />
         </>
       )}
-      <Modal isCentered onClose={onClose} isOpen={isOpen} motionPreset="slideInBottom">
-        <ModalOverlay />
-        <ModalContent
-          className={`max-w-[70%] max-h-[70%] absolute py-10 ${
-            selectedData.length === 1
-              ? 'h-[30%]'
-              : selectedData.length >= 2 && selectedData.length <= 5
-              ? 'h-[40%]'
-              : 'h-[60%] overflow-y-scroll'
-          } `}
+      {onOpen && (
+        <div
+          className=" main-modal fixed w-full h-200 inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
         >
-          <ModalHeader>
-            <div className="flex">
-              <p className="text-sm font-semibold ml-5"> Are you sure want to delete this data ?</p>
-              <div className="flex-1" />
-              <Button
-                className="rounded-full bg-[#aaa] outline outline-offset-2 outline-[#1F2022]"
-                colorScheme="blue"
-                mr={3}
-                onClick={onClose}
-              >
-                Cancel
-              </Button>
-              <Button
-                className="rounded-full bg-[#232323] text-[#fff]"
-                variant="blue"
-                onClick={() => {
-                  onDelete();
-                  onClose();
-                }}
-              >
-                Delete Data
-              </Button>
+          <div className="border shadow-lg modal-container bg-white w-[80%] mx-auto rounded z-50 overflow-y-auto ">
+            <div className="modal-content py-4 text-left px-6">
+              <div className="flex justify-between items-center pb-3">
+                <p className="text-MD font-bold">Are you sure to delete this data ?</p>
+                <div className="flex-1" />
+                <Button
+                  className=" rounded-full focus:outline-none modal-close px-4 bg-gray-400 p-3 mr-2 text-black hover:bg-gray-300"
+                  onClick={() => setOnOpen(!onOpen)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="rounded-full bg-[#232323] text-[#fff]"
+                  onClick={() => {
+                    onDelete();
+                    setOnOpen(!onOpen);
+                  }}
+                >
+                  Delete Data
+                </Button>
+              </div>
+              <div className={`my-5 ${selectedData.length > 5 ? 'overflow-y-auto' : ''} w-full bg-cyan-500 `}>
+                <DeletedList datas={selectedData} columnsData={columns} />
+              </div>
             </div>
-          </ModalHeader>
-          <ModalBody className="mx-auto">
-            <DeletedList datas={selectedData} columnsData={columns} />
-          </ModalBody>
-        </ModalContent>
-      </Modal>
-    </>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
