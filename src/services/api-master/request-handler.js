@@ -62,10 +62,10 @@ export default class RequestHandler {
     });
   }
 
-  find(id, url = this.url) {
+  find(param) {
     return new Promise((resolve, reject) => {
       api
-        .get(`${url}/${id}`, {
+        .get(`${this.url}/${param}`, {
           state: LocalStorage.get('is_mock') ? 'mock' : 'default',
         })
         .then(response => {
@@ -102,7 +102,7 @@ export default class RequestHandler {
   update(id, body) {
     return new Promise((resolve, reject) => {
       api
-        .put(`${this.url}/${id}/edit`, body, {
+        .put(`${this.url}/${id}`, body, {
           params: {
             state: LocalStorage.get('is_mock') ? 'mock' : 'default',
           },

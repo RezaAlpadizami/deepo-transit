@@ -5,11 +5,9 @@ import { HomeIcon } from '@heroicons/react/solid';
 const NotFound = React.lazy(() => import('../screens/home-screens/404'));
 const Home = React.lazy(() => import('../screens/home-screens/index'));
 const MasterWarhouse = React.lazy(() => import('../screens/master-screens/warehouse-screens/index'));
-const MasterWarehouseAdd = React.lazy(() => import('../screens/master-screens/warehouse-screens/add-warehouse'));
-const MasterWarehouseView = React.lazy(() =>
-  import('../screens/master-screens/warehouse-screens/view-detail-warehouse')
-);
-const MasterWarehouseUpdate = React.lazy(() => import('../screens/master-screens/warehouse-screens/update-warehouse'));
+const MasterWarehouseAdd = React.lazy(() => import('../screens/master-screens/warehouse-screens/add'));
+const MasterWarehouseShow = React.lazy(() => import('../screens/master-screens/warehouse-screens/show'));
+const MasterWarehouseEdit = React.lazy(() => import('../screens/master-screens/warehouse-screens/edit'));
 
 export default [
   {
@@ -42,7 +40,7 @@ export default [
         routes: [
           {
             displayName: 'Add Warehouse',
-            name: 'warehouse-add',
+            name: 'master-warehouse-add',
             role: 'master',
             showmenu: false,
             exact: true,
@@ -51,21 +49,21 @@ export default [
           },
           {
             displayName: 'View Detail Warehouse',
-            name: 'warehouse-view',
+            name: 'master-warehouse-show',
             role: 'master',
             showmenu: false,
             exact: true,
-            route: '/master/warehouse/:id',
-            component: MasterWarehouseView,
+            route: '/master/warehouse/:id/show',
+            component: MasterWarehouseShow,
           },
           {
             displayName: 'Edit Detail Warehouse',
-            name: 'warehouse-edit',
+            name: 'master-warehouse-edit',
             role: 'master',
             showmenu: false,
             exact: true,
             route: '/master/warehouse/:id/edit',
-            component: MasterWarehouseUpdate,
+            component: MasterWarehouseEdit,
           },
         ],
       },

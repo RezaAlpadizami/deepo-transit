@@ -6,7 +6,6 @@ import { Button } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
-import LoadingHover from '../../../components/loading-hover-component';
 import { WarehouseApi } from '../../../services/api-master';
 import Input from '../../../components/input-component';
 import DatePicker from '../../../components/datepicker-component';
@@ -15,7 +14,6 @@ function Screen() {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const [loading, setLoading] = useState(false);
   const [errrorMessage, setErrorMessage] = useState([null]);
   const [showAlert, setShowAlert] = useState(false);
 
@@ -43,7 +41,6 @@ function Screen() {
   });
 
   const onEditSaveWarehouse = data => {
-    setLoading(true);
     WarehouseApi.update(id, {
       name: data.name,
       code: data.code,
@@ -54,11 +51,9 @@ function Screen() {
       location: data.location,
     })
       .then(() => {
-        setLoading(false);
         navigate('/master/warehouse');
       })
       .catch(error => {
-        setLoading(false);
         setErrorMessage(error.status);
       });
   };
@@ -123,7 +118,6 @@ function Screen() {
           <Input name="location" label="Location" register={register} errors={errors} />
         </div>
       </form>
-      {loading && <LoadingHover fixed />}
     </div>
   );
 }

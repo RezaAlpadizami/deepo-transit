@@ -130,7 +130,7 @@ function DataTable(props) {
 
                   {hasViewAction && (
                     <td className="py-1 px-6 border-none hover: text-blue-400 no-underline">
-                      <Link type="button" className="mr-4" href={`${location.pathname}/${row.original.id}`}>
+                      <Link type="button" className="mr-4" href={`${location.pathname}/${row.original.id}/show`}>
                         View Detail
                       </Link>
                     </td>
