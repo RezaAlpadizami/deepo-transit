@@ -4,10 +4,11 @@ import { HomeIcon } from '@heroicons/react/solid';
 const NotFound = React.lazy(() => import('../screens/home-screens/404'));
 const Home = React.lazy(() => import('../screens/home-screens/index'));
 const MasterCity = React.lazy(() => import('../screens/master-screens/city/index'));
+
 const CategoryScreens = React.lazy(() => import('../screens/master-screens/category-screens/index'));
-const CategoryScreensAdd = React.lazy(() => import('../screens/master-screens/category-screens/add-category'));
-const CategoryScreensDetail = React.lazy(() => import('../screens/master-screens/category-screens/detail-category'));
-const CategoryScreensEdit = React.lazy(() => import('../screens/master-screens/category-screens/edit-category'));
+const CategoryScreenAdd = React.lazy(() => import('../screens/master-screens/category-screens/add'));
+const CategoryScreenShow = React.lazy(() => import('../screens/master-screens/category-screens/show'));
+const CategoryScreenEdit = React.lazy(() => import('../screens/master-screens/category-screens/edit'));
 
 export default [
   {
@@ -45,16 +46,16 @@ export default [
             showmenu: false,
             exact: true,
             route: '/master/category/add',
-            component: CategoryScreensAdd,
+            component: CategoryScreenAdd,
           },
           {
             displayName: 'Detail Category',
-            name: 'master-category-detail',
+            name: 'master-category-show',
             role: 'master',
             showmenu: false,
             exact: true,
-            route: '/master/category/:id/detail',
-            component: CategoryScreensDetail,
+            route: '/master/category/:id/show',
+            component: CategoryScreenShow,
           },
           {
             displayName: 'Update Category',
@@ -63,7 +64,7 @@ export default [
             showmenu: false,
             exact: true,
             route: '/master/category/:id/edit',
-            component: CategoryScreensEdit,
+            component: CategoryScreenEdit,
           },
         ],
       },
