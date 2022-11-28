@@ -4,10 +4,11 @@ import { HomeIcon } from '@heroicons/react/solid';
 const NotFound = React.lazy(() => import('../screens/home-screens/404'));
 const Home = React.lazy(() => import('../screens/home-screens/index'));
 const MasterCity = React.lazy(() => import('../screens/master-screens/city/index'));
+
 const StorageScreens = React.lazy(() => import('../screens/master-screens/storage-screens/index'));
-const StorageScreensAdd = React.lazy(() => import('../screens/master-screens/storage-screens/add-storage'));
-const StorageScreensDetail = React.lazy(() => import('../screens/master-screens/storage-screens/detail-storage'));
-const StorageScreensEdit = React.lazy(() => import('../screens/master-screens/storage-screens/edit-storage'));
+const StorageScreenAdd = React.lazy(() => import('../screens/master-screens/storage-screens/add'));
+const StorageScreenShow = React.lazy(() => import('../screens/master-screens/storage-screens/show'));
+const StorageScreenEdit = React.lazy(() => import('../screens/master-screens/storage-screens/edit'));
 
 export default [
   {
@@ -45,16 +46,16 @@ export default [
             showmenu: false,
             exact: true,
             route: '/master/storage/add',
-            component: StorageScreensAdd,
+            component: StorageScreenAdd,
           },
           {
             displayName: 'Detail Storage',
-            name: 'master-storage-detail',
+            name: 'master-storage-show',
             role: 'master',
             showmenu: false,
             exact: true,
-            route: '/master/storage/:id/detail',
-            component: StorageScreensDetail,
+            route: '/master/storage/:id/show',
+            component: StorageScreenShow,
           },
           {
             displayName: 'Update Storage',
@@ -63,19 +64,9 @@ export default [
             showmenu: false,
             exact: true,
             route: '/master/storage/:id/edit',
-            component: StorageScreensEdit,
+            component: StorageScreenEdit,
           },
         ],
-      },
-      {
-        displayName: 'Country',
-        icon: HomeIcon,
-        name: 'master-country',
-        role: 'master',
-        showmenu: true,
-        exact: true,
-        route: '/master/country',
-        component: StorageScreens,
       },
       {
         displayName: 'X',

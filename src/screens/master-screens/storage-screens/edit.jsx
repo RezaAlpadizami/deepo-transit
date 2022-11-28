@@ -30,12 +30,11 @@ function Screen() {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm({
     resolver: yupResolver(schema),
   });
 
-  const onEditSaveWarehouse = data => {
+  const onEditSaveStorage = data => {
     setLoading(true);
     StorageApi.update(id, {
       code: data.code,
@@ -58,12 +57,12 @@ function Screen() {
 
   return (
     <div className="">
-      <form onSubmit={handleSubmit(onEditSaveWarehouse)}>
+      <form onSubmit={handleSubmit(onEditSaveStorage)}>
         <div className="flex mb-12">
           <h1 className="font-bold text-3xl">Update Warehouse</h1>
           <div className="flex-1" />
           <Button
-            onClick={() => reset()}
+            onClick={() => navigate(-1)}
             paddingX={12}
             size="sm"
             className="bg-white border border-gray-500 text-gray-500 rounded-full border-3 py-4 px-6 mr-2 hover:text-white hover:bg-black"

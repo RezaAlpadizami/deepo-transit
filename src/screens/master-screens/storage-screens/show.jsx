@@ -17,10 +17,10 @@ function Screen() {
   const [dataStorageById, setDataStorageById] = useState([]);
 
   useEffect(() => {
-    getDetailWarehouse();
+    getDetailStorage();
   }, []);
 
-  const getDetailWarehouse = () => {
+  const getDetailStorage = () => {
     setLoading(true);
     StorageApi.find(id)
       .then(res => {
