@@ -12,7 +12,6 @@ import { hasProperty } from '../utils/helper';
 import { Checkbox } from './checkbox-component';
 import TableComponent from './table-component';
 import LoadingHover from './loading-component';
-import LoadSkeleton from './skeleton-table-component';
 
 function DataTable(props) {
   const {
@@ -217,7 +216,6 @@ function DataTable(props) {
 
   return (
     <>
-      {loading && <LoadSkeleton />}
       <LoadingHover visible={loadingHover} />
       {download && (
         <div style={{ display: 'none' }}>
@@ -282,23 +280,29 @@ function DataTable(props) {
         {loading && (
           <div className="w-full">
             <div className="">
-              <div className=" border-b border-x border-gray-300 p-3 bg-white">
-                <div className="animate-pulse rounded-full w-64 bg-slate-200 h-3" />
+              <div className="flex p-3">
+                <div className="h-5 rounded-lg bg-gray-300 w-[5%]" />
+                <div className="h-5 ml-3 rounded-lg bg-gray-300  w-[95%] " />
               </div>
-              <div className="border-b border-x border-gray-300 p-3 bg-gray-50">
-                <div className="rounded-full bg-slate-200 h-3 w-80" />
+              <div className="flex mt-1 p-3">
+                <div className="h-5 rounded-lg bg-gray-300 w-[5%]" />
+                <div className="h-5 ml-3 rounded-lg bg-gray-300  w-[95%] " />
               </div>
-              <div className=" border-b border-x border-gray-300 p-3 bg-white">
-                <div className="animate-pulse rounded-full w-52 bg-slate-200 h-3" />
+              <div className="flex mt-1 p-3">
+                <div className="h-5 rounded-lg bg-gray-300 w-[5%]" />
+                <div className="h-5 ml-3 rounded-lg bg-gray-300  w-[95%] " />
               </div>
-              <div className="border-b border-x border-gray-300 p-3 bg-gray-50">
-                <div className="rounded-full bg-slate-200 h-3 w-60" />
+              <div className="flex mt-1 p-3">
+                <div className="h-5 rounded-lg bg-gray-300 w-[5%]" />
+                <div className="h-5 ml-3 rounded-lg bg-gray-300  w-[95%] " />
               </div>
-              <div className=" border-b border-x border-gray-300 p-3 bg-white">
-                <div className="animate-pulse rounded-full w-64 bg-slate-200 h-3" />
+              <div className="flex mt-1 p-3">
+                <div className="h-5 rounded-lg bg-gray-300 w-[5%]" />
+                <div className="h-5 ml-3 rounded-lg bg-gray-300  w-[95%] " />
               </div>
-              <div className="border-b border-x border-gray-300 p-3 bg-gray-50">
-                <div className="rounded-full bg-slate-200 h-3 w-56" />
+              <div className="flex mt-1 p-3">
+                <div className="h-5 rounded-lg bg-gray-300 w-[5%]" />
+                <div className="h-5 ml-3 rounded-lg bg-gray-300  w-[95%] " />
               </div>
             </div>
           </div>

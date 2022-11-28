@@ -12,7 +12,6 @@ import Datatable from '../../../components/datatable-component';
 import Input from '../../../components/input-component';
 import Select from '../../../components/select-component';
 import TextArea from '../../../components/textarea-component';
-import LoadSkeleton from '../../../components/skeleton-component';
 
 function Screen(props) {
   const { route, displayName } = props;
@@ -98,7 +97,6 @@ function Screen(props) {
 
   return (
     <div className="">
-      {loading && <LoadSkeleton />}
       <div className="flex">
         <h1 className="font-bold text-xl">{displayName}</h1>
         <div className="flex-1" />
@@ -161,7 +159,7 @@ function Screen(props) {
           data={data}
           name={displayName}
           totalData={totalData}
-          // loading={loading}
+          loading={loading}
           checkbox
           onChangePage={page => getData(page)}
         />
