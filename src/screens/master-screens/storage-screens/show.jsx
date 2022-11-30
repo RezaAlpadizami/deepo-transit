@@ -50,7 +50,7 @@ function Screen() {
             navigate(`/master/storage/${id}/edit`);
           }}
           size="sm"
-          className="rounded-full bg-gray-700 hover:bg-black text-[#fff] mr-60"
+          className="bg-white border border-gray-500 text-gray-500 rounded-full border-3 py-4 px-6 mr-60 hover:text-white hover:bg-black"
         >
           Edit
         </Button>

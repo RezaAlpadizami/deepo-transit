@@ -2,22 +2,29 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@chakra-ui/react';
+
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-
 import Moment from 'moment';
-import { StorageApi } from '../../../services/api-master';
+import Swal from 'sweetalert2';
 
+import { StorageApi } from '../../../services/api-master';
 import Datatable from '../../../components/datatable-component';
 import Input from '../../../components/input-component';
 import Select from '../../../components/select-component';
 
-function Screen() {
+function Screen(props) {
+  const { displayName } = props;
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
   const [totalData, setTotalData] = useState([]);
+
+  const [filterData, setFilterData] = useState({
+    limit: 10,
+    offset: 0,
+  });
 
   const schema = yup.object().shape({
     code: yup.string().nullable(),
@@ -38,20 +45,28 @@ function Screen() {
 
   useEffect(() => {
     getDataStorage();
-  }, []);
+  }, [filterData]);
 
   const getDataStorage = () => {
     setLoading(true);
-    StorageApi.get()
-      .then(data => {
+    StorageApi.get({ ...filterData })
+      .then(res => {
         setLoading(false);
-        setData(data.results);
-        setTotalData(data.count);
+        setData(res.results);
+        setTotalData(res.count);
       })
-      .catch(e => {
+      .catch(error => {
         setLoading(false);
-        console.log(e);
+        Swal.fire({ text: error?.message || error?.originalError, icon: 'error' });
       });
+  };
+
+  const onReset = () => {
+    reset();
+    setFilterData({
+      limit: 10,
+      offset: 0,
+    });
   };
 
   const onSubmitFilter = data => {
@@ -72,16 +87,21 @@ function Screen() {
         }
       }
     });
+    setFilterData(prev => {
+      return {
+        ...prev,
+        limit: 10,
+        offset: 0,
+        ...data,
+      };
+    });
   };
 
   return (
     <div className="">
       <div className="flex">
-        <h1 className="font-bold text-xl">Storage</h1>
+        <h1 className="font-bold text-xl">{displayName}</h1>
         <div className="flex-1" />
-        {/* <Button onClick={() => navigate('/master/city/add')} paddingX={12} size="sm" colorScheme="primary">
-          Tambah SKP
-        </Button> */}
       </div>
       <form onSubmit={handleSubmit(onSubmitFilter)}>
         <div className="grid items-start justify-items-center w-full gap-4 gap-y-1 px-6 mb-4 grid-cols-3 mt-4">
@@ -95,10 +115,10 @@ function Screen() {
             name="warehouse_id"
             label="Warehouse"
             options={[
-              { value: 'pusat', label: 'Gudang Pusat' },
-              { value: 'serpong', label: 'Gudang Serpong' },
-              { value: 'cilegon', label: 'Gudang Cilegon' },
-              { value: 'jaksel', label: 'Gudang Jakarta Selatan' },
+              { value: 1, label: 'Gudang Pusat' },
+              { value: 2, label: 'Gudang Serpong' },
+              { value: 3, label: 'Gudang Cilegon' },
+              { value: 4, label: 'Gudang Jakarta Selatan' },
             ]}
             placeholder=""
             register={register}
@@ -108,7 +128,14 @@ function Screen() {
 
         <div className="flex gap-2 mb-4">
           <div className="flex-1" />
-          <Button type="button" size="sm" width="24" onClick={() => reset()} colorScheme="blackAlpha" variant="outline">
+          <Button
+            type="button"
+            size="sm"
+            width="24"
+            onClick={() => onReset()}
+            colorScheme="blackAlpha"
+            variant="outline"
+          >
             Reset
           </Button>
           <Button
@@ -171,7 +198,7 @@ function Screen() {
           checkbox
           column={[
             { header: 'Code', value: 'code' },
-            { header: 'Rack', value: 'rack_number' },
+            { header: 'Rack Number', value: 'rack_number' },
             { header: 'Bay', value: 'bay' },
             { header: 'Level', value: 'level' },
             { header: 'Warehouse', value: 'warehouse_id' },
@@ -180,7 +207,6 @@ function Screen() {
           totalData={totalData}
           loading={loading}
           onChangePage={page => getDataStorage(page)}
-          hasViewAction
         />
       </div>
     </div>

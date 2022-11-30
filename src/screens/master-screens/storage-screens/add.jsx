@@ -12,7 +12,8 @@ import { StorageApi } from '../../../services/api-master';
 import Input from '../../../components/input-component';
 import Select from '../../../components/select-component';
 
-function Screen() {
+function Screen(props) {
+  const { displayName } = props;
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
@@ -20,8 +21,8 @@ function Screen() {
   const schema = yup.object().shape({
     bay: yup.string().nullable().required(),
     code: yup.string().nullable().required(),
-    rack: yup.string().nullable().required(),
-    warehouse: yup.string().nullable().required(),
+    rack_number: yup.string().nullable().required(),
+    warehouse_id: yup.number().nullable().required(),
     level: yup.string().nullable().required(),
   });
 
@@ -37,13 +38,11 @@ function Screen() {
   const onAddStorage = data => {
     setLoading(true);
     StorageApi.store({
-      name: data.name,
       code: data.code,
-      address: data.address,
-      phone: data.phone,
-      capacity: data.capacity,
-      last_stock_opname: data.last_stock_opname,
-      location: data.location,
+      rack_number: data.rack_number,
+      bay: data.bay,
+      level: data.level,
+      warehouse_id: data.warehouse_id,
     })
       .then(() => {
         setLoading(false);
@@ -60,7 +59,7 @@ function Screen() {
     <div className="">
       <form onSubmit={handleSubmit(onAddStorage)}>
         <div className="flex mb-12">
-          <h1 className="font-bold text-3xl">Add Storage</h1>
+          <h1 className="font-bold text-3xl">{displayName}</h1>
           <div className="flex-1" />
           <Button
             onClick={() => reset()}
@@ -83,15 +82,15 @@ function Screen() {
         <div className="grid items-start justify-items-center w-[80%] gap-4 gap-y-12 ml-6 mb-4 grid-cols-2 mt-4">
           <Input name="code" label="Code" register={register} errors={errors} />
           <Input name="level" label="Level" register={register} errors={errors} />
-          <Input name="rack" label="Rack" register={register} errors={errors} />
+          <Input name="rack_number" label="Rack" register={register} errors={errors} />
           <Select
-            name="warehouse"
+            name="warehouse_id"
             label="Warehouse"
             options={[
-              { value: 'pusat', label: 'Gudang Pusat' },
-              { value: 'serpong', label: 'Gudang Serpong' },
-              { value: 'cilegon', label: 'Gudang Cilegon' },
-              { value: 'jaksel', label: 'Gudang Jakarta Selatan' },
+              { value: 1, label: 'Gudang Pusat' },
+              { value: 2, label: 'Gudang Serpong' },
+              { value: 3, label: 'Gudang Cilegon' },
+              { value: 4, label: 'Gudang Jakarta Selatan' },
             ]}
             placeholder=""
             register={register}

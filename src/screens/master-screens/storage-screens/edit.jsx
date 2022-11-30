@@ -12,7 +12,8 @@ import { StorageApi } from '../../../services/api-master';
 import Input from '../../../components/input-component';
 import Select from '../../../components/select-component';
 
-function Screen() {
+function Screen(props) {
+  const { displayName } = props;
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -43,8 +44,7 @@ function Screen() {
       warehouse_id: data.warehouse_id,
       level: data.level,
     })
-      .then(res => {
-        console.log('res update', res);
+      .then(() => {
         setLoading(false);
         Swal.fire({ text: 'Successfully Saved', icon: 'success' });
         navigate('/master/storage');
@@ -59,7 +59,7 @@ function Screen() {
     <div className="">
       <form onSubmit={handleSubmit(onEditSaveStorage)}>
         <div className="flex mb-12">
-          <h1 className="font-bold text-3xl">Update Warehouse</h1>
+          <h1 className="font-bold text-3xl">{displayName}</h1>
           <div className="flex-1" />
           <Button
             onClick={() => navigate(-1)}
