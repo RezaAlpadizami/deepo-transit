@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-// import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/solid';
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/solid';
 import { useTable, useSortBy, usePagination } from 'react-table';
 import { observer } from 'mobx-react-lite';
 
@@ -10,7 +10,6 @@ function DataTable(props) {
     onChangePage = () => {},
     totalData = 0,
     limit = 10,
-    offset = 0,
     loading = false,
   } = props;
 
@@ -20,10 +19,6 @@ function DataTable(props) {
   useEffect(() => {
     setLastPage(Math.ceil(totalData / limit));
   }, [totalData, limit]);
-
-  useEffect(() => {
-    setPages(offset / limit + 1);
-  }, [offset]);
 
   const data = React.useMemo(() => propsData, [JSON.stringify(propsData)]);
 
@@ -108,31 +103,31 @@ function DataTable(props) {
         </div>
       )}
 
-      <nav className="flex justify-end items-center bg-white pl-4 border-x border-b" aria-label="Table navigation">
-        {/* still be maintained temporarily, if there is a design change in the future */}
-        {/* <span className="text-sm font-normal text-gray-500">
+      <nav className="flex justify-between items-center bg-white pl-4" aria-label="Table navigation">
+        <span className="text-sm font-normal text-gray-500 ">
           {totalData <= 0 ? null : (
             <>
-              Showing
+              Showing <span className="font-semibold text-gray-900 ">{`${limit * (pages - 1) + 1} - `}</span>
               <span className="font-semibold text-gray-900">
-                {limit * (page - 1) + 1}-{page * limit}
+                {pages * limit > totalData ? totalData : pages * limit}
               </span>{' '}
-              of <span className="font-semibold text-gray-900">{totalData}</span>
+              of <span className="font-semibold text-gray-900 ">{totalData}</span>
             </>
           )}
-        </span> */}
+        </span>
+
         <ul className="inline-flex items-center text-sm -space-x-px py-4 mr-8">
-          {/* <li>
+          <li>
             <button
               type="button"
-              disabled={page === 1}
-              onClick={() => (page === 1 ? {} : changePage(page - 1))}
+              disabled={pages === 1}
+              onClick={() => (pages === 1 ? {} : changePage(pages - 1))}
               className="block py-2 px-3 ml-0 leading-tight text-gray-500 bg-white disabled:text-gray-300 disabled:hover:bg-white hover:bg-gray-100 hover:text-gray-700"
             >
               <span className="sr-only">Previous</span>
-              <ChevronLeftIcon className="w-5 h-5" />
+              {totalData <= 0 ? null : <ChevronLeftIcon className="w-5 h-5" />}
             </button>
-          </li> */}
+          </li>
           {lastPage > 7 && pages >= 4 && (
             <>
               <li>
@@ -161,9 +156,8 @@ function DataTable(props) {
             .map((_, i) => {
               const p =
                 lastPage > 7 && lastPage - pages < 3 ? lastPage - 4 : lastPage > 7 && pages >= 4 ? pages - 1 : 1;
-
               return (
-                <li>
+                <li key={i}>
                   <button
                     type="button"
                     disabled={pages === i + p}
@@ -198,17 +192,17 @@ function DataTable(props) {
               </li>
             </>
           )}
-          {/* <li>
+          <li>
             <button
               type="button"
-              disabled={page === lastPage}
-              onClick={() => (page === lastPage ? {} : changePage(page + 1))}
+              disabled={pages === lastPage}
+              onClick={() => (pages === lastPage ? {} : changePage(pages + 1))}
               className="block py-2 px-3 leading-tight text-gray-500 bg-white disabled:text-gray-300 disabled:hover:bg-white hover:bg-gray-100 hover:text-gray-700"
             >
               <span className="sr-only">Next</span>
-              <ChevronRightIcon className="w-5 h-5" />
+              {totalData <= 0 ? null : <ChevronRightIcon className="w-5 h-5" />}
             </button>
-          </li> */}
+          </li>
         </ul>
       </nav>
     </div>
