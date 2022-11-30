@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import * as yup from 'yup';
 import Moment from 'moment';
+import Swal from 'sweetalert2';
 import { Button } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 
@@ -50,9 +51,9 @@ function Screen(props) {
         setDataListWarehouse(data.data);
         setTotalData(data.query.total);
       })
-      .catch(e => {
+      .catch(error => {
         setLoading(false);
-        console.log(e);
+        Swal.fire({ text: error?.message || error?.originalError, icon: 'error' });
       });
   };
 
@@ -144,6 +145,7 @@ function Screen(props) {
           </Button>
         </div>
         <Datatable
+          checkbox
           column={[
             { header: 'Code', value: 'code', type: 'link' },
             { header: 'Name', value: 'name' },

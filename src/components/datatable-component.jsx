@@ -6,7 +6,7 @@ import { observer } from 'mobx-react-lite';
 import { Link } from '@chakra-ui/react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/solid';
 
-import { Checkbox } from './checkbox-component';
+import Checkbox from './checkbox-component';
 
 function DataTable(props) {
   const {

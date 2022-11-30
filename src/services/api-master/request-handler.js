@@ -69,7 +69,6 @@ export default class RequestHandler {
           state: LocalStorage.get('is_mock') ? 'mock' : 'default',
         })
         .then(response => {
-          console.log('response', response);
           if (response.ok) resolve(response.data);
           else reject(RequestHandler.defaultErrorResponse(response));
         })
