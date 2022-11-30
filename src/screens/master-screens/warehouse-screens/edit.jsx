@@ -1,30 +1,31 @@
 import React, { useState } from 'react';
+
+import * as yup from 'yup';
+import Swal from 'sweetalert2';
+import { Button } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
-
-import { Button } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
 
-import { WarehouseApi } from '../../../services/api-master';
 import Input from '../../../components/input-component';
+import WarehouseApi from '../../../services/api-master';
 import DatePicker from '../../../components/datepicker-component';
+import LoadingHover from '../../../components/loading-hover-component';
 
-function Screen() {
-  const navigate = useNavigate();
+function Screen(props) {
+  const { displayName } = props;
   const { id } = useParams();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
-  const [errrorMessage, setErrorMessage] = useState([null]);
-  const [showAlert, setShowAlert] = useState(false);
-
-  const phoneRegExp =
+  const phoneValidation =
     /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/;
 
   const schema = yup.object().shape({
     name: yup.string().nullable().required(),
     code: yup.string().nullable().required(),
     address: yup.string().nullable().required(),
-    phone: yup.string().matches(phoneRegExp, 'Phone number is not valid'),
+    phone: yup.string().matches(phoneValidation, 'Phone number is not valid'),
     capacity: yup.number().nullable().required(),
     last_stock_opname: yup.date().nullable().required(),
     location: yup.string().nullable().required(),
@@ -35,12 +36,12 @@ function Screen() {
     control,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm({
     resolver: yupResolver(schema),
   });
 
   const onEditSaveWarehouse = data => {
+    setLoading(true);
     WarehouseApi.update(id, {
       name: data.name,
       code: data.code,
@@ -51,40 +52,24 @@ function Screen() {
       location: data.location,
     })
       .then(() => {
+        setLoading(false);
+        Swal.fire({ text: 'Successfully Saved', icon: 'success' });
         navigate('/master/warehouse');
       })
       .catch(error => {
-        setErrorMessage(error.status);
+        setLoading(false);
+        Swal.fire({ text: error?.message, icon: 'error' });
       });
-  };
-
-  const handleCloseButton = () => {
-    setShowAlert(false);
-    reset();
   };
 
   return (
     <div className="">
-      {showAlert && (
-        <div className="flex justify-center">
-          <span className="p-2 bg-[#E25450] rounded-[8px] text-center text-white text-[12px] items-center">
-            {errrorMessage}{' '}
-            <button
-              className="bg-transparent text-[13px] font-semibold leading-none outline-none focus:outline-none"
-              onClick={() => handleCloseButton()}
-              type="button"
-            >
-              <span className="ml-3 font-bold">Tutup</span>
-            </button>
-          </span>
-        </div>
-      )}
       <form onSubmit={handleSubmit(onEditSaveWarehouse)}>
         <div className="flex mb-12">
-          <h1 className="font-bold text-3xl">Update Warehouse</h1>
+          <h1 className="font-bold text-3xl">{displayName}</h1>
           <div className="flex-1" />
           <Button
-            onClick={() => reset()}
+            onClick={() => navigate(-1)}
             paddingX={12}
             size="sm"
             className="bg-white border border-gray-500 text-gray-500 rounded-full border-3 py-4 px-6 mr-2 hover:text-white hover:bg-black"
@@ -118,6 +103,7 @@ function Screen() {
           <Input name="location" label="Location" register={register} errors={errors} />
         </div>
       </form>
+      {loading && <LoadingHover fixed />}
     </div>
   );
 }

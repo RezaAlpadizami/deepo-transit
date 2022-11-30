@@ -11,7 +11,7 @@ export default function BreadcrumbComponent() {
   const [menuTree, setMenuTree] = useState([]);
 
   useEffect(() => {
-    setMenuTree(findTree(menuItem, location.pathname));
+    setMenuTree(findTree(menuItem, location));
   }, [location.pathname]);
 
   return (

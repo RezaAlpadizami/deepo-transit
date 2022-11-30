@@ -4,19 +4,17 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Moment from 'moment';
 import { Button } from '@chakra-ui/react';
 
+import DeleteButton from '../../../components/delete-button-component';
 import LoadingHover from '../../../components/loading-hover-component';
 import InputDetail from '../../../components/input-detail-component';
-import { WarehouseApi } from '../../../services/api-master';
+import WarehouseApi from '../../../services/api-master';
 
-function Screen() {
+function Screen(props) {
+  const { displayName } = props;
   const { id } = useParams();
   const navigate = useNavigate();
-
   const [loading, setLoading] = useState(false);
-  //   const [errrorMessage, setErrorMessage] = useState([null]);
-  //   const [showAlert, setShowAlert] = useState(false);
   const [dataWarehouseById, setDataWarehouseById] = useState([]);
-  //   const [totalData, setTotalData] = useState([]);
 
   useEffect(() => {
     getDetailWarehouse();
@@ -38,21 +36,20 @@ function Screen() {
   return (
     <div className="">
       <div className="flex mb-12">
-        <h1 className="font-bold text-3xl">Detail Warehouse</h1>
+        <h1 className="font-bold text-3xl">{displayName}</h1>
         <div className="flex-1" />
-        <Button
-          onClick={() => {}}
-          paddingX={12}
-          size="sm"
-          className="bg-white border border-gray-500 text-gray-500 rounded-full border-3 py-4 px-6 mr-2 hover:text-white hover:bg-black"
-        >
-          Delete
-        </Button>
+        <DeleteButton
+          api={WarehouseApi}
+          afterSuccessDeleteTo="master/warehouse"
+          textConfirmButton="Are you sure want to remove this ?"
+        />
         <Button
           paddingX={12}
           type="submit"
+          onClick={() => {
+            navigate(`/master/warehouse/${id}/edit`);
+          }}
           size="sm"
-          onClick={() => navigate(`/master/warehouse/${id}/edit`)}
           className="bg-white border border-gray-500 text-gray-500 rounded-full border-3 py-4 px-6 mr-60 hover:text-white hover:bg-black"
         >
           Edit

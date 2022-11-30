@@ -2,25 +2,23 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
+import * as yup from 'yup';
+import Moment from 'moment';
 import { Button } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
 
 import Datatable from '../../../components/datatable-component';
 import Input from '../../../components/input-component';
 import DatePicker from '../../../components/datepicker-component';
-import warehouseApi from '../../../services/api-master/resources/warehouse-api';
+import WarehouseApi from '../../../services/api-master/resources/warehouse-api';
 
-function Screen() {
+function Screen(props) {
+  const { displayName } = props;
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
   const [dataListWarehouse, setDataListWarehouse] = useState([]);
   const [totalData, setTotalData] = useState([]);
-  const [filterData, setFilterData] = useState({
-    limit: 5,
-    offset: 0,
-  });
 
   const schema = yup.object().shape({
     name: yup.string(),
@@ -42,16 +40,11 @@ function Screen() {
 
   useEffect(() => {
     getDataWarehouse();
-  }, [JSON.stringify(filterData)]);
-
-  useEffect(() => {
-    setFilterData({ ...filterData });
   }, []);
 
   const getDataWarehouse = () => {
     setLoading(true);
-    warehouseApi
-      .get({ ...filterData })
+    WarehouseApi.get()
       .then(data => {
         setLoading(false);
         setDataListWarehouse(data.data);
@@ -63,13 +56,33 @@ function Screen() {
       });
   };
 
+  const onSubmitFilter = data => {
+    Object.keys(data).forEach(dt => {
+      if (Object.hasOwnProperty.call(data, dt)) {
+        if (!data[dt]) {
+          delete data[dt];
+        }
+        if (data[dt] instanceof Date) {
+          if (dt.toLowerCase().includes('to')) {
+            data[dt] = Moment(data[dt]).endOf('day').format('YYYY-MM-DD');
+          } else {
+            data[dt] = Moment(data[dt]).startOf('day').format('YYYY-MM-DD');
+          }
+        } else {
+          // eslint-disable-next-line no-unused-expressions
+          data[dt];
+        }
+      }
+    });
+  };
+
   return (
     <div className="">
       <div className="flex">
-        <h1 className="font-bold text-xl">Warehouse</h1>
+        <h1 className="font-bold text-xl">{displayName}</h1>
         <div className="flex-1" />
       </div>
-      <form onSubmit={handleSubmit(d => console.log(d))}>
+      <form onSubmit={handleSubmit(onSubmitFilter)}>
         <div className="grid items-start justify-items-center w-full gap-4 gap-y-1 mx-2 mb-4 grid-cols-5 mt-4">
           <Input name="code" label="Code" register={register} errors={errors} />
           <Input name="name" label="Name" register={register} errors={errors} />
@@ -132,7 +145,7 @@ function Screen() {
         </div>
         <Datatable
           column={[
-            { header: 'Code', value: 'code' },
+            { header: 'Code', value: 'code', type: 'link' },
             { header: 'Name', value: 'name' },
             { header: 'Capacity', value: 'capacity', type: 'percent' },
             { header: 'Location', value: 'location' },
@@ -142,7 +155,6 @@ function Screen() {
           totalData={totalData}
           loading={loading}
           onChangePage={page => getDataWarehouse(page)}
-          hasViewAction
         />
       </div>
     </div>

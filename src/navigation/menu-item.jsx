@@ -1,9 +1,9 @@
 import React from 'react';
 import { HomeIcon } from '@heroicons/react/solid';
-// import warehouseIcon from '../assets/icons/'
 
 const NotFound = React.lazy(() => import('../screens/home-screens/404'));
 const Home = React.lazy(() => import('../screens/home-screens/index'));
+
 const MasterWarhouse = React.lazy(() => import('../screens/master-screens/warehouse-screens/index'));
 const MasterWarehouseAdd = React.lazy(() => import('../screens/master-screens/warehouse-screens/add'));
 const MasterWarehouseShow = React.lazy(() => import('../screens/master-screens/warehouse-screens/show'));
@@ -26,7 +26,7 @@ export default [
     showmenu: true,
     exact: true,
     route: '/master',
-    component: MasterWarhouse,
+    component: Home,
     routes: [
       {
         displayName: 'Warehouse',
@@ -66,26 +66,6 @@ export default [
             component: MasterWarehouseEdit,
           },
         ],
-      },
-      {
-        displayName: 'Country',
-        icon: HomeIcon,
-        name: 'master-country',
-        role: 'master',
-        showmenu: true,
-        exact: true,
-        route: '/master/country',
-        component: MasterWarhouse,
-      },
-      {
-        displayName: 'X',
-        icon: HomeIcon,
-        name: 'master-x',
-        role: 'master',
-        showmenu: false,
-        exact: true,
-        route: '/master/x',
-        component: MasterWarhouse,
       },
     ],
   },
