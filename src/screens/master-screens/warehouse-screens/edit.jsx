@@ -8,7 +8,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { yupResolver } from '@hookform/resolvers/yup';
 
 import Input from '../../../components/input-component';
-import WarehouseApi from '../../../services/api-master';
+import { WarehouseApi } from '../../../services/api-master';
 import DatePicker from '../../../components/datepicker-component';
 import LoadingHover from '../../../components/loading-hover-component';
 

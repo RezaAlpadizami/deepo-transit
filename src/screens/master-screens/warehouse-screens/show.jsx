@@ -7,7 +7,7 @@ import { Button } from '@chakra-ui/react';
 import DeleteButton from '../../../components/delete-button-component';
 import LoadingHover from '../../../components/loading-hover-component';
 import InputDetail from '../../../components/input-detail-component';
-import WarehouseApi from '../../../services/api-master';
+import { WarehouseApi } from '../../../services/api-master';
 
 function Screen(props) {
   const { displayName } = props;
@@ -38,11 +38,7 @@ function Screen(props) {
       <div className="flex mb-12">
         <h1 className="font-bold text-3xl">{displayName}</h1>
         <div className="flex-1" />
-        <DeleteButton
-          api={WarehouseApi}
-          afterSuccessDeleteTo="master/warehouse"
-          textConfirmButton="Are you sure want to remove this ?"
-        />
+        <DeleteButton api={WarehouseApi} redirectTo="master/warehouse" />
         <Button
           paddingX={12}
           type="submit"

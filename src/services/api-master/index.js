@@ -1,3 +1,4 @@
 import WarehouseApi from './resources/warehouse-api';
+import ProductApi from './resources/product-api';
 
-export default WarehouseApi;
+export { WarehouseApi, ProductApi };

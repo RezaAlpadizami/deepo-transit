@@ -23,10 +23,10 @@ function ActionToolbar(props) {
     onAdd,
     onEdit,
   } = props;
-
   const navigate = useNavigate();
   const [onOpen, setOnOpen] = useState(false);
   const [showHide, setShowHide] = useState(false);
+
   const onCopy = () => {
     let text = '';
     copyItem.forEach(val => {
@@ -78,9 +78,14 @@ function ActionToolbar(props) {
         <Button
           type="button"
           onClick={() => navigate(`${navTo?.path}/add`)}
-          className="bg-white border border-gray-500 text-md rounded-xl border-3 py-1 px-4 hover:bg-black hover:text-white"
+          className="bg-[#232323] border border-gray-500 text-md rounded-xl border-3 py-1 px-4 text-white hover:bg-black"
         >
           + Add Warehouse
+        </Button>
+      )}
+      {onDownload && (
+        <Button className={`${button} w-[11%]`} onClick={onDownload}>
+          Save to Excel
         </Button>
       )}
       {onEdit && (
@@ -89,7 +94,7 @@ function ActionToolbar(props) {
           onClick={() => navigate(`${navTo?.path}/${selectedData?.find(i => i).original.id}/edit`)}
           disabled={selectedData.length !== 1}
         >
-          Edit
+          Update
         </Button>
       )}
       {onDelete && (
@@ -97,11 +102,7 @@ function ActionToolbar(props) {
           Delete
         </Button>
       )}
-      {onDownload && (
-        <Button className={button} onClick={onDownload}>
-          Save to Excel
-        </Button>
-      )}
+
       {copyClipboard && (
         <Button className={button} onClick={onCopy} disabled={selectedData.length === 0}>
           Copy to Clipboard

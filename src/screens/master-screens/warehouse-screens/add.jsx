@@ -8,7 +8,7 @@ import { Button } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 
 import LoadingHover from '../../../components/loading-hover-component';
-import WarehouseApi from '../../../services/api-master';
+import { WarehouseApi } from '../../../services/api-master';
 import Input from '../../../components/input-component';
 import DatePicker from '../../../components/datepicker-component';
 

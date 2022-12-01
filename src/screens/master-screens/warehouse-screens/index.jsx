@@ -11,7 +11,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import Datatable from '../../../components/datatable-component';
 import Input from '../../../components/input-component';
 import DatePicker from '../../../components/datepicker-component';
-import WarehouseApi from '../../../services/api-master/resources/warehouse-api';
+import { WarehouseApi } from '../../../services/api-master';
 
 function Screen(props) {
   const { displayName } = props;
