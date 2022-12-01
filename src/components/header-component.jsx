@@ -1,4 +1,3 @@
-/* eslint-disable react/no-array-index-key */
 import React, { useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { UserCircleIcon } from '@heroicons/react/solid';

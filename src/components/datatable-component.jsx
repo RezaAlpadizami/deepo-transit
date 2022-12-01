@@ -436,7 +436,6 @@ function DataTable(props) {
             <tbody {...getTableBodyProps()}>
               {rows.map((row, i) => {
                 prepareRow(row);
-                // setSelectedData(selectedFlatRows);
                 return (
                   <tr
                     key={i}

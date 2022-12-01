@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 export function hasProperty(dataObject, property) {
   return Object.hasOwnProperty.call(dataObject, property);
 }

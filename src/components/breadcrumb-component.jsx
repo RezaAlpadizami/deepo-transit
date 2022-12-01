@@ -1,4 +1,3 @@
-/* eslint-disable react/no-array-index-key */
 /* eslint-disable no-lonely-if */
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
