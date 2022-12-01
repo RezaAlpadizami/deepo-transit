@@ -82,7 +82,7 @@ function Screen(props) {
       warehouse_id: Number(data.warehouse_id),
       level: data.level,
     })
-      .then(res => {
+      .then(() => {
         Swal.fire({ text: 'Successfully Saved', icon: 'success' });
         navigate(route.split('/').slice(0, 3).join('/'));
       })
