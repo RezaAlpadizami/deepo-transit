@@ -19,7 +19,6 @@ function DeleteButton(props) {
       cancelButtonText: `<p class="rounded-full bg-[#aaa] border-2 border-[#1F2022] text-[#fff] px-5 py-2">Cancel</p>`,
       reverseButtons: true,
     }).then(status => {
-      console.log('status', status);
       if (status.isDismissed) return;
       if (status.isConfirmed) {
         api
@@ -29,7 +28,6 @@ function DeleteButton(props) {
             navigate(`/${afterSuccessDeleteTo}`);
           })
           .catch(error => {
-            console.log('error', error);
             if (error.code) {
               Swal.fire({ text: 'Something goes wrong', icon: 'error' });
             }

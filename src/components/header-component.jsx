@@ -13,7 +13,6 @@ function Header() {
 
   return (
     <header className="flex p-5 border-b">
-      {/* <MenuIcon className="w-6 h-6 p-px cursor-pointer hover:bg-slate-100" onClick={() => store.toggleDrawer()} /> */}
       <div className="mx-3 mt-0.5 cursor-pointer" onClick={() => store.toggleDrawer()}>
         <img src={logo} alt="logo" />
       </div>
@@ -24,7 +23,7 @@ function Header() {
             if (v.routes && !isShouldDisplay(v.routes)) return null;
             return (
               <li className="px-2" key={i}>
-                <Link to={v.route} className={findTree([v], location.pathname).length > 0 ? 'font-bold' : ''}>
+                <Link to={v.route} className={findTree([v], location).length > 0 ? 'font-bold' : ''}>
                   {v.displayName}
                 </Link>
               </li>

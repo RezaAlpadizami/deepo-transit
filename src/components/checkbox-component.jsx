@@ -1,7 +1,6 @@
-/* eslint-disable import/prefer-default-export */
 import React, { useRef, useEffect, forwardRef } from 'react';
 
-export const Checkbox = forwardRef(({ indeterminate, ...rest }, ref) => {
+const Checkbox = forwardRef(({ indeterminate, ...rest }, ref) => {
   const defaultRef = useRef();
   const resolvedRef = ref || defaultRef;
 
@@ -10,3 +9,5 @@ export const Checkbox = forwardRef(({ indeterminate, ...rest }, ref) => {
   }, [resolvedRef, indeterminate]);
   return <input type="checkbox" className="mr-2" ref={resolvedRef} {...rest} />;
 });
+
+export default Checkbox;

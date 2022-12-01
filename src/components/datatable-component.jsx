@@ -6,7 +6,7 @@ import { observer } from 'mobx-react-lite';
 import { Link } from '@chakra-ui/react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/solid';
 
-import { Checkbox } from './checkbox-component';
+import Checkbox from './checkbox-component';
 
 function DataTable(props) {
   const {
@@ -16,7 +16,6 @@ function DataTable(props) {
     totalData = 0,
     limit = 10,
     loading = false,
-    hasViewAction,
     checkbox,
   } = props;
 
@@ -37,9 +36,20 @@ function DataTable(props) {
           Header: d.header,
           accessor: d.value,
           Cell: props => {
-            const { value } = props;
+            const { value, row } = props;
             if (d.type === 'date') {
               return Moment(value).format('DD MMM YYYY');
+            }
+            if (d.type === 'link') {
+              return (
+                <Link
+                  type="button"
+                  className="mr-4 text-blue-400"
+                  href={`${location.pathname}/${row.original.id}/show`}
+                >
+                  {value}
+                </Link>
+              );
             }
             return value;
           },
@@ -89,11 +99,6 @@ function DataTable(props) {
                   {column.render('Header')}
                 </th>
               ))}
-              {hasViewAction && (
-                <th className="py-3 px-6" width={150}>
-                  {' '}
-                </th>
-              )}
             </tr>
           ))}
         </thead>
@@ -111,14 +116,6 @@ function DataTable(props) {
                       {cell.render('Cell')}
                     </td>
                   ))}
-
-                  {hasViewAction && (
-                    <td className="py-1 px-6 border-none hover: text-blue-400 no-underline">
-                      <Link type="button" className="mr-4" href={`${location.pathname}/${row.original.id}`}>
-                        View Detail
-                      </Link>
-                    </td>
-                  )}
                 </tr>
               );
             })}
