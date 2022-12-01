@@ -83,7 +83,6 @@ function Screen(props) {
       level: data.level,
     })
       .then(res => {
-        console.log('res update', res);
         Swal.fire({ text: 'Successfully Saved', icon: 'success' });
         navigate(route.split('/').slice(0, 3).join('/'));
       })
