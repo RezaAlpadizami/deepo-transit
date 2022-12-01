@@ -1,6 +1,6 @@
-/* eslint-disable react/no-unstable-nested-components */
 import React, { useEffect, useState } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/solid';
+import { ChevronLeftIcon, ChevronRightIcon, ArrowSmUpIcon, ArrowSmDownIcon } from '@heroicons/react/solid';
+
 import { useTable, useRowSelect, usePagination, useSortBy } from 'react-table';
 import { observer } from 'mobx-react-lite';
 import Swal from 'sweetalert2';
@@ -31,6 +31,7 @@ function DataTable(props) {
     checkbox,
     name,
     filters,
+    onSort = () => {},
   } = props;
 
   const {
@@ -143,7 +144,7 @@ function DataTable(props) {
   }, [filters]);
   const changePage = page => {
     setPages(page);
-    onChangePage(page);
+    onChangePage(page, (page - 1) * limit, selectedFlatRows);
   };
 
   const isActionToolbarExclude = action => {
@@ -192,6 +193,7 @@ function DataTable(props) {
     const actions = {
       add: 'add',
       view: 'view',
+      edit: 'edit',
       delete: 'delete',
       'save-to-excel': 'download',
       'show-hide-column': 'showHideColumn',
@@ -206,7 +208,7 @@ function DataTable(props) {
     }
     return false;
   };
-  const shouldRenderToolbar = () => {
+  const renderToolbar = () => {
     if (!noToolbar && toolbar) {
       return (
         enableAction('view') ||
@@ -406,22 +408,24 @@ function DataTable(props) {
           </div>
         </div>
       )}
-      {shouldRenderToolbar() && (
+      {renderToolbar() && (
         <Toolbar
           selectedData={selectedFlatRows}
           defaultShow={propsColumn}
           getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
           columns={allColumns}
           navTo={{ path: to, id: selectedFlatRows?.find(i => i)?.original.id }}
+          onAdd={enableAction('add')}
+          onEdit={enableAction('edit')}
           copyItem={allColumns.filter(i => i.id !== 'selection' && i.isVisible === true)}
           copyClipboard={enableAction('copy-to-clipboard')}
-          onAdd={enableAction('add')}
           view={enableAction('view')}
           onDelete={enableAction('delete') && deleteData}
           onDownload={enableAction('save-to-excel') && download}
           onShowHideColumn={enableAction('show-hide-column')}
         />
       )}
+
       <div className="overflow-x-auto relative px-6 pb-11 bg-white rounded-b-3xl">
         <table {...getTableProps()} className="table-auto w-full text-sm text-left text-gray-500 border-t">
           <thead className="text-xs text-black uppercase bg-thead">
@@ -429,7 +433,28 @@ function DataTable(props) {
               <tr key={idxgroup} {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map((column, columnidx) => (
                   <th key={columnidx} {...column.getHeaderProps(column.getSortByToggleProps())} className="py-3 px-6">
-                    {column.render('Header')}
+                    <div
+                      className="flex"
+                      onClick={() =>
+                        onSort({
+                          sort_by: column.id,
+                          sort_order: column.isSorted ? (column.isSortedDesc ? 'desc' : 'asc') : 'desc',
+                        })
+                      }
+                    >
+                      {column.render('Header')}
+                      <span>
+                        {column.isSorted ? (
+                          column.isSortedDesc ? (
+                            <ArrowSmDownIcon className="ml-2 h-4" />
+                          ) : (
+                            <ArrowSmUpIcon className="ml-2 h-4" />
+                          )
+                        ) : (
+                          ''
+                        )}
+                      </span>
+                    </div>
                   </th>
                 ))}
               </tr>

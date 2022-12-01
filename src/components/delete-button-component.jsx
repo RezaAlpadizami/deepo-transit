@@ -4,18 +4,21 @@ import { Button } from '@chakra-ui/react';
 import Swal from 'sweetalert2';
 
 function DeleteButton(props) {
-  const { api, id = 1, afterSuccessDeleteTo, textConfirmButton } = props;
+  const { api, id, redirectTo, text = 'Are you sure want to remove this ?' } = props;
+
   const navigate = useNavigate();
 
   const deleteData = () => {
     Swal.fire({
-      text: textConfirmButton,
+      title: `Delete Data`,
+      text,
       padding: 20,
       showCancelButton: true,
       buttonsStyling: false,
       confirmButtonColor: '#246EE5',
       cancelButtonColor: '#FFFFFF',
       confirmButtonText: `<p class="rounded-full bg-[#232323] text-[#fff] px-5 py-2 ml-5">Delete</p>`,
+
       cancelButtonText: `<p class="rounded-full bg-[#aaa] border-2 border-[#1F2022] text-[#fff] px-5 py-2">Cancel</p>`,
       reverseButtons: true,
     }).then(status => {
@@ -25,7 +28,7 @@ function DeleteButton(props) {
           .delete(id)
           .then(() => {
             Swal.fire({ text: 'Data deleted successfully', icon: 'success' });
-            navigate(`/${afterSuccessDeleteTo}`);
+            navigate(`/${redirectTo}`);
           })
           .catch(error => {
             if (error.code) {
