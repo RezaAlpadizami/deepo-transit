@@ -39,7 +39,6 @@ function Screen(props) {
 
   const {
     register,
-    // control,
     handleSubmit,
     formState: { errors },
     reset,
@@ -176,6 +175,8 @@ function Screen(props) {
             action: {
               view: true,
               delete: true,
+              add: true,
+              edit: true,
               'copy-to-clipboard': true,
               'show-hide-column': true,
               'save-to-excel': true,
