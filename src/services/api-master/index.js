@@ -1,5 +1,6 @@
-import CityApi from './resources/city-api';
-import StarshipApi from './resources/starship-api';
+import WarehouseApi from './resources/warehouse-api';
+import StorageApi from './resources/storage-api';
+import ProductApi from './resources/product-api';
 import CategoryApi from './resources/category-api';
 
-export { CityApi, StarshipApi, CategoryApi };
+export { WarehouseApi, StorageApi, ProductApi, CategoryApi };

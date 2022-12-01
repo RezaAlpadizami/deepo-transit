@@ -8,12 +8,16 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import Input from '../../../components/input-component';
-import { CategoryApi } from '../../../services/api-master';
+import Select from '../../../components/select-component';
 import LoadingHover from '../../../components/loading-hover-component';
+import { StorageApi, WarehouseApi } from '../../../services/api-master';
 
 const schema = yup.object().shape({
+  bay: yup.string().nullable().required(),
   code: yup.string().nullable().required(),
-  name: yup.string().nullable().required(),
+  rack_number: yup.string().nullable().required(),
+  warehouse_id: yup.number().nullable().required(),
+  level: yup.string().nullable().required(),
 });
 
 function Screen(props) {
@@ -31,14 +35,38 @@ function Screen(props) {
   const navigate = useNavigate();
   const { id } = useParams();
 
+  const [warehouseData, setWarhouseData] = useState([]);
+  const [warehouseId, setWarhouseId] = useState();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
-    CategoryApi.find(id)
+    WarehouseApi.get()
       .then(res => {
+        if (warehouseId) {
+          setValue('warehouse_id', warehouseId, {
+            value: warehouseId,
+            label: `${res.data?.find(i => i.id === warehouseId)?.name} - ${
+              res.data?.find(i => i.id === warehouseId)?.location
+            }`,
+          });
+        }
+        setWarhouseData(res.data);
+      })
+      .catch(error => {
+        Swal.fire({ text: error?.message || error?.data.title, icon: 'error' });
+      });
+  }, [warehouseId]);
+
+  useEffect(() => {
+    setLoading(true);
+    StorageApi.find(id)
+      .then(res => {
+        setValue('bay', res.bay);
         setValue('code', res.code);
-        setValue('name', res.name);
+        setValue('rack_number', res.rack_number);
+        setValue('warehouse_id', res.warehouse_id);
+        setValue('level', res.level);
+        setWarhouseId(res.warehouse_id);
         setLoading(false);
       })
       .catch(error => {
@@ -46,10 +74,13 @@ function Screen(props) {
       });
   }, []);
 
-  const onEditSaveCategory = data => {
-    CategoryApi.update(id, {
+  const onEditSaveStorage = data => {
+    StorageApi.update(id, {
+      bay: data.bay,
       code: data.code,
-      name: data.name,
+      rack_number: data.rack_number,
+      warehouse_id: Number(data.warehouse_id),
+      level: data.level,
     })
       .then(res => {
         console.log('res update', res);
@@ -63,7 +94,7 @@ function Screen(props) {
 
   return (
     <div className="">
-      <form onSubmit={handleSubmit(onEditSaveCategory)}>
+      <form onSubmit={handleSubmit(onEditSaveStorage)}>
         <div className="flex mb-12">
           <h1 className="font-bold text-3xl">{displayName}</h1>
           <div className="flex-1" />
@@ -87,7 +118,22 @@ function Screen(props) {
 
         <div className="grid items-start justify-items-center w-[80%] gap-4 gap-y-12 ml-6 mb-4 grid-cols-2 mt-4">
           <Input name="code" label="Code" register={register} errors={errors} />
-          <Input name="name" label="Category" register={register} errors={errors} />
+          <Input name="level" label="Level" register={register} errors={errors} />
+          <Input name="rack_number" label="Rack" register={register} errors={errors} />
+          <Select
+            name="warehouse_id"
+            label="Warehouse"
+            options={warehouseData?.map(i => {
+              return {
+                value: i.id,
+                label: `${i.name} ${i.location}`,
+              };
+            })}
+            placeholder=""
+            register={register}
+            errors={errors}
+          />
+          <Input name="bay" label="Bay" register={register} errors={errors} />
         </div>
       </form>
       {loading && <LoadingHover visible={loading} />}

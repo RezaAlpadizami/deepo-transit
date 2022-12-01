@@ -1,4 +1,3 @@
-/* eslint-disable no-lonely-if */
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from '@chakra-ui/react';
@@ -11,13 +10,13 @@ export default function BreadcrumbComponent() {
   const [menuTree, setMenuTree] = useState([]);
 
   useEffect(() => {
-    setMenuTree(findTree(menuItem, location.pathname));
+    setMenuTree(findTree(menuItem, location));
   }, [location.pathname]);
 
   return (
     <Breadcrumb color="#8e97a7" marginBottom={4} separator=">">
-      {menuTree.map(d => (
-        <BreadcrumbItem className="last:text-black">
+      {menuTree.map((d, idx) => (
+        <BreadcrumbItem className="last:text-black" key={idx}>
           <BreadcrumbLink href={d.route}>{d.displayName}</BreadcrumbLink>
         </BreadcrumbItem>
       ))}

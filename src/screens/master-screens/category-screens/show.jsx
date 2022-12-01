@@ -1,18 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
+
+import Swal from 'sweetalert2';
+import { Button } from '@chakra-ui/react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { Button } from '@chakra-ui/react';
-import Swal from 'sweetalert2';
-
-import DeleteButton from '../../../components/delete-button-component';
-import LoadingHover from '../../../components/loading-hover-component';
-import InputDetail from '../../../components/input-detail-component';
+import Context from '../../../context';
 import { CategoryApi } from '../../../services/api-master';
+import InputDetail from '../../../components/input-detail-component';
+import LoadingHover from '../../../components/loading-hover-component';
+import DeleteButton from '../../../components/delete-button-component';
 
 function Screen(props) {
   const { id } = useParams();
   const navigate = useNavigate();
   const { displayName } = props;
+  const { store } = useContext(Context);
 
   const [loading, setLoading] = useState(false);
   const [dataCategoryById, setDataCategoryById] = useState([]);
@@ -41,17 +43,18 @@ function Screen(props) {
         <div className="flex-1" />
         <DeleteButton
           api={CategoryApi}
-          afterSuccessDeleteTo="master/category"
+          id={id}
+          redirectUrl="master/category"
           textConfirmButton="Are you sure want to remove this ?"
         />
         <Button
-          paddingX={12}
-          type="submit"
-          size="sm"
           onClick={() => {
             navigate(`/master/category/${id}/edit`);
+            store.setIsLoadEdit(true);
           }}
-          className="bg-white border border-gray-500 text-gray-500 rounded-full border-3 py-4 px-6 mr-60 hover:text-white hover:bg-black"
+          px={8}
+          type="submit"
+          className="ml-4 rounded-full bg-[#232323] text-[#fff]"
         >
           Edit
         </Button>
@@ -61,7 +64,7 @@ function Screen(props) {
         <InputDetail value={dataCategoryById.code} label="Code" />
         <InputDetail value={dataCategoryById.name} label="Category" />
       </div>
-      {loading && <LoadingHover fixed />}
+      {loading && <LoadingHover visible={loading} />}
     </div>
   );
 }

@@ -2,9 +2,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { extendTheme, ChakraProvider } from '@chakra-ui/react';
-// import { io } from 'socket.io-client';
 
 import './index.css';
+import './assets/styles/custom.css';
 import Context from './context';
 import RootStore from './store/root-store';
 import reportWebVitals from './reportWebVitals';
@@ -24,14 +24,6 @@ const colors = {
 const theme = extendTheme({ colors });
 
 const store = RootStore.create({ isLogin: false });
-
-// const socket = io(process.env.REACT_APP_SOCKET, {
-//   reconnectionDelayMax: 10000,
-//   auth: {
-//     token: 'token',
-//   },
-//   transports: ['websocket'],
-// });
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

@@ -1,5 +1,6 @@
 module.exports = {
-  PLANET: 'planets',
-  STARSHIP: 'starships',
+  WAREHOUSE: 'warehouse',
+  STORAGE: 'storage',
+  PRODUCT: 'product',
   CATEGORY: 'category',
 };

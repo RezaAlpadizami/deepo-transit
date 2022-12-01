@@ -1,10 +1,10 @@
 import RequestHandler from '../request-handler';
 import ENDPOINT from '../../../config/api-master';
 
-class StarshipApi extends RequestHandler {
+class WarehouseApi extends RequestHandler {
   constructor() {
-    super(ENDPOINT.STARSHIP);
+    super(ENDPOINT.WAREHOUSE);
   }
 }
 
-export default new StarshipApi();
+export default new WarehouseApi();
