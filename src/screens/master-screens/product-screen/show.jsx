@@ -18,19 +18,20 @@ function ShowScreen(props) {
   useEffect(() => {
     ProductApi.find(id)
       .then(res => {
-        setData(res);
+        setData(res.data);
       })
       .catch(error => {
         Swal.fire({ text: error?.message, icon: 'error' });
       });
   }, []);
+
   return (
     <div className="">
       <div className="flex mb-12">
         <h1 className="font-bold text-3xl">{displayName}</h1>
         <div className="flex-1" />
         <div>
-          <DeleteButton api={ProductApi} redirectUrl="master/product" />
+          <DeleteButton api={ProductApi} id={id} redirectUrl="master/product" />
           <Button
             onClick={() => {
               navigate(`/master/product/${id}/edit`);

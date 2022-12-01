@@ -1,4 +1,3 @@
-/* eslint-disable no-lonely-if */
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from '@chakra-ui/react';

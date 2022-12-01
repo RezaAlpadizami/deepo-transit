@@ -29,11 +29,13 @@ function Screen(props) {
           },
         ]}
         columns={[
-          { header: ' Code', value: 'code', copy: true, type: 'link' },
-          { header: ' Name', value: 'name', copy: true },
-          { header: ' Capacity', value: 'capacity', copy: true },
-          { header: ' Location', value: 'location', copy: true },
+          { header: 'Wareouse Code', value: 'code', copy: true, type: 'link' },
+          { header: 'Wareouse Name', value: 'name', copy: true },
+          { header: 'Wareouse Location', value: 'location', copy: true },
+          { header: 'Wareouse Address', value: 'address', copy: true },
+          { header: 'Warehouse Capacity', value: 'capacity', copy: true },
           { header: 'Last Stock Opname', value: 'last_stock_opname', copy: true, type: 'date' },
+          { header: 'Warehouse Phone', value: 'phone', copy: true },
         ]}
         toolbar={{
           action: {

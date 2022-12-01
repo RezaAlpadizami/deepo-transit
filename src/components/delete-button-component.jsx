@@ -5,7 +5,6 @@ import Swal from 'sweetalert2';
 
 function DeleteButton(props) {
   const { api, id, redirectTo, text = 'Are you sure want to remove this ?' } = props;
-
   const navigate = useNavigate();
 
   const deleteData = () => {

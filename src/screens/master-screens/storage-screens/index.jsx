@@ -1,10 +1,27 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+
+import Swal from 'sweetalert2';
 
 import Datatable from '../../../components/datatable-component';
-import { StorageApi } from '../../../services/api-master';
+import { StorageApi, WarehouseApi } from '../../../services/api-master';
 
 function Screen(props) {
   const { displayName, route } = props;
+  const [warehouseData, setWarhouseData] = useState([]);
+
+  useEffect(() => {
+    getData();
+  }, []);
+
+  const getData = () => {
+    WarehouseApi.get()
+      .then(res => {
+        setWarhouseData(res.data);
+      })
+      .catch(error => {
+        Swal.fire({ text: error?.message || error?.originalError, icon: 'error' });
+      });
+  };
 
   return (
     <div className="">
@@ -30,24 +47,12 @@ function Screen(props) {
             name: 'warehouse',
             label: 'Warehouse',
             type: 'select',
-            data: [
-              {
-                value: 1,
-                label: 'Gudang Pusat',
-              },
-              {
-                value: 2,
-                label: 'Gudang Serpong',
-              },
-              {
-                value: 3,
-                label: 'Gudang Cilegon',
-              },
-              {
-                value: 4,
-                label: 'Gudang Jakarta Selatan',
-              },
-            ],
+            data: warehouseData?.map(i => {
+              return {
+                value: i.id,
+                label: `${i.name} ${i.location}`,
+              };
+            }),
           },
         ]}
         columns={[

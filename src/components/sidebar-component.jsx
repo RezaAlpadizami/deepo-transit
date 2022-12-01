@@ -33,9 +33,10 @@ function SidebarComponent() {
       <div className="">
         <ul className="text-white">
           {menuParent?.routes?.map(
-            (d, idx) =>
-              d.showmenu && (
-                <Link key={idx} to={d.route}>
+            d =>
+              d.showmenu &&
+              (store.user.hasRole(d.role) || d.role === '') && (
+                <Link to={d.route}>
                   <li
                     className={`${
                       findTree([d], location).length > 0 ? 'bg-[#606060] hover:font-bold' : 'hover:bg-[#878787]'
@@ -58,9 +59,10 @@ function SidebarComponent() {
                       }`}
                     >
                       {d.routes.map(
-                        (r, idx) =>
-                          r.showmenu && (
-                            <Link key={idx} to={r.route}>
+                        r =>
+                          r.showmenu &&
+                          (store.user.hasRole(r.role) || r.role === '') && (
+                            <Link to={r.route}>
                               <li
                                 className={`${
                                   findTree([r], location).length > 0 ? 'font-bold' : ''

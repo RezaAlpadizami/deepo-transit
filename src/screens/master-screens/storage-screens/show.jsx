@@ -40,6 +40,7 @@ function Screen() {
         <div className="flex-1" />
         <DeleteButton
           api={StorageApi}
+          id={id}
           afterSuccessDeleteTo="master/storage"
           textConfirmButton="Are you sure want to remove this ?"
         />

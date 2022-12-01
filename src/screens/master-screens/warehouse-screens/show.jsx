@@ -39,7 +39,7 @@ function Screen(props) {
       <div className="flex mb-12">
         <h1 className="font-bold text-3xl">{displayName}</h1>
         <div className="flex-1" />
-        <DeleteButton api={WarehouseApi} redirectTo="master/warehouse" />
+        <DeleteButton api={WarehouseApi} id={id} redirectTo="master/warehouse" />
         <Button
           paddingX={12}
           type="submit"

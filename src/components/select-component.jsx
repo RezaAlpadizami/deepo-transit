@@ -17,7 +17,6 @@ function SelectComponent(props) {
             size="sm"
             name={name}
             id={name}
-            isInvalid={errors[name]}
             className="w-full text-sm rounded-full border-gray-400 px-5 py-2.5 h-full"
             isDisabled={disabled}
             placeholder={placeholder}
@@ -30,9 +29,14 @@ function SelectComponent(props) {
           </Select>
         </div>
       </div>
-      {errors[name] && (
-        <span className="text-red-700 text-xs ml-1">{errors[name]?.message.replace(name, label.toLowerCase())}</span>
-      )}
+      {errors &&
+        (Array.isArray(errors[name]?.message) ? (
+          errors[name]?.message.map(m => <span className="error d-block">{m.toLowerCase()}</span>)
+        ) : (
+          <span className="text-red-700 ml-1">
+            {errors[name]?.message.replace(name, label?.toLowerCase() || name.toLowerCase())}
+          </span>
+        ))}
     </div>
   );
 }
