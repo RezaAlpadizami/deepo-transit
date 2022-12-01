@@ -41,12 +41,7 @@ function Screen(props) {
       <div className="flex mb-12">
         <h1 className="font-bold text-3xl">{displayName}</h1>
         <div className="flex-1" />
-        <DeleteButton
-          api={CategoryApi}
-          id={id}
-          redirectUrl="master/category"
-          textConfirmButton="Are you sure want to remove this ?"
-        />
+        <DeleteButton api={CategoryApi} id={id} redirectTo="master/category" />
         <Button
           onClick={() => {
             navigate(`/master/category/${id}/edit`);
