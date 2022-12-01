@@ -1,19 +1,17 @@
 import React, { useState } from 'react';
 import copy from 'copy-to-clipboard';
-import { Button, Modal, ModalContent, useDisclosure, ModalOverlay, ModalHeader, ModalBody } from '@chakra-ui/react';
+import { Button } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { DocumentDownloadIcon, EyeIcon, TrashIcon, ClipboardListIcon, ViewGridIcon } from '@heroicons/react/solid';
 import ShowHide from './show-hide-component';
 import DeletedList from './delete-list-component';
 import { getNestedObject } from '../utils/helper';
 
-const button = 'border-black border-2 ml-3 rounded-lg text-sm px-10';
+const button = 'bg-white border border-gray-500 text-md rounded-xl border-3 py-1 px-4 hover:bg-black hover:text-white';
 
 function ActionToolbar(props) {
   const {
     onDownload,
-    view,
     onDelete,
     copyClipboard,
     onShowHideColumn,
@@ -22,26 +20,23 @@ function ActionToolbar(props) {
     getToggleHideAllColumnsProps,
     columns,
     copyItem,
+    onAdd,
+    onEdit,
   } = props;
   const navigate = useNavigate();
-  const { onClose, isOpen, onOpen } = useDisclosure();
+  const [onOpen, setOnOpen] = useState(false);
   const [showHide, setShowHide] = useState(false);
-  const onView = () => {
-    if (navTo) {
-      navigate(`${navTo?.path}/${navTo?.id}/show`);
-    }
-  };
 
   const onCopy = () => {
     let text = '';
     copyItem.forEach(val => {
-      text += `${val.header}\t`;
+      text += `${val.Header}\t`;
     });
     selectedData.forEach(i => {
       text += '\n';
       const props = { ...i.original };
       copyItem.forEach(col => {
-        const getValue = getNestedObject(props, col.value.split('.'));
+        const getValue = getNestedObject(props, col.id.split('.'));
         text += `${
           getValue
             ? getValue
@@ -57,8 +52,11 @@ function ActionToolbar(props) {
     });
     const Toast = Swal.mixin({
       toast: true,
+      width: '18%',
       position: 'top-end',
       showConfirmButton: false,
+      background: '#FFC000',
+      padding: '1 0',
       timer: 3000,
       timerProgressBar: true,
       didOpen: toast => {
@@ -68,59 +66,51 @@ function ActionToolbar(props) {
     });
 
     Toast.fire({
-      icon: 'info',
-      title: 'Copy to Clipboard',
+      icon: 'warning',
+      iconColor: '#998032',
+      title: '<h5>Copy to Clipboard</h5>',
     });
   };
 
   return (
-    <>
-      {onDownload && (
+    <div className="flex gap-4 bg-white py-6 px-6 rounded-t-3xl">
+      {onAdd && (
         <Button
-          leftIcon={<DocumentDownloadIcon className="w-5" />}
-          className={`${button} w-[11%]`}
-          onClick={onDownload}
+          type="button"
+          onClick={() => navigate(`${navTo?.path}/add`)}
+          className="bg-[#232323] border border-gray-500 text-md rounded-xl border-3 py-1 px-4 text-white hover:bg-black"
         >
+          + Add Warehouse
+        </Button>
+      )}
+      {onDownload && (
+        <Button className={`${button} w-[11%]`} onClick={onDownload}>
           Save to Excel
         </Button>
       )}
-      {view && (
+      {onEdit && (
         <Button
-          leftIcon={<EyeIcon className="w-4" />}
-          className={`${button} w-20`}
-          onClick={onView}
+          className={button}
+          onClick={() => navigate(`${navTo?.path}/${selectedData?.find(i => i).original.id}/edit`)}
           disabled={selectedData.length !== 1}
         >
-          View
+          Update
         </Button>
       )}
       {onDelete && (
-        <Button
-          leftIcon={<TrashIcon className="w-4" />}
-          className={`${button} w-[7%]`}
-          onClick={onOpen}
-          disabled={selectedData.length === 0}
-        >
+        <Button className={button} onClick={() => setOnOpen(!onOpen)} disabled={selectedData.length === 0}>
           Delete
         </Button>
       )}
+
       {copyClipboard && (
-        <Button
-          leftIcon={<ClipboardListIcon className="w-4" />}
-          className={`${button} w-[14%]`}
-          onClick={onCopy}
-          disabled={selectedData.length === 0}
-        >
+        <Button className={button} onClick={onCopy} disabled={selectedData.length === 0}>
           Copy to Clipboard
         </Button>
       )}
       {onShowHideColumn && (
         <>
-          <Button
-            leftIcon={<ViewGridIcon className="w-4" />}
-            className={`${button} w-[15%]`}
-            onClick={() => setShowHide(!showHide)}
-          >
+          <Button className={button} onClick={() => setShowHide(!showHide)}>
             Show / Hide Column(s)
           </Button>
           <ShowHide
@@ -131,39 +121,40 @@ function ActionToolbar(props) {
           />
         </>
       )}
-      <Modal isCentered onClose={onClose} isOpen={isOpen} motionPreset="slideInBottom">
-        <ModalOverlay />
-        <ModalContent className=" max-w-[70%] max-h-[70%] py-10 h-[60%]">
-          <ModalHeader>
-            <div className="flex">
-              <p className="text-sm font-semibold ml-5"> Are you sure want to delete this data ?</p>
-              <div className="flex-1" />
-              <Button
-                className="rounded-full bg-[#aaa] outline outline-offset-2 outline-[#1F2022]"
-                colorScheme="blue"
-                mr={3}
-                onClick={onClose}
-              >
-                Cancel
-              </Button>
-              <Button
-                className="rounded-full bg-[#232323] text-[#fff]"
-                variant="blue"
-                onClick={() => {
-                  onDelete();
-                  onClose();
-                }}
-              >
-                Delete Data
-              </Button>
+      {onOpen && (
+        <div
+          className=" main-modal fixed w-full h-200 inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+        >
+          <div className="border shadow-lg modal-container bg-white w-[80%] mx-auto rounded z-50 overflow-y-auto ">
+            <div className="modal-content py-4 text-left px-6">
+              <div className="flex justify-between items-center pb-3">
+                <p className="text-MD font-bold">Are you sure to delete this data ?</p>
+                <div className="flex-1" />
+                <Button
+                  className=" rounded-full focus:outline-none modal-close px-4 bg-gray-400 p-3 mr-2 text-black hover:bg-gray-300"
+                  onClick={() => setOnOpen(!onOpen)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="rounded-full bg-[#232323] text-[#fff]"
+                  onClick={() => {
+                    onDelete();
+                    setOnOpen(!onOpen);
+                  }}
+                >
+                  Delete Data
+                </Button>
+              </div>
+              <div className={`my-5 ${selectedData.length > 5 ? 'overflow-y-auto' : ''} w-full bg-cyan-500 `}>
+                <DeletedList datas={selectedData} columnsData={columns} />
+              </div>
             </div>
-          </ModalHeader>
-          <ModalBody>
-            <DeletedList datas={selectedData} columnsData={columns} />
-          </ModalBody>
-        </ModalContent>
-      </Modal>
-    </>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 

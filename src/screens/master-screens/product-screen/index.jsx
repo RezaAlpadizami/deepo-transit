@@ -19,6 +19,16 @@ function Screen(props) {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
   const [totalData, setTotalData] = useState([]);
+  const defaultSort = {
+    sort_by: 'id',
+    sort_order: 'desc',
+  };
+
+  const [filterData, setFilterData] = useState({
+    limit: 10,
+    offset: 0,
+    ...defaultSort,
+  });
 
   const schema = yup.object().shape({
     name: yup.string().nullable(),
@@ -29,7 +39,6 @@ function Screen(props) {
 
   const {
     register,
-    // control,
     handleSubmit,
     formState: { errors },
     reset,
@@ -39,11 +48,12 @@ function Screen(props) {
 
   useEffect(() => {
     getData();
-  }, []);
+  }, [filterData]);
 
   const getData = () => {
     setLoading(true);
-    ProductApi.get()
+
+    ProductApi.get({ ...filterData })
       .then(res => {
         setData(res.data);
         setTotalData(res.query.total);
@@ -54,6 +64,14 @@ function Screen(props) {
         Swal.fire({ text: error?.message, icon: 'error' });
       });
   };
+  const onReset = () => {
+    reset();
+    setFilterData({
+      limit: 10,
+      offset: 0,
+      ...defaultSort,
+    });
+  };
 
   const onSubmit = data => {
     for (const dt in data) {
@@ -62,11 +80,11 @@ function Screen(props) {
           delete data[dt];
         }
         if (data[dt] === 'All') {
-          // setFilterData({
-          //   limit: 10,
-          //   offset: 0,
-          //   status: null,
-          // });
+          setFilterData({
+            limit: 10,
+            offset: 0,
+            ...defaultSort,
+          });
           delete data[dt];
         }
         if (data[dt] instanceof Date) {
@@ -81,6 +99,14 @@ function Screen(props) {
         }
       }
     }
+    setFilterData(prev => {
+      return {
+        ...prev,
+        limit: 10,
+        offset: 0,
+        ...data,
+      };
+    });
   };
 
   return (
@@ -121,7 +147,14 @@ function Screen(props) {
         </div>
         <div className="flex gap-2">
           <div className="flex-1" />
-          <Button type="button" size="sm" width="24" onClick={() => reset()} colorScheme="blackAlpha" variant="outline">
+          <Button
+            type="button"
+            size="sm"
+            width="24"
+            onClick={() => onReset()}
+            colorScheme="blackAlpha"
+            variant="outline"
+          >
             Reset
           </Button>
           <Button type="submit" size="sm" width="24" colorScheme="primary">
@@ -142,6 +175,8 @@ function Screen(props) {
             action: {
               view: true,
               delete: true,
+              add: true,
+              edit: true,
               'copy-to-clipboard': true,
               'show-hide-column': true,
               'save-to-excel': true,
@@ -151,10 +186,12 @@ function Screen(props) {
           to={route}
           data={data}
           name={displayName}
+          offset={filterData.offset}
+          onChangePage={(page, offset) => setFilterData({ ...filterData, offset })}
           totalData={totalData}
           loading={loading}
+          onSort={sort => setFilterData({ limit: 10, offset: 0, ...sort })}
           checkbox
-          onChangePage={page => getData(page)}
         />
       </div>
     </div>

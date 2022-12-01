@@ -26,7 +26,6 @@ function Screen(props) {
 
   const {
     register,
-    // control,
     handleSubmit,
     formState: { errors },
     reset,

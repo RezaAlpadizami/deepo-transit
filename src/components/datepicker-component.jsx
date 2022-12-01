@@ -17,10 +17,10 @@ function InputElement(props) {
         width="auto"
         type="text"
         isInvalid={errors[name]}
-        className="w-full text-sm rounded-l-md border-gray-300 px-3 py-1"
+        className="w-full text-sm border-gray-400 py-5 rounded-full px-8"
       />
-      <InputRightElement className="rounded-r-md">
-        <CalendarIcon className="w-4 h-4" />
+      <InputRightElement className="rounded-r-full w-14 bg-gray-400 h-full">
+        <CalendarIcon className="w-5 h-5 mt-0.5" />
       </InputRightElement>
     </InputGroup>
   );
@@ -31,10 +31,10 @@ function SelectComponent(props) {
   return (
     <div className="flex-auto w-full">
       <div>
-        <label htmlFor={name} className="text-sm font-light text-gray-600 block ml-1">
+        <label htmlFor={name} className="text-sm font-light text-black block ml-1">
           {label}
         </label>
-        <div className="mt-1 flex  shadow-sm">
+        <div className="mt-1 flex">
           <Controller
             name={name}
             render={({ field: { onChange, value, name } }) => {
@@ -48,6 +48,7 @@ function SelectComponent(props) {
                   onChange={onChange}
                   id={name}
                   customInput={<InputElement errors={errors} />}
+                  className="py-6"
                 />
               );
             }}
