@@ -52,7 +52,7 @@ function Content() {
                 <Route
                   exact={routes.exact}
                   path={routes.route}
-                  element={<routes.component displayName={routes.displayName} />}
+                  element={<routes.component route={routes.route} displayName={routes.displayName} />}
                 />
               );
 

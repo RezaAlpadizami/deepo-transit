@@ -32,15 +32,19 @@ function InputComponent(props) {
             hidden={hidden}
             name={name}
             id={name}
-            isInvalid={errors[name]}
             className="w-full text-sm rounded-full border-gray-400 px-5 py-5"
             placeholder={placeholder}
           />
         </div>
       </div>
-      {errors[name] && (
-        <span className="text-red-700 text-xs ml-1">{errors[name]?.message.replace(name, label.toLowerCase())}</span>
-      )}
+      {errors &&
+        (Array.isArray(errors[name]?.message) ? (
+          errors[name]?.message.map(m => <span className="error d-block">{m.toLowerCase()}</span>)
+        ) : (
+          <span className="text-red-700 ml-1">
+            {errors[name]?.message.replace(name, label?.toLowerCase() || name.toLowerCase())}
+          </span>
+        ))}
     </div>
   );
 }

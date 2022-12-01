@@ -5,6 +5,7 @@ import { extendTheme, ChakraProvider } from '@chakra-ui/react';
 // import { io } from 'socket.io-client';
 
 import './index.css';
+import './assets/styles/custom.css';
 import Context from './context';
 import RootStore from './store/root-store';
 import reportWebVitals from './reportWebVitals';

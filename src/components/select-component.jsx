@@ -22,8 +22,10 @@ function SelectComponent(props) {
             isDisabled={disabled}
             placeholder={placeholder}
           >
-            {options.map(el => (
-              <option value={el.value}>{el.label}</option>
+            {options.map((el, idx) => (
+              <option key={idx} value={el.value}>
+                {el.label}
+              </option>
             ))}
           </Select>
         </div>
