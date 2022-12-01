@@ -48,11 +48,23 @@ function Content() {
           }
           if (item.routes && item.routes.length > 0) {
             item.routes.forEach(routes => {
-              comp.push(<Route exact={routes.exact} path={routes.route} element={<routes.component />} />);
+              comp.push(
+                <Route
+                  exact={routes.exact}
+                  path={routes.route}
+                  element={<routes.component displayName={routes.displayName} />}
+                />
+              );
 
               if (routes.routes && routes.routes.length > 0) {
                 routes.routes.forEach(routes2 => {
-                  comp.push(<Route exact={routes2.exact} path={routes2.route} element={<routes2.component />} />);
+                  comp.push(
+                    <Route
+                      exact={routes2.exact}
+                      path={routes2.route}
+                      element={<routes2.component displayName={routes2.displayName} />}
+                    />
+                  );
                 });
               }
             });

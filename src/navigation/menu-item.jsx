@@ -1,10 +1,13 @@
 import React from 'react';
-import { HomeIcon, UserCircleIcon } from '@heroicons/react/solid';
+import { HomeIcon } from '@heroicons/react/solid';
 
 const NotFound = React.lazy(() => import('../screens/home-screens/404'));
 const Home = React.lazy(() => import('../screens/home-screens/index'));
-const MasterCity = React.lazy(() => import('../screens/master-screens/city/index'));
-const MasterCityAdd = React.lazy(() => import('../screens/master-screens/city/add'));
+
+const MasterWarhouse = React.lazy(() => import('../screens/master-screens/warehouse-screens/index'));
+const MasterWarehouseAdd = React.lazy(() => import('../screens/master-screens/warehouse-screens/add'));
+const MasterWarehouseShow = React.lazy(() => import('../screens/master-screens/warehouse-screens/show'));
+const MasterWarehouseEdit = React.lazy(() => import('../screens/master-screens/warehouse-screens/edit'));
 
 export default [
   {
@@ -23,59 +26,46 @@ export default [
     showmenu: true,
     exact: true,
     route: '/master',
-    component: MasterCity,
+    component: Home,
     routes: [
       {
-        displayName: 'City',
+        displayName: 'Warehouse',
         icon: HomeIcon,
-        name: 'master-city',
+        name: 'master-warehouse',
         role: 'master',
         showmenu: true,
         exact: true,
-        route: '/master/city',
-        component: MasterCity,
+        route: '/master/warehouse',
+        component: MasterWarhouse,
         routes: [
           {
-            displayName: 'Add City',
-            icon: UserCircleIcon,
-            name: 'master-city-add',
-            role: 'master',
-            showmenu: true,
-            exact: true,
-            route: '/master/city/add',
-            component: MasterCityAdd,
-          },
-          {
-            displayName: 'Delete',
-            icon: UserCircleIcon,
-            name: 'master-city-delete',
+            displayName: 'Add Warehouse',
+            name: 'master-warehouse-add',
             role: 'master',
             showmenu: false,
             exact: true,
-            route: '/master/city/delete',
-            component: MasterCityAdd,
+            route: '/master/warehouse/add',
+            component: MasterWarehouseAdd,
+          },
+          {
+            displayName: 'View Detail Warehouse',
+            name: 'master-warehouse-show',
+            role: 'master',
+            showmenu: false,
+            exact: true,
+            route: '/master/warehouse/:id/show',
+            component: MasterWarehouseShow,
+          },
+          {
+            displayName: 'Edit Detail Warehouse',
+            name: 'master-warehouse-edit',
+            role: 'master',
+            showmenu: false,
+            exact: true,
+            route: '/master/warehouse/:id/edit',
+            component: MasterWarehouseEdit,
           },
         ],
-      },
-      {
-        displayName: 'Country',
-        icon: HomeIcon,
-        name: 'master-country',
-        role: 'master',
-        showmenu: true,
-        exact: true,
-        route: '/master/country',
-        component: MasterCity,
-      },
-      {
-        displayName: 'X',
-        icon: HomeIcon,
-        name: 'master-x',
-        role: 'master',
-        showmenu: false,
-        exact: true,
-        route: '/master/x',
-        component: MasterCity,
       },
     ],
   },

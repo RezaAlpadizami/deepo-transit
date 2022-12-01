@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/solid';
-import { useTable, useSortBy, usePagination } from 'react-table';
+import { useLocation } from 'react-router-dom';
+import { useTable, useSortBy, usePagination, useRowSelect } from 'react-table';
+import Moment from 'moment';
 import { observer } from 'mobx-react-lite';
+import { Link } from '@chakra-ui/react';
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/solid';
+
+import Checkbox from './checkbox-component';
 
 function DataTable(props) {
   const {
@@ -11,8 +16,10 @@ function DataTable(props) {
     totalData = 0,
     limit = 10,
     loading = false,
+    checkbox,
   } = props;
 
+  const location = useLocation();
   const [pages, setPages] = useState(1);
   const [lastPage, setLastPage] = useState(1);
 
@@ -28,6 +35,24 @@ function DataTable(props) {
         return {
           Header: d.header,
           accessor: d.value,
+          Cell: props => {
+            const { value, row } = props;
+            if (d.type === 'date') {
+              return Moment(value).format('DD MMM YYYY');
+            }
+            if (d.type === 'link') {
+              return (
+                <Link
+                  type="button"
+                  className="mr-4 text-blue-400"
+                  href={`${location.pathname}/${row.original.id}/show`}
+                >
+                  {value}
+                </Link>
+              );
+            }
+            return value;
+          },
         };
       }),
     [JSON.stringify(propsColumn)]
@@ -36,7 +61,26 @@ function DataTable(props) {
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable(
     { columns, data },
     useSortBy,
-    usePagination
+    usePagination,
+    useRowSelect,
+    hooks => {
+      if (checkbox) {
+        hooks.visibleColumns.push(column => {
+          return [
+            {
+              id: 'selection',
+              Header: ({ getToggleAllRowsSelectedProps }) => (
+                <Checkbox {...getToggleAllRowsSelectedProps()} style={{ width: '15px', height: '15px' }} />
+              ),
+              Cell: ({ row }) => (
+                <Checkbox {...row.getToggleRowSelectedProps()} style={{ width: '15px', height: '15px' }} />
+              ),
+            },
+            ...column,
+          ];
+        });
+      }
+    }
   );
 
   const changePage = page => {
@@ -45,8 +89,8 @@ function DataTable(props) {
   };
 
   return (
-    <div className="overflow-x-auto relative border-1 mt-4">
-      <table {...getTableProps()} className="table-auto w-full text-sm text-left text-gray-500  border">
+    <div className="overflow-x-auto relative px-6 pb-11 bg-white rounded-b-3xl">
+      <table {...getTableProps()} className="table-auto w-full text-sm text-left text-gray-500 border-t">
         <thead className="text-xs text-black uppercase bg-thead">
           {headerGroups.map(headerGroup => (
             <tr {...headerGroup.getHeaderGroupProps()}>
@@ -81,23 +125,29 @@ function DataTable(props) {
       {loading && (
         <div className="w-full">
           <div className="">
-            <div className=" border-b border-x border-gray-300 p-3 bg-white">
-              <div className="animate-pulse rounded-full w-64 bg-slate-200 h-3" />
+            <div className="flex p-3">
+              <div className="h-5 rounded-lg bg-gray-300 w-[5%]" />
+              <div className="h-5 ml-3 rounded-lg bg-gray-300  w-[95%] " />
             </div>
-            <div className="border-b border-x border-gray-300 p-3 bg-gray-50">
-              <div className="rounded-full bg-slate-200 h-3 w-80" />
+            <div className="flex mt-1 p-3">
+              <div className="h-5 rounded-lg bg-gray-300 w-[5%]" />
+              <div className="h-5 ml-3 rounded-lg bg-gray-300  w-[95%] " />
             </div>
-            <div className=" border-b border-x border-gray-300 p-3 bg-white">
-              <div className="animate-pulse rounded-full w-52 bg-slate-200 h-3" />
+            <div className="flex mt-1 p-3">
+              <div className="h-5 rounded-lg bg-gray-300 w-[5%]" />
+              <div className="h-5 ml-3 rounded-lg bg-gray-300  w-[95%] " />
             </div>
-            <div className="border-b border-x border-gray-300 p-3 bg-gray-50">
-              <div className="rounded-full bg-slate-200 h-3 w-60" />
+            <div className="flex mt-1 p-3">
+              <div className="h-5 rounded-lg bg-gray-300 w-[5%]" />
+              <div className="h-5 ml-3 rounded-lg bg-gray-300  w-[95%] " />
             </div>
-            <div className=" border-b border-x border-gray-300 p-3 bg-white">
-              <div className="animate-pulse rounded-full w-64 bg-slate-200 h-3" />
+            <div className="flex mt-1 p-3">
+              <div className="h-5 rounded-lg bg-gray-300 w-[5%]" />
+              <div className="h-5 ml-3 rounded-lg bg-gray-300  w-[95%] " />
             </div>
-            <div className="border-b border-x border-gray-300 p-3 bg-gray-50">
-              <div className="rounded-full bg-slate-200 h-3 w-56" />
+            <div className="flex mt-1 p-3">
+              <div className="h-5 rounded-lg bg-gray-300 w-[5%]" />
+              <div className="h-5 ml-3 rounded-lg bg-gray-300  w-[95%] " />
             </div>
           </div>
         </div>
