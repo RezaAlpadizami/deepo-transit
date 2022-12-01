@@ -9,7 +9,8 @@ import InputDetail from '../../../components/input-detail-component';
 import { StorageApi } from '../../../services/api-master';
 import DeleteButton from '../../../components/delete-button-component';
 
-function Screen() {
+function Screen(props) {
+  const { displayName } = props;
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -36,14 +37,9 @@ function Screen() {
   return (
     <div className="">
       <div className="flex mb-12">
-        <h1 className="font-bold text-3xl">Detail Warehouse</h1>
+        <h1 className="font-bold text-3xl">{displayName}</h1>
         <div className="flex-1" />
-        <DeleteButton
-          api={StorageApi}
-          id={id}
-          afterSuccessDeleteTo="master/storage"
-          textConfirmButton="Are you sure want to remove this ?"
-        />
+        <DeleteButton api={StorageApi} id={id} redirectTo="master/storage" />
         <Button
           paddingX={12}
           type="submit"

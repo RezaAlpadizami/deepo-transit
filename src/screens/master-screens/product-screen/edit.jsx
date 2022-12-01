@@ -11,8 +11,6 @@ import TextArea from '../../../components/textarea-component';
 import { ProductApi, CategoryApi } from '../../../services/api-master';
 import Select from '../../../components/select-component';
 import Input from '../../../components/input-component';
-// import LoadSkeleton from '../../../components/skeleton-edit-component';
-// import Context from '../../../context';useContext
 
 const schema = yup.object().shape({
   sku: yup.string().nullable().max(7).required(),
@@ -23,7 +21,6 @@ const schema = yup.object().shape({
 
 function Screen(props) {
   const { route, displayName } = props;
-  // const { store } = useContext(Context);
   const {
     register,
     handleSubmit,

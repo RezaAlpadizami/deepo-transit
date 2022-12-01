@@ -17,7 +17,6 @@ function DeleteButton(props) {
       confirmButtonColor: '#246EE5',
       cancelButtonColor: '#FFFFFF',
       confirmButtonText: `<p class="rounded-full bg-[#232323] text-[#fff] px-5 py-2 ml-5">Delete</p>`,
-
       cancelButtonText: `<p class="rounded-full bg-[#aaa] border-2 border-[#1F2022] text-[#fff] px-5 py-2">Cancel</p>`,
       reverseButtons: true,
     }).then(status => {

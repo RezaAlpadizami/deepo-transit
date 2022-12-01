@@ -1,37 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import * as yup from 'yup';
 import Swal from 'sweetalert2';
 import { Button } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
-import { useNavigate, useParams } from 'react-router-dom';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useNavigate, useParams } from 'react-router-dom';
+import Moment from 'moment';
 
 import Input from '../../../components/input-component';
 import { WarehouseApi } from '../../../services/api-master';
 import DatePicker from '../../../components/datepicker-component';
 import LoadingHover from '../../../components/loading-hover-component';
 
+const schema = yup.object().shape({
+  name: yup.string().nullable().required(),
+  code: yup.string().nullable().required(),
+  address: yup.string().nullable().required(),
+  phone: yup.string().nullable().required(),
+  capacity: yup.number().nullable().required(),
+  last_stock_opname: yup.string().nullable().required(),
+  location: yup.string().nullable().required(),
+});
+
 function Screen(props) {
-  const { displayName } = props;
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-
-  const phoneValidation =
-    /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/;
-
-  const schema = yup.object().shape({
-    name: yup.string().nullable().required(),
-    code: yup.string().nullable().required(),
-    address: yup.string().nullable().required(),
-    phone: yup.string().matches(phoneValidation, 'Phone number is not valid'),
-    capacity: yup.number().nullable().required(),
-    last_stock_opname: yup.date().nullable().required(),
-    location: yup.string().nullable().required(),
-  });
+  const { displayName, route } = props;
 
   const {
+    setValue,
     register,
     control,
     handleSubmit,
@@ -40,24 +36,42 @@ function Screen(props) {
     resolver: yupResolver(schema),
   });
 
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const [loading] = useState(false);
+
+  useEffect(() => {
+    WarehouseApi.find(id)
+      .then(res => {
+        setValue('name', res.name);
+        setValue('code', res.code);
+        setValue('address', res.address);
+        setValue('phone', res.phone);
+        setValue('capacity', res.capacity);
+        setValue('last_stock_opname', res.last_stock_opname ? Moment(res.start_date).toDate() : null);
+        setValue('location', res.location);
+      })
+      .catch(error => {
+        Swal.fire({ text: error?.message, icon: 'error' });
+      });
+  }, []);
+
   const onEditSaveWarehouse = data => {
-    setLoading(true);
     WarehouseApi.update(id, {
-      name: data.name,
+      name: data.bay,
       code: data.code,
       address: data.address,
       phone: data.phone,
+      level: data.level,
       capacity: data.capacity,
-      last_stock_opname: data.last_stock_opname,
+      last_stock_opname: data.last_stock_opname ? Moment(data.start_date).format('YYYY-MM-DD') : null,
       location: data.location,
     })
       .then(() => {
-        setLoading(false);
         Swal.fire({ text: 'Successfully Saved', icon: 'success' });
-        navigate('/master/warehouse');
+        navigate(route.split('/').slice(0, 3).join('/'));
       })
       .catch(error => {
-        setLoading(false);
         Swal.fire({ text: error?.message, icon: 'error' });
       });
   };
@@ -72,7 +86,7 @@ function Screen(props) {
             onClick={() => navigate(-1)}
             paddingX={12}
             size="sm"
-            className="bg-white border border-gray-500 text-gray-500 rounded-full border-3 py-4 px-6 mr-2 hover:text-white hover:bg-black"
+            className="bg-[#E3E3E3] border border-gray-500 text-gray-500 rounded-full border-3 py-4 px-6 mr-2 hover:text-gray-700 hover:bg-[#D9D9D9]"
           >
             Cancel
           </Button>
@@ -80,7 +94,7 @@ function Screen(props) {
             paddingX={12}
             type="submit"
             size="sm"
-            className="bg-white border border-gray-500 text-gray-500 rounded-full border-3 py-4 px-6 mr-60 hover:text-white hover:bg-black"
+            className="bg-[#232323] border border-gray-500 text-white rounded-full border-3 py-4 px-6 mr-60 hover:bg-black"
           >
             Save
           </Button>
@@ -103,7 +117,7 @@ function Screen(props) {
           <Input name="location" label="Location" register={register} errors={errors} />
         </div>
       </form>
-      {loading && <LoadingHover fixed />}
+      {loading && <LoadingHover visible={loading} />}
     </div>
   );
 }

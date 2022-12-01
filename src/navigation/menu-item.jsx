@@ -1,8 +1,13 @@
 import React from 'react';
-import { HomeIcon, UserCircleIcon, ArchiveIcon, ServerIcon } from '@heroicons/react/solid';
+import { HomeIcon, UserCircleIcon, ArchiveIcon, ServerIcon, MenuAlt3Icon } from '@heroicons/react/solid';
 
 const NotFound = React.lazy(() => import('../screens/home-screens/404'));
 const Home = React.lazy(() => import('../screens/home-screens/index'));
+
+const CategoryScreens = React.lazy(() => import('../screens/master-screens/category-screens/index'));
+const CategoryScreenAdd = React.lazy(() => import('../screens/master-screens/category-screens/add'));
+const CategoryScreenShow = React.lazy(() => import('../screens/master-screens/category-screens/show'));
+const CategoryScreenEdit = React.lazy(() => import('../screens/master-screens/category-screens/edit'));
 
 const StorageScreens = React.lazy(() => import('../screens/master-screens/storage-screens/index'));
 const StorageScreenAdd = React.lazy(() => import('../screens/master-screens/storage-screens/add'));
@@ -155,6 +160,45 @@ export default [
             exact: true,
             route: '/master/product/:id/edit',
             component: ProductEditScreen,
+          },
+        ],
+      },
+      {
+        displayName: 'Category',
+        icon: MenuAlt3Icon,
+        name: 'master-category',
+        role: 'master',
+        showmenu: true,
+        exact: true,
+        route: '/master/category',
+        component: CategoryScreens,
+        routes: [
+          {
+            displayName: 'Add Category',
+            name: 'master-category-add',
+            role: 'master',
+            showmenu: false,
+            exact: true,
+            route: '/master/category/add',
+            component: CategoryScreenAdd,
+          },
+          {
+            displayName: 'Detail Category',
+            name: 'master-category-show',
+            role: 'master',
+            showmenu: false,
+            exact: true,
+            route: '/master/category/:id/show',
+            component: CategoryScreenShow,
+          },
+          {
+            displayName: 'Update Category',
+            name: 'master-category-edit',
+            role: 'master',
+            showmenu: false,
+            exact: true,
+            route: '/master/category/:id/edit',
+            component: CategoryScreenEdit,
           },
         ],
       },
