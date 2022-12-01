@@ -1,10 +1,10 @@
 import RequestHandler from '../request-handler';
 import ENDPOINT from '../../../config/api-master';
 
-class CityApi extends RequestHandler {
+class CategoryApi extends RequestHandler {
   constructor() {
-    super(ENDPOINT.PLANET);
+    super(ENDPOINT.CATEGORY);
   }
 }
 
-export default new CityApi();
+export default new CategoryApi();
