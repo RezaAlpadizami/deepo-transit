@@ -38,7 +38,7 @@ module.exports = {
     'react/jsx-filename-extension': 2,
     'react/jsx-indent': [2, 2],
     'react/prop-types': [0],
-    'react/no-array-index-key': [1],
+    'react/no-array-index-key': [0],
     'class-methods-use-this': [1],
     'no-undef': [2],
     'no-case-declarations': [1],

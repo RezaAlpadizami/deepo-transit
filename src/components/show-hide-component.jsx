@@ -1,7 +1,7 @@
 /* eslint-disable react/no-array-index-key */
 import React from 'react';
 import RightSideBar from './right-sidebar-component';
-import { Checkbox } from './checkbox-component';
+import Checkbox from './checkbox-component';
 
 function ShowHide(props) {
   const { visible, onClose, columns, getToggleHideAllColumnsProps } = props;

@@ -3,8 +3,6 @@ import copy from 'copy-to-clipboard';
 import { Button } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-// Modal, ModalContent, useDisclosure, ModalOverlay, ModalHeader, ModalBody
-// import { DocumentDownloadIcon, EyeIcon, TrashIcon, ClipboardListIcon, ViewGridIcon } from '@heroicons/react/solid';
 import ShowHide from './show-hide-component';
 import DeletedList from './delete-list-component';
 import { getNestedObject } from '../utils/helper';
@@ -14,7 +12,6 @@ const button = 'bg-white border border-gray-500 text-md rounded-xl border-3 py-1
 function ActionToolbar(props) {
   const {
     onDownload,
-    view,
     onDelete,
     copyClipboard,
     onShowHideColumn,
@@ -30,12 +27,6 @@ function ActionToolbar(props) {
   const navigate = useNavigate();
   const [onOpen, setOnOpen] = useState(false);
   const [showHide, setShowHide] = useState(false);
-  const onView = () => {
-    if (navTo) {
-      navigate(`${navTo?.path}/${navTo?.id}/show`);
-    }
-  };
-
   const onCopy = () => {
     let text = '';
     copyItem.forEach(val => {
@@ -94,7 +85,6 @@ function ActionToolbar(props) {
       )}
       {onEdit && (
         <Button
-          // leftIcon={<EyeIcon size="xl" className="w-5" />}
           className={button}
           onClick={() => navigate(`${navTo?.path}/${selectedData?.find(i => i).original.id}/edit`)}
           disabled={selectedData.length !== 1}
@@ -102,53 +92,24 @@ function ActionToolbar(props) {
           Edit
         </Button>
       )}
-      {view && (
-        <Button
-          // leftIcon={<EyeIcon size="xl" className="w-5" />}
-          className={button}
-          onClick={onView}
-          disabled={selectedData.length !== 1}
-        >
-          View
-        </Button>
-      )}
-
       {onDelete && (
-        <Button
-          // leftIcon={<TrashIcon size="xl" className="w-5" />}
-          className={button}
-          onClick={() => setOnOpen(!onOpen)}
-          disabled={selectedData.length === 0}
-        >
+        <Button className={button} onClick={() => setOnOpen(!onOpen)} disabled={selectedData.length === 0}>
           Delete
         </Button>
       )}
       {onDownload && (
-        <Button
-          // leftIcon={<DocumentDownloadIcon size="xl" className="w-5 " />}
-          className={button}
-          onClick={onDownload}
-        >
+        <Button className={button} onClick={onDownload}>
           Save to Excel
         </Button>
       )}
       {copyClipboard && (
-        <Button
-          // leftIcon={<ClipboardListIcon size="xl" className="w-5" />}
-          className={button}
-          onClick={onCopy}
-          disabled={selectedData.length === 0}
-        >
+        <Button className={button} onClick={onCopy} disabled={selectedData.length === 0}>
           Copy to Clipboard
         </Button>
       )}
       {onShowHideColumn && (
         <>
-          <Button
-            // leftIcon={<ViewGridIcon size="xl" className="w-5" />}
-            className={button}
-            onClick={() => setShowHide(!showHide)}
-          >
+          <Button className={button} onClick={() => setShowHide(!showHide)}>
             Show / Hide Column(s)
           </Button>
           <ShowHide

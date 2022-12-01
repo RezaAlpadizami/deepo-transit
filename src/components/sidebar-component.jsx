@@ -14,7 +14,7 @@ function SidebarComponent() {
   const [menuParent, setMenuParent] = useState(null);
 
   useEffect(() => {
-    setMenuParent(findParent(menuItem, location.pathname));
+    setMenuParent(findParent(menuItem, location));
   }, [location.pathname]);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ function SidebarComponent() {
     <aside
       className={`${
         store.isDrawerOpen ? 'w-64' : '-translate-x-64 w-0'
-      } bg-slate-700 transition-all ease-in-out delay-150 duration-300 `}
+      } bg-[#232323] transition-all ease-in-out delay-150 duration-300 `}
     >
       <div className="">
         <ul className="text-white">
@@ -39,17 +39,15 @@ function SidebarComponent() {
                 <Link key={idx} to={d.route}>
                   <li
                     className={`${
-                      findTree([d], location.pathname).length > 0
-                        ? 'bg-slate-800 hover:font-bold'
-                        : 'hover:bg-slate-600'
+                      findTree([d], location).length > 0 ? 'bg-[#606060] hover:font-bold' : 'hover:bg-[#878787]'
                     } flex px-5 py-3 items-center`}
                   >
                     <d.icon className="w-5 h-5" />
                     <span className="ml-2 flex-auto">{d.displayName}</span>
-                    {d.routes && findTree([d.routes], location.pathname).length > 0 && (
+                    {d.routes && findTree([d.routes], location).length > 0 && (
                       <ChevronRightIcon
                         className={`w-5 h-5 transition-transform ease-out duration-300 ${
-                          findTree([d], location.pathname).length > 0 ? 'rotate-90' : 'rotate-0'
+                          findTree([d], location).length > 0 ? 'rotate-90' : 'rotate-0'
                         }`}
                       />
                     )}
@@ -57,16 +55,16 @@ function SidebarComponent() {
                   {d.routes?.length > 0 && (
                     <ul
                       className={`transition-all ease-in-out duration-300 bg-slate-800 overflow-hidden ${
-                        findTree([d], location.pathname).length > 0 ? 'max-h-96' : 'max-h-0'
+                        findTree([d], location).length > 0 ? 'max-h-96' : 'max-h-0'
                       }`}
                     >
                       {d.routes.map(
-                        (r, i) =>
+                        (r, idx) =>
                           r.showmenu && (
-                            <Link key={i} to={r.route}>
+                            <Link key={idx} to={r.route}>
                               <li
                                 className={`${
-                                  findTree([r], location.pathname).length > 0 ? 'font-bold' : ''
+                                  findTree([r], location).length > 0 ? 'font-bold' : ''
                                 } pl-12 pr-5 py-3 hover:bg-slate-900`}
                               >
                                 {r.displayName}

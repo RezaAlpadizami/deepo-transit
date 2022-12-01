@@ -1,4 +1,3 @@
-/* eslint-disable react/no-array-index-key */
 /* eslint-disable react/no-unstable-nested-components */
 import React, { useEffect, useState } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/solid';
@@ -8,18 +7,21 @@ import Swal from 'sweetalert2';
 import XLSX from 'xlsx';
 import Moment from 'moment';
 import { saveAs } from 'file-saver';
+import { Link, Button } from '@chakra-ui/react';
+import { useForm } from 'react-hook-form';
 import Toolbar from './action-toolbar-component';
 import { hasProperty } from '../utils/helper';
-import { Checkbox } from './checkbox-component';
 import TableComponent from './table-component';
 import LoadingHover from './loading-component';
+import Checkbox from './checkbox-component';
+import Select from './select-component';
+import Input from './input-component';
+import DatePicker from './datepicker-component';
 
 function DataTable(props) {
   const {
-    data: propsData = [],
     columns: propsColumn = [],
     onChangePage = () => {},
-    totalData = 0,
     limit = 10,
     loading = false,
     toolbar,
@@ -28,17 +30,38 @@ function DataTable(props) {
     api,
     checkbox,
     name,
+    filters,
   } = props;
 
-  const [page, setPage] = useState(1);
-  const [lastPage, setLastPage] = useState(1);
-  const [loadingHover, setLoadingHover] = useState(false);
+  const {
+    handleSubmit,
+    reset,
+    register,
+    control,
+    formState: { errors },
+  } = useForm();
 
+  const [pages, setPages] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
+  const [datas, setDatas] = useState([]);
+  const [totalData, setTotalData] = useState([]);
+  const [loadingHover, setLoadingHover] = useState(false);
+  const defaultSort = {
+    sort_by: 'id',
+    sort_order: 'desc',
+  };
+
+  const [filter, setFilter] = useState([]);
+  const [filterData, setFilterData] = useState({
+    limit: 10,
+    offset: 0,
+    ...defaultSort,
+  });
   useEffect(() => {
     setLastPage(Math.ceil(totalData / limit));
   }, [totalData, limit]);
 
-  const data = React.useMemo(() => propsData, [JSON.stringify(propsData)]);
+  const data = React.useMemo(() => datas, [JSON.stringify(datas)]);
 
   const columns = React.useMemo(
     () =>
@@ -47,16 +70,25 @@ function DataTable(props) {
           Header: d.header,
           accessor: d.value,
           Cell: props => {
-            const { value } = props;
+            const { value, row } = props;
             if (d.type === 'date') {
               return Moment(value).format('DD MMM YYYY');
             }
+            if (d.type === 'link') {
+              return (
+                <Link type="button" className="mr-4 text-blue-400" href={`${to}/${row.original.id}/show`}>
+                  {value}
+                </Link>
+              );
+            }
+
             return value;
           },
         };
       }),
     [JSON.stringify(propsColumn)]
   );
+
   const {
     getTableProps,
     getTableBodyProps,
@@ -85,8 +117,32 @@ function DataTable(props) {
     }
   });
 
+  useEffect(() => {
+    getData();
+  }, [filterData]);
+
+  const getData = () => {
+    setLoadingHover(true);
+    api
+      .get({ ...filterData })
+      .then(res => {
+        setLoadingHover(false);
+        setDatas(res.data);
+        setTotalData(res.query.total);
+      })
+      .catch(error => {
+        setLoadingHover(false);
+        Swal.fire({ text: error?.message || error?.originalError, icon: 'error' });
+      });
+  };
+
+  useEffect(() => {
+    if (Array.isArray(filters)) {
+      setFilter([...filters]);
+    }
+  }, [filters]);
   const changePage = page => {
-    setPage(page);
+    setPages(page);
     onChangePage(page);
   };
 
@@ -213,6 +269,50 @@ function DataTable(props) {
     return saveAs(new Blob([s2ab(wbout)], { type: 'application/octet-stream' }), `${name}.xlsx`);
   };
 
+  const onReset = () => {
+    reset();
+    setFilterData({
+      limit: 10,
+      offset: 0,
+      ...defaultSort,
+    });
+  };
+  const onSubmit = data => {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const dt in data) {
+      if (Object.hasOwnProperty.call(data, dt)) {
+        if (!data[dt]) {
+          delete data[dt];
+        }
+        if (data[dt] === 'All') {
+          setFilterData({
+            limit: 10,
+            offset: 0,
+            ...defaultSort,
+          });
+          delete data[dt];
+        }
+        if (data[dt] instanceof Date) {
+          if (dt.toLowerCase().includes('to')) {
+            data[dt] = Moment(data[dt]).endOf('day').format('YYYY-MM-DD');
+          } else {
+            data[dt] = Moment(data[dt]).startOf('day').format('YYYY-MM-DD');
+          }
+        } else {
+          // eslint-disable-next-line no-unused-expressions
+          data[dt];
+        }
+      }
+    }
+    setFilterData(prev => {
+      return {
+        ...prev,
+        limit: 10,
+        offset: 0,
+        ...data,
+      };
+    });
+  };
   return (
     <>
       <LoadingHover visible={loadingHover} />
@@ -227,7 +327,83 @@ function DataTable(props) {
           />
         </div>
       )}
-
+      {filter && filter.length !== 0 && (
+        <div className="">
+          <div className="flex">
+            <h1 className="font-bold text-xl">{name}</h1>
+          </div>
+          <div>
+            <form>
+              <div className="px-4">
+                <div className="grid grid-cols-3 gap-4 mt-4">
+                  {filter.map((item, idx) => {
+                    if (item.type === 'date_picker') {
+                      return (
+                        <div className={item.col ? `col-span-${item.col}` : ''} key={`component${idx}`}>
+                          <DatePicker
+                            name={item.name}
+                            label={item.label}
+                            placeholder={item.placeholder}
+                            register={register}
+                            control={control}
+                            errors={errors}
+                          />
+                        </div>
+                      );
+                    }
+                    if (item.type === 'select') {
+                      return (
+                        <div className={item.col ? `col-span-${item.col}` : ''} key={`component${idx}`}>
+                          <Select
+                            name={item.name}
+                            label={item.label}
+                            options={item.data}
+                            register={register}
+                            control={control}
+                            disabled={item.disabled}
+                          />
+                        </div>
+                      );
+                      // eslint-disable-next-line no-else-return
+                    } else {
+                      return (
+                        <div className={item.col ? `col-span-${item.col}` : ''} key={`component${idx}`}>
+                          <Input name={item.name} label={item.label} register={register} control={control} />
+                        </div>
+                      );
+                    }
+                  })}
+                </div>
+              </div>
+              <div className="col-md-3 offset-md-9 px-0">
+                <div className="flex justify-end mt-3 px-4 py-3">
+                  <Button
+                    type="button"
+                    size="sm"
+                    width="24"
+                    className="mr-2 bg-[#E3E3E3] hover:text-gray-700 hover:bg-[#D9D9D9]"
+                    onClick={() => onReset()}
+                    colorScheme="blackAlpha"
+                    variant="outline"
+                  >
+                    Reset
+                  </Button>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    width="24"
+                    variant="solid"
+                    className="bg-[#232323] hover:bg-black text-white"
+                    onClick={handleSubmit(onSubmit)}
+                  >
+                    Filter
+                  </Button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       {shouldRenderToolbar() && (
         <Toolbar
           selectedData={selectedFlatRows}
@@ -243,12 +419,9 @@ function DataTable(props) {
           onShowHideColumn={enableAction('show-hide-column')}
         />
       )}
-      <div className="overflow-x-auto relative border-1 mt-4">
-        <table
-          {...getTableProps()}
-          className="table-auto w-full text-sm text-left text-gray-500 dark:text-gray-400 border"
-        >
-          <thead className="text-xs text-black uppercase bg-thead dark:bg-gray-700 dark:text-gray-400">
+      <div className="overflow-x-auto relative px-6 pb-11 bg-white rounded-b-3xl">
+        <table {...getTableProps()} className="table-auto w-full text-sm text-left text-gray-500 border-t">
+          <thead className="text-xs text-black uppercase bg-thead">
             {headerGroups.map((headerGroup, idxgroup) => (
               <tr key={idxgroup} {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map((column, columnidx) => (
@@ -268,9 +441,7 @@ function DataTable(props) {
                   <tr
                     key={i}
                     {...row.getRowProps()}
-                    className={`${
-                      i % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                    } border-b hover:bg-slate-100 dark:bg-gray-900 dark:border-gray-700`}
+                    className={`${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}border-b hover:bg-slate-100`}
                   >
                     {row.cells.map((cell, idx) => (
                       <td key={idx} {...cell.getCellProps()} className="py-2 px-6">
@@ -286,58 +457,65 @@ function DataTable(props) {
         {loading && (
           <div className="w-full">
             <div className="">
-              <div className=" border-b border-x border-gray-300 p-3 bg-white">
-                <div className="animate-pulse rounded-full w-64 bg-slate-200 h-3" />
+              <div className="flex p-3">
+                <div className="h-5 rounded-lg bg-gray-300 w-[5%]" />
+                <div className="h-5 ml-3 rounded-lg bg-gray-300  w-[95%] " />
               </div>
-              <div className="border-b border-x border-gray-300 p-3 bg-gray-50">
-                <div className="rounded-full bg-slate-200 h-3 w-80" />
+              <div className="flex mt-1 p-3">
+                <div className="h-5 rounded-lg bg-gray-300 w-[5%]" />
+                <div className="h-5 ml-3 rounded-lg bg-gray-300  w-[95%] " />
               </div>
-              <div className=" border-b border-x border-gray-300 p-3 bg-white">
-                <div className="animate-pulse rounded-full w-52 bg-slate-200 h-3" />
+              <div className="flex mt-1 p-3">
+                <div className="h-5 rounded-lg bg-gray-300 w-[5%]" />
+                <div className="h-5 ml-3 rounded-lg bg-gray-300  w-[95%] " />
               </div>
-              <div className="border-b border-x border-gray-300 p-3 bg-gray-50">
-                <div className="rounded-full bg-slate-200 h-3 w-60" />
+              <div className="flex mt-1 p-3">
+                <div className="h-5 rounded-lg bg-gray-300 w-[5%]" />
+                <div className="h-5 ml-3 rounded-lg bg-gray-300  w-[95%] " />
               </div>
-              <div className=" border-b border-x border-gray-300 p-3 bg-white">
-                <div className="animate-pulse rounded-full w-64 bg-slate-200 h-3" />
+              <div className="flex mt-1 p-3">
+                <div className="h-5 rounded-lg bg-gray-300 w-[5%]" />
+                <div className="h-5 ml-3 rounded-lg bg-gray-300  w-[95%] " />
               </div>
-              <div className="border-b border-x border-gray-300 p-3 bg-gray-50">
-                <div className="rounded-full bg-slate-200 h-3 w-56" />
+              <div className="flex mt-1 p-3">
+                <div className="h-5 rounded-lg bg-gray-300 w-[5%]" />
+                <div className="h-5 ml-3 rounded-lg bg-gray-300  w-[95%] " />
               </div>
             </div>
           </div>
         )}
 
-        <nav
-          className="flex justify-between items-center bg-white pl-4 border-x border-b"
-          aria-label="Table navigation"
-        >
-          <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-            Showing{' '}
-            <span className="font-semibold text-gray-900 dark:text-white">
-              {limit * (page - 1) + 1}-{page * limit}
-            </span>{' '}
-            of <span className="font-semibold text-gray-900 dark:text-white">{totalData}</span>
+        <nav className="flex justify-between items-center bg-white pl-4" aria-label="Table navigation">
+          <span className="text-sm font-normal text-gray-500 ">
+            {totalData <= 0 ? null : (
+              <>
+                Showing <span className="font-semibold text-gray-900 ">{`${limit * (pages - 1) + 1} - `}</span>
+                <span className="font-semibold text-gray-900">
+                  {pages * limit > totalData ? totalData : pages * limit}
+                </span>{' '}
+                of <span className="font-semibold text-gray-900 ">{totalData}</span>
+              </>
+            )}
           </span>
-          <ul className="inline-flex items-center text-sm -space-x-px">
+          <ul className="inline-flex items-center text-sm -space-x-px py-4 mr-8">
             <li>
               <button
                 type="button"
-                disabled={page === 1}
-                onClick={() => (page === 1 ? {} : changePage(page - 1))}
-                className="block py-2 px-3 ml-0 leading-tight text-gray-500 bg-white disabled:text-gray-300 disabled:hover:bg-white hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                disabled={pages === 1}
+                onClick={() => (pages === 1 ? {} : changePage(pages - 1))}
+                className="block py-2 px-3 ml-0 leading-tight text-gray-500 bg-white disabled:text-gray-300 disabled:hover:bg-white hover:bg-gray-100 hover:text-gray-700"
               >
                 <span className="sr-only">Previous</span>
                 <ChevronLeftIcon className="w-5 h-5" />
               </button>
             </li>
-            {lastPage > 7 && page > 4 && (
+            {lastPage > 7 && pages >= 4 && (
               <>
                 <li>
                   <button
                     type="button"
                     onClick={() => changePage(1)}
-                    className="py-2 px-3 leading-tight text-gray-500 bg-white  hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                    className="py-2 px-3 leading-tight text-black rounded-lg bg-gray-100 mr-1  hover:bg-gray-700 hover:text-white"
                   >
                     1
                   </button>
@@ -345,7 +523,7 @@ function DataTable(props) {
                 <li>
                   <button
                     type="button"
-                    className="py-2 px-3 leading-tight text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                    className="py-2 px-3 leading-tight text-black rounded-lg mr-0.5 bg-gray-100 hover:bg-gray-700 hover:text-white"
                   >
                     ...
                   </button>
@@ -353,32 +531,33 @@ function DataTable(props) {
               </>
             )}
             {Array(
-              lastPage > 7 && lastPage - page <= 3 ? 5 : lastPage > 7 && page > 4 ? 3 : lastPage > 7 ? 5 : lastPage
+              lastPage > 7 && lastPage - pages < 3 ? 5 : lastPage > 7 && pages >= 4 ? 3 : lastPage > 7 ? 5 : lastPage
             )
               .fill('')
               .map((_, i) => {
-                const p = lastPage > 7 && lastPage - page <= 3 ? lastPage - 4 : lastPage > 7 && page > 4 ? page - 1 : 1;
+                const p =
+                  lastPage > 7 && lastPage - pages < 3 ? lastPage - 4 : lastPage > 7 && pages >= 4 ? pages - 1 : 1;
                 return (
                   <li key={i}>
                     <button
                       type="button"
-                      disabled={page === i + p}
+                      disabled={pages === i + p}
                       onClick={() => changePage(i + p)}
                       className={`${
-                        page === i + p ? 'bg-gray-200' : 'bg-white'
-                      } py-2 px-3 leading-tight text-gray-500  hover:bg-gray-100 disabled:text-gray-400 disabled:hover:bg-gray-200 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white`}
+                        pages === i + p ? 'bg-gray-700 text-white' : 'bg-white'
+                      } py-2 px-3 mx-0.5 leading-tight text-black bg-gray-100 rounded-lg hover:bg-gray-700 hover:text-white disabled:text-white`}
                     >
                       {i + p}
                     </button>
                   </li>
                 );
               })}
-            {lastPage > 7 && lastPage - page > 3 && (
+            {lastPage > 7 && lastPage - pages >= 3 && (
               <>
                 <li>
                   <button
                     type="button"
-                    className="py-2 px-3 leading-tight text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                    className="py-2 px-3 mr-1 ml-0.5 leading-tight text-black rounded-lg bg-gray-100 hover:bg-gray-700 hover:text-white"
                   >
                     ...
                   </button>
@@ -387,7 +566,7 @@ function DataTable(props) {
                   <button
                     type="button"
                     onClick={() => changePage(lastPage)}
-                    className="py-2 px-3 leading-tight text-gray-500 bg-white  hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                    className="py-2 px-3 leading-tight text-black rounded-lg bg-gray-100 hover:bg-gray-700 hover:text-white"
                   >
                     {lastPage}
                   </button>
@@ -397,12 +576,12 @@ function DataTable(props) {
             <li>
               <button
                 type="button"
-                disabled={page === lastPage}
-                onClick={() => (page === lastPage ? {} : changePage(page + 1))}
-                className="block py-2 px-3 leading-tight text-gray-500 bg-white disabled:text-gray-300 disabled:hover:bg-white hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                disabled={pages === lastPage}
+                onClick={() => (pages === lastPage ? {} : changePage(pages + 1))}
+                className="block py-2 px-3 leading-tight text-gray-500 bg-white disabled:text-gray-300 disabled:hover:bg-white hover:bg-gray-100 hover:text-gray-700"
               >
                 <span className="sr-only">Next</span>
-                <ChevronRightIcon className="w-5 h-5" />
+                {totalData <= 0 ? null : <ChevronRightIcon className="w-5 h-5" />}
               </button>
             </li>
           </ul>

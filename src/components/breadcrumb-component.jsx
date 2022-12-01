@@ -12,13 +12,13 @@ export default function BreadcrumbComponent() {
   const [menuTree, setMenuTree] = useState([]);
 
   useEffect(() => {
-    setMenuTree(findTree(menuItem, location.pathname));
+    setMenuTree(findTree(menuItem, location));
   }, [location.pathname]);
 
   return (
-    <Breadcrumb bg="#e2e7ef" color="#8e97a7" marginBottom={4} paddingX={4} paddingY={2} borderRadius={5} shadow="inner">
+    <Breadcrumb color="#8e97a7" marginBottom={4} separator=">">
       {menuTree.map((d, idx) => (
-        <BreadcrumbItem key={idx}>
+        <BreadcrumbItem className="last:text-black" key={idx}>
           <BreadcrumbLink href={d.route}>{d.displayName}</BreadcrumbLink>
         </BreadcrumbItem>
       ))}
