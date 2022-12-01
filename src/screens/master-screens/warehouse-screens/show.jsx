@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import Moment from 'moment';
+import Swal from 'sweetalert2';
 import { Button } from '@chakra-ui/react';
 
 import DeleteButton from '../../../components/delete-button-component';
@@ -28,8 +29,8 @@ function Screen(props) {
         setDataWarehouseById(res);
       })
       .catch(error => {
-        console.log(error);
         setLoading(false);
+        Swal.fire({ text: error?.message, icon: 'error' });
       });
   };
 
@@ -38,7 +39,7 @@ function Screen(props) {
       <div className="flex mb-12">
         <h1 className="font-bold text-3xl">{displayName}</h1>
         <div className="flex-1" />
-        <DeleteButton api={WarehouseApi} redirectTo="master/warehouse" />
+        <DeleteButton api={WarehouseApi} id={id} redirectTo="master/warehouse" />
         <Button
           paddingX={12}
           type="submit"

@@ -191,8 +191,8 @@ function DataTable(props) {
 
   const enableAction = action => {
     const actions = {
-      view: 'view',
       add: 'add',
+      view: 'view',
       edit: 'edit',
       delete: 'delete',
       'save-to-excel': 'download',
@@ -363,6 +363,7 @@ function DataTable(props) {
                             options={item.data}
                             register={register}
                             control={control}
+                            errors={errors}
                             disabled={item.disabled}
                           />
                         </div>

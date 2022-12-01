@@ -38,7 +38,6 @@ function Screen(props) {
   const [loading, setLoading] = useState(false);
   const [categoryData, setCategoryData] = useState([]);
   const [categoryId, setCategoryId] = useState();
-  // const loadingSkeleton = store?.isLoadEdit;
 
   useEffect(() => {
     setLoading(true);
@@ -49,7 +48,6 @@ function Screen(props) {
         setValue('product_desc', res.data.product_desc);
         setCategoryId(res.data.category_id);
         setLoading(false);
-        // store.setIsLoadEdit(false);
       })
       .catch(error => {
         Swal.fire({ text: error?.message, icon: 'error' });
@@ -96,7 +94,6 @@ function Screen(props) {
   return (
     <div className="">
       <form onSubmit={handleSubmit(onSubmit)}>
-        {/* {loadingSkeleton && <LoadSkeleton />} */}
         <div className="flex mb-12">
           <h1 className="font-bold text-3xl">{displayName}</h1>
           <div className="flex-1" />
