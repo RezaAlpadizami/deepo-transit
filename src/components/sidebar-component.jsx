@@ -34,8 +34,7 @@ function SidebarComponent() {
         <ul className="text-white">
           {menuParent?.routes?.map(
             (d, idx) =>
-              d.showmenu &&
-              (store.user.hasRole(d.role) || d.role === '') && (
+              d.showmenu && (
                 <Link key={idx} to={d.route}>
                   <li
                     className={`${
@@ -60,8 +59,7 @@ function SidebarComponent() {
                     >
                       {d.routes.map(
                         (r, idx) =>
-                          r.showmenu &&
-                          (store.user.hasRole(r.role) || r.role === '') && (
+                          r.showmenu && (
                             <Link key={idx} to={r.route}>
                               <li
                                 className={`${

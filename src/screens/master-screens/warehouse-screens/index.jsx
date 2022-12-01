@@ -154,6 +154,7 @@ function Screen(props) {
             { header: 'Last Stock Opname', value: 'last_stock_opname', type: 'date' },
           ]}
           data={dataListWarehouse}
+          api={WarehouseApi}
           totalData={totalData}
           loading={loading}
           onChangePage={page => getDataWarehouse(page)}
