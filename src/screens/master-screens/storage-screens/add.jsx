@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@chakra-ui/react';
@@ -8,7 +8,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
 import LoadingHover from '../../../components/loading-hover-component';
-import { StorageApi } from '../../../services/api-master';
+import { StorageApi, WarehouseApi } from '../../../services/api-master';
 import Input from '../../../components/input-component';
 import Select from '../../../components/select-component';
 
@@ -16,14 +16,15 @@ function Screen(props) {
   const { displayName } = props;
   const navigate = useNavigate();
 
+  const [warehouseData, setWarhouseData] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const schema = yup.object().shape({
-    bay: yup.string().nullable().required(),
-    code: yup.string().nullable().required(),
-    rack_number: yup.string().nullable().required(),
+    bay: yup.string().nullable().max(2).required(),
+    code: yup.string().nullable().max(7).required(),
+    rack_number: yup.string().nullable().max(1).required(),
     warehouse_id: yup.number().nullable().required(),
-    level: yup.string().nullable().required(),
+    level: yup.string().nullable().max(1).required(),
   });
 
   const {
@@ -34,6 +35,16 @@ function Screen(props) {
   } = useForm({
     resolver: yupResolver(schema),
   });
+
+  useEffect(() => {
+    WarehouseApi.get()
+      .then(res => {
+        setWarhouseData(res.data);
+      })
+      .catch(error => {
+        Swal.fire({ text: error?.message || error?.originalError, icon: 'error' });
+      });
+  }, []);
 
   const onAddStorage = data => {
     setLoading(true);
@@ -86,12 +97,12 @@ function Screen(props) {
           <Select
             name="warehouse_id"
             label="Warehouse"
-            options={[
-              { value: 1, label: 'Gudang Pusat' },
-              { value: 2, label: 'Gudang Serpong' },
-              { value: 3, label: 'Gudang Cilegon' },
-              { value: 4, label: 'Gudang Jakarta Selatan' },
-            ]}
+            options={warehouseData?.map(i => {
+              return {
+                value: i.id,
+                label: `${i.name} ${i.location}`,
+              };
+            })}
             placeholder=""
             register={register}
             errors={errors}

@@ -12,13 +12,13 @@ import { CategoryApi } from '../../../services/api-master';
 import Input from '../../../components/input-component';
 
 function Screen(props) {
-  const { displayName } = props;
+  const { displayName, route } = props;
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
 
   const schema = yup.object().shape({
-    code: yup.string().nullable().required(),
+    code: yup.string().nullable().max(7).required(),
     name: yup.string().nullable().required(),
   });
 
@@ -36,11 +36,10 @@ function Screen(props) {
       code: data.code,
       name: data.name,
     })
-      .then(res => {
-        console.log('res', res);
+      .then(() => {
         setLoading(false);
         Swal.fire({ text: 'Successfully Saved', icon: 'success' });
-        navigate('/master/category');
+        navigate(route.split('/').slice(0, 3).join('/'));
       })
       .catch(error => {
         setLoading(false);
