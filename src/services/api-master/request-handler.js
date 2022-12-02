@@ -2,7 +2,7 @@ import { create } from 'apisauce';
 import LocalStorage from 'local-storage';
 // import AuthService from '../auth/AuthService';
 
-const api = create({ baseURL: process.env.REACT_APP_LOCAL });
+const api = create({ baseURL: process.env.REACT_APP_MASTER });
 
 // api.axiosInstance.interceptors.request.use(
 //   // eslint-disable-next-line consistent-return
