@@ -3,4 +3,5 @@ module.exports = {
   STORAGE: 'storage',
   PRODUCT: 'product',
   CATEGORY: 'category',
+  PRODUCT_JOURNEY: 'product-journey',
 };

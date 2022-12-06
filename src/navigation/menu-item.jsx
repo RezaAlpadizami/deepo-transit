@@ -1,5 +1,14 @@
 import React from 'react';
-import { HomeIcon, UserCircleIcon, ArchiveIcon, ServerIcon, MenuAlt3Icon } from '@heroicons/react/solid';
+import {
+  HomeIcon,
+  UserCircleIcon,
+  ArchiveIcon,
+  ServerIcon,
+  MenuAlt3Icon,
+  DesktopComputerIcon,
+  ClipboardListIcon,
+  ShareIcon,
+} from '@heroicons/react/solid';
 
 const NotFound = React.lazy(() => import('../screens/home-screens/404'));
 const Home = React.lazy(() => import('../screens/home-screens/index'));
@@ -23,6 +32,10 @@ const MasterWarhouse = React.lazy(() => import('../screens/master-screens/wareho
 const MasterWarehouseAdd = React.lazy(() => import('../screens/master-screens/warehouse-screens/add'));
 const MasterWarehouseShow = React.lazy(() => import('../screens/master-screens/warehouse-screens/show'));
 const MasterWarehouseEdit = React.lazy(() => import('../screens/master-screens/warehouse-screens/edit'));
+
+const ProductJourneyScreens = React.lazy(() => import('../screens/product-screens/product-journey-screens/index'));
+const ProductJourneyShowScreen = React.lazy(() => import('../screens/product-screens/product-journey-screens/show'));
+
 export default [
   {
     displayName: 'Home',
@@ -33,7 +46,6 @@ export default [
     route: '/',
     component: Home,
   },
-
   {
     displayName: 'Master',
     name: 'master',
@@ -199,6 +211,38 @@ export default [
             exact: true,
             route: '/master/category/:id/edit',
             component: CategoryScreenEdit,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    displayName: 'Product',
+    name: 'product',
+    role: 'product',
+    showmenu: true,
+    exact: true,
+    route: '/product',
+    component: Home,
+    routes: [
+      {
+        displayName: 'Product Journey',
+        icon: ShareIcon,
+        name: 'product-journey',
+        role: 'product',
+        showmenu: true,
+        exact: true,
+        route: '/product-journey',
+        component: ProductJourneyScreens,
+        routes: [
+          {
+            displayName: 'Detail Product Journey',
+            name: 'product-journey-detail',
+            role: 'product',
+            showmenu: false,
+            exact: true,
+            route: '/product-journey/:id/show',
+            component: ProductJourneyShowScreen,
           },
         ],
       },

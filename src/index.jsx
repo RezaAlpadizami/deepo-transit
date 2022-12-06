@@ -2,6 +2,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { extendTheme, ChakraProvider } from '@chakra-ui/react';
+import { StepsStyleConfig as Steps } from 'chakra-ui-steps';
 
 import './index.css';
 import './assets/styles/custom.css';
@@ -21,7 +22,12 @@ const colors = {
     500: '#246ee5',
   },
 };
-const theme = extendTheme({ colors });
+
+const components = {
+  Steps,
+};
+
+const theme = extendTheme({ colors, components });
 
 const store = RootStore.create({ isLogin: false });
 
