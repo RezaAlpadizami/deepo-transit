@@ -39,5 +39,5 @@
 }
 
 .css-1qozmav {
-  @apply border-blue-400 !important
+  @apply border-blue-400 my-0 py-4 !important
 }

@@ -4,7 +4,7 @@ import * as React from 'react';
 function Contents(props, { index, ...rest }) {
   const { dataGetJourney } = props;
   return (
-    <Flex height="100%" rounded="md" width="100%" {...rest}>
+    <Flex height="100%" rounded="md" width="100%" {...rest} position="relative">
       <div className="flex flex-col text-left gap-y-4">
         <h2 className="text-gray-400">Warehouse</h2>
         <div className="flex gap-x-72">

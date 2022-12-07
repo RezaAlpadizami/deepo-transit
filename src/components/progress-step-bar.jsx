@@ -1,14 +1,16 @@
 import React from 'react';
 
 import Moment from 'moment';
-import { ViewGridAddIcon, SwitchHorizontalIcon } from '@heroicons/react/solid';
+import { ViewGridAddIcon, SwitchHorizontalIcon, ShoppingCartIcon } from '@heroicons/react/solid';
 import { Step, Steps, useSteps } from 'chakra-ui-steps';
 import Contents from './Content';
 import '../assets/styles/custom.css';
 
 const steps = [
-  { label: 'Inbound', description: '25 JUL 2022', icon: ViewGridAddIcon },
-  { label: 'Relocate - Out', description: '25 JUL 2022', icon: SwitchHorizontalIcon },
+  { label: 'Inbound', icon: ViewGridAddIcon, requestId: '0001/JUL/2022' },
+  { label: 'Relocate - Out', icon: SwitchHorizontalIcon, requestId: '0001/AUG/2022' },
+  { label: 'Relocate - In', icon: SwitchHorizontalIcon, requestId: '0001/MAR/2022' },
+  { label: 'Outbound', icon: ShoppingCartIcon, requestId: '0001/MAR/2022' },
 ];
 
 export default function ProgressStepBar(props) {
@@ -18,20 +20,19 @@ export default function ProgressStepBar(props) {
     initialStep: 0,
   });
   return (
-    <Steps
-      orientation="vertical"
-      activeStep={activeStep}
-      checkIcon={ViewGridAddIcon}
-      onClickStep={step => setStep(step)}
-    >
-      {steps.map(({ label, icon }, index) => (
+    <Steps orientation="vertical" activeStep={activeStep} onClickStep={step => setStep(step)}>
+      {steps.map(({ label, icon, requestId }, index) => (
         <Step
           width="100%"
           label={label}
           description={Moment(dataGet.activity_date).format('DD MMM YYYY')}
           icon={icon}
           key={label}
+          position="relative"
         >
+          <div className="absolute -right-56 top-2 text-gray-400">
+            <p>{requestId}</p>
+          </div>
           <Contents dataGetJourney={dataGet} my={1} index={index} />
         </Step>
       ))}
