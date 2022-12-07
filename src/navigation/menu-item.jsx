@@ -1,14 +1,5 @@
 import React from 'react';
-import {
-  HomeIcon,
-  UserCircleIcon,
-  ArchiveIcon,
-  ServerIcon,
-  MenuAlt3Icon,
-  DesktopComputerIcon,
-  ClipboardListIcon,
-  ShareIcon,
-} from '@heroicons/react/solid';
+import { HomeIcon, UserCircleIcon, ArchiveIcon, ServerIcon, MenuAlt3Icon, ShareIcon } from '@heroicons/react/solid';
 
 const NotFound = React.lazy(() => import('../screens/home-screens/404'));
 const Home = React.lazy(() => import('../screens/home-screens/index'));

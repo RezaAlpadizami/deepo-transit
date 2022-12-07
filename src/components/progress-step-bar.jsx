@@ -14,29 +14,27 @@ const steps = [
 export default function ProgressStepBar(props) {
   const { dataGet } = props;
 
-  const { prevStep, nextStep, activeStep } = useSteps({
+  const { activeStep, setStep } = useSteps({
     initialStep: 0,
   });
   return (
-    <>
-      <Steps
-        orientation="vertical"
-        activeStep={activeStep}
-        checkIcon={ViewGridAddIcon}
-        onClick={activeStep === 0 ? nextStep : prevStep}
-      >
-        {steps.map(({ label, icon }, index) => (
-          <Step
-            width="100%"
-            label={label}
-            description={Moment(dataGet.activity_date).format('DD MMM YYYY')}
-            icon={icon}
-            key={label}
-          >
-            <Contents dataGetJourney={dataGet} my={1} index={index} />
-          </Step>
-        ))}
-      </Steps>
-    </>
+    <Steps
+      orientation="vertical"
+      activeStep={activeStep}
+      checkIcon={ViewGridAddIcon}
+      onClickStep={step => setStep(step)}
+    >
+      {steps.map(({ label, icon }, index) => (
+        <Step
+          width="100%"
+          label={label}
+          description={Moment(dataGet.activity_date).format('DD MMM YYYY')}
+          icon={icon}
+          key={label}
+        >
+          <Contents dataGetJourney={dataGet} my={1} index={index} />
+        </Step>
+      ))}
+    </Steps>
   );
 }

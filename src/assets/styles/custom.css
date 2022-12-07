@@ -19,13 +19,25 @@
 }
 
 .css-jqbi37[aria-current=step] {
-  @apply bg-white !important
+  @apply border-blue-500 bg-white !important
 }
 
 .css-62u96g {
   @apply font-bold !important
 }
 
+.css-jqbi37 {
+  @apply bg-white text-black border-blue-500 !important
+}
+
 .css-jqbi37[data-highlighted] {
   @apply bg-transparent !important
+}
+
+.css-k008qs > svg {
+  @apply text-blue-500
+}
+
+.css-1qozmav {
+  @apply border-blue-400 !important
 }
