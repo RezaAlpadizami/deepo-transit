@@ -40,8 +40,8 @@ function Screen(props) {
       </div>
 
       <div>
-        <h1 className="font-bold">Detail Product</h1>
-        <div className="flex gap-8 p-10 mt-6 bg-white rounded-[20px] w-[60%]">
+        <h1 className="font-bold text-[24px]">Detail Product</h1>
+        <div className="flex gap-24 p-10 mt-6 bg-white rounded-[20px] w-[98%]">
           <div>
             <InputDetail value={dataJourneyById.product_name} label="Name" />
             <InputDetail value={dataJourneyById.product_sku} label="SKU" />
@@ -53,8 +53,8 @@ function Screen(props) {
         </div>
       </div>
       <div className="mt-8">
-        <h1 className="font-bold">Product Journey</h1>
-        <div className="flex gap-8 p-10 mt-6 bg-white rounded-[20px] w-[60%]">
+        <h1 className="font-bold text-[24px]">Product Journey</h1>
+        <div className="flex gap-8 p-10 mt-6 bg-white rounded-[20px] w-[98%]">
           <div>
             <ProgressStepBar dataGet={dataJourneyById} />
           </div>

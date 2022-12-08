@@ -2,6 +2,10 @@
     @apply flex flex-row !important
 }
 
+.css-4ixs5p {
+  @apply text-[18px] !important
+}
+
 .css-17ug9r4 .css-4ixs5p {
     @apply mt-0.5 ml-6 
 }
@@ -11,7 +15,7 @@
 }
 
 .css-v0f33p {
-    @apply font-extrabold
+    @apply font-extrabold text-[20px] !important
 }
 
 .css-if6l71 {

@@ -20,12 +20,14 @@ export default function ProgressStepBar(props) {
     initialStep: 0,
   });
   return (
-    <Steps orientation="vertical" activeStep={activeStep} onClickStep={step => setStep(step)}>
+    <Steps orientation="vertical" activeStep={activeStep} col onClickStep={step => setStep(step)} fontSize="24px">
       {steps.map(({ label, icon, requestId }, index) => (
         <Step
           width="100%"
+          fontSize="20px"
           label={label}
           description={Moment(dataGet.activity_date).format('DD MMM YYYY')}
+          isCompletedStep={false}
           icon={icon}
           key={label}
           position="relative"
