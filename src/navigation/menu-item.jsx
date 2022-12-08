@@ -23,6 +23,10 @@ const MasterWarhouse = React.lazy(() => import('../screens/master-screens/wareho
 const MasterWarehouseAdd = React.lazy(() => import('../screens/master-screens/warehouse-screens/add'));
 const MasterWarehouseShow = React.lazy(() => import('../screens/master-screens/warehouse-screens/show'));
 const MasterWarehouseEdit = React.lazy(() => import('../screens/master-screens/warehouse-screens/edit'));
+
+const ProductInformation = React.lazy(() => import('../screens/product-screens/product-information-screens/index'));
+const ProductInformationShow = React.lazy(() => import('../screens/product-screens/product-information-screens/show'));
+
 export default [
   {
     displayName: 'Home',
@@ -199,6 +203,38 @@ export default [
             exact: true,
             route: '/master/category/:id/edit',
             component: CategoryScreenEdit,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    displayName: 'Product',
+    name: 'product',
+    role: 'product',
+    showmenu: true,
+    exact: true,
+    route: '/product',
+    component: ProductInformation,
+    routes: [
+      {
+        displayName: 'Product Information',
+        icon: HomeIcon,
+        name: 'product-information',
+        role: 'product',
+        showmenu: true,
+        exact: true,
+        route: '/product/product-information',
+        component: ProductInformation,
+        routes: [
+          {
+            displayName: 'Product Information Detail',
+            name: 'product-information',
+            role: 'product',
+            showmenu: false,
+            exact: true,
+            route: '/product/product-information/:id/show',
+            component: ProductInformationShow,
           },
         ],
       },

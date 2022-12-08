@@ -36,8 +36,7 @@ function Screen(props) {
       code: data.code,
       name: data.name,
     })
-      .then(res => {
-        console.log('res', res);
+      .then(() => {
         setLoading(false);
         Swal.fire({ text: 'Successfully Saved', icon: 'success' });
         navigate('/master/category');
