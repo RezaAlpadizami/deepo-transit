@@ -32,7 +32,7 @@ const baseStyleLabel = props => {
   };
 };
 const baseStyleDescription = props => ({
-  color: mode(`gray.800`, `gray.200`)(props),
+  color: mode(`gray.500`, `gray.200`)(props),
   marginTop: '2px',
   fontWeight: 'medium',
   marginLeft: '15px',
