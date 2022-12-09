@@ -13,11 +13,11 @@ import LoadingHover from '../../../components/loading-hover-component';
 import { StorageApi, WarehouseApi } from '../../../services/api-master';
 
 const schema = yup.object().shape({
-  bay: yup.string().nullable().required(),
-  code: yup.string().nullable().required(),
-  rack_number: yup.string().nullable().required(),
+  bay: yup.string().nullable().max(2).required(),
+  code: yup.string().nullable().max(7).required(),
+  rack_number: yup.string().nullable().max(1).required(),
   warehouse_id: yup.number().nullable().required(),
-  level: yup.string().nullable().required(),
+  level: yup.string().nullable().max(1).required(),
 });
 
 function Screen(props) {
@@ -61,12 +61,12 @@ function Screen(props) {
     setLoading(true);
     StorageApi.find(id)
       .then(res => {
-        setValue('bay', res.bay);
-        setValue('code', res.code);
-        setValue('rack_number', res.rack_number);
-        setValue('warehouse_id', res.warehouse_id);
-        setValue('level', res.level);
-        setWarhouseId(res.warehouse_id);
+        setValue('bay', res.data.bay);
+        setValue('code', res.data.code);
+        setValue('rack_number', res.data.rack_number);
+        setValue('warehouse_id', res.data.warehouse_id);
+        setValue('level', res.data.level);
+        setWarhouseId(res.data.warehouse_id);
         setLoading(false);
       })
       .catch(error => {

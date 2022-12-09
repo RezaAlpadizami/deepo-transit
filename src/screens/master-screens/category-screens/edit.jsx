@@ -37,8 +37,8 @@ function Screen(props) {
     setLoading(true);
     CategoryApi.find(id)
       .then(res => {
-        setValue('code', res.code);
-        setValue('name', res.name);
+        setValue('code', res.data.code);
+        setValue('name', res.data.name);
         setLoading(false);
       })
       .catch(error => {
@@ -51,8 +51,7 @@ function Screen(props) {
       code: data.code,
       name: data.name,
     })
-      .then(res => {
-        console.log('res update', res);
+      .then(() => {
         Swal.fire({ text: 'Successfully Saved', icon: 'success' });
         navigate(route.split('/').slice(0, 3).join('/'));
       })

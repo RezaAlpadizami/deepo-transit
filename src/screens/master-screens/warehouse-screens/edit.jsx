@@ -43,13 +43,13 @@ function Screen(props) {
   useEffect(() => {
     WarehouseApi.find(id)
       .then(res => {
-        setValue('name', res.name);
-        setValue('code', res.code);
-        setValue('address', res.address);
-        setValue('phone', res.phone);
-        setValue('capacity', res.capacity);
-        setValue('last_stock_opname', res.last_stock_opname ? Moment(res.start_date).toDate() : null);
-        setValue('location', res.location);
+        setValue('name', res.data.name);
+        setValue('code', res.data.code);
+        setValue('address', res.data.address);
+        setValue('phone', res.data.phone);
+        setValue('capacity', res.data.capacity);
+        setValue('last_stock_opname', res.data.last_stock_opname ? Moment(res.start_date).toDate() : null);
+        setValue('location', res.data.location);
       })
       .catch(error => {
         Swal.fire({ text: error?.message, icon: 'error' });
@@ -58,13 +58,13 @@ function Screen(props) {
 
   const onEditSaveWarehouse = data => {
     WarehouseApi.update(id, {
-      name: data.bay,
+      name: data.name,
       code: data.code,
       address: data.address,
       phone: data.phone,
       level: data.level,
-      capacity: data.capacity,
-      last_stock_opname: data.last_stock_opname ? Moment(data.start_date).format('YYYY-MM-DD') : null,
+      capacity: Number(data.capacity),
+      last_stock_opname: data.last_stock_opname ? Moment(data.last_stock_opname).format('YYYY-MM-DD') : null,
       location: data.location,
     })
       .then(() => {
