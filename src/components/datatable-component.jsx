@@ -71,12 +71,13 @@ function DataTable(props) {
           accessor: d.value,
           Cell: props => {
             const { value, row } = props;
+            console.log('row', row);
             if (d.type === 'date') {
               return Moment(value).format('DD MMM YYYY');
             }
             if (d.type === 'link') {
               return (
-                <Link type="button" className="mr-4 text-blue-400" href={`${to}/${row.original.id}/show`}>
+                <Link type="button" className="mr-4 text-blue-400" href={`${to}/${row.original.product_id}/show`}>
                   {value}
                 </Link>
               );

@@ -43,8 +43,8 @@ function Screen(props) {
           },
         ]}
         columns={[
-          { header: 'Request Number', value: 'request_number', copy: true },
-          { header: 'SKU', value: 'product_sku', copy: true, type: 'link' },
+          { header: 'Request Number', value: 'request_number', copy: true, type: 'link' },
+          { header: 'SKU', value: 'product_sku', copy: true },
           { header: 'Product Name', value: 'product_name', copy: true },
           { header: 'Activity Name', value: 'activity_name', copy: true },
           { header: 'Activity Date', value: 'activity_data', copy: true, type: 'date' },

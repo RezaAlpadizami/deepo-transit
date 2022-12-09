@@ -43,5 +43,18 @@
 }
 
 .css-1qozmav {
-  @apply border-blue-400 my-0 py-4 !important
+  @apply border-blue-400 my-0 !important
 }
+
+.css-1xyw0yv {
+  @apply ml-11 my-6
+}
+
+.css-jqbi37 {
+    @apply mr-5
+}
+
+.css-jqbi37[aria-current=step] {
+  @apply mr-5
+}
+
