@@ -77,7 +77,11 @@ function DataTable(props) {
             }
             if (d.type === 'link') {
               return (
-                <Link type="button" className="mr-4 text-blue-400" href={`${to}/${row.original.product_id}/show`}>
+                <Link
+                  type="button"
+                  className="mr-4 text-blue-400"
+                  href={`${to}/${row.original.product_id ? row.original.product_id : row.original.id}/show`}
+                >
                   {value}
                 </Link>
               );

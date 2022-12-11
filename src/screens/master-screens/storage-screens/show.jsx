@@ -54,14 +54,14 @@ function Screen(props) {
       </div>
 
       <div className="grid items-start justify-items-center w-[80%] gap-4 gap-y-12 ml-6 mb-4 grid-cols-2 mt-4">
-        <InputDetail value={dataStorageById.data?.code} label="Code" />
-        <InputDetail value={dataStorageById.data?.level} label="Level" />
-        <InputDetail value={dataStorageById.data?.rack_number} label="Rack" />
+        <InputDetail value={dataStorageById.code} label="Code" />
+        <InputDetail value={dataStorageById.level} label="Level" />
+        <InputDetail value={dataStorageById.rack_number} label="Rack" />
         <InputDetail
-          value={`${dataStorageById?.data?.warehouse?.name} ${dataStorageById?.data?.warehouse?.location}`}
+          value={`${dataStorageById?.warehouse?.name} ${dataStorageById?.warehouse?.location}`}
           label="Warehouse"
         />
-        <InputDetail value={dataStorageById.data?.bay} label="Bay" />
+        <InputDetail value={dataStorageById.bay} label="Bay" />
       </div>
       {loading && <LoadingHover fixed />}
     </div>
