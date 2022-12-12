@@ -28,6 +28,7 @@ function DataTable(props) {
     to,
     api,
     checkbox,
+    displayName,
     name,
     filters,
     onSort = () => {},
@@ -269,7 +270,7 @@ function DataTable(props) {
   const download = () => {
     setLoadingHover(true);
     const wb = XLSX.utils.table_to_book(document.getElementById('mytable'), {
-      sheet: `${name}`,
+      sheet: `${displayName}`,
     });
     const wbout = XLSX.write(wb, { bookType: 'xlsx', bookSST: true, type: 'binary' });
     function s2ab(data) {
@@ -282,9 +283,19 @@ function DataTable(props) {
     setTimeout(() => {
       setLoadingHover(false);
     }, 500);
-    return saveAs(new Blob([s2ab(wbout)], { type: 'application/octet-stream' }), `${name}.xlsx`);
+    return saveAs(
+      new Blob([s2ab(wbout)], { type: 'application/octet-stream' }),
+      `${
+        name
+          ? name.toLowerCase() === 'master'
+            ? 'Warehouse'
+            : name.toLowerCase() === 'product'
+            ? 'Product Information'
+            : ''
+          : displayName
+      }.xlsx`
+    );
   };
-
   const onReset = () => {
     reset();
     setFilterData({
@@ -346,7 +357,7 @@ function DataTable(props) {
       {filter && filter.length !== 0 && (
         <div className="">
           <div className="flex">
-            <h1 className="font-bold text-xl">{name}</h1>
+            <h1 className="font-bold text-xl">{displayName}</h1>
           </div>
           <div>
             <form>
@@ -428,7 +439,7 @@ function DataTable(props) {
           getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
           columns={allColumns}
           navTo={{ path: to, id: selectedFlatRows?.find(i => i)?.original.id }}
-          name={name}
+          name={displayName}
           onAdd={enableAction('add')}
           onEdit={enableAction('edit')}
           copyItem={allColumns.filter(i => i.id !== 'selection' && i.isVisible === true)}

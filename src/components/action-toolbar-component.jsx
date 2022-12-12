@@ -24,6 +24,7 @@ function ActionToolbar(props) {
     onEdit,
     name,
   } = props;
+
   const navigate = useNavigate();
   const [onOpen, setOnOpen] = useState(false);
   const [showHide, setShowHide] = useState(false);

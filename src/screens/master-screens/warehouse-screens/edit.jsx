@@ -43,13 +43,13 @@ function Screen(props) {
   useEffect(() => {
     WarehouseApi.find(id)
       .then(res => {
-        setValue('name', res.data.name);
-        setValue('code', res.data.code);
-        setValue('address', res.data.address);
-        setValue('phone', res.data.phone);
-        setValue('capacity', res.data.capacity);
-        setValue('last_stock_opname', res.data.last_stock_opname ? Moment(res.start_date).toDate() : null);
-        setValue('location', res.data.location);
+        setValue('name', res.name);
+        setValue('code', res.code);
+        setValue('address', res.address);
+        setValue('phone', res.phone);
+        setValue('capacity', res.capacity);
+        setValue('last_stock_opname', res.last_stock_opname ? Moment(res.start_date).toDate() : null);
+        setValue('location', res.location);
       })
       .catch(error => {
         Swal.fire({ text: error?.message, icon: 'error' });

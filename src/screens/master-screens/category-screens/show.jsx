@@ -28,7 +28,7 @@ function Screen(props) {
     CategoryApi.find(id)
       .then(res => {
         setLoading(false);
-        setDataCategoryById(res.data);
+        setDataCategoryById(res);
       })
       .catch(error => {
         setLoading(false);
