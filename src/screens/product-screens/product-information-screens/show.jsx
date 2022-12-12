@@ -17,6 +17,7 @@ function ShowScreen(props) {
   const [data, setData] = useState();
   const [dataJourney, setDataJourney] = useState([]);
   const [storageDetails, setStorageDetails] = useState([]);
+  const [totalJourney, setTotalJourney] = useState();
 
   useEffect(() => {
     Promise.allSettled([
@@ -30,6 +31,7 @@ function ShowScreen(props) {
       .then(result => {
         if (result[0].status === 'fulfilled' && result[1].status === 'fulfilled') {
           setDataJourney(result[0].value.journey);
+          setTotalJourney(Number(result[0].value.journey.length));
           setData(result[1].value);
           const filterWarehouse = [
             ...new Map(
@@ -42,11 +44,11 @@ function ShowScreen(props) {
               return {
                 list: result[1].value.product.product_info
                   .filter(s => s.warehouse_id === f)
-                  .map(i => {
+                  .map((i, idx) => {
                     return {
                       warehouse: i.warehouse_name,
                       warehouse_id: i.warehouse_id,
-                      total: 5,
+                      total_item: idx + 1,
                       storage: [
                         {
                           rack: i.rack,
@@ -60,7 +62,20 @@ function ShowScreen(props) {
               };
             }),
           };
-          setStorageDetails(body.storage_details);
+
+          setStorageDetails(
+            body.storage_details.map((i, idx) => {
+              return {
+                storage: i.list
+                  .filter(f => f.warehouse_id === filterWarehouse[idx])
+                  .map(m => {
+                    return m.storage[0];
+                  }),
+                warehouse: i.list.length > 0 ? i.list[idx].warehouse : '',
+                total: i.list.length > 0 ? i.list[idx].total_item : 0,
+              };
+            })
+          );
         } else if (result[0].status === 'rejected' && result[1].status === 'rejected') {
           Swal.fire({ text: 'Something Went Wrong', icon: 'error' });
         }
@@ -71,9 +86,10 @@ function ShowScreen(props) {
   }, []);
 
   const steps = dataJourney.length > 5 ? dataJourney.splice(-Number(`${dataJourney.length - 5}`)) : dataJourney;
-  const { activeStep } = useSteps({
-    initialStep: dataJourney.length,
+  const { activeStep = totalJourney - 1 } = useSteps({
+    totalJourney,
   });
+
   return (
     <>
       <div className="flex mb-12">
@@ -111,57 +127,53 @@ function ShowScreen(props) {
                 }`}
               >
                 <strong className="text-gray-400">Warehouse</strong>
-                {storageDetails.length > 0
-                  ? storageDetails.map(i => {
-                      return i.list.map(c => {
+                {storageDetails.map((i, idx) => {
+                  return (
+                    <>
+                      <div className="flex mb-2 mt-2" key={idx}>
+                        <strong>{i.warehouse}</strong>
+                        <div className="flex-1" />
+                        <strong className="mr-5">{i.total}</strong>
+                      </div>
+                      {i.storage.map((s, sIdx) => {
                         return (
-                          <>
-                            <div className="flex mb-2 mt-2">
-                              <strong>{c.warehouse}</strong>
-                              <div className="flex-1" />
-                              <strong className="mr-5">{c.total}</strong>
+                          <div className="grid grid-cols-8 " key={sIdx}>
+                            <div className="mb-3">
+                              <p className="mb-2 text-gray-400">Rack</p>
+                              <button type="button" className="bg-slate-300 outline outline-1 rounded-lg px-6">
+                                {s.rack}
+                              </button>
                             </div>
-                            {c.storage.map(s => {
-                              return (
-                                <div className="grid grid-cols-8 ">
-                                  <div className="mb-3">
-                                    <p className="mb-2 text-gray-400">Rack</p>
-                                    <button type="button" className="bg-slate-300 outline outline-1 rounded-lg px-6">
-                                      {s.rack}
-                                    </button>
-                                  </div>
-                                  <div className="mb-3">
-                                    <p className="mb-2 text-gray-400 w-20">Bay</p>
-                                    <button type="button" className="bg-slate-300 outline outline-1 rounded-lg px-6">
-                                      {s.bay}
-                                    </button>
-                                  </div>
-                                  <div>
-                                    <p className="mb-2 text-gray-400 w-20">Level</p>
-                                    <button type="button" className="bg-slate-300 outline outline-1 rounded-lg px-6">
-                                      {s.level}
-                                    </button>
-                                  </div>
-                                  <div className="col-span-4" />
-                                  <div className="my-auto mr-5 flex">
-                                    <div className="flex-1" />
-                                    <strong>{s.total}</strong>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </>
+                            <div className="mb-3">
+                              <p className="mb-2 text-gray-400 w-20">Bay</p>
+                              <button type="button" className="bg-slate-300 outline outline-1 rounded-lg px-6">
+                                {s.bay}
+                              </button>
+                            </div>
+                            <div>
+                              <p className="mb-2 text-gray-400 w-20">Level</p>
+                              <button type="button" className="bg-slate-300 outline outline-1 rounded-lg px-6">
+                                {s.level}
+                              </button>
+                            </div>
+                            <div className="col-span-4" />
+                            <div className="my-auto mr-5 flex">
+                              <div className="flex-1" />
+                              <strong>{s.total}</strong>
+                            </div>
+                          </div>
                         );
-                      });
-                    })
-                  : null}
+                      })}
+                    </>
+                  );
+                })}
               </div>
             </div>
           </div>
         </div>
         <div className="row-span-2 pl-1">
           <strong>Product Journey</strong>
-          <div className="bg-white h-full rounded-3xl mt-2 pt-10 pl-3 pr-3">
+          <div className="bg-white h-[95%] rounded-3xl mt-2 pt-10 pl-3 pr-3">
             <div className="pl-5">
               <Steps colorScheme="blue" size="lg" orientation="vertical" activeStep={activeStep}>
                 {steps.map(item => {
