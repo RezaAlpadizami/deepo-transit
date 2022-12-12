@@ -351,7 +351,7 @@ function DataTable(props) {
           <div>
             <form>
               <div className="px-4">
-                <div className="grid grid-cols-3 gap-4 mt-4">
+                <div className="grid grid-cols-6 gap-4 mt-4">
                   {filter.map((item, idx) => {
                     if (item.type === 'date_picker') {
                       return (

@@ -13,38 +13,47 @@ function Screen(props) {
           {
             name: 'product_id',
             label: 'Item Code',
+            col: 2,
           },
           {
             name: 'product_sku',
             label: 'SKU',
+            col: 2,
           },
           {
             name: 'product_name',
             label: 'Name',
+            col: 2,
           },
           {
             name: 'product_category',
             label: 'Category',
+            col: 1,
           },
           {
             name: 'qty',
             label: 'Qty',
+            col: 1,
           },
           {
             name: 'warehouse',
             label: 'Warehouse',
+            col: 1,
           },
           {
             name: 'rack',
             label: 'Rack',
+            col: 1,
           },
           {
             name: 'bay',
             label: 'Bay',
+            col: 1,
           },
           {
             name: 'level',
             label: 'level',
+            col: 1,
           },
         ]}
         columns={[
