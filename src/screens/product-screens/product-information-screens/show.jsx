@@ -5,7 +5,7 @@ import Swal from 'sweetalert2';
 import Moment from 'moment';
 import { Steps, Step, useSteps } from 'chakra-ui-steps';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ProductApi, WarehouseApi, StorageApi } from '../../../services/api-master';
+import { ProductInfoApi } from '../../../services/api-master';
 import InputDetail from '../../../components/input-detail-component';
 import RightLeftIcon from '../../../assets/images/right-left-arrow.svg';
 import LeftRightIcon from '../../../assets/images/left-right-arrow.svg';
@@ -49,79 +49,45 @@ const dummyJourney = [
   },
 ];
 
-const dummyProductInfo = [
-  {
-    warehouse_name: 'Gudang Pusat',
-    total_storage: '100',
-    storage: [
-      {
-        Rack: 'A',
-        Bay: '01',
-        Level: 'B',
-        total: '20',
-      },
-      {
-        Rack: 'A',
-        Bay: '02',
-        Level: 'C',
-        total: '30',
-      },
-    ],
-  },
-  {
-    warehouse_name: 'Gudang Pusat KCP',
-    total_storage: '80',
-    storage: [
-      {
-        Rack: 'A',
-        Bay: '01',
-        Level: 'B',
-        total: '20',
-      },
-      {
-        Rack: 'A',
-        Bay: '02',
-        Level: 'C',
-        total: '10',
-      },
-      {
-        Rack: 'B',
-        Bay: '01',
-        Level: 'B',
-        total: '20',
-      },
-      {
-        Rack: 'C',
-        Bay: '02',
-        Level: 'C',
-        total: '30',
-      },
-    ],
-  },
-];
-
 function ShowScreen(props) {
   const { displayName } = props;
   const navigate = useNavigate();
   const { id } = useParams();
   const [data, setData] = useState();
-  // const [warehouse, setWarehouse] = useState();
+  const [storageDetails, setStorageDetails] = useState([]);
 
   useEffect(() => {
-    Promise.allSettled([
-      ProductApi.find(id).then(res => {
-        return res.data;
-      }),
-      WarehouseApi.get().then(res => {
-        return res.data;
-      }),
-      StorageApi.get().then(res => {
-        return res.data;
-      }),
-    ])
-      .then(result => {
-        // setWarehouse(result[1].value);
-        setData(result[0].value);
+    ProductInfoApi.find(id)
+      .then(res => {
+        setData(res);
+        const filterWarehouse = [
+          ...new Map(res?.product.product_info.map(i => [JSON.stringify(i.warehouse_id), i.warehouse_id])).values(),
+        ];
+
+        const body = {
+          storage_details: filterWarehouse.map(f => {
+            return {
+              list: res.product.product_info
+                .filter(s => s.warehouse_id === f)
+                .map(i => {
+                  return {
+                    warehouse: i.warehouse_name,
+                    warehouse_id: i.warehouse_id,
+                    total: 5,
+                    storage: [
+                      {
+                        rack: i.rack,
+                        bay: i.bay,
+                        level: i.level,
+                        total: i.qty || 2,
+                      },
+                    ],
+                  };
+                }),
+            };
+          }),
+        };
+        setStorageDetails(body.storage_details);
       })
       .catch(error => {
         Swal.fire({ text: error?.message, icon: 'error' });
@@ -144,10 +110,10 @@ function ShowScreen(props) {
             <strong>Detail Product</strong>
             <div className="bg-white h-full rounded-2xl p-4 mt-3">
               <div className="grid ml-10 grid-cols-2 py-3">
-                <InputDetail value={data?.product_desc} label="Name" swapBold />
-                <InputDetail value={data?.product_desc} label="Category" swapBold />
-                <InputDetail value={data?.product_desc} label="SKU" swapBold />
-                <InputDetail value={data?.product_desc} label="Desc" swapBold />
+                <InputDetail value={data?.product.product_name} label="Name" swapBold />
+                <InputDetail value={data?.product.product_category} label="Category" swapBold />
+                <InputDetail value={data?.product.product_sku} label="SKU" swapBold />
+                <InputDetail value={data?.product.product_desc || '-'} label="Desc" swapBold />
               </div>
             </div>
           </div>
@@ -159,55 +125,59 @@ function ShowScreen(props) {
               <div className="flex bg-white rounded-2xl h-10 mt-2 px-5 py-2">
                 <p>Total Product</p>
                 <div className="flex-1" />
-                <strong className="mr-5">{data?.category_id}</strong>
+                <strong className="mr-5">{data?.qty}</strong>
               </div>
             </div>
             <div className="h-80">
               <div
                 className={`bg-white rounded-2xl mt-5 p-5 h-full ${
-                  dummyProductInfo.length > 1 ? 'overflow-y-scroll' : ''
+                  storageDetails.length > 1 ? 'overflow-y-scroll' : ''
                 }`}
               >
                 <strong className="text-gray-400">Warehouse</strong>
-                {dummyProductInfo.map(i => {
-                  return (
-                    <>
-                      <div className="flex mb-2 mt-2">
-                        <strong>{i.warehouse_name}</strong>
-                        <div className="flex-1" />
-                        <strong className="mr-5">{i.total_storage}</strong>
-                      </div>
-                      {i.storage.map(s => {
+                {storageDetails.length > 0
+                  ? storageDetails.map(i => {
+                      return i.list.map(c => {
                         return (
-                          <div className="grid grid-cols-4 ">
-                            <div className="mb-3">
-                              <p className="mb-2 text-gray-400 w-20">Rack</p>
-                              <button type="button" className="bg-slate-300 outline outline-1 rounded-lg px-6">
-                                {s.Rack}
-                              </button>
-                            </div>
-                            <div className="mb-3">
-                              <p className="mb-2 text-gray-400 w-20">Bay</p>
-                              <button type="button" className="bg-slate-300 outline outline-1 rounded-lg px-6">
-                                {s.Bay}
-                              </button>
-                            </div>
-                            <div>
-                              <p className="mb-2 text-gray-400 w-20">Level</p>
-                              <button type="button" className="bg-slate-300 outline outline-1 rounded-lg px-6">
-                                {s.Level}
-                              </button>
-                            </div>
-                            <div className="my-auto mr-5 flex">
+                          <>
+                            <div className="flex mb-2 mt-2">
+                              <strong>{c.warehouse}</strong>
                               <div className="flex-1" />
-                              <strong>{s.total}</strong>
+                              <strong className="mr-5">{c.total}</strong>
                             </div>
-                          </div>
+                            {c.storage.map(s => {
+                              return (
+                                <div className="grid grid-cols-4 ">
+                                  <div className="mb-3">
+                                    <p className="mb-2 text-gray-400">Rack</p>
+                                    <button type="button" className="bg-slate-300 outline outline-1 rounded-lg px-6">
+                                      {s.rack}
+                                    </button>
+                                  </div>
+                                  <div className="mb-3">
+                                    <p className="mb-2 text-gray-400 w-20">Bay</p>
+                                    <button type="button" className="bg-slate-300 outline outline-1 rounded-lg px-6">
+                                      {s.bay}
+                                    </button>
+                                  </div>
+                                  <div>
+                                    <p className="mb-2 text-gray-400 w-20">Level</p>
+                                    <button type="button" className="bg-slate-300 outline outline-1 rounded-lg px-6">
+                                      {s.level}
+                                    </button>
+                                  </div>
+                                  <div className="my-auto mr-5 flex">
+                                    <div className="flex-1" />
+                                    <strong>{s.total}</strong>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </>
                         );
-                      })}
-                    </>
-                  );
-                })}
+                      });
+                    })
+                  : null}
               </div>
             </div>
           </div>

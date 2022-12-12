@@ -1,5 +1,5 @@
 import React from 'react';
-import { ProductApi } from '../../../services/api-master';
+import { ProductInfoApi } from '../../../services/api-master';
 import Datatable from '../../../components/datatable-component';
 
 function Screen(props) {
@@ -8,29 +8,22 @@ function Screen(props) {
   return (
     <div className="">
       <Datatable
+        identifierProperties="product_id"
         filters={[
           {
-            name: 'item_code',
+            name: 'product_id',
             label: 'Item Code',
           },
           {
-            name: 'sku',
+            name: 'product_sku',
             label: 'SKU',
           },
           {
-            name: 'name',
+            name: 'product_name',
             label: 'Name',
           },
           {
-            name: 'name',
-            label: 'Name',
-          },
-          {
-            name: 'sku',
-            label: 'SKU',
-          },
-          {
-            name: 'category',
+            name: 'product_category',
             label: 'Category',
           },
           {
@@ -55,12 +48,16 @@ function Screen(props) {
           },
         ]}
         columns={[
-          { header: 'Item Code', value: 'sku', copy: true, type: 'link' },
-          { header: 'SKU', value: 'product_name', copy: true },
-          { header: 'Name', value: 'category_id', copy: true },
-          { header: 'Category', value: 'product_desc', copy: true },
-          { header: 'Description', value: 'description', copy: true },
-          { header: 'Qty', value: 'quantity', copy: true },
+          // { header: 'Item Code', value: 'product_id', copy: true, type: 'link' },
+          { header: 'SKU', value: 'product_sku', copy: true, type: 'link' },
+          { header: 'Name', value: 'product_name', copy: true },
+          { header: 'Category', value: 'product_category', copy: true },
+          { header: 'Description', value: 'product_desc', copy: true },
+          { header: 'Qty', value: 'qty', copy: true },
+          { header: 'warehouse', value: 'warehouse' },
+          { header: 'rack', value: 'rack' },
+          { header: 'bay', value: 'bay' },
+          { header: 'level', value: 'level' },
         ]}
         toolbar={{
           action: {
@@ -69,7 +66,7 @@ function Screen(props) {
             'save-to-excel': true,
           },
         }}
-        api={ProductApi}
+        api={ProductInfoApi}
         to={route}
         name={displayName}
         checkbox

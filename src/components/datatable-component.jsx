@@ -32,6 +32,7 @@ function DataTable(props) {
     name,
     filters,
     onSort = () => {},
+    identifierProperties = 'id',
   } = props;
 
   const {
@@ -77,7 +78,11 @@ function DataTable(props) {
             }
             if (d.type === 'link') {
               return (
-                <Link type="button" className="mr-4 text-blue-400" href={`${to}/${row.original.id}/show`}>
+                <Link
+                  type="button"
+                  className="mr-4 text-blue-400"
+                  href={`${to}/${row.original[identifierProperties]}/show`}
+                >
                   {value}
                 </Link>
               );
