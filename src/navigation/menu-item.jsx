@@ -1,5 +1,5 @@
 import React from 'react';
-import { HomeIcon, UserCircleIcon, ArchiveIcon, ServerIcon, MenuAlt3Icon } from '@heroicons/react/solid';
+import { HomeIcon, UserCircleIcon, ArchiveIcon, ServerIcon, MenuAlt3Icon, ShareIcon } from '@heroicons/react/solid';
 
 const NotFound = React.lazy(() => import('../screens/home-screens/404'));
 const Home = React.lazy(() => import('../screens/home-screens/index'));
@@ -27,6 +27,9 @@ const MasterWarehouseEdit = React.lazy(() => import('../screens/master-screens/w
 const ProductInformation = React.lazy(() => import('../screens/product-screens/product-information-screens/index'));
 const ProductInformationShow = React.lazy(() => import('../screens/product-screens/product-information-screens/show'));
 
+const ProductJourneyScreens = React.lazy(() => import('../screens/product-screens/product-journey-screens/index'));
+const ProductJourneyShowScreen = React.lazy(() => import('../screens/product-screens/product-journey-screens/show'));
+
 export default [
   {
     displayName: 'Home',
@@ -37,7 +40,6 @@ export default [
     route: '/',
     component: Home,
   },
-
   {
     displayName: 'Master',
     name: 'master',
@@ -215,6 +217,7 @@ export default [
     showmenu: true,
     exact: true,
     route: '/product',
+
     component: ProductInformation,
     routes: [
       {
@@ -235,6 +238,27 @@ export default [
             exact: true,
             route: '/product/product-information/:id/show',
             component: ProductInformationShow,
+          },
+          {
+            displayName: 'Product Journey',
+            icon: ShareIcon,
+            name: 'product-journey',
+            role: 'product',
+            showmenu: true,
+            exact: true,
+            route: '/product-journey',
+            component: ProductJourneyScreens,
+            routes: [
+              {
+                displayName: 'Detail Product Journey',
+                name: 'product-journey-detail',
+                role: 'product',
+                showmenu: false,
+                exact: true,
+                route: '/product-journey/:id/show',
+                component: ProductJourneyShowScreen,
+              },
+            ],
           },
         ],
       },

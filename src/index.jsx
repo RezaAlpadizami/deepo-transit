@@ -3,7 +3,9 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { extendTheme, ChakraProvider } from '@chakra-ui/react';
 import { StepsStyleConfig as Steps } from 'chakra-ui-steps';
+
 import { mode } from '@chakra-ui/theme-tools';
+
 import './index.css';
 import './assets/styles/custom.css';
 import Context from './context';
@@ -90,6 +92,7 @@ const CustomSteps = {
 const components = {
   Steps: CustomSteps,
 };
+
 const theme = extendTheme({ colors, components });
 
 const store = RootStore.create({ isLogin: false });

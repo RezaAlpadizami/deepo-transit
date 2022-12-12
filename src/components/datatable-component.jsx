@@ -21,7 +21,6 @@ import DatePicker from './datepicker-component';
 function DataTable(props) {
   const {
     columns: propsColumn = [],
-    onChangePage = () => {},
     limit = 10,
     loading = false,
     toolbar,
@@ -73,6 +72,7 @@ function DataTable(props) {
           accessor: d.value,
           Cell: props => {
             const { value, row } = props;
+            console.log('row', row);
             if (d.type === 'date') {
               return Moment(value).format('DD MMM YYYY');
             }
@@ -147,9 +147,10 @@ function DataTable(props) {
       setFilter([...filters]);
     }
   }, [filters]);
+
   const changePage = page => {
     setPages(page);
-    onChangePage(page, (page - 1) * limit, selectedFlatRows);
+    setFilterData({ ...filterData, offset: (page - 1) * limit });
   };
 
   const isActionToolbarExclude = action => {
