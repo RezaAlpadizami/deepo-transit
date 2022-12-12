@@ -1,21 +1,21 @@
-.css-17ug9r4 {
-    @apply flex flex-row !important
+.css-kcf2wt .css-17ug9r4 {
+    @apply flex flex-row 
 }
 
-.css-4ixs5p {
-  @apply text-[18px] !important
+.css-17ug9r4 .css-4ixs5p {
+  @apply text-[18px]
 }
 
 .css-17ug9r4 .css-4ixs5p {
     @apply mt-0.5 ml-6 
 }
 
-.css-n2fr4v {
-    @apply mt-0.5 ml-6 !important
+.css-17ug9r4 .css-n2fr4v {
+    @apply mt-0.5 ml-6 
 }
 
-.css-v0f33p {
-    @apply font-extrabold text-[20px] !important
+.css-17ug9r4 .css-v0f33p {
+    @apply font-extrabold text-[20px]
 }
 
 .css-if6l71 {
@@ -23,27 +23,34 @@
 }
 
 .css-jqbi37[aria-current=step] {
-  @apply border-blue-500 bg-white !important
+  @apply border-blue-500 bg-white
 }
 
 .css-62u96g {
-  @apply font-bold !important
+  @apply font-bold
 }
 
-.css-jqbi37 {
-  @apply bg-white text-black border-blue-500 !important
+.css-h78qna .css-kcf2wt .css-jqbi37 {
+  @apply bg-white text-black border-blue-500 
+}
+.css-h78qna .css-kcf2wt .css-jqbi37 {
+  @apply bg-white text-black border-blue-500 hover:border-blue-500
 }
 
-.css-jqbi37[data-highlighted] {
-  @apply bg-transparent !important
+.css-455g1w .css-kcf2wt .css-jqbi37 {
+  @apply bg-white text-black border-blue-500 hover:border-blue-500
 }
 
 .css-k008qs > svg {
   @apply text-blue-500
 }
 
-.css-1qozmav {
-  @apply border-blue-400 my-0 !important
+.css-h78qna .css-1qozmav {
+  @apply border-blue-400 my-0
+}
+
+.css-i13cmg .css-455g1w .css-1qozmav {
+  @apply border-blue-400 my-0 
 }
 
 .css-1xyw0yv {

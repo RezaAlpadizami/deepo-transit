@@ -37,8 +37,8 @@ function Screen(props) {
     setLoading(true);
     CategoryApi.find(id)
       .then(res => {
-        setValue('code', res.data.code);
-        setValue('name', res.data.name);
+        setValue('code', res.code);
+        setValue('name', res.name);
         setLoading(false);
       })
       .catch(error => {

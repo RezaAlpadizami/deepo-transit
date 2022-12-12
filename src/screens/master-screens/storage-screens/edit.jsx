@@ -61,12 +61,12 @@ function Screen(props) {
     setLoading(true);
     StorageApi.find(id)
       .then(res => {
-        setValue('bay', res.data.bay);
-        setValue('code', res.data.code);
-        setValue('rack_number', res.data.rack_number);
-        setValue('warehouse_id', res.data.warehouse_id);
-        setValue('level', res.data.level);
-        setWarhouseId(res.data.warehouse_id);
+        setValue('bay', res.bay);
+        setValue('code', res.code);
+        setValue('rack_number', res.rack_number);
+        setValue('warehouse_id', res.warehouse_id);
+        setValue('level', res.level);
+        setWarhouseId(res.warehouse_id);
         setLoading(false);
       })
       .catch(error => {
