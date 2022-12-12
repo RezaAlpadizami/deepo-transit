@@ -439,7 +439,8 @@ function DataTable(props) {
           getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
           columns={allColumns}
           navTo={{ path: to, id: selectedFlatRows?.find(i => i)?.original.id }}
-          name={displayName}
+          displayName={displayName}
+          name={name}
           onAdd={enableAction('add')}
           onEdit={enableAction('edit')}
           copyItem={allColumns.filter(i => i.id !== 'selection' && i.isVisible === true)}
