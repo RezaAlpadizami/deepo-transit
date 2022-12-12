@@ -46,7 +46,7 @@ export default [
     role: 'master',
     showmenu: true,
     exact: true,
-    route: '/master/warehouse',
+    route: '/master',
     component: MasterWarhouse,
     routes: [
       {
