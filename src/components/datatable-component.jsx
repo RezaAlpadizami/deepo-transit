@@ -72,11 +72,10 @@ function DataTable(props) {
           accessor: d.value,
           Cell: props => {
             const { value, row } = props;
-            console.log('row', row);
             if (d.type === 'date') {
               return Moment(value).format('DD MMM YYYY');
             }
-            if (d.type === 'link') {
+            if (d.type === 'link' && to) {
               return (
                 <Link
                   type="button"
@@ -92,7 +91,7 @@ function DataTable(props) {
           },
         };
       }),
-    [JSON.stringify(propsColumn)]
+    [JSON.stringify(propsColumn), to]
   );
 
   const {
@@ -234,7 +233,7 @@ function DataTable(props) {
       selectedFlatRows.map(d => {
         return new Promise((resolve, reject) => {
           api
-            .delete(d.values.id)
+            .delete(d.original[identifierProperties])
             .then(r => resolve(r))
             .catch(e => reject(e));
         });
@@ -242,20 +241,28 @@ function DataTable(props) {
     ]).then(result => {
       const success = [];
       const failed = [];
-      result.forEach(r => {
-        if (r.status === 'fulfilled') {
-          success.push(true);
-          setLoadingHover(false);
-        } else {
-          result.reason.data.error.api.map(m => failed.push(m));
-        }
-      });
-
+      if (result.value) {
+        result.forEach(r => {
+          if (r.status === 'fulfilled') {
+            success.push(true);
+            setLoadingHover(false);
+          } else {
+            result.reason.data.error.api.map(m => failed.push(m));
+            failed.push(true);
+          }
+        });
+      } else if (result.value === 'undefined') {
+        Swal.fire({ text: `Something When Wrong`, icon: 'error' });
+      }
       if (success.length > 0) {
         Swal.fire({ text: 'Data Deleted Successfully', icon: 'success' });
       } else if (failed.length > 0) {
-        Swal.fire({ text: 'Something Went Wrong', icon: 'success' });
+        Swal.fire({ text: 'Something Went Wrong', icon: 'error' });
       }
+      setFilterData(prev => ({
+        ...prev,
+        offset: 0,
+      }));
     });
   };
 

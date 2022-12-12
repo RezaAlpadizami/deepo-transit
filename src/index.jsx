@@ -37,7 +37,7 @@ const baseStyleDescription = props => ({
   color: mode(`gray.500`, `gray.200`)(props),
   marginTop: '2px',
   fontWeight: 'medium',
-  marginLeft: '15px',
+  marginLeft: '10px',
   fontSize: 'xs',
   wordSpacing: '50px',
 });

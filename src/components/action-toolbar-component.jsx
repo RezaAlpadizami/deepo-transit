@@ -148,7 +148,7 @@ function ActionToolbar(props) {
                   Delete Data
                 </Button>
               </div>
-              <div className={`my-5 ${selectedData.length > 5 ? 'overflow-y-auto' : ''} w-full place-content-center `}>
+              <div className={`my-5 ${selectedData.length > 5 ? 'overflow-y-auto' : ''} flex justify-center`}>
                 <DeletedList datas={selectedData} columnsData={columns} />
               </div>
             </div>

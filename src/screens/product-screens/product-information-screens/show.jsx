@@ -5,98 +5,74 @@ import Swal from 'sweetalert2';
 import Moment from 'moment';
 import { Steps, Step, useSteps } from 'chakra-ui-steps';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ProductInfoApi } from '../../../services/api-master';
+import { ProductInfoApi, ProductJourney } from '../../../services/api-master';
 import InputDetail from '../../../components/input-detail-component';
 import RightLeftIcon from '../../../assets/images/right-left-arrow.svg';
 import LeftRightIcon from '../../../assets/images/left-right-arrow.svg';
-
-const dummyJourney = [
-  {
-    activity_name: 'Inbound',
-    request_number: '001/DES/2002',
-    date: '2022-12-08T02:33:03.449Z',
-    status: 'done',
-  },
-  {
-    activity_name: 'Relocate - In',
-    request_number: '002/DES/2003',
-    date: '2022-12-01T02:33:03.449Z',
-    status: 'done',
-  },
-  {
-    activity_name: 'Relocate - Out',
-    request_number: '003/JUN/2011',
-    date: '2022-11-08T02:33:03.449Z',
-    status: 'done',
-  },
-  {
-    activity_name: 'Outbond',
-    request_number: '001/AUG/2022',
-    date: '2022-12-20T02:33:03.449Z',
-    status: 'pending',
-  },
-  {
-    activity_name: 'Outbond',
-    request_number: '001/OKT/2022',
-    date: '2022-12-20T02:33:03.449Z',
-    status: 'pending',
-  },
-  {
-    activity_name: 'Outbond',
-    request_number: '001/OKT/2022',
-    date: '2022-12-20T02:33:03.449Z',
-    status: 'pending',
-  },
-];
 
 function ShowScreen(props) {
   const { displayName } = props;
   const navigate = useNavigate();
   const { id } = useParams();
   const [data, setData] = useState();
+  const [dataJourney, setDataJourney] = useState([]);
   const [storageDetails, setStorageDetails] = useState([]);
 
   useEffect(() => {
-    ProductInfoApi.find(id)
-      .then(res => {
-        setData(res);
-        const filterWarehouse = [
-          ...new Map(res?.product.product_info.map(i => [JSON.stringify(i.warehouse_id), i.warehouse_id])).values(),
-        ];
+    Promise.allSettled([
+      ProductJourney.find(id).then(res => {
+        return res;
+      }),
+      ProductInfoApi.find(id).then(res => {
+        return res;
+      }),
+    ])
+      .then(result => {
+        if (result[0].status === 'fulfilled' && result[1].status === 'fulfilled') {
+          setDataJourney(result[0].value.journey);
+          setData(result[1].value);
+          const filterWarehouse = [
+            ...new Map(
+              result[1].value?.product.product_info.map(i => [JSON.stringify(i.warehouse_id), i.warehouse_id])
+            ).values(),
+          ];
 
-        const body = {
-          storage_details: filterWarehouse.map(f => {
-            return {
-              list: res.product.product_info
-                .filter(s => s.warehouse_id === f)
-                .map(i => {
-                  return {
-                    warehouse: i.warehouse_name,
-                    warehouse_id: i.warehouse_id,
-                    total: 5,
-                    storage: [
-                      {
-                        rack: i.rack,
-                        bay: i.bay,
-                        level: i.level,
-                        total: i.qty || 2,
-                      },
-                    ],
-                  };
-                }),
-            };
-          }),
-        };
-        setStorageDetails(body.storage_details);
+          const body = {
+            storage_details: filterWarehouse.map(f => {
+              return {
+                list: result[1].value.product.product_info
+                  .filter(s => s.warehouse_id === f)
+                  .map(i => {
+                    return {
+                      warehouse: i.warehouse_name,
+                      warehouse_id: i.warehouse_id,
+                      total: 5,
+                      storage: [
+                        {
+                          rack: i.rack,
+                          bay: i.bay,
+                          level: i.level,
+                          total: i.qty || 2,
+                        },
+                      ],
+                    };
+                  }),
+              };
+            }),
+          };
+          setStorageDetails(body.storage_details);
+        } else if (result[0].status === 'rejected' && result[1].status === 'rejected') {
+          Swal.fire({ text: 'Something Went Wrong', icon: 'error' });
+        }
       })
       .catch(error => {
         Swal.fire({ text: error?.message, icon: 'error' });
       });
   }, []);
 
-  const steps = dummyJourney.length > 5 ? dummyJourney.splice(-Number(`${dummyJourney.length - 5}`)) : dummyJourney;
+  const steps = dataJourney.length > 5 ? dataJourney.splice(-Number(`${dataJourney.length - 5}`)) : dataJourney;
   const { activeStep } = useSteps({
-    initialStep: 1,
+    initialStep: dataJourney.length,
   });
   return (
     <>
@@ -147,7 +123,7 @@ function ShowScreen(props) {
                             </div>
                             {c.storage.map(s => {
                               return (
-                                <div className="grid grid-cols-4 ">
+                                <div className="grid grid-cols-8 ">
                                   <div className="mb-3">
                                     <p className="mb-2 text-gray-400">Rack</p>
                                     <button type="button" className="bg-slate-300 outline outline-1 rounded-lg px-6">
@@ -166,6 +142,7 @@ function ShowScreen(props) {
                                       {s.level}
                                     </button>
                                   </div>
+                                  <div className="col-span-4" />
                                   <div className="my-auto mr-5 flex">
                                     <div className="flex-1" />
                                     <strong>{s.total}</strong>
@@ -191,19 +168,19 @@ function ShowScreen(props) {
                   return (
                     <Step
                       icon={() =>
-                        item.activity_name.toLowerCase() === 'inbound' ? (
+                        item.status.toLowerCase() === 'inbound' ? (
                           <ArchiveIcon className="h-8 stroke-[#5081ED]" />
-                        ) : item.activity_name.toLowerCase() === 'relocate - in' ? (
+                        ) : item.status.toLowerCase() === 'relocate - in' ? (
                           <img className="h-8" style={{ transform: 'scaleX(-1)' }} alt="right" src={LeftRightIcon} />
-                        ) : item.activity_name.toLowerCase() === 'relocate - out' ? (
+                        ) : item.status.toLowerCase() === 'relocate - out' ? (
                           <img className="h-8" alt="right" src={RightLeftIcon} />
                         ) : (
                           <ShoppingCartIcon className="h-8 stroke-[#5081ED]" />
                         )
                       }
-                      label={item.activity_name}
+                      label={item.status}
                       description={`${item.request_number} ${Moment(item.date).format('DD-MMM-YYYY')}`}
-                      key={item.activity_name}
+                      key={item.status}
                     />
                   );
                 })}
@@ -214,7 +191,7 @@ function ShowScreen(props) {
                 <Button
                   type="button"
                   size="sm"
-                  onClick={activeStep === steps.length ? () => navigate(`/product-journey/${1}/show`) : () => {}}
+                  onClick={activeStep === steps.length ? () => navigate(`/product-journey/${id}/show`) : () => {}}
                   className={`${
                     activeStep === steps.length ? 'bg-[#232323] text-white ' : 'bg-gray-500 text-gray-200 '
                   } border border-gray-500 text-md rounded-xl border-3 py-1 px-8 hover:bg-black mt-5`}

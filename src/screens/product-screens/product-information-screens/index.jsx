@@ -48,7 +48,6 @@ function Screen(props) {
           },
         ]}
         columns={[
-          // { header: 'Item Code', value: 'product_id', copy: true, type: 'link' },
           { header: 'SKU', value: 'product_sku', copy: true, type: 'link' },
           { header: 'Name', value: 'product_name', copy: true },
           { header: 'Category', value: 'product_category', copy: true },

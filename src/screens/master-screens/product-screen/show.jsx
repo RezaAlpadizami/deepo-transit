@@ -18,7 +18,7 @@ function ShowScreen(props) {
   useEffect(() => {
     ProductApi.find(id)
       .then(res => {
-        setData(res.data);
+        setData(res);
       })
       .catch(error => {
         Swal.fire({ text: error?.message, icon: 'error' });
