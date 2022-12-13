@@ -3,7 +3,7 @@ import { ProductInfoApi } from '../../../services/api-master';
 import Datatable from '../../../components/datatable-component';
 
 function Screen(props) {
-  const { route, displayName, name } = props;
+  const { route, displayName } = props;
 
   return (
     <div className="">
@@ -76,7 +76,6 @@ function Screen(props) {
         }}
         api={ProductInfoApi}
         to={route}
-        name={name}
         displayName={displayName}
         checkbox
       />

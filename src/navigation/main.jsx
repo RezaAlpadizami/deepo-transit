@@ -47,7 +47,7 @@ function Content() {
                 <Route
                   exact={item.exact}
                   path={item.route}
-                  element={<item.component route={item.route} displayName={item.displayName} name={item.name} />}
+                  element={<item.component route={item.route} displayName={item.displayName} />}
                 />
               );
             } else {
