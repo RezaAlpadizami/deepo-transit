@@ -22,7 +22,6 @@ function ActionToolbar(props) {
     copyItem,
     onAdd,
     onEdit,
-    name,
     displayName,
   } = props;
 
@@ -83,14 +82,7 @@ function ActionToolbar(props) {
           onClick={() => navigate(`${navTo?.path}/add`)}
           className="bg-[#232323] border border-gray-500 text-md rounded-xl border-3 py-1 px-4 text-white hover:bg-black"
         >
-          + Add{' '}
-          {name
-            ? name.toLowerCase() === 'master'
-              ? 'Warehouse'
-              : name.toLowerCase() === 'product'
-              ? 'Product Information'
-              : ''
-            : displayName}
+          + Add {displayName}
         </Button>
       )}
       {onDownload && (

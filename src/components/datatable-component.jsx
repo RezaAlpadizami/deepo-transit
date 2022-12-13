@@ -283,18 +283,7 @@ function DataTable(props) {
     setTimeout(() => {
       setLoadingHover(false);
     }, 500);
-    return saveAs(
-      new Blob([s2ab(wbout)], { type: 'application/octet-stream' }),
-      `${
-        name
-          ? name.toLowerCase() === 'master'
-            ? 'Warehouse'
-            : name.toLowerCase() === 'product'
-            ? 'Product Information'
-            : ''
-          : displayName
-      }.xlsx`
-    );
+    return saveAs(new Blob([s2ab(wbout)], { type: 'application/octet-stream' }), `${displayName}.xlsx`);
   };
   const onReset = () => {
     reset();

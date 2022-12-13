@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@chakra-ui/react';
-import { ArchiveIcon, ShoppingCartIcon } from '@heroicons/react/outline';
+import { ArchiveIcon, ChevronLeftIcon, ShoppingCartIcon } from '@heroicons/react/outline';
 import Swal from 'sweetalert2';
 import Moment from 'moment';
 import { Steps, Step, useSteps } from 'chakra-ui-steps';
@@ -93,6 +93,9 @@ function ShowScreen(props) {
   return (
     <>
       <div className="flex mb-12">
+        <button type="button">
+          <ChevronLeftIcon className="pointer-events-auto h-10 stroke-2" onClick={() => navigate(-1)} />
+        </button>
         <h1 className="font-bold text-3xl">{displayName}</h1>
         <div className="flex-1" />
       </div>
@@ -100,8 +103,8 @@ function ShowScreen(props) {
         <div className="col-span-2">
           <div className="col-span-2 px-4">
             <strong>Detail Product</strong>
-            <div className="bg-white h-full rounded-2xl p-4 mt-3">
-              <div className="grid ml-10 grid-cols-2 py-3">
+            <div className="bg-white h-full rounded-2xl mt-3">
+              <div className="grid ml-10 grid-cols-2 pb-5">
                 <InputDetail value={data?.product.product_name} label="Name" swapBold />
                 <InputDetail value={data?.product.product_category} label="Category" swapBold />
                 <InputDetail value={data?.product.product_sku} label="SKU" swapBold />
@@ -120,7 +123,7 @@ function ShowScreen(props) {
                 <strong className="mr-5">{data?.qty}</strong>
               </div>
             </div>
-            <div className="h-80">
+            <div className="h-[300px] pb-4">
               <div
                 className={`bg-white rounded-2xl mt-5 p-5 h-full ${
                   storageDetails.length > 1 ? 'overflow-y-scroll' : ''

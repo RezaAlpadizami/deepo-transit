@@ -45,9 +45,8 @@ export default [
     name: 'master',
     role: 'master',
     showmenu: true,
-    exact: true,
+    exact: false,
     route: '/master/warehouse',
-    component: MasterWarhouse,
     routes: [
       {
         displayName: 'Warehouse',
@@ -216,8 +215,7 @@ export default [
     role: 'product',
     showmenu: true,
     exact: true,
-    route: '/product/information',
-    component: ProductInformation,
+    route: '/product/product-information',
     routes: [
       {
         displayName: 'Product Information',
@@ -230,7 +228,7 @@ export default [
         component: ProductInformation,
         routes: [
           {
-            displayName: 'Product Information Detail',
+            displayName: 'Detail Product Information',
             name: 'product-information',
             role: 'product',
             showmenu: false,
