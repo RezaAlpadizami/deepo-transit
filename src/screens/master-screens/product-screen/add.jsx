@@ -5,7 +5,7 @@ import { Button } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import Swal from 'sweetalert2';
-import LoadingHover from '../../../components/loading-component';
+import LoadingHover from '../../../components/loading-hover-component';
 import TextArea from '../../../components/textarea-component';
 import { ProductApi, CategoryApi } from '../../../services/api-master';
 import Select from '../../../components/select-component';

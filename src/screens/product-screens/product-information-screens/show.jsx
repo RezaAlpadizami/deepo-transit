@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@chakra-ui/react';
-import { ArchiveIcon, ChevronLeftIcon, ShoppingCartIcon } from '@heroicons/react/outline';
+import { ChevronLeftIcon, ShoppingCartIcon, ArchiveIcon } from '@heroicons/react/outline';
 import Swal from 'sweetalert2';
 import Moment from 'moment';
-import { Steps, Step, useSteps } from 'chakra-ui-steps';
+import { Steps, Step } from 'chakra-ui-steps';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ProductInfoApi, ProductJourney } from '../../../services/api-master';
 import InputDetail from '../../../components/input-detail-component';
 import RightLeftIcon from '../../../assets/images/right-left-arrow.svg';
 import LeftRightIcon from '../../../assets/images/left-right-arrow.svg';
+import LoadingComponent from '../../../components/loading-component';
 
 function ShowScreen(props) {
   const { displayName } = props;
@@ -17,9 +18,12 @@ function ShowScreen(props) {
   const [data, setData] = useState();
   const [dataJourney, setDataJourney] = useState([]);
   const [storageDetails, setStorageDetails] = useState([]);
-  const [totalJourney, setTotalJourney] = useState();
+  const [loading, setLoading] = useState(false);
+  const [loadingJourney, setLoadingJourney] = useState(false);
 
   useEffect(() => {
+    setLoading(true);
+    setLoadingJourney(true);
     Promise.allSettled([
       ProductJourney.find(id).then(res => {
         return res;
@@ -30,17 +34,15 @@ function ShowScreen(props) {
     ])
       .then(result => {
         if (result[0].status === 'fulfilled' && result[1].status === 'fulfilled') {
-          setDataJourney(result[0].value.journey);
-          setTotalJourney(Number(result[0].value.journey.length));
           setData(result[1].value);
-          const filterWarehouse = [
+          const filterWarehouseInfo = [
             ...new Map(
               result[1].value?.product.product_info.map(i => [JSON.stringify(i.warehouse_id), i.warehouse_id])
             ).values(),
           ];
 
           const body = {
-            storage_details: filterWarehouse.map(f => {
+            storage_details: filterWarehouseInfo.map(f => {
               return {
                 list: result[1].value.product.product_info
                   .filter(s => s.warehouse_id === f)
@@ -63,21 +65,42 @@ function ShowScreen(props) {
             }),
           };
 
-          setStorageDetails(
-            body.storage_details.map((i, idx) => {
+          if (body.storage_details.length > 0) {
+            setStorageDetails(
+              body.storage_details.map((i, idx) => {
+                return {
+                  storage: i.list
+                    .filter(f => f.warehouse_id === filterWarehouseInfo[idx])
+                    .map(m => {
+                      return m.storage[0];
+                    }),
+                  warehouse: i.list.length > 0 ? i.list[idx]?.warehouse : '',
+                  total: i.list.length > 0 ? i.list[idx]?.total_item : 0,
+                };
+              })
+            );
+          }
+
+          setDataJourney(
+            result[0].value.journey.map(i => {
               return {
-                storage: i.list
-                  .filter(f => f.warehouse_id === filterWarehouse[idx])
-                  .map(m => {
-                    return m.storage[0];
-                  }),
-                warehouse: i.list.length > 0 ? i.list[idx].warehouse : '',
-                total: i.list.length > 0 ? i.list[idx].total_item : 0,
+                activity_name: i.activity_name,
+                request_number: '001/DES/2002',
+                date: i.activity_date,
               };
             })
           );
-        } else if (result[0].status === 'rejected' && result[1].status === 'rejected') {
-          Swal.fire({ text: 'Something Went Wrong', icon: 'error' });
+
+          setLoadingJourney(false);
+          setLoading(false);
+        } else if (result[0].status === 'rejected' || result[1].status === 'rejected') {
+          if (result[0].status === 'rejected') {
+            Swal.fire({ text: `${result[0].reason?.message}`, icon: 'error' });
+          } else if (result[1].status === 'rejected') {
+            Swal.fire({ text: `${result[1].reason?.message}`, icon: 'error' });
+          } else {
+            Swal.fire({ text: 'Something Went Wrong', icon: 'error' });
+          }
         }
       })
       .catch(error => {
@@ -86,9 +109,6 @@ function ShowScreen(props) {
   }, []);
 
   const steps = dataJourney.length > 5 ? dataJourney.splice(-Number(`${dataJourney.length - 5}`)) : dataJourney;
-  const { activeStep = totalJourney - 1 } = useSteps({
-    totalJourney,
-  });
 
   return (
     <>
@@ -104,10 +124,10 @@ function ShowScreen(props) {
           <div className="col-span-2 px-4">
             <strong>Detail Product</strong>
             <div className="bg-white h-full rounded-2xl mt-3">
-              <div className="grid ml-10 grid-cols-2 pb-5">
-                <InputDetail value={data?.product.product_name} label="Name" swapBold />
-                <InputDetail value={data?.product.product_category} label="Category" swapBold />
-                <InputDetail value={data?.product.product_sku} label="SKU" swapBold />
+              <div className="grid ml-10 grid-cols-2 pb-5 pr-5  ">
+                <InputDetail value={data?.product.product_name || '-'} label="Name" swapBold />
+                <InputDetail value={data?.product.product_category || '-'} label="Category" swapBold />
+                <InputDetail value={data?.product.product_sku || '-'} label="SKU" swapBold />
                 <InputDetail value={data?.product.product_desc || '-'} label="Desc" swapBold />
               </div>
             </div>
@@ -130,6 +150,7 @@ function ShowScreen(props) {
                 }`}
               >
                 <strong className="text-gray-400">Warehouse</strong>
+                <LoadingComponent visible={loading} />
                 {storageDetails.map((i, idx) => {
                   return (
                     <>
@@ -177,38 +198,41 @@ function ShowScreen(props) {
         <div className="row-span-2 pl-1">
           <strong>Product Journey</strong>
           <div className="bg-white h-[95%] rounded-3xl mt-2 pt-10 pl-3 pr-3">
+            <LoadingComponent visible={loadingJourney} />
             <div className="pl-5">
-              <Steps colorScheme="blue" size="lg" orientation="vertical" activeStep={activeStep}>
-                {steps.map(item => {
-                  return (
-                    <Step
-                      icon={() =>
-                        item.status.toLowerCase() === 'inbound' ? (
-                          <ArchiveIcon className="h-8 stroke-[#5081ED]" />
-                        ) : item.status.toLowerCase() === 'relocate - in' ? (
-                          <img className="h-8" style={{ transform: 'scaleX(-1)' }} alt="right" src={LeftRightIcon} />
-                        ) : item.status.toLowerCase() === 'relocate - out' ? (
-                          <img className="h-8" alt="right" src={RightLeftIcon} />
-                        ) : (
-                          <ShoppingCartIcon className="h-8 stroke-[#5081ED]" />
-                        )
-                      }
-                      label={item.status}
-                      description={`${item.request_number} ${Moment(item.date).format('DD-MMM-YYYY')}`}
-                      key={item.status}
-                    />
-                  );
-                })}
-              </Steps>
+              {steps.length > 0 && (
+                <Steps colorScheme="blue" size="lg" orientation="vertical">
+                  {steps.map(item => {
+                    return (
+                      <Step
+                        icon={() =>
+                          item.activity_name.toLowerCase() === 'inbound' ? (
+                            <ArchiveIcon className="h-8 stroke-[#5081ED]" />
+                          ) : item.activity_name.toLowerCase() === 'relocate - in' ? (
+                            <img className="h-8" style={{ transform: 'scaleX(-1)' }} alt="right" src={LeftRightIcon} />
+                          ) : item.activity_name.toLowerCase() === 'relocate - out' ? (
+                            <img className="h-8" alt="right" src={RightLeftIcon} />
+                          ) : (
+                            <ShoppingCartIcon className="h-8 stroke-[#5081ED]" />
+                          )
+                        }
+                        label={item.activity_name}
+                        description={`${item.request_number} ${Moment(item.date).format('DD-MMM-YYYY')}`}
+                        key={item.status}
+                      />
+                    );
+                  })}
+                </Steps>
+              )}
             </div>
             {steps.length >= 5 && (
               <div className="flex justify-center">
                 <Button
                   type="button"
                   size="sm"
-                  onClick={activeStep === steps.length ? () => navigate(`/product-journey/${id}/show`) : () => {}}
+                  onClick={() => navigate(`/product-journey/${id}/show`)}
                   className={`${
-                    activeStep === steps.length ? 'bg-[#232323] text-white ' : 'bg-gray-500 text-gray-200 '
+                    steps.length ? 'bg-[#232323] text-white ' : 'bg-gray-500 text-gray-200 '
                   } border border-gray-500 text-md rounded-xl border-3 py-1 px-8 hover:bg-black mt-5`}
                 >
                   More

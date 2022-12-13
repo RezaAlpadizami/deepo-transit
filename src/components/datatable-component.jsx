@@ -12,7 +12,6 @@ import { useForm } from 'react-hook-form';
 import Toolbar from './action-toolbar-component';
 import { hasProperty } from '../utils/helper';
 import TableComponent from './table-component';
-import LoadingHover from './loading-component';
 import Checkbox from './checkbox-component';
 import Select from './select-component';
 import Input from './input-component';
@@ -22,7 +21,6 @@ function DataTable(props) {
   const {
     columns: propsColumn = [],
     limit = 10,
-    loading = false,
     toolbar,
     noToolbar,
     to,
@@ -331,7 +329,6 @@ function DataTable(props) {
   };
   return (
     <>
-      <LoadingHover visible={loadingHover} />
       {download && (
         <div style={{ display: 'none' }}>
           <TableComponent
@@ -475,7 +472,8 @@ function DataTable(props) {
               </tr>
             ))}
           </thead>
-          {!loading && (
+
+          {!loadingHover && (
             <tbody {...getTableBodyProps()}>
               {rows.map((row, i) => {
                 prepareRow(row);
@@ -496,32 +494,33 @@ function DataTable(props) {
             </tbody>
           )}
         </table>
-        {loading && (
+
+        {loadingHover && (
           <div className="w-full">
-            <div className="">
+            <div className="bg-[#fff]">
               <div className="flex p-3">
-                <div className="h-5 rounded-lg bg-gray-300 w-[5%]" />
-                <div className="h-5 ml-3 rounded-lg bg-gray-300  w-[95%] " />
+                <div className="h-5 rounded-lg bg-gray-100 w-[5%]" />
+                <div className="h-5 ml-3 rounded-lg bg-gray-100 w-[95%] " />
               </div>
               <div className="flex mt-1 p-3">
-                <div className="h-5 rounded-lg bg-gray-300 w-[5%]" />
-                <div className="h-5 ml-3 rounded-lg bg-gray-300  w-[95%] " />
+                <div className="h-5 rounded-lg bg-gray-100 w-[5%]" />
+                <div className="h-5 ml-3 rounded-lg bg-gray-100 w-[95%] " />
               </div>
               <div className="flex mt-1 p-3">
-                <div className="h-5 rounded-lg bg-gray-300 w-[5%]" />
-                <div className="h-5 ml-3 rounded-lg bg-gray-300  w-[95%] " />
+                <div className="h-5 rounded-lg bg-gray-100 w-[5%]" />
+                <div className="h-5 ml-3 rounded-lg bg-gray-100 w-[95%] " />
               </div>
               <div className="flex mt-1 p-3">
-                <div className="h-5 rounded-lg bg-gray-300 w-[5%]" />
-                <div className="h-5 ml-3 rounded-lg bg-gray-300  w-[95%] " />
+                <div className="h-5 rounded-lg bg-gray-100 w-[5%]" />
+                <div className="h-5 ml-3 rounded-lg bg-gray-100 w-[95%] " />
               </div>
               <div className="flex mt-1 p-3">
-                <div className="h-5 rounded-lg bg-gray-300 w-[5%]" />
-                <div className="h-5 ml-3 rounded-lg bg-gray-300  w-[95%] " />
+                <div className="h-5 rounded-lg bg-gray-100 w-[5%]" />
+                <div className="h-5 ml-3 rounded-lg bg-gray-100 w-[95%] " />
               </div>
               <div className="flex mt-1 p-3">
-                <div className="h-5 rounded-lg bg-gray-300 w-[5%]" />
-                <div className="h-5 ml-3 rounded-lg bg-gray-300  w-[95%] " />
+                <div className="h-5 rounded-lg bg-gray-100 w-[5%]" />
+                <div className="h-5 ml-3 rounded-lg bg-gray-100 w-[95%] " />
               </div>
             </div>
           </div>

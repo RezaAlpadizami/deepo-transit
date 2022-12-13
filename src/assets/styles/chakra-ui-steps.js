@@ -31,7 +31,7 @@ const baseStyleStepIconContainer = props => {
     transitionProperty: 'background, border-color',
     transitionDuration: 'normal',
     _activeStep: {
-      bg: 'gray.100',
+      bg: 'white',
       borderColor: 'blue.500',
       _invalid: {
         bg: 'red.500',
