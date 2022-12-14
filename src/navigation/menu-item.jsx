@@ -24,6 +24,9 @@ const MasterWarehouseAdd = React.lazy(() => import('../screens/master-screens/wa
 const MasterWarehouseShow = React.lazy(() => import('../screens/master-screens/warehouse-screens/show'));
 const MasterWarehouseEdit = React.lazy(() => import('../screens/master-screens/warehouse-screens/edit'));
 
+const ProductInformation = React.lazy(() => import('../screens/product-screens/product-information-screens/index'));
+const ProductInformationShow = React.lazy(() => import('../screens/product-screens/product-information-screens/show'));
+
 const ProductJourneyScreens = React.lazy(() => import('../screens/product-screens/product-journey-screens/index'));
 const ProductJourneyShowScreen = React.lazy(() => import('../screens/product-screens/product-journey-screens/show'));
 
@@ -42,9 +45,8 @@ export default [
     name: 'master',
     role: 'master',
     showmenu: true,
-    exact: true,
-    route: '/master',
-    component: Home,
+    exact: false,
+    route: '/master/warehouse',
     routes: [
       {
         displayName: 'Warehouse',
@@ -213,9 +215,29 @@ export default [
     role: 'product',
     showmenu: true,
     exact: true,
-    route: '/product',
-    component: Home,
+    route: '/product/product-information',
     routes: [
+      {
+        displayName: 'Product Information',
+        icon: HomeIcon,
+        name: 'product-information',
+        role: 'product',
+        showmenu: true,
+        exact: true,
+        route: '/product/product-information',
+        component: ProductInformation,
+        routes: [
+          {
+            displayName: 'Detail Product Information',
+            name: 'product-information',
+            role: 'product',
+            showmenu: false,
+            exact: true,
+            route: '/product/product-information/:id/show',
+            component: ProductInformationShow,
+          },
+        ],
+      },
       {
         displayName: 'Product Journey',
         icon: ShareIcon,

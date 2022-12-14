@@ -2,8 +2,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { extendTheme, ChakraProvider } from '@chakra-ui/react';
-import { StepsStyleConfig as Steps } from 'chakra-ui-steps';
-
+import CustomSteps from './assets/styles/chakra-ui-steps';
 import './index.css';
 import './assets/styles/custom.css';
 import Context from './context';
@@ -24,7 +23,7 @@ const colors = {
 };
 
 const components = {
-  Steps,
+  Steps: CustomSteps,
 };
 
 const theme = extendTheme({ colors, components });

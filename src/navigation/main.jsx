@@ -43,7 +43,13 @@ function Content() {
           const comp = [];
           if (item.route && item.component) {
             if (store.user.hasRole(item.role) || item.role === '') {
-              comp.push(<Route exact={item.exact} path={item.route} element={<item.component />} />);
+              comp.push(
+                <Route
+                  exact={item.exact}
+                  path={item.route}
+                  element={<item.component route={item.route} displayName={item.displayName} />}
+                />
+              );
             } else {
               comp.push(<Route exact path={item.route} element={<NoAccessScreen />} />);
             }

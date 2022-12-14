@@ -49,7 +49,7 @@ function Screen(props) {
         }}
         api={WarehouseApi}
         to={route}
-        name={displayName}
+        displayName={displayName}
         checkbox
       />
     </div>

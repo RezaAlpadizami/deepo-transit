@@ -22,8 +22,9 @@ function ActionToolbar(props) {
     copyItem,
     onAdd,
     onEdit,
-    name,
+    displayName,
   } = props;
+
   const navigate = useNavigate();
   const [onOpen, setOnOpen] = useState(false);
   const [showHide, setShowHide] = useState(false);
@@ -81,7 +82,7 @@ function ActionToolbar(props) {
           onClick={() => navigate(`${navTo?.path}/add`)}
           className="bg-[#232323] border border-gray-500 text-md rounded-xl border-3 py-1 px-4 text-white hover:bg-black"
         >
-          + Add {name}
+          + Add {displayName}
         </Button>
       )}
       {onDownload && (
@@ -148,7 +149,7 @@ function ActionToolbar(props) {
                   Delete Data
                 </Button>
               </div>
-              <div className={`my-5 ${selectedData.length > 5 ? 'overflow-y-auto' : ''} w-full bg-cyan-500 `}>
+              <div className={`my-5 ${selectedData.length > 5 ? 'overflow-y-auto' : ''} flex justify-center`}>
                 <DeletedList datas={selectedData} columnsData={columns} />
               </div>
             </div>
