@@ -131,7 +131,6 @@ function DataTable(props) {
     api
       .get({ ...filterData })
       .then(res => {
-        console.log('res', res);
         setLoadingHover(false);
         setDatas(res.data);
         setTotalData(res.query.total);
@@ -147,7 +146,6 @@ function DataTable(props) {
       setFilter([...filters]);
     }
   }, [filters]);
-  console.log('filters', filters);
 
   const changePage = page => {
     setPages(page);
@@ -353,7 +351,6 @@ function DataTable(props) {
               <div className="px-4">
                 <div className="grid grid-cols-6 gap-4 mt-4">
                   {filter.map((item, idx) => {
-                    console.log('item', item);
                     if (item.type === 'date_picker') {
                       return (
                         <div className={item.col ? `col-span-${item.col}` : ''} key={`component${idx}`}>

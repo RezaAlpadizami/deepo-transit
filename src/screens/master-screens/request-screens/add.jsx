@@ -20,7 +20,6 @@ function Screen() {
 
   const [data, setData] = useState([]);
   console.log('data', data);
-
   const schema = yup.object().shape({
     activity_name: yup.string().nullable().required(),
     activity_date: yup.date().nullable().required(),

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-// import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import * as yup from 'yup';
 import Moment from 'moment/moment';
@@ -13,6 +13,7 @@ import InputDetail from '../../../components/input-detail-component';
 import TextArea from '../../../components/textarea-component';
 
 function Screen() {
+  const { id } = useParams();
   const [dataRequesById, setDataRequestById] = useState([]);
 
   const schema = yup.object().shape({
@@ -35,7 +36,7 @@ function Screen() {
   }, []);
 
   const getDetailRequest = () => {
-    RequestApi.find(1)
+    RequestApi.find(id)
       .then(res => {
         setDataRequestById(res);
       })
