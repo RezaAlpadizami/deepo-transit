@@ -1,5 +1,5 @@
 import React from 'react';
-import RequestApi from '../../../services/api-master';
+import RequestApi from '../../../services/api-transit';
 import Datatable from '../../../components/datatable-component';
 
 function Screen(props) {
@@ -42,7 +42,7 @@ function Screen(props) {
           { header: 'User', value: 'request_by', copy: true },
           { header: 'Activity', value: 'activity_name', copy: true },
           { header: 'Date', value: 'activity_date', copy: true, type: 'date' },
-          { header: 'Notes', value: 'notes', copy: true },
+          { header: 'Notes', value: 'notes', copy: true, type: 'scrollable' },
           { header: 'Status', value: 'status', copy: true },
         ]}
         toolbar={{

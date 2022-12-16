@@ -86,6 +86,13 @@ function DataTable(props) {
                 </Link>
               );
             }
+            if (d.type === 'scrollable') {
+              return (
+                <div className="max-h-[300px] max-w-[250px] overflow-y-auto no-scrollbar::-webkit-scrollbar no-scrollbar whitespace-pre-line text-justify p-2">
+                  <span>{value}</span>
+                </div>
+              );
+            }
 
             return value;
           },

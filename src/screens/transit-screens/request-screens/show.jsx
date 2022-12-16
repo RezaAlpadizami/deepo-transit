@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
 import { Button, Text } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 
-import RequestApi from '../../../services/api-master';
+import RequestApi from '../../../services/api-transit';
 import InputDetail from '../../../components/input-detail-component';
 import TextArea from '../../../components/textarea-component';
 
@@ -85,7 +85,14 @@ function Screen() {
             </div>
           </div>
           <div className="mt-12">
-            <TextArea name="notes" label="Notes" register={register} errors={errors} />
+            <TextArea
+              name="notes"
+              label="Notes"
+              register={register}
+              errors={errors}
+              value={dataRequesById?.notes}
+              disabled
+            />
           </div>
         </fieldset>
         <fieldset className="border border-[#7D8F69] w-full h-full px-8 py-12 rounded-[55px]">

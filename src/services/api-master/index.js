@@ -1,3 +1,3 @@
-import RequestApi from './resources/request-api';
+import ProductApi from './resources/product-api';
 
-export default RequestApi;
+export default ProductApi;

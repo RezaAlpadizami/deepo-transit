@@ -3,24 +3,24 @@ import { HomeIcon } from '@heroicons/react/solid';
 
 const NotFound = React.lazy(() => import('../screens/home-screens/404'));
 
-const RequestScreens = React.lazy(() => import('../screens/master-screens/request-screens/index'));
-const RequestScreensAdd = React.lazy(() => import('../screens/master-screens/request-screens/add'));
-const RequestScreenShow = React.lazy(() => import('../screens/master-screens/request-screens/show'));
+const RequestScreens = React.lazy(() => import('../screens/transit-screens/request-screens/index'));
+const RequestScreensAdd = React.lazy(() => import('../screens/transit-screens/request-screens/add'));
+const RequestScreenShow = React.lazy(() => import('../screens/transit-screens/request-screens/show'));
 
 export default [
   {
-    displayName: 'Request',
+    displayName: 'Transit',
     icon: HomeIcon,
-    name: 'request',
-    role: 'request',
+    name: 'transit',
+    role: 'transit',
     showmenu: false,
-    exact: true,
+    exact: false,
     routes: [
       {
         displayName: 'Request',
         icon: HomeIcon,
-        name: 'request',
-        role: 'request',
+        name: 'transit-request',
+        role: 'transit-request',
         showmenu: true,
         exact: true,
         route: '/request',
@@ -29,8 +29,8 @@ export default [
       {
         displayName: 'Create Request',
         icon: HomeIcon,
-        name: 'request-add',
-        role: 'request',
+        name: 'transit-request-add',
+        role: 'transit-request',
         showmenu: false,
         exact: true,
         route: '/request/add',
@@ -39,8 +39,8 @@ export default [
       {
         displayName: 'Detail Request',
         icon: HomeIcon,
-        name: 'request-show',
-        role: 'request',
+        name: 'transit-request-show',
+        role: 'transit-request',
         showmenu: false,
         exact: true,
         route: '/request/:id/show',
