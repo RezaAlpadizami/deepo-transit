@@ -80,7 +80,7 @@ function ActionToolbar(props) {
         <Button
           type="button"
           onClick={() => navigate(`${navTo?.path}/add`)}
-          className="bg-[#232323] border border-gray-500 text-md rounded-xl border-3 py-1 px-4 text-white hover:bg-black"
+          className="bg-[#7D8F69] text-md rounded-xl border-3 py-1 px-4 text-white hover:bg-black"
         >
           + Add {displayName}
         </Button>

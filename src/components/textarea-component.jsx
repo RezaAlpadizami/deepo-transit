@@ -17,10 +17,10 @@ function InputComponent(props) {
   return (
     <div className="flex-auto w-full">
       <div>
-        <label htmlFor={name} className="text-sm font-light text-gray-600 block ml-1">
+        <label htmlFor={name} className="text-md font-light text-gray-600 block ml-1">
           {label}
         </label>
-        <div className="mt-1 flex  shadow-sm">
+        <div className="mt-1 flex shadow-sm">
           <Textarea
             {...register(name)}
             bg="white"

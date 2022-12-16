@@ -1,10 +1,10 @@
 import RequestHandler from '../request-handler';
 import ENDPOINT from '../../../config/api-master';
 
-class StorageApi extends RequestHandler {
+class RequestApi extends RequestHandler {
   constructor() {
-    super(ENDPOINT.STORAGE);
+    super(ENDPOINT.REQUEST);
   }
 }
 
-export default new StorageApi();
+export default new RequestApi();

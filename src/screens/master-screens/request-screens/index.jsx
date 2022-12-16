@@ -1,10 +1,9 @@
 import React from 'react';
-
-import { ProductJourney } from '../../../services/api-master';
+import RequestApi from '../../../services/api-master';
 import Datatable from '../../../components/datatable-component';
 
 function Screen(props) {
-  const { displayName, route } = props;
+  const { route, displayName } = props;
 
   return (
     <div className="">
@@ -13,53 +12,53 @@ function Screen(props) {
           {
             name: 'request_number',
             label: 'Request Number',
-            placeholder: 'Input Request Number',
+            col: 3,
           },
           {
-            name: 'product_sku',
-            label: 'SKU',
-            placeholder: 'Input SKU',
-          },
-          {
-            name: 'product_name',
-            label: 'Product Name',
-            placeholder: 'Input Product Name',
+            name: 'request_by',
+            label: 'User',
+            col: 3,
           },
           {
             name: 'activity_name',
             label: 'Activity',
-            placeholder: 'Input Activity',
+            col: 2,
           },
           {
             name: 'activity_date',
-            label: 'Activity Date',
+            label: 'Date',
             type: 'date_picker',
             placeholder: 'Select date',
+            col: 2,
           },
           {
-            name: 'warehouse_name',
-            label: 'Warehouse',
-            placeholder: 'Input Warehouse',
+            name: 'status',
+            label: 'Status',
+            col: 2,
           },
         ]}
         columns={[
           { header: 'Request Number', value: 'request_number', copy: true, type: 'link' },
-          { header: 'SKU', value: 'product_sku', copy: true },
-          { header: 'Product Name', value: 'product_name', copy: true },
-          { header: 'Activity Name', value: 'activity_name', copy: true },
-          { header: 'Activity Date', value: 'activity_data', copy: true, type: 'date' },
+          { header: 'User', value: 'request_by', copy: true },
+          { header: 'Activity', value: 'activity_name', copy: true },
+          { header: 'Date', value: 'activity_date', copy: true, type: 'date' },
+          { header: 'Notes', value: 'notes', copy: true },
+          { header: 'Status', value: 'status', copy: true },
         ]}
         toolbar={{
           action: {
+            add: true,
+            delete: true,
             'copy-to-clipboard': true,
             'show-hide-column': true,
             'save-to-excel': true,
           },
         }}
-        api={ProductJourney}
+        api={RequestApi}
         to={route}
         displayName={displayName}
         checkbox
+        hasButtonAction
       />
     </div>
   );

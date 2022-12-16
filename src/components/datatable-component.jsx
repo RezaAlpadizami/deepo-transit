@@ -31,6 +31,7 @@ function DataTable(props) {
     filters,
     onSort = () => {},
     identifierProperties = 'id',
+    hasButtonAction,
   } = props;
 
   const {
@@ -130,6 +131,7 @@ function DataTable(props) {
     api
       .get({ ...filterData })
       .then(res => {
+        console.log('res', res);
         setLoadingHover(false);
         setDatas(res.data);
         setTotalData(res.query.total);
@@ -145,6 +147,7 @@ function DataTable(props) {
       setFilter([...filters]);
     }
   }, [filters]);
+  console.log('filters', filters);
 
   const changePage = page => {
     setPages(page);
@@ -350,6 +353,7 @@ function DataTable(props) {
               <div className="px-4">
                 <div className="grid grid-cols-6 gap-4 mt-4">
                   {filter.map((item, idx) => {
+                    console.log('item', item);
                     if (item.type === 'date_picker') {
                       return (
                         <div className={item.col ? `col-span-${item.col}` : ''} key={`component${idx}`}>
@@ -469,6 +473,7 @@ function DataTable(props) {
                     </div>
                   </th>
                 ))}
+                {hasButtonAction && <th> </th>}
               </tr>
             ))}
           </thead>
@@ -488,6 +493,18 @@ function DataTable(props) {
                         {cell.render('Cell')}
                       </td>
                     ))}
+                    {hasButtonAction && (
+                      <td className="text-black py-1 px-6">
+                        <Button
+                          // onClick={()}
+                          px={8}
+                          size="sm"
+                          className="rounded-full bg-[#6ECCAF] text-[#fff] mr-6"
+                        >
+                          Process
+                        </Button>
+                      </td>
+                    )}
                   </tr>
                 );
               })}
