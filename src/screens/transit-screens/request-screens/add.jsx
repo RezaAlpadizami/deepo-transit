@@ -7,28 +7,33 @@ import Swal from 'sweetalert2';
 import { Button, Text } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 
+import ProductApi from '../../../services/api-master';
 import RequestApi from '../../../services/api-transit';
-import Select from '../../../components/select-component';
-import LoadingHover from '../../../components/loading-hover-component';
-import InputDetail from '../../../components/input-detail-component';
 import Input from '../../../components/input-component';
+import Select from '../../../components/select-component';
 import TextArea from '../../../components/textarea-component';
 import DatePicker from '../../../components/datepicker-component';
-import ProductApi from '../../../services/api-master';
+import InputDetail from '../../../components/input-detail-component';
+import LoadingHover from '../../../components/loading-hover-component';
 
 function Screen() {
   const navigate = useNavigate();
-  const [data, setData] = useState([]);
-  // const [dataProduct, setDataProduct] = useState([]);
-  const [loading, setLoading] = useState(false);
 
-  // notes: need adjusment be, give back error validation, must input min 255 length for notes
+  const [dataProduct, setDataProduct] = useState([]);
+  const [dataInputAdd, setDataInputAdd] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [dataAdd, setDataAdd] = useState([]);
+
   const schema = yup.object().shape({
     activity_name: yup.string().nullable().required(),
     activity_date: yup.date().nullable().required(),
     notes: yup.string().nullable().max(255).required(),
-    product_name: yup.string().nullable().required(),
-    qty: yup.number().nullable().required(),
+    detail: yup.array().of(
+      yup.object({
+        product_id: yup.string().nullable().required(),
+        qty: yup.number().nullable().required(),
+      })
+    ),
   });
 
   const {
@@ -48,23 +53,33 @@ function Screen() {
 
   useEffect(() => {
     getData();
-  }, []);
+  }, [dataAdd]);
 
   const getData = () => {
     ProductApi.get()
       .then(res => {
-        setData(res.data);
+        setDataProduct(res.data);
       })
       .catch(error => {
         Swal.fire({ text: error?.message || error?.originalError, icon: 'error' });
       });
   };
 
-  const onAddProd = data => {
-    const dataProd = [];
-    const totalData = dataProd.push(data);
-    console.log('dataproddd', totalData);
+  const onAddProdRequestDetail = dataInput => {
+    const dataInputAddArray = [dataProduct.find(obj => obj.id === Number(dataInput.product_id))];
+    const handleDataAdd = dataInputAddArray.map(data => {
+      return {
+        ...data,
+        qty: dataInput.qty,
+      };
+    });
+    setDataAdd(state => [...state, ...handleDataAdd]);
+    setDataInputAdd(state => [...state, dataInput]);
   };
+
+  const getTotalQty = dataAdd?.reduce((accumulator, object) => {
+    return accumulator + Number(object.qty);
+  }, 0);
 
   const onSubmitRequest = data => {
     setLoading(true);
@@ -73,16 +88,7 @@ function Screen() {
       request_by: 'testing',
       warehouse_id: 1,
       notes: data.notes,
-      detail: [
-        {
-          product_id: 1,
-          qty: 100,
-        },
-        {
-          product_id: 2,
-          qty: 20,
-        },
-      ],
+      detail: dataInputAdd,
     })
       .then(() => {
         setLoading(false);
@@ -100,61 +106,59 @@ function Screen() {
       <div className="grid-cols-2 gap-4 flex">
         <fieldset className="border border-[#7D8F69] w-full h-full px-8 py-12 rounded-[55px]">
           <legend className="px-2 text-[28px] text-[#7D8F69]">Request</legend>
-          <form onSubmit={handleSubmit(onSubmitRequest)}>
-            <div className="flex gap-4 justify-center">
-              <div className="w-full">
-                <Select
-                  name="activity_name"
-                  label="Activity"
-                  options={[
-                    {
-                      value: 1,
-                      label: 'INBOUND',
-                    },
-                    {
-                      value: 2,
-                      label: 'OUTBOUND',
-                    },
-                    {
-                      value: 3,
-                      label: 'RELOCATE-OUT',
-                    },
-                    {
-                      value: 3,
-                      label: 'RELOCATE-IN',
-                    },
-                  ]}
-                  placeholder=""
-                  register={register}
-                  errors={errors}
-                />
-              </div>
-              <div className="w-full">
-                <DatePicker
-                  name="activity_date"
-                  label="Date"
-                  placeholder="Date / Month / Year"
-                  register={register}
-                  control={control}
-                  errors={errors}
-                />
-              </div>
+          <div className="flex gap-4 justify-center">
+            <div className="w-full">
+              <Select
+                name="activity_name"
+                label="Activity"
+                options={[
+                  {
+                    value: 1,
+                    label: 'INBOUND',
+                  },
+                  {
+                    value: 2,
+                    label: 'OUTBOUND',
+                  },
+                  {
+                    value: 3,
+                    label: 'RELOCATE-OUT',
+                  },
+                  {
+                    value: 4,
+                    label: 'RELOCATE-IN',
+                  },
+                ]}
+                placeholder=""
+                register={register}
+                errors={errors}
+              />
             </div>
-            <div>
-              <TextArea name="notes" label="Notes" register={register} errors={errors} />
+            <div className="w-full">
+              <DatePicker
+                name="activity_date"
+                label="Date"
+                placeholder="Date / Month / Year"
+                register={register}
+                control={control}
+                errors={errors}
+              />
             </div>
-          </form>
+          </div>
+          <div>
+            <TextArea name="notes" label="Notes" register={register} errors={errors} />
+          </div>
         </fieldset>
 
         <fieldset className="border border-[#7D8F69] w-full h-full px-8 py-12 rounded-[55px]">
           <legend className="px-2 text-[28px] text-[#7D8F69]">Request Detail</legend>
-          <form onSubmit={handleSubmitProd(onAddProd)}>
+          <form onSubmit={handleSubmitProd(onAddProdRequestDetail)}>
             <div className="flex gap-4 justify-center">
               <div className="w-full col-span-2">
                 <Select
-                  name="product_name"
+                  name="product_id"
                   label="Product"
-                  options={data?.map(i => {
+                  options={dataProduct?.map(i => {
                     return {
                       value: i.id,
                       label: i.product_name,
@@ -176,48 +180,31 @@ function Screen() {
             </div>
           </form>
           <div className="border-b border-[#7D8F69] my-6"> </div>
-          <div>
-            <div className="flex">
-              <InputDetail
-                value="SKU: ABC1234"
-                label="Energizer AA C2"
-                customStyleLabel="font-bold text-md mb-0"
-                customStyleSpan="text-md"
-              />
-              <div className="flex gap-20 mt-6">
-                <span className="">X</span>
-                <Text>100</Text>
-              </div>
+          {dataAdd?.length > 0 && (
+            <div>
+              {dataAdd.map(val => {
+                return (
+                  <div className="flex">
+                    <InputDetail
+                      value={`SKU: ${val.sku}`}
+                      label={`${val.product_name}`}
+                      customStyleLabel="font-bold text-md mb-0"
+                      customStyleSpan="text-md"
+                    />
+                    <div className="flex relative gap-20 mt-6">
+                      <span className="absolute right-24">X</span>
+                      <Text>{val.qty}</Text>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-            <div className="flex">
-              <InputDetail
-                value="SKU: ABC1234"
-                label="Energizer AA C2"
-                customStyleLabel="font-bold text-md mb-0"
-                customStyleSpan="text-md"
-              />
-              <div className="flex gap-20 mt-6">
-                <span className="">X</span>
-                <Text>100</Text>
-              </div>
-            </div>
-            <div className="flex">
-              <InputDetail
-                value="SKU: ABC1234"
-                label="Energizer AA C2"
-                customStyleLabel="font-bold text-md mb-0"
-                customStyleSpan="text-md"
-              />
-              <div className="flex gap-20 mt-6">
-                <span className="">X</span>
-                <Text>100</Text>
-              </div>
-            </div>
-          </div>
+          )}
+
           <div className="border-b border-[#7D8F69] my-6"> </div>
           <div className="flex justify-between">
             <Text>Total Product</Text>
-            <Text>300</Text>
+            <Text>{getTotalQty}</Text>
           </div>
         </fieldset>
       </div>
@@ -234,7 +221,13 @@ function Screen() {
             </Button>
           </div>
           <div>
-            <Button type="submit" px={8} size="sm" className="rounded-full bg-[#7D8F69] text-[#fff] mr-6">
+            <Button
+              type="submit"
+              onClick={handleSubmit(onSubmitRequest)}
+              px={8}
+              size="sm"
+              className="rounded-full bg-[#7D8F69] text-[#fff] mr-6"
+            >
               Submit
             </Button>
           </div>

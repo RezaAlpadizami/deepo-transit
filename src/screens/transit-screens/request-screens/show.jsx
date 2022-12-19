@@ -3,14 +3,14 @@ import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 
 import * as yup from 'yup';
-import Moment from 'moment/moment';
 import Swal from 'sweetalert2';
+import Moment from 'moment/moment';
 import { Button, Text } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 
 import RequestApi from '../../../services/api-transit';
-import InputDetail from '../../../components/input-detail-component';
 import TextArea from '../../../components/textarea-component';
+import InputDetail from '../../../components/input-detail-component';
 
 function Screen() {
   const { id } = useParams();
@@ -24,8 +24,6 @@ function Screen() {
 
   const {
     register,
-    // control,
-    //   handleSubmit,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
