@@ -15,7 +15,7 @@ export default [
     name: 'transit',
     role: 'transit',
     showmenu: false,
-    exact: false,
+    exact: true,
     route: '/',
     component: Home,
     routes: [
