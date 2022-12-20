@@ -31,9 +31,15 @@ function Screen() {
     { activity_name: 'RELOCATE-OUT' },
   ];
 
-  const schema = yup.object().shape({
+  const schemaAddProduct = yup.object().shape({
     product_id: yup.string().nullable().required(),
     qty: yup.number().nullable().typeError('please input quantity').required(),
+  });
+
+  const schemaSubmitRequest = yup.object().shape({
+    activity_name: yup.string().nullable().required(),
+    activity_date: yup.date().nullable().required(),
+    notes: yup.string().nullable().max(255).required(),
   });
 
   const {
@@ -41,7 +47,7 @@ function Screen() {
     formState: { errors: errorsProd },
     handleSubmit: handleSubmitProd,
   } = useForm({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schemaAddProduct),
   });
 
   const {
@@ -49,7 +55,9 @@ function Screen() {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    resolver: yupResolver(schemaSubmitRequest),
+  });
 
   useEffect(() => {
     getData();
