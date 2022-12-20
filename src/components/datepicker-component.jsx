@@ -15,6 +15,7 @@ function InputElement(props) {
         bg="white"
         size="sm"
         width="auto"
+        autoComplete="off"
         type="text"
         isInvalid={errors[name]}
         className="w-full text-sm border-gray-400 py-5 rounded-full px-8"

@@ -6,9 +6,9 @@ class RequestApi extends RequestHandler {
     super(ENDPOINT.REQUEST);
   }
 
-  createRequestProcess(request_number) {
+  createRequestProcess(id) {
     return new Promise((resolve, reject) => {
-      this.store(`${this.url}/process/${encodeURIComponent(request_number)}`)
+      this.store(`${this.url}/process/${id}`)
         .then(response => {
           resolve(response);
         })

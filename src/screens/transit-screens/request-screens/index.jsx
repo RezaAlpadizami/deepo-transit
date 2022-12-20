@@ -6,6 +6,13 @@ import Datatable from '../../../components/datatable-component';
 function Screen(props) {
   const { route, displayName } = props;
 
+  const activityProduct = [
+    { activity_name: 'INBOUND' },
+    { activity_name: 'OUTBOUND' },
+    { activity_name: 'RELOCATE-IN' },
+    { activity_name: 'RELOCATE-OUT' },
+  ];
+
   return (
     <div className="">
       <Datatable
@@ -13,16 +20,23 @@ function Screen(props) {
           {
             name: 'request_number',
             label: 'Request Number',
-            col: 3,
+            col: 2,
           },
           {
             name: 'request_by',
             label: 'User',
-            col: 3,
+            col: 2,
           },
           {
             name: 'activity_name',
             label: 'Activity',
+            type: 'select',
+            data: activityProduct?.map(i => {
+              return {
+                value: i.activity_name,
+                label: i.activity_name,
+              };
+            }),
             col: 2,
           },
           {

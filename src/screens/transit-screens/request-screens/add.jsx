@@ -24,32 +24,32 @@ function Screen() {
   const [loading, setLoading] = useState(false);
   const [dataAdd, setDataAdd] = useState([]);
 
+  const activityProduct = [
+    { activity_name: 'INBOUND' },
+    { activity_name: 'OUTBOUND' },
+    { activity_name: 'RELOCATE-IN' },
+    { activity_name: 'RELOCATE-OUT' },
+  ];
+
   const schema = yup.object().shape({
-    activity_name: yup.string().nullable().required(),
-    activity_date: yup.date().nullable().required(),
-    notes: yup.string().nullable().max(255).required(),
-    detail: yup.array().of(
-      yup.object({
-        product_id: yup.string().nullable().required(),
-        qty: yup.number().nullable().required(),
-      })
-    ),
+    product_id: yup.string().nullable().required(),
+    qty: yup.number().nullable().typeError('please input quantity').required(),
   });
 
   const {
     register: registerProd,
     formState: { errors: errorsProd },
     handleSubmit: handleSubmitProd,
-  } = useForm();
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
 
   const {
     register,
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm({
-    resolver: yupResolver(schema),
-  });
+  } = useForm();
 
   useEffect(() => {
     getData();
@@ -111,24 +111,12 @@ function Screen() {
               <Select
                 name="activity_name"
                 label="Activity"
-                options={[
-                  {
-                    value: 1,
-                    label: 'INBOUND',
-                  },
-                  {
-                    value: 2,
-                    label: 'OUTBOUND',
-                  },
-                  {
-                    value: 3,
-                    label: 'RELOCATE-OUT',
-                  },
-                  {
-                    value: 4,
-                    label: 'RELOCATE-IN',
-                  },
-                ]}
+                options={activityProduct?.map(i => {
+                  return {
+                    value: i.activity_name,
+                    label: i.activity_name,
+                  };
+                })}
                 placeholder=""
                 register={register}
                 errors={errors}

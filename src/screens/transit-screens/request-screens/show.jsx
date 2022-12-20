@@ -38,12 +38,10 @@ function Screen() {
 
   const onSubmitRequest = () => {
     setLoading(true);
-    RequestApi.createRequestProcess(dataRequesById.request_number)
-      .then(res => {
-        console.log('res', res);
+    RequestApi.createRequestProcess(id)
+      .then(() => {
         setLoading(false);
         Swal.fire({ text: 'Successfully Saved', icon: 'success' });
-        // navigate('/request');
       })
       .catch(error => {
         setLoading(false);
