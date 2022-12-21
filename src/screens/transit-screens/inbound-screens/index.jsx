@@ -11,7 +11,7 @@ import Input from '../../../components/input-component';
 import DatePicker from '../../../components/datepicker-component';
 import TextArea from '../../../components/textarea-component';
 import SimpleTable from '../../../components/simple-table-component';
-import StorageApi from '../../../services/api-master';
+import { StorageApi } from '../../../services/api-master';
 import MagnifyClass from '../../../assets/images/magnify-glass.svg';
 import ModalTableOverview from '../../../components/modal-overview-table-component';
 

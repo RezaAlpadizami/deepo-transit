@@ -86,6 +86,13 @@ function DataTable(props) {
                 </Link>
               );
             }
+            if (d.type === 'scrollable') {
+              return (
+                <div className="max-h-[300px] max-w-[250px] overflow-y-auto no-scrollbar::-webkit-scrollbar no-scrollbar whitespace-pre-line text-justify p-2">
+                  <span>{value}</span>
+                </div>
+              );
+            }
 
             return value;
           },
@@ -329,6 +336,20 @@ function DataTable(props) {
       };
     });
   };
+
+  const onSubmitRequestProcess = row => {
+    setLoadingHover(true);
+    api
+      .createRequestProcess(row.original.id)
+      .then(() => {
+        setLoadingHover(false);
+        Swal.fire('OK', `Request ${row.original.request_number} berhasil di download`, 'success');
+      })
+      .catch(error => {
+        setLoadingHover(false);
+        Swal.fire({ text: error?.message, icon: 'error' });
+      });
+  };
   return (
     <>
       {download && (
@@ -372,6 +393,7 @@ function DataTable(props) {
                           <Select
                             name={item.name}
                             label={item.label}
+                            placeholder={item.label}
                             options={item.data}
                             register={register}
                             control={control}
@@ -494,7 +516,8 @@ function DataTable(props) {
                     {hasButtonAction && (
                       <td className="text-black py-1 px-6">
                         <Button
-                          // onClick={()}
+                          onClick={e => onSubmitRequestProcess(row, row.id, e)}
+                          type="submit"
                           px={8}
                           size="sm"
                           className="rounded-full bg-[#6ECCAF] text-[#fff] mr-6"

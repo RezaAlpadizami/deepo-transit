@@ -5,13 +5,14 @@ function InputComponent(props) {
   const {
     name,
     label,
-    maxLength = 100,
+    maxLength = 255,
     disabled,
     type = 'text',
     register,
     errors,
     hidden = false,
     placeholder,
+    value,
   } = props;
 
   return (
@@ -30,6 +31,7 @@ function InputComponent(props) {
             isDisabled={disabled}
             maxLength={maxLength}
             hidden={hidden}
+            value={value}
             name={name}
             id={name}
             isInvalid={errors[name]}

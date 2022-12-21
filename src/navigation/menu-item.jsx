@@ -4,11 +4,11 @@ import { HomeIcon } from '@heroicons/react/solid';
 const NotFound = React.lazy(() => import('../screens/home-screens/404'));
 const Home = React.lazy(() => import('../screens/home-screens/index'));
 
-const RequestScreens = React.lazy(() => import('../screens/master-screens/request-screens/index'));
-const RequestScreensAdd = React.lazy(() => import('../screens/master-screens/request-screens/add'));
-const RequestScreenShow = React.lazy(() => import('../screens/master-screens/request-screens/show'));
+const RequestScreens = React.lazy(() => import('../screens/transit-screens/request-screens/index'));
+const RequestScreensAdd = React.lazy(() => import('../screens/transit-screens/request-screens/add'));
+const RequestScreenShow = React.lazy(() => import('../screens/transit-screens/request-screens/show'));
 
-const InboundScreens = React.lazy(() => import('../screens/master-screens/inbound-screens/index'));
+const InboundScreens = React.lazy(() => import('../screens/transit-screens/inbound-screens/index'));
 
 export default [
   {
@@ -21,18 +21,19 @@ export default [
     component: Home,
   },
   {
-    displayName: 'Master',
-    name: 'request',
-    role: 'request',
+    displayName: 'Transit',
+    icon: HomeIcon,
+    name: 'transit',
+    role: 'transit',
     showmenu: false,
-    exact: false,
+    exact: true,
     route: '/request',
     routes: [
       {
         displayName: 'Request',
         icon: HomeIcon,
-        name: 'request',
-        role: 'request',
+        name: 'transit-request',
+        role: 'transit-request',
         showmenu: true,
         exact: true,
         route: '/request',
@@ -78,6 +79,7 @@ export default [
         name: 'request',
         role: 'request',
         showmenu: true,
+
         exact: true,
         route: '/inbound',
         component: InboundScreens,

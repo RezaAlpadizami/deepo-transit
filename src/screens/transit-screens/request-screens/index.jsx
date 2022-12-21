@@ -1,9 +1,17 @@
 import React from 'react';
-import RequestApi from '../../../services/api-master';
+
+import RequestApi from '../../../services/api-transit';
 import Datatable from '../../../components/datatable-component';
 
 function Screen(props) {
   const { route, displayName } = props;
+
+  const activityProduct = [
+    { activity_name: 'INBOUND' },
+    { activity_name: 'OUTBOUND' },
+    { activity_name: 'RELOCATE-IN' },
+    { activity_name: 'RELOCATE-OUT' },
+  ];
 
   return (
     <div className="">
@@ -12,16 +20,23 @@ function Screen(props) {
           {
             name: 'request_number',
             label: 'Request Number',
-            col: 3,
+            col: 2,
           },
           {
             name: 'request_by',
             label: 'User',
-            col: 3,
+            col: 2,
           },
           {
             name: 'activity_name',
             label: 'Activity',
+            type: 'select',
+            data: activityProduct?.map(i => {
+              return {
+                value: i.activity_name,
+                label: i.activity_name,
+              };
+            }),
             col: 2,
           },
           {
@@ -42,7 +57,7 @@ function Screen(props) {
           { header: 'User', value: 'request_by', copy: true },
           { header: 'Activity', value: 'activity_name', copy: true },
           { header: 'Date', value: 'activity_date', copy: true, type: 'date' },
-          { header: 'Notes', value: 'notes', copy: true },
+          { header: 'Notes', value: 'notes', copy: true, type: 'scrollable' },
           { header: 'Status', value: 'status', copy: true },
         ]}
         toolbar={{

@@ -15,6 +15,7 @@ function InputElement(props) {
         bg="white"
         size="sm"
         width="auto"
+        autoComplete="off"
         type="text"
         isInvalid={errors[name]}
         variant={disabled ? 'filled' : 'outline'}

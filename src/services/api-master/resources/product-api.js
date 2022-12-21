@@ -1,10 +1,10 @@
 import RequestHandler from '../request-handler';
 import ENDPOINT from '../../../config/api-master';
 
-class RequestApi extends RequestHandler {
+class ProductApi extends RequestHandler {
   constructor() {
-    super(ENDPOINT.STORAGE);
+    super(ENDPOINT.PRODUCT);
   }
 }
 
-export default new RequestApi();
+export default new ProductApi();
