@@ -6,7 +6,7 @@ import Swal from 'sweetalert2';
 import Moment from 'moment/moment';
 import { Button, Text } from '@chakra-ui/react';
 
-import RequestApi from '../../../services/api-transit';
+import { RequestApi } from '../../../services/api-transit';
 import TextArea from '../../../components/textarea-component';
 import InputDetail from '../../../components/input-detail-component';
 import LoadingHover from '../../../components/loading-hover-component';

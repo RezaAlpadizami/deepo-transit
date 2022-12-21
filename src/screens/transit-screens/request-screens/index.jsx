@@ -1,6 +1,6 @@
 import React from 'react';
 
-import RequestApi from '../../../services/api-transit';
+import { RequestApi } from '../../../services/api-transit';
 import Datatable from '../../../components/datatable-component';
 
 function Screen(props) {

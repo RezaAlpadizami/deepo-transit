@@ -10,10 +10,12 @@ function InputComponent(props) {
     type = 'text',
     register,
     errors,
+    value,
     hidden = false,
     placeholder,
     icon,
     addOnleft,
+    readOnly = false,
   } = props;
 
   return (
@@ -51,6 +53,7 @@ function InputComponent(props) {
               size="sm"
               width="auto"
               type={type}
+              value={value}
               isDisabled={disabled}
               maxLength={maxLength}
               hidden={hidden}
@@ -59,6 +62,7 @@ function InputComponent(props) {
               variant={disabled ? 'filled' : 'outline'}
               className={`${disabled ? 'bg-gray-200' : ''} w-full text-sm rounded-full border-gray-400 px-5 py-5`}
               placeholder={placeholder}
+              readOnly={readOnly}
             />
           )}
         </div>

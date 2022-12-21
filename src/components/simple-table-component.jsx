@@ -1,11 +1,13 @@
-import { Button } from '@chakra-ui/react';
 import React from 'react';
+import { Button } from '@chakra-ui/react';
 import { useTable, useRowSelect } from 'react-table';
 
-// import SelectComponent from './select-component';
+import Select from './select-component';
+import Input from './input-component';
 
 function ModalTable(props) {
-  const { datas, columns: propsColumn = [], onSplit = () => {} } = props;
+  const { datas, columns: propsColumn = [], onSplit = () => {}, register, control } = props;
+
   // storage  register, control
   const data = React.useMemo(() => datas, [JSON.stringify(datas)]);
 
@@ -15,14 +17,49 @@ function ModalTable(props) {
         return {
           Header: d.header,
           accessor: d.value,
+          width: d.width,
+
           Cell: props => {
             const { value, row } = props;
-
-            if (d.type === 'split') {
+            if (d.type === 'select') {
               return (
-                <Button key={i} onClick={() => onSplit(row.original.id, row.original.id)} px={8}>
+                <Select
+                  name="rack"
+                  placeholder={d.placeholder}
+                  options={
+                    d.data.map(i => {
+                      return {
+                        value: i[d.name],
+                        label: i[d.name],
+                      };
+                    }) || []
+                  }
+                  register={register}
+                  control={control}
+                />
+              );
+            }
+
+            if (d.type === 'split' && row.original.request_number) {
+              return (
+                <Button
+                  size="md"
+                  className="text-[#fff] font-bold bg-[#29A373] rounded-2xl"
+                  key={i}
+                  onClick={() => {
+                    onSplit(row.index + 1, row.original.id);
+                  }}
+                  px={6}
+                >
                   Split
                 </Button>
+              );
+            }
+            if (d.type === 'input') {
+              return (
+                <div className="w-16">
+                  <Input name={`${d.name}`} value={value} register={register} control={control} readOnly />
+                </div>
               );
             }
             return value;
@@ -39,11 +76,11 @@ function ModalTable(props) {
   return (
     <div className="overflow-x-auto relative px-6 pb-11 bg-white rounded-b-3xl">
       <table {...getTableProps()} className="table-auto w-full text-sm text-left text-gray-500 border-t">
-        <thead className="text-xs text-black uppercase bg-thead">
+        <thead className="text-xs text-black uppercase bg-white border-b">
           {headerGroups.map((headerGroup, idxgroup) => (
             <tr key={idxgroup} {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map((column, columnidx) => (
-                <th key={columnidx} {...column.getHeaderProps()} className="py-3 px-6">
+                <th key={columnidx} {...column.getHeaderProps()} className="py-3 px-6" width={column.width}>
                   <div className="flex">{column.render('Header')}</div>
                 </th>
               ))}
@@ -54,11 +91,7 @@ function ModalTable(props) {
           {rows.map((row, i) => {
             prepareRow(row);
             return (
-              <tr
-                key={i}
-                {...row.getRowProps()}
-                className={`${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}border-b hover:bg-slate-100`}
-              >
+              <tr key={i} {...row.getRowProps()} className="bg-white border-1 border-b hover:bg-slate-100">
                 {row.cells.map((cell, idx) => (
                   <td key={idx} {...cell.getCellProps()} className="py-2 px-6">
                     {cell.render('Cell')}

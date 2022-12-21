@@ -6,7 +6,7 @@ import Swal from 'sweetalert2';
 import { Button, Table, Thead, Tbody, Tr, Th, Td, TableContainer } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { CalculatorIcon, XIcon } from '@heroicons/react/outline';
-import RequestApi from '../../../services/api-transit';
+import { RequestApi, TransitApi } from '../../../services/api-transit';
 import Input from '../../../components/input-component';
 import DatePicker from '../../../components/datepicker-component';
 import TextArea from '../../../components/textarea-component';
@@ -34,7 +34,7 @@ function Screen() {
     sort_by: 'id',
     sort_order: 'desc',
   };
-  const [data, setData] = useState();
+  const [data, setData] = useState([]);
   const [filterData, setFilterData] = useState({
     ...defaultSort,
   });
@@ -42,7 +42,9 @@ function Screen() {
   const [onOverview, setOnOverview] = useState(false);
   const [overviewData, setOverviewData] = useState([]);
   const [storageData, setStorageData] = useState();
-  const [counter, setCounter] = useState(1);
+  const [storeSplit, setStoreSplit] = useState([]);
+  const [splice, setSplice] = useState([]);
+  let counter = 0;
 
   useEffect(() => {
     getDetailRequest();
@@ -89,30 +91,56 @@ function Screen() {
     }
     setFilterData(prev => ({ ...prev, data }));
   };
-
   const onSplit = (idx, qty) => {
-    // console.log('qty', qty);
-    // console.log('idx', idx);
-    // console.log('devide', qty / counter);
-    setCounter(counter + 1);
-    const res = [];
+    counter += 1;
+    const findData = data.find(i => i.id === idx);
     if (qty / counter >= 1) {
-      console.log('counter', counter);
-      console.log('divideddd', qty / counter);
-      // Object.keys(data).forEach(key => {
-      //   console.log('key forEach', key);
-      //   console.log('row idx', idx);
-      //   console.log('condition', key === idx);
-      //   if (key === idx) {
-      //     console.log('masukk');
-      //     console.log('newData', data[key]);
-      //     res.push({ key: data[key] });
-      //     return res;
-      //   }
-      //   return res;
-      // });
-      console.log('ress', res);
+      setStoreSplit(prev => [...prev, { id: findData.id / counter }]);
+      setSplice(data.filter(i => i.id !== qty));
+      setData(data.filter(i => i.id !== qty));
     }
+  };
+
+  useEffect(() => {
+    setData(prev => [...prev, ...storeSplit, ...splice]);
+  }, [storeSplit]);
+
+  const onSubmitRFID = () => {
+    Promise.allSettled(
+      data.map(i => {
+        return new Promise((resolve, reject) => {
+          TransitApi.store([{ request_id: i.id, product_id: i.id, qty: i.id, storage_id: i.id, warehouse_id: i.id }])
+            .then(res => resolve(res))
+            .catch(err => reject(err));
+        });
+      })
+    ).then(res => {
+      const success = [];
+      const failed = [];
+      res.forEach(result => {
+        if (result.status === 'fulfilled') {
+          success.push(true);
+        } else {
+          failed.push(true);
+        }
+      });
+      if (failed.length > 0) {
+        setOnOpen(!onOpen);
+        // Swal.fire({ text: 'There is some problem occured', icon: 'error' });
+      } else {
+        setOnOpen(!onOpen);
+      }
+    });
+  };
+  const onFinalSubmit = () => {
+    const body = [];
+    TransitApi.inbound(body)
+      .then(() => {
+        setOnOpen(!onOpen);
+      })
+      .catch(error => {
+        console.log('error', error);
+      });
   };
 
   return (
@@ -228,7 +256,7 @@ function Screen() {
               px={12}
               size="sm"
               className="rounded-2xl ml-4 bg-[#526C55] text-[#fff] font-bold"
-              onClick={() => setOnOpen(!onOpen)}
+              onClick={onSubmitRFID}
               disabled={false}
             >
               Submit
@@ -239,6 +267,7 @@ function Screen() {
       {onOverview && (
         <div
           className=" main-modal fixed w-full h-200 inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
+          // onClick={onOverview ? () => setOnOverview(!onOverview) : null}
           style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
         >
           <div className="border shadow-lg modal-container bg-white w-[80%] mx-auto rounded z-50 overflow-y-auto ">
@@ -280,10 +309,40 @@ function Screen() {
 
               <SimpleTable
                 columns={[
-                  { header: 'No', value: 'id' },
+                  { header: 'No', value: 'activity_name' },
                   { header: 'SKU', value: 'created_by' },
                   { header: 'Product', value: 'request_by' },
-                  { header: 'Qty', value: 'status' },
+                  { header: 'Qty', value: 'id' },
+                  {
+                    header: ' ',
+                    value: '  ',
+                    type: 'select',
+                    placeholder: 'Rack',
+                    name: 'rack_number',
+                    data: storageData,
+                  },
+                  {
+                    header: ' ',
+                    value: 'b  ',
+                    type: 'select',
+                    placeholder: 'Bay',
+                    name: 'bay',
+                    data: storageData,
+                  },
+                  {
+                    header: '  ',
+                    value: 'l',
+                    type: 'select',
+                    placeholder: 'Level',
+                    name: 'level',
+                    data: storageData,
+                  },
+                  {
+                    header: ' ',
+                    value: 'status',
+                    name: 'qty',
+                    type: 'input',
+                  },
                   {
                     header: ' ',
                     value: ' ',
@@ -310,9 +369,7 @@ function Screen() {
                     px={12}
                     size="sm"
                     className="rounded-2xl ml-4 bg-[#526C55] text-[#fff] font-bold"
-                    onClick={() => {
-                      setOnOpen(!onOpen);
-                    }}
+                    onClick={onFinalSubmit}
                   >
                     Submit
                   </Button>

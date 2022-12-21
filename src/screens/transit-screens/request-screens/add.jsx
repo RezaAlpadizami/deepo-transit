@@ -8,7 +8,7 @@ import { Button, Text } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 
 import { ProductApi } from '../../../services/api-master';
-import RequestApi from '../../../services/api-transit';
+import { RequestApi } from '../../../services/api-transit';
 import Input from '../../../components/input-component';
 import Select from '../../../components/select-component';
 import TextArea from '../../../components/textarea-component';
