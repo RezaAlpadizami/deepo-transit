@@ -1,5 +1,5 @@
 import React from 'react';
-import { Input } from '@chakra-ui/react';
+import { Input, InputGroup, InputLeftElement } from '@chakra-ui/react';
 
 function InputComponent(props) {
   const {
@@ -12,6 +12,8 @@ function InputComponent(props) {
     errors,
     hidden = false,
     placeholder,
+    icon,
+    addOnleft,
   } = props;
 
   return (
@@ -21,20 +23,44 @@ function InputComponent(props) {
           {label}
         </label>
         <div className="mt-1 flex">
-          <Input
-            {...register(name)}
-            bg="white"
-            size="sm"
-            width="auto"
-            type={type}
-            isDisabled={disabled}
-            maxLength={maxLength}
-            hidden={hidden}
-            name={name}
-            id={name}
-            className="w-full text-sm rounded-full border-gray-400 px-5 py-5"
-            placeholder={placeholder}
-          />
+          {addOnleft ? (
+            <InputGroup>
+              <InputLeftElement fontSize="md" pointerEvents="none" className="ml-2">
+                {icon}
+              </InputLeftElement>
+              <Input
+                {...register(name)}
+                bg="white"
+                size="sm"
+                width="auto"
+                type={type}
+                isDisabled={disabled}
+                maxLength={maxLength}
+                hidden={hidden}
+                name={name}
+                id={name}
+                variant={disabled ? 'filled' : 'outline'}
+                className={`${disabled ? 'bg-gray-200' : ''} w-full text-sm rounded-full border-gray-400 pl-12 py-5`}
+                placeholder={placeholder}
+              />
+            </InputGroup>
+          ) : (
+            <Input
+              {...register(name)}
+              bg="white"
+              size="sm"
+              width="auto"
+              type={type}
+              isDisabled={disabled}
+              maxLength={maxLength}
+              hidden={hidden}
+              name={name}
+              id={name}
+              variant={disabled ? 'filled' : 'outline'}
+              className={`${disabled ? 'bg-gray-200' : ''} w-full text-sm rounded-full border-gray-400 px-5 py-5`}
+              placeholder={placeholder}
+            />
+          )}
         </div>
       </div>
       {errors &&

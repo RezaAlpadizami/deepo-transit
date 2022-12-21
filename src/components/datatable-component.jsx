@@ -45,7 +45,7 @@ function DataTable(props) {
   const [pages, setPages] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [datas, setDatas] = useState([]);
-  const [totalData, setTotalData] = useState([]);
+  const [totalData, setTotalData] = useState(0);
   const [loadingHover, setLoadingHover] = useState(false);
   const defaultSort = {
     sort_by: 'id',
@@ -131,6 +131,7 @@ function DataTable(props) {
     api
       .get({ ...filterData })
       .then(res => {
+        console.log('res', res);
         setLoadingHover(false);
         setDatas(res.data);
         setTotalData(res.query.total);

@@ -2,19 +2,31 @@ import React from 'react';
 import { HomeIcon } from '@heroicons/react/solid';
 
 const NotFound = React.lazy(() => import('../screens/home-screens/404'));
+const Home = React.lazy(() => import('../screens/home-screens/index'));
 
 const RequestScreens = React.lazy(() => import('../screens/master-screens/request-screens/index'));
 const RequestScreensAdd = React.lazy(() => import('../screens/master-screens/request-screens/add'));
 const RequestScreenShow = React.lazy(() => import('../screens/master-screens/request-screens/show'));
 
+const InboundScreens = React.lazy(() => import('../screens/master-screens/inbound-screens/index'));
+
 export default [
   {
-    displayName: 'Request',
-    icon: HomeIcon,
+    displayName: 'Home',
+    name: 'home',
+    role: 'home',
+    showmenu: false,
+    exact: true,
+    route: '/',
+    component: Home,
+  },
+  {
+    displayName: 'Master',
     name: 'request',
     role: 'request',
     showmenu: false,
-    exact: true,
+    exact: false,
+    route: '/request',
     routes: [
       {
         displayName: 'Request',
@@ -25,26 +37,62 @@ export default [
         exact: true,
         route: '/request',
         component: RequestScreens,
+        routes: [
+          {
+            displayName: 'Request',
+            icon: HomeIcon,
+            name: 'request',
+            role: 'request',
+            showmenu: false,
+            exact: true,
+            route: '/request',
+            component: RequestScreens,
+            routes: [
+              {
+                displayName: 'Create Request',
+                icon: HomeIcon,
+                name: 'request-add',
+                role: 'request',
+                showmenu: false,
+                exact: true,
+                route: '/request/add',
+                component: RequestScreensAdd,
+              },
+              {
+                displayName: 'Detail Request',
+                icon: HomeIcon,
+                name: 'request-show',
+                role: 'request',
+                showmenu: false,
+                exact: true,
+                route: '/request/:id/show',
+                component: RequestScreenShow,
+              },
+            ],
+          },
+        ],
       },
       {
-        displayName: 'Create Request',
+        displayName: 'Inbound',
         icon: HomeIcon,
-        name: 'request-add',
+        name: 'request',
         role: 'request',
-        showmenu: false,
+        showmenu: true,
         exact: true,
-        route: '/request/add',
-        component: RequestScreensAdd,
-      },
-      {
-        displayName: 'Detail Request',
-        icon: HomeIcon,
-        name: 'request-show',
-        role: 'request',
-        showmenu: false,
-        exact: true,
-        route: '/request/:id/show',
-        component: RequestScreenShow,
+        route: '/inbound',
+        component: InboundScreens,
+        routes: [
+          {
+            displayName: 'Inbound',
+            icon: HomeIcon,
+            name: 'request',
+            role: 'request',
+            showmenu: false,
+            exact: true,
+            route: '/inbound',
+            component: InboundScreens,
+          },
+        ],
       },
     ],
   },

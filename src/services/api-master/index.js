@@ -1,3 +1,3 @@
-import RequestApi from './resources/request-api';
+import StorageApi from './resources/request-api';
 
-export default RequestApi;
+export default StorageApi;
