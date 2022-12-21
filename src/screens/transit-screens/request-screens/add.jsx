@@ -7,7 +7,7 @@ import Swal from 'sweetalert2';
 import { Button, Text } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 
-import ProductApi from '../../../services/api-master';
+import { ProductApi } from '../../../services/api-master';
 import RequestApi from '../../../services/api-transit';
 import Input from '../../../components/input-component';
 import Select from '../../../components/select-component';
