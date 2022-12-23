@@ -1,13 +1,13 @@
 import React, { Suspense, useContext } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
-import { Spinner } from '@chakra-ui/react';
 import NoAccessScreen from '../screens/home-screens/no-access';
 import MenuItem from './menu-item';
 import Header from '../components/header-component';
 import Sidebar from '../components/sidebar-component';
 
 import Context from '../context';
+import LoadingHover from '../components/loading-hover-component';
 
 function MainNavigation() {
   return (
@@ -15,7 +15,8 @@ function MainNavigation() {
       <Header />
       <div className="flex">
         <Sidebar />
-        <div className="p-6 bg-container min-h-screen flex-auto transition-width ease-in-out delay-150 duration-300">
+
+        <div className="p-6 bg-container min-h-screen flex-auto transition-width ease-in-out delay-150 duration-300 w-5/6 ">
           <Content />
         </div>
       </div>
@@ -31,7 +32,7 @@ function Content() {
       fallback={
         <div className="h-64 flex items-center justify-center">
           <div>
-            <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
+            <LoadingHover visible />
           </div>
         </div>
       }

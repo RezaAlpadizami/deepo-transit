@@ -1,14 +1,15 @@
 import RequestHandler from '../request-handler';
 import ENDPOINT from '../../../config/api-transit';
 
-class RequestApi extends RequestHandler {
+class TransitApi extends RequestHandler {
   constructor() {
-    super(ENDPOINT.REQUEST);
+    super(ENDPOINT.TRANSIT);
   }
 
-  createRequestProcess(id) {
+  inbound(body) {
     return new Promise((resolve, reject) => {
-      this.store(`${this.url}/process/${id}`)
+      this.api
+        .post(`${this.url}/inbound`, body)
         .then(response => {
           resolve(response);
         })
@@ -19,4 +20,4 @@ class RequestApi extends RequestHandler {
   }
 }
 
-export default new RequestApi();
+export default new TransitApi();

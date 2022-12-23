@@ -8,7 +8,18 @@ const RequestScreens = React.lazy(() => import('../screens/transit-screens/reque
 const RequestScreensAdd = React.lazy(() => import('../screens/transit-screens/request-screens/add'));
 const RequestScreenShow = React.lazy(() => import('../screens/transit-screens/request-screens/show'));
 
+const InboundScreens = React.lazy(() => import('../screens/transit-screens/inbound-screens/index'));
+
 export default [
+  {
+    displayName: 'Home',
+    name: 'home',
+    role: 'home',
+    showmenu: false,
+    exact: true,
+    route: '/',
+    component: Home,
+  },
   {
     displayName: 'Transit',
     icon: HomeIcon,
@@ -16,8 +27,7 @@ export default [
     role: 'transit',
     showmenu: false,
     exact: true,
-    route: '/',
-    component: Home,
+    route: '/request',
     routes: [
       {
         displayName: 'Request',
@@ -28,26 +38,60 @@ export default [
         exact: true,
         route: '/request',
         component: RequestScreens,
+        routes: [
+          {
+            displayName: 'Request',
+            icon: HomeIcon,
+            name: 'transit-request',
+            role: 'transit-request',
+            showmenu: false,
+            exact: true,
+            route: '/request',
+          },
+          {
+            displayName: 'Create Request',
+            icon: HomeIcon,
+            name: 'transit-request-add',
+            role: 'transit-request',
+            showmenu: false,
+            exact: true,
+            route: '/request/add',
+            component: RequestScreensAdd,
+          },
+          {
+            displayName: 'Detail Request',
+            icon: HomeIcon,
+            name: 'transit-request-show',
+            role: 'transit-request',
+            showmenu: false,
+            exact: true,
+            route: '/request/:id/show',
+            component: RequestScreenShow,
+          },
+        ],
       },
       {
-        displayName: 'Create Request',
+        displayName: 'Inbound',
         icon: HomeIcon,
-        name: 'transit-request-add',
-        role: 'transit-request',
-        showmenu: false,
+        name: 'request',
+        role: 'request',
+        showmenu: true,
+
         exact: true,
-        route: '/request/add',
-        component: RequestScreensAdd,
-      },
-      {
-        displayName: 'Detail Request',
-        icon: HomeIcon,
-        name: 'transit-request-show',
-        role: 'transit-request',
-        showmenu: false,
-        exact: true,
-        route: '/request/:id/show',
-        component: RequestScreenShow,
+        route: '/inbound',
+        component: InboundScreens,
+        routes: [
+          {
+            displayName: 'Inbound',
+            icon: HomeIcon,
+            name: 'request',
+            role: 'request',
+            showmenu: false,
+            exact: true,
+            route: '/inbound',
+            component: InboundScreens,
+          },
+        ],
       },
     ],
   },

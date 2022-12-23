@@ -35,7 +35,7 @@ function InputComponent(props) {
             name={name}
             id={name}
             isInvalid={errors[name]}
-            className="w-full text-sm rounded-md border-gray-300 px-3 py-1"
+            className="w-full text-sm rounded-2xl border-gray-300 px-3 py-1"
             placeholder={placeholder}
           />
         </div>

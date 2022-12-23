@@ -7,7 +7,7 @@ import { CalendarIcon } from '@heroicons/react/outline';
 import 'react-datepicker/dist/react-datepicker.css';
 
 function InputElement(props) {
-  const { errors, name } = props;
+  const { errors, name, disabled } = props;
   return (
     <InputGroup size="sm">
       <Input
@@ -18,7 +18,8 @@ function InputElement(props) {
         autoComplete="off"
         type="text"
         isInvalid={errors[name]}
-        className="w-full text-sm border-gray-400 py-5 rounded-full px-8"
+        variant={disabled ? 'filled' : 'outline'}
+        className={` ${disabled ? 'bg-gray-200' : ''} w-full text-sm border-gray-400 py-5 rounded-full px-8`}
       />
       <InputRightElement className="rounded-r-full w-14 bg-gray-400 h-full">
         <CalendarIcon className="w-5 h-5 mt-0.5" />
@@ -48,7 +49,7 @@ function SelectComponent(props) {
                   value={value}
                   onChange={onChange}
                   id={name}
-                  customInput={<InputElement errors={errors} />}
+                  customInput={<InputElement disabled errors={errors} />}
                   className="py-6"
                 />
               );
