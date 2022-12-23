@@ -8,7 +8,8 @@ class RequestApi extends RequestHandler {
 
   createRequestProcess(id) {
     return new Promise((resolve, reject) => {
-      this.store(`${this.url}/process/${id}`)
+      this.api
+        .post(`${this.url}/process/${id}`)
         .then(response => {
           resolve(response);
         })

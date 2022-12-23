@@ -4,10 +4,11 @@ import { ChevronLeftIcon, ChevronRightIcon, ArrowSmUpIcon, ArrowSmDownIcon } fro
 import { useTable, useRowSelect, usePagination, useSortBy } from 'react-table';
 import { observer } from 'mobx-react-lite';
 import Swal from 'sweetalert2';
+import { Link } from 'react-router-dom';
 import XLSX from 'xlsx';
 import Moment from 'moment';
 import { saveAs } from 'file-saver';
-import { Link, Button } from '@chakra-ui/react';
+import { Button } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import Toolbar from './action-toolbar-component';
 import { hasProperty } from '../utils/helper';
@@ -80,7 +81,7 @@ function DataTable(props) {
                 <Link
                   type="button"
                   className="mr-4 text-blue-400"
-                  href={`${to}/${row.original[identifierProperties]}/show`}
+                  to={`${to}/${row.original[identifierProperties]}/show`}
                 >
                   {value}
                 </Link>
@@ -342,7 +343,7 @@ function DataTable(props) {
       .createRequestProcess(row.original.id)
       .then(() => {
         setLoadingHover(false);
-        Swal.fire('OK', `Request ${row.original.request_number} berhasil di download`, 'success');
+        Swal.fire('OK', `Request ${row.original.request_number} berhasil di process`, 'success');
       })
       .catch(error => {
         setLoadingHover(false);
