@@ -6,7 +6,9 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        container: '#f3f6fa',
+        primarydeepo: '#184D47',
+        secondarydeepo: '#2C7873',
+        container: '#F3F3F3',
         thead: '#F3F4F5',
         slate: {
           850: '#172030',

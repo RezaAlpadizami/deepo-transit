@@ -55,10 +55,10 @@ function Screen() {
   }, 0);
 
   return (
-    <div className="bg-white p-5 rounded-[55px] shadow py-12">
+    <div className="bg-white p-5 rounded-[55px] drop-shadow-md py-12">
       <div className="grid-cols-2 gap-4 flex">
-        <fieldset className="border border-[#7D8F69] w-full h-full px-8 py-12 rounded-[55px]">
-          <legend className="px-2 text-[28px] text-[#7D8F69]">Request</legend>
+        <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
+          <legend className="px-2 text-[28px] text-primarydeepo">Request</legend>
           <div className="flex flex-col">
             <div className="w-full">
               <InputDetail
@@ -100,8 +100,8 @@ function Screen() {
             />
           </div>
         </fieldset>
-        <fieldset className="border border-[#7D8F69] w-full h-full px-8 py-12 rounded-[55px]">
-          <legend className="px-2 text-[28px] text-[#7D8F69]">Request Detail</legend>
+        <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
+          <legend className="px-2 text-[28px] text-primarydeepo">Request Detail</legend>
           <div>
             <div className="flex justify-between">
               <Text className="text-gray-400">Product</Text>
@@ -139,7 +139,7 @@ function Screen() {
               type="submit"
               px={8}
               size="sm"
-              className="rounded-full bg-[#7D8F69] text-[#fff] mr-6"
+              className="ml-4 rounded-full bg-[#184D47] drop-shadow-md text-[#fff] font-bold hover:text-[#E4E4E4] mr-12"
             >
               Process
             </Button>

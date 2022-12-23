@@ -32,6 +32,7 @@ function InputComponent(props) {
             hidden={hidden}
             name={name}
             id={name}
+            focusBorderColor="#184D47"
             className="w-full text-sm rounded-full border-gray-400 px-5 py-5"
             placeholder={placeholder}
           />

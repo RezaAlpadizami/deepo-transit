@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import { ChevronRightIcon } from '@heroicons/react/solid';
-
+import ArrowUpTray from '../assets/images/arrow-up-tray.svg';
 import Context from '../context';
 import menuItem from '../navigation/menu-item';
 import { findParent, findTree } from '../utils/navigation-utils';
@@ -27,10 +27,10 @@ function SidebarComponent() {
   return (
     <aside
       className={`${
-        store.isDrawerOpen ? 'w-64' : '-translate-x-64 w-0'
-      } bg-[#232323] transition-all ease-in-out delay-150 duration-300 `}
+        store.isDrawerOpen ? 'w-80' : '-translate-x-80 w-0'
+      } bg-primarydeepo transition-all ease-in-out delay-150 duration-300`}
     >
-      <div className="">
+      <div className="relative h-full">
         <ul className="text-white">
           {menuParent?.routes?.map(
             (d, idx) =>
@@ -39,7 +39,9 @@ function SidebarComponent() {
                 <Link to={d.route} key={idx}>
                   <li
                     className={`${
-                      findTree([d], location).length > 0 ? 'bg-[#606060] hover:font-bold' : 'hover:bg-[#878787]'
+                      findTree([d], location).length > 0
+                        ? 'bg-secondarydeepo hover:font-bold active:text-secondarydeepo]'
+                        : 'hover:bg-secondarydeepo'
                     } flex px-5 py-3 items-center`}
                   >
                     <d.icon className="w-5 h-5" />
@@ -54,7 +56,7 @@ function SidebarComponent() {
                   </li>
                   {d.routes?.length > 0 && (
                     <ul
-                      className={`transition-all ease-in-out duration-300 bg-slate-800 overflow-hidden ${
+                      className={`transition-all ease-in-out duration-300 bg-secondarydeepo overflow-hidden ${
                         findTree([d], location).length > 0 ? 'max-h-96' : 'max-h-0'
                       }`}
                     >
@@ -66,7 +68,7 @@ function SidebarComponent() {
                               <li
                                 className={`${
                                   findTree([r], location).length > 0 ? 'font-bold' : ''
-                                } pl-12 pr-5 py-3 hover:bg-slate-900`}
+                                } pl-12 pr-5 py-3 hover:bg-secondarydeepo`}
                               >
                                 {r.displayName}
                               </li>
@@ -79,6 +81,16 @@ function SidebarComponent() {
               )
           )}
         </ul>
+        <button
+          className="absolute inset-x-0 bottom-10 h-15 py-3 hover:bg-hoversidebar"
+          type="button"
+          onClick={() => {}}
+        >
+          <div className="flex pl-6">
+            <img src={ArrowUpTray} alt="arrow up" className="h-7 rotate-90 text-black" />
+            <h3 className="pt-0 pl-6 transition-all ease-in-out duration-300 font-bold text-md text-[#fff]">Log out</h3>
+          </div>
+        </button>
       </div>
     </aside>
   );

@@ -15,13 +15,13 @@ function InputElement(props) {
         bg="white"
         size="sm"
         width="auto"
-        autoComplete="off"
         type="text"
         isInvalid={errors[name]}
+        focusBorderColor="primarydeepo"
         className="w-full text-sm border-gray-400 py-5 rounded-full px-8"
       />
-      <InputRightElement className="rounded-r-full w-14 bg-gray-400 h-full">
-        <CalendarIcon className="w-5 h-5 mt-0.5" />
+      <InputRightElement className="rounded-r-full w-14 bg-primarydeepo h-full">
+        <CalendarIcon color="white" className="w-5 h-5 mt-0.5" />
       </InputRightElement>
     </InputGroup>
   );
@@ -46,6 +46,7 @@ function SelectComponent(props) {
                   placeholderText={placeholder}
                   selected={value}
                   value={value}
+                  autoComplete="off"
                   onChange={onChange}
                   id={name}
                   customInput={<InputElement errors={errors} />}

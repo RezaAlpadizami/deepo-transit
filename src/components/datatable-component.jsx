@@ -343,6 +343,7 @@ function DataTable(props) {
       .createRequestProcess(row.original.id)
       .then(() => {
         setLoadingHover(false);
+        getData();
         Swal.fire('OK', `Request ${row.original.request_number} berhasil di process`, 'success');
       })
       .catch(error => {
@@ -416,22 +417,31 @@ function DataTable(props) {
               <div className="col-md-3 offset-md-9 px-0">
                 <div className="flex justify-end mt-3 px-4 py-3">
                   <Button
+                    _hover={{
+                      shadow: 'md',
+                      transform: 'translateY(-5px)',
+                      transitionDuration: '0.2s',
+                      transitionTimingFunction: 'ease-in-out',
+                    }}
                     type="button"
                     size="sm"
-                    width="24"
-                    className="mr-2 bg-[#E3E3E3] hover:text-gray-700 hover:bg-[#D9D9D9]"
+                    px={8}
+                    className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#184D47] font-bold"
                     onClick={() => onReset()}
-                    colorScheme="blackAlpha"
-                    variant="outline"
                   >
                     Reset
                   </Button>
                   <Button
+                    _hover={{
+                      shadow: 'md',
+                      transform: 'translateY(-5px)',
+                      transitionDuration: '0.2s',
+                      transitionTimingFunction: 'ease-in-out',
+                    }}
                     type="submit"
                     size="sm"
-                    width="24"
-                    variant="solid"
-                    className="bg-[#232323] hover:bg-black text-white"
+                    px={8}
+                    className="ml-4 rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold"
                     onClick={handleSubmit(onSubmit)}
                   >
                     Filter
@@ -520,7 +530,7 @@ function DataTable(props) {
                           type="submit"
                           px={8}
                           size="sm"
-                          className="rounded-full bg-[#6ECCAF] text-[#fff] mr-6"
+                          className="ml-4 rounded-full bg-secondarydeepo drop-shadow-md text-[#fff] font-bold hover:text-[#E8F3D6] mr-6"
                         >
                           Process
                         </Button>

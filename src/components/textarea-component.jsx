@@ -35,6 +35,7 @@ function InputComponent(props) {
             name={name}
             id={name}
             isInvalid={errors[name]}
+            focusBorderColor="#184D47"
             className="w-full text-sm rounded-md border-gray-300 px-3 py-1"
             placeholder={placeholder}
           />

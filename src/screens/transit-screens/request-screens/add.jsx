@@ -110,10 +110,10 @@ function Screen() {
   };
 
   return (
-    <div className="bg-white p-5 rounded-[55px] shadow py-12">
+    <div className="bg-white p-5 rounded-[55px] py-12 drop-shadow-md">
       <div className="grid-cols-2 gap-4 flex">
-        <fieldset className="border border-[#7D8F69] w-full h-full px-8 py-12 rounded-[55px]">
-          <legend className="px-2 text-[28px] text-[#7D8F69]">Request</legend>
+        <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
+          <legend className="px-2 text-[28px] text-primarydeep">Request</legend>
           <div className="flex gap-4 justify-center">
             <div className="w-full">
               <Select
@@ -125,7 +125,7 @@ function Screen() {
                     label: i.activity_name,
                   };
                 })}
-                placeholder=""
+                placeholder="Activity"
                 register={register}
                 errors={errors}
               />
@@ -146,8 +146,8 @@ function Screen() {
           </div>
         </fieldset>
 
-        <fieldset className="border border-[#7D8F69] w-full h-full px-8 py-12 rounded-[55px]">
-          <legend className="px-2 text-[28px] text-[#7D8F69]">Request Detail</legend>
+        <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
+          <legend className="px-2 text-[28px] text-primarydeepo">Request Detail</legend>
           <form onSubmit={handleSubmitProd(onAddProdRequestDetail)}>
             <div className="flex gap-4 justify-center">
               <div className="w-full col-span-2">
@@ -160,7 +160,7 @@ function Screen() {
                       label: i.product_name,
                     };
                   })}
-                  placeholder=""
+                  placeholder="Product"
                   register={registerProd}
                   errors={errorsProd}
                 />
@@ -170,7 +170,7 @@ function Screen() {
               </div>
             </div>
             <div className="flex justify-end">
-              <Button px={8} type="submit" size="sm" className="rounded-full bg-[#7D8F69] text-[#fff] mr-6">
+              <Button px={8} type="submit" size="sm" className="rounded-full bg-primarydeepo text-[#fff] mr-6">
                 + Add
               </Button>
             </div>
@@ -211,7 +211,7 @@ function Screen() {
               onClick={() => navigate(-1)}
               px={8}
               size="sm"
-              className="rounded-full bg-white border border-[#7D8F69] text-black mr-6"
+              className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#184D47] font-bold"
             >
               Cancel
             </Button>
@@ -222,7 +222,7 @@ function Screen() {
               onClick={handleSubmit(onSubmitRequest)}
               px={8}
               size="sm"
-              className="rounded-full bg-[#7D8F69] text-[#fff] mr-6"
+              className="ml-4 rounded-full bg-[#184D47] drop-shadow-md text-[#fff] font-bold hover:text-[#E4E4E4] mr-14"
             >
               Submit
             </Button>
