@@ -43,7 +43,7 @@ function Screen() {
   const [storageData, setStorageData] = useState();
   const [storeSplit, setStoreSplit] = useState([]);
   const [splice, setSplice] = useState([]);
-  const [counter, setCounter] = useState(0);
+  const [counter, setCounter] = useState(1);
   const [id, setId] = useState();
   useEffect(() => {
     getDetailRequest();
