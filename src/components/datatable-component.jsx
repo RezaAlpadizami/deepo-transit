@@ -1,22 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon, ArrowSmUpIcon, ArrowSmDownIcon } from '@heroicons/react/solid';
 
-import { useTable, useRowSelect, usePagination, useSortBy } from 'react-table';
-import { observer } from 'mobx-react-lite';
-import Swal from 'sweetalert2';
-import { Link } from 'react-router-dom';
 import XLSX from 'xlsx';
 import Moment from 'moment';
+import Swal from 'sweetalert2';
 import { saveAs } from 'file-saver';
-import { Button } from '@chakra-ui/react';
+import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import Toolbar from './action-toolbar-component';
+import { Button } from '@chakra-ui/react';
+import { observer } from 'mobx-react-lite';
+import { useTable, useRowSelect, usePagination, useSortBy } from 'react-table';
+import { ChevronLeftIcon, ChevronRightIcon, ArrowSmUpIcon, ArrowSmDownIcon } from '@heroicons/react/solid';
+
+import Input from './input-component';
+import Select from './select-component';
+import Checkbox from './checkbox-component';
 import { hasProperty } from '../utils/helper';
 import TableComponent from './table-component';
-import Checkbox from './checkbox-component';
-import Select from './select-component';
-import Input from './input-component';
 import DatePicker from './datepicker-component';
+import Toolbar from './action-toolbar-component';
 
 function DataTable(props) {
   const {
@@ -344,7 +345,13 @@ function DataTable(props) {
       .then(() => {
         setLoadingHover(false);
         getData();
-        Swal.fire('OK', `Request ${row.original.request_number} berhasil di process`, 'success');
+        Swal.fire({
+          text: `Request ${row.original.request_number} berhasil di process`,
+          icon: 'success',
+          buttonsStyling: false,
+          confirmButtonColor: 'primarydeepo',
+          confirmButtonText: `<p class="rounded bg-secondarydeepo text-[#fff] px-5 py-2 ml-5 font-bold">OK</p>`,
+        });
       })
       .catch(error => {
         setLoadingHover(false);
@@ -472,7 +479,7 @@ function DataTable(props) {
         />
       )}
 
-      <div className="overflow-x-auto relative px-6 pb-11 bg-white rounded-b-3xl">
+      <div className="overflow-x-auto relative px-6 pb-11 bg-white rounded-b-3xl drop-shadow-md">
         <table {...getTableProps()} className="table-auto w-full text-sm text-left text-gray-500 border-t">
           <thead className="text-xs text-black uppercase bg-thead">
             {headerGroups.map((headerGroup, idxgroup) => (
@@ -530,7 +537,7 @@ function DataTable(props) {
                           type="submit"
                           px={8}
                           size="sm"
-                          className="ml-4 rounded-full bg-secondarydeepo drop-shadow-md text-[#fff] font-bold hover:text-[#E8F3D6] mr-6"
+                          className="text-white bg-gradient-to-r from-secondarydeepo to-primarydeepo hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2"
                         >
                           Process
                         </Button>
