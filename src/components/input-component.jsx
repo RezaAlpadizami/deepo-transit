@@ -10,12 +10,14 @@ function InputComponent(props) {
     type = 'text',
     register,
     errors,
-    value,
+    value = '',
     hidden = false,
     placeholder,
     icon,
     addOnleft,
     readOnly = false,
+    array,
+    key,
   } = props;
 
   return (
@@ -46,6 +48,24 @@ function InputComponent(props) {
                 placeholder={placeholder}
               />
             </InputGroup>
+          ) : array && key ? (
+            <Input
+              {...register(`${name}_${key}`)}
+              bg="white"
+              size="sm"
+              width="auto"
+              type={type}
+              value={value}
+              isDisabled={disabled}
+              maxLength={maxLength}
+              hidden={hidden}
+              name={name}
+              id={name}
+              variant={disabled ? 'filled' : 'outline'}
+              className={`${disabled ? 'bg-gray-200' : ''} w-full text-sm rounded-full border-gray-400 px-5 py-5`}
+              placeholder={placeholder}
+              readOnly={readOnly}
+            />
           ) : (
             <Input
               {...register(name)}

@@ -5,7 +5,7 @@ import { useTable, useRowSelect } from 'react-table';
 import Select from './select-component';
 import Input from './input-component';
 
-function ModalTable(props) {
+function SimpleTable(props) {
   const { datas, columns: propsColumn = [], onSplit = () => {}, register, control } = props;
 
   // storage  register, control
@@ -23,20 +23,22 @@ function ModalTable(props) {
             const { value, row } = props;
             if (d.type === 'select') {
               return (
-                <Select
-                  name="rack"
-                  placeholder={d.placeholder}
-                  options={
-                    d.data.map(i => {
-                      return {
-                        value: i[d.name],
-                        label: i[d.name],
-                      };
-                    }) || []
-                  }
-                  register={register}
-                  control={control}
-                />
+                <div className="w-20">
+                  <Select
+                    name="rack"
+                    placeholder={d.placeholder}
+                    options={
+                      d.data.map(i => {
+                        return {
+                          value: i[d.name],
+                          label: i[d.name],
+                        };
+                      }) || []
+                    }
+                    register={register}
+                    control={control}
+                  />
+                </div>
               );
             }
 
@@ -55,10 +57,12 @@ function ModalTable(props) {
                 </Button>
               );
             }
+
             if (d.type === 'input') {
+              console.log('value', value);
               return (
                 <div className="w-16">
-                  <Input name={`${d.name}`} value={value} register={register} control={control} readOnly />
+                  <Input name={`${d.name}`} value={value} register={register} control={control} array key={i} />
                 </div>
               );
             }
@@ -106,4 +110,4 @@ function ModalTable(props) {
   );
 }
 
-export default ModalTable;
+export default SimpleTable;

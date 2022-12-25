@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
-import Moment from 'moment';
 import Swal from 'sweetalert2';
 import { Button, Table, Thead, Tbody, Tr, Th, Td, TableContainer } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -10,7 +9,6 @@ import { RequestApi, TransitApi } from '../../../services/api-transit';
 import Input from '../../../components/input-component';
 import DatePicker from '../../../components/datepicker-component';
 import TextArea from '../../../components/textarea-component';
-import SimpleTable from '../../../components/simple-table-component';
 import { StorageApi } from '../../../services/api-master';
 import MagnifyClass from '../../../assets/images/magnify-glass.svg';
 import ModalTableOverview from '../../../components/modal-overview-table-component';
@@ -35,17 +33,18 @@ function Screen() {
     sort_order: 'desc',
   };
   const [data, setData] = useState([]);
-  const [filterData, setFilterData] = useState({
+  const [filterData] = useState({
     ...defaultSort,
   });
+  // setFilterData
   const [onOpen, setOnOpen] = useState(false);
   const [onOverview, setOnOverview] = useState(false);
   const [overviewData, setOverviewData] = useState([]);
   const [storageData, setStorageData] = useState();
   const [storeSplit, setStoreSplit] = useState([]);
   const [splice, setSplice] = useState([]);
-  let counter = 0;
-
+  const [counter, setCounter] = useState(0);
+  const [id, setId] = useState();
   useEffect(() => {
     getDetailRequest();
   }, [filterData]);
@@ -55,54 +54,44 @@ function Screen() {
     Promise.allSettled([
       RequestApi.get({ status: 'PENDING' }).then(res => res),
       RequestApi.get({ ...filterData }).then(res => res),
-      StorageApi.get({ warehouse_id: 3 }).then(res => res),
+      StorageApi.get({ warehouse_id: 2 }).then(res => res),
+      // TransitApi.get({ warehouse_id: 2, product_id: 2 }).then(res => res),
     ])
-
       .then(result => {
         setOverviewData(result[0].value.data);
         setData(result[1].value.data);
         setStorageData(result[2].value.data);
+        // console.log('result', result);
       })
       .catch(error => {
         Swal.fire({ text: error?.message || error?.data?.error, icon: 'error' });
       });
-    // }
   };
 
-  const onSubmit = data => {
-    // eslint-disable-next-line no-restricted-syntax
-    for (const dt in data) {
-      if (Object.hasOwnProperty.call(data, dt)) {
-        if (!data[dt]) {
-          delete data[dt];
-        }
-
-        if (data[dt] instanceof Date) {
-          if (dt.toLowerCase().includes('to')) {
-            data[dt] = Moment(data[dt]).endOf('day').format('YYYY-MM-DD');
-          } else {
-            data[dt] = Moment(data[dt]).startOf('day').format('YYYY-MM-DD');
-          }
-        } else {
-          // eslint-disable-next-line no-unused-expressions
-          data[dt];
-        }
-      }
-    }
-    setFilterData(prev => ({ ...prev, data }));
-  };
   const onSplit = (idx, qty) => {
-    counter += 1;
-    const findData = data.find(i => i.id === idx);
-    if (qty / counter >= 1) {
-      setStoreSplit(prev => [...prev, { id: findData.id / counter }]);
+    setId(qty);
+    const findData = data.find(i => i.id === qty);
+    if (qty / counter !== 1 && qty / counter > 1) {
+      setStoreSplit(prev => {
+        if (prev.length === 0) {
+          return [
+            { ...findData, ...{ child_qty: findData.id / counter } },
+            ...prev,
+            { child_qty: findData.id / counter },
+          ];
+        }
+        return [...prev, { child_qty: findData.id / counter }];
+      });
+
       setSplice(data.filter(i => i.id !== qty));
-      setData(data.filter(i => i.id !== qty));
     }
   };
 
+  console.log('storeSplit', storeSplit);
   useEffect(() => {
-    setData(prev => [...prev, ...storeSplit, ...splice]);
+    console.log('id', id);
+    console.log('setData', [...storeSplit, ...splice]);
+    setData([...storeSplit, ...splice]);
   }, [storeSplit]);
 
   const onSubmitRFID = () => {
@@ -132,11 +121,12 @@ function Screen() {
       }
     });
   };
-  const onFinalSubmit = () => {
+  const onFinalSubmit = data => {
+    console.log('onFinalSubmit', data);
     const body = [];
     TransitApi.inbound(body)
       .then(() => {
-        setOnOpen(!onOpen);
+        // setOnOpen(!onOpen);
       })
       .catch(error => {
         console.log('error', error);
@@ -147,8 +137,7 @@ function Screen() {
     <div className="bg-white p-5 rounded-[55px] shadow">
       <fieldset className="border border-[#7D8F69] w-full h-full px-8 rounded-[55px] pb-6">
         <legend className="px-2 text-[28px] text-[#7D8F69] font-semibold">Request</legend>
-
-        <form className="grid grid-cols-8 gap-6" onSubmit={handleSubmit(onSubmit)}>
+        <div className="grid grid-cols-8 gap-6">
           <button
             type="submit"
             onClick={() => setOnOverview(!onOverview)}
@@ -179,7 +168,7 @@ function Screen() {
           <div className="col-span-3">
             <TextArea name="notes" label="Notes" register={register} control={control} errors={errors} />
           </div>
-        </form>
+        </div>
       </fieldset>
 
       <div className="grid-cols-2 gap-4 flex">
@@ -302,59 +291,52 @@ function Screen() {
           className=" main-modal fixed w-full h-200 inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
           style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
         >
-          <div className="border shadow-lg modal-container bg-white w-[80%] mx-auto rounded z-50 overflow-y-auto ">
-            <div className="modal-content py-4 text-left px-6">
+          <div className="border shadow-lg modal-container bg-white w-[80%] mx-auto rounded z-50 overflow-y-auto h-80">
+            <form className="modal-content py-4 text-left px-6" onSubmit={handleSubmit(onFinalSubmit)}>
               <p className="text-MD font-bold">Dashboard Transit</p>
               <div className="flex-1" />
+              {/* <TableContainer> */}
+              <table variant="simple">
+                <thead>
+                  <tr>
+                    <th>No</th>
+                    <th>SKU</th>
+                    <th>Product</th>
+                    <th isNumeric>Qty || ID</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data?.map((d, i) => {
+                    return (
+                      <tr key={i}>
+                        <td>{i + 1}</td>
+                        <td>{d.request_by}</td>
+                        <td>{d.status}</td>
+                        <td>{d.id}</td>
 
-              <SimpleTable
-                columns={[
-                  { header: 'No', value: 'activity_name' },
-                  { header: 'SKU', value: 'created_by' },
-                  { header: 'Product', value: 'request_by' },
-                  { header: 'Qty', value: 'id' },
-                  {
-                    header: ' ',
-                    value: '  ',
-                    type: 'select',
-                    placeholder: 'Rack',
-                    name: 'rack_number',
-                    data: storageData,
-                  },
-                  {
-                    header: ' ',
-                    value: 'b  ',
-                    type: 'select',
-                    placeholder: 'Bay',
-                    name: 'bay',
-                    data: storageData,
-                  },
-                  {
-                    header: '  ',
-                    value: 'l',
-                    type: 'select',
-                    placeholder: 'Level',
-                    name: 'level',
-                    data: storageData,
-                  },
-                  {
-                    header: ' ',
-                    value: 'status',
-                    name: 'qty',
-                    type: 'input',
-                  },
-                  {
-                    header: ' ',
-                    value: ' ',
-                    type: 'split',
-                  },
-                ]}
-                onSplit={(id, qty) => onSplit(id, qty)}
-                datas={data || []}
-                storage={storageData}
-                register={register}
-                control={control}
-              />
+                        <td>
+                          {d.id ? (
+                            <Button
+                              size="md"
+                              className="text-[#fff] font-bold bg-[#29A373] rounded-2xl"
+                              key={i}
+                              onClick={() => {
+                                setCounter(count => count + 1);
+                                onSplit(i + 1, d.id);
+                              }}
+                              px={6}
+                            >
+                              Split
+                            </Button>
+                          ) : null}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              {/* </tableContainer> */}
+
               <div className="grid place-items-end pt-4">
                 <div>
                   <Button
@@ -369,13 +351,13 @@ function Screen() {
                     px={12}
                     size="sm"
                     className="rounded-2xl ml-4 bg-[#526C55] text-[#fff] font-bold"
-                    onClick={onFinalSubmit}
+                    type="submit"
                   >
                     Submit
                   </Button>
                 </div>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       )}
