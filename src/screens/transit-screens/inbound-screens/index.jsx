@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import Swal from 'sweetalert2';
 import { Button, Table, Thead, Tbody, Tr, Th, Td, TableContainer } from '@chakra-ui/react';
@@ -12,6 +12,7 @@ import TextArea from '../../../components/textarea-component';
 import { StorageApi } from '../../../services/api-master';
 import MagnifyClass from '../../../assets/images/magnify-glass.svg';
 import ModalTableOverview from '../../../components/modal-overview-table-component';
+import Select from '../../../components/select-component';
 
 function Screen() {
   const schema = yup.object().shape({
@@ -28,32 +29,34 @@ function Screen() {
   } = useForm({
     resolver: yupResolver(schema),
   });
+  const { fields } = useFieldArray({
+    control,
+    name: 'rack',
+  });
+  console.log('fields', fields);
   const defaultSort = {
     sort_by: 'id',
     sort_order: 'desc',
   };
   const [data, setData] = useState([]);
-  const [filterData] = useState({
-    ...defaultSort,
-  });
-  // setFilterData
+
   const [onOpen, setOnOpen] = useState(false);
   const [onOverview, setOnOverview] = useState(false);
   const [overviewData, setOverviewData] = useState([]);
   const [storageData, setStorageData] = useState();
   const [storeSplit, setStoreSplit] = useState([]);
-  const [splice, setSplice] = useState([]);
+
   const [counter, setCounter] = useState(1);
   const [id, setId] = useState();
   useEffect(() => {
     getDetailRequest();
-  }, [filterData]);
+  }, []);
 
   const getDetailRequest = () => {
     // if (Object.entries(filterData).length !== 0) {
     Promise.allSettled([
       RequestApi.get({ status: 'PENDING' }).then(res => res),
-      RequestApi.get({ ...filterData }).then(res => res),
+      RequestApi.get({ ...defaultSort }).then(res => res),
       StorageApi.get({ warehouse_id: 2 }).then(res => res),
       // TransitApi.get({ warehouse_id: 2, product_id: 2 }).then(res => res),
     ])
@@ -83,15 +86,17 @@ function Screen() {
         return [...prev, { child_qty: findData.id / counter }];
       });
 
-      setSplice(data.filter(i => i.id !== qty));
+      setData(data.filter(i => i.id !== qty));
     }
   };
 
-  console.log('storeSplit', storeSplit);
   useEffect(() => {
-    console.log('id', id);
-    console.log('setData', [...storeSplit, ...splice]);
-    setData([...storeSplit, ...splice]);
+    setData(prev => {
+      if (storeSplit.find(i => i.id === id)?.id > prev.find(i => i.id !== id)?.id) {
+        return [...storeSplit, ...prev];
+      }
+      return [...prev, ...storeSplit];
+    });
   }, [storeSplit]);
 
   const onSubmitRFID = () => {
@@ -295,47 +300,63 @@ function Screen() {
             <form className="modal-content py-4 text-left px-6" onSubmit={handleSubmit(onFinalSubmit)}>
               <p className="text-MD font-bold">Dashboard Transit</p>
               <div className="flex-1" />
-              {/* <TableContainer> */}
-              <table variant="simple">
-                <thead>
-                  <tr>
-                    <th>No</th>
-                    <th>SKU</th>
-                    <th>Product</th>
-                    <th isNumeric>Qty || ID</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data?.map((d, i) => {
-                    return (
-                      <tr key={i}>
-                        <td>{i + 1}</td>
-                        <td>{d.request_by}</td>
-                        <td>{d.status}</td>
-                        <td>{d.id}</td>
+              <TableContainer>
+                <Table varianT="simple">
+                  <Thead>
+                    <Tr>
+                      <Th>No</Th>
+                      <Th>SKU</Th>
+                      <Th>ProducT</Th>
+                      <Th>QTy(ID val)</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {data?.map((d, i) => {
+                      return (
+                        <Tr key={i}>
+                          <Td>{i + 1}</Td>
+                          <Td>{d.request_by}</Td>
+                          <Td>{d.status}</Td>
+                          <Td>{d.id}</Td>
+                          <Td>
+                            <div className="w-20">
+                              <Select
+                                name="rack"
+                                placeholder={d.placeholder}
+                                options={[
+                                  {
+                                    value: 'asd',
+                                    labe: '123',
+                                  },
+                                ]}
+                                register={register}
+                                control={control}
+                              />
+                            </div>
+                          </Td>
 
-                        <td>
-                          {d.id ? (
-                            <Button
-                              size="md"
-                              className="text-[#fff] font-bold bg-[#29A373] rounded-2xl"
-                              key={i}
-                              onClick={() => {
-                                setCounter(count => count + 1);
-                                onSplit(i + 1, d.id);
-                              }}
-                              px={6}
-                            >
-                              Split
-                            </Button>
-                          ) : null}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-              {/* </tableContainer> */}
+                          <Td>
+                            {d.id ? (
+                              <Button
+                                size="md"
+                                className="text-[#fff] font-bold bg-[#29A373] rounded-2xl"
+                                key={i}
+                                onClick={() => {
+                                  setCounter(count => count + 1);
+                                  onSplit(i + 1, d.id);
+                                }}
+                                px={6}
+                              >
+                                Split
+                              </Button>
+                            ) : null}
+                          </Td>
+                        </Tr>
+                      );
+                    })}
+                  </Tbody>
+                </Table>
+              </TableContainer>
 
               <div className="grid place-items-end pt-4">
                 <div>

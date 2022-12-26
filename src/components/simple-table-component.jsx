@@ -8,7 +8,6 @@ import Input from './input-component';
 function SimpleTable(props) {
   const { datas, columns: propsColumn = [], onSplit = () => {}, register, control } = props;
 
-  // storage  register, control
   const data = React.useMemo(() => datas, [JSON.stringify(datas)]);
 
   const columns = React.useMemo(
@@ -59,7 +58,6 @@ function SimpleTable(props) {
             }
 
             if (d.type === 'input') {
-              console.log('value', value);
               return (
                 <div className="w-16">
                   <Input name={`${d.name}`} value={value} register={register} control={control} array key={i} />
