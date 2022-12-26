@@ -218,7 +218,7 @@ function Screen() {
                 onClick={() => navigate(-1)}
                 px={8}
                 size="sm"
-                className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#184D47] font-bold"
+                className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
               >
                 Cancel
               </Button>

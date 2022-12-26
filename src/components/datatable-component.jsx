@@ -100,12 +100,13 @@ function DataTable(props) {
             if (d.type === 'action-button' && row.original.request_number) {
               return (
                 <Button
-                  size="xs"
-                  className="text-[#fff] font-bold bg-[#29A373] rounded-2xl"
+                  className="text-white bg-gradient-to-r from-processbtnfrom to-processbtnto hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2"
                   onClick={() => {
                     onActionButton(row.original.id, row.original);
                   }}
-                  px={6}
+                  type="button"
+                  px={8}
+                  size="sm"
                 >
                   Process
                 </Button>
@@ -416,13 +417,17 @@ function DataTable(props) {
                         <div className={`${item.col ? `col-span-${item.col}` : ''}`} key={`component${idx}`}>
                           <p className="text-md font-bold">{item.text}</p>
                           <Button
+                            _hover={{
+                              shadow: 'md',
+                              transform: 'translateY(-5px)',
+                              transitionDuration: '0.2s',
+                              transitionTimingFunction: 'ease-in-out',
+                            }}
                             type="button"
-                            size="xs"
-                            width="24"
-                            className="mr-2 bg-[#E3E3E3] text-[#000] hover:bg-[#D9D9D9]"
+                            size="sm"
+                            px={8}
+                            className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold mt-2"
                             onClick={() => onReset()}
-                            colorScheme="blackAlpha"
-                            variant="outline"
                           >
                             Reset
                           </Button>
@@ -496,7 +501,7 @@ function DataTable(props) {
                       type="button"
                       size="sm"
                       px={8}
-                      className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#184D47] font-bold"
+                      className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
                       onClick={() => onReset()}
                     >
                       Reset
@@ -510,6 +515,7 @@ function DataTable(props) {
                       }}
                       type="submit"
                       size="sm"
+                      px={8}
                       className="ml-4 rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold"
                       onClick={handleSubmit(onSubmit)}
                     >
@@ -600,7 +606,7 @@ function DataTable(props) {
                           type="submit"
                           px={8}
                           size="sm"
-                          className="text-white bg-gradient-to-r from-secondarydeepo to-primarydeepo hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2"
+                          className="text-white bg-gradient-to-r from-processbtnfrom to-processbtnto hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2"
                         >
                           Process
                         </Button>

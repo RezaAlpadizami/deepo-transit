@@ -21,8 +21,9 @@ import { toCalculate } from '../../../utils/helper';
 const totalRFID = 110;
 const swalButton = Swal.mixin({
   customClass: {
-    confirmButton: 'rounded rounded-2xl bg-cyan-500 w-20 text-[#fff] font-bold',
-    cancelButton: 'rounded rounded-2xl bg-red-500 w-20 ml-2 text-[#fff] font-bold',
+    confirmButton: 'rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold w-20',
+    cancelButton:
+      'ml-4 rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold w-20',
   },
   buttonsStyling: false,
 });
@@ -198,16 +199,16 @@ function Screen() {
 
   return (
     <div className="bg-white p-5 rounded-[55px] shadow">
-      <fieldset className="border border-[#7D8F69] w-full h-full px-8 rounded-[55px] pb-6">
-        <legend className="px-2 text-[28px] text-[#7D8F69] font-semibold">Request</legend>
+      <fieldset className="border border-primarydeepo w-full h-full px-8 rounded-[55px] pb-6">
+        <legend className="px-2 text-[28px] text-primarydeepo font-semibold">Request</legend>
         <div className="grid grid-cols-8 gap-6">
           <button
             type="submit"
             onClick={() => setOnOverview(!onOverview)}
-            className="bg-[#526C55] h-[130px] w-[150px] rounded-lg grid place-content-center ml-6 mt-2 col-span-2 "
+            className="bg-gradient-to-r from-processbtnfrom to-processbtnto h-[110px] w-[110px] rounded-lg grid place-content-center ml-6 mt-2 col-span-2 mt-8"
           >
-            <p className="text-lg text-[#fff] font-bold">Request</p>
-            <CalculatorIcon className="h-20 w-15 bg-[#526C55] stroke-[#fff]" />
+            <p className="text-lg text-[#fff] font-bold mb-2">Request</p>
+            <CalculatorIcon className="h-10 w-15 bg-gradient-to-r from-processbtnfrom to-processbtnto stroke-[#fff] mx-auto" />
           </button>
 
           <div className="col-span-3">
@@ -235,8 +236,8 @@ function Screen() {
       </fieldset>
 
       <div className="grid-cols-2 gap-4 flex">
-        <fieldset className="border border-[#7D8F69] w-full h-full px-8 py-12 rounded-[55px]">
-          <legend className="px-2 text-[28px] text-[#7D8F69] font-semibold">Request Detail</legend>
+        <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
+          <legend className="px-2 text-[28px] text-primarydeepo font-semibold">Request Detail</legend>
           <LoadingComponent visible={loadingRequest} />
           {!loadingRequest ? (
             <TableContainer>
@@ -266,8 +267,8 @@ function Screen() {
             </TableContainer>
           ) : null}
         </fieldset>
-        <fieldset className="border border-[#7D8F69] w-full h-full px-8 py-12 rounded-[55px]">
-          <legend className="px-2 text-[28px] text-[#7D8F69] font-semibold">RFID Detected</legend>
+        <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
+          <legend className="px-2 text-[28px] text-primarydeepo font-semibold">RFID Detected</legend>
           <TableContainer>
             <Table variant="simple">
               <Thead>
@@ -294,7 +295,7 @@ function Screen() {
           </TableContainer>
         </fieldset>
       </div>
-      <div className="border border-[#7D8F69] w-full h-full px-8 rounded-[55px] py-2 mt-10">
+      <div className="border border-primarydeepo w-full h-full px-8 rounded-[55px] py-2 mt-10">
         <div className="grid grid-cols-3 gap-4">
           <div className="pt-2">
             <div>Total Request</div>
@@ -306,18 +307,32 @@ function Screen() {
           </div>
           <div className="flex py-4">
             <Button
-              px={12}
+              _hover={{
+                shadow: 'md',
+                transform: 'translateY(-5px)',
+                transitionDuration: '0.2s',
+                transitionTimingFunction: 'ease-in-out',
+              }}
+              type="button"
               size="sm"
-              className="rounded-2xl bg-[#432009] text-[#fff] font-bold"
+              px={8}
+              className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
               onClick={scanning ? stopScanning : startScanning}
             >
               {scanning ? <StopIcon className="h-6 animate-pulse" /> : <p className="tracking-wide">Scan</p>}
             </Button>
 
             <Button
-              px={12}
+              _hover={{
+                shadow: 'md',
+                transform: 'translateY(-5px)',
+                transitionDuration: '0.2s',
+                transitionTimingFunction: 'ease-in-out',
+              }}
+              type="submit"
               size="sm"
-              className="rounded-2xl ml-4 bg-[#526C55] text-[#fff] font-bold"
+              px={8}
+              className="ml-4 rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold"
               onClick={onSubmitRFID}
               disabled={!isScanned}
             >
@@ -378,7 +393,7 @@ function Screen() {
         >
           <div className="border shadow-lg modal-container bg-white w-[80%] mx-auto rounded z-50 overflow-y-auto h-80">
             <form className="modal-content py-4 text-left px-6" onSubmit={handleSubmit(onFinalSubmit)}>
-              <p className="text-MD font-bold">Dashboard Transit</p>
+              <p className="text-md font-bold">Dashboard Transit</p>
               <div className="flex-1" />
               <TableContainer>
                 <Table varianT="simple">
@@ -442,18 +457,31 @@ function Screen() {
               <div className="grid place-items-end pt-4">
                 <div>
                   <Button
-                    px={12}
+                    _hover={{
+                      shadow: 'md',
+                      transform: 'translateY(-5px)',
+                      transitionDuration: '0.2s',
+                      transitionTimingFunction: 'ease-in-out',
+                    }}
+                    type="button"
                     size="sm"
-                    className="rounded-2xl ml-4 bg-red-500 text-[#fff] font-bold"
+                    px={8}
+                    className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
                     onClick={() => setOnOpen(!onOpen)}
                   >
                     Cancel
                   </Button>
                   <Button
-                    px={12}
-                    size="sm"
-                    className="rounded-2xl ml-4 bg-[#526C55] text-[#fff] font-bold"
+                    _hover={{
+                      shadow: 'md',
+                      transform: 'translateY(-5px)',
+                      transitionDuration: '0.2s',
+                      transitionTimingFunction: 'ease-in-out',
+                    }}
                     type="submit"
+                    size="sm"
+                    px={8}
+                    className="ml-4 rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold"
                   >
                     Submit
                   </Button>

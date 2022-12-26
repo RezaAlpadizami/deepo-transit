@@ -1,14 +1,17 @@
 /** @type {import('tailwindcss').Config} */
 const plugin = require('tailwindcss/plugin');
+
 module.exports = {
   important: true,
   content: ['./src/**/*.{js,jsx,ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        primarydeepo: '#184D47',
-        secondarydeepo: '#2C7873',
-        container: '#F3F3F3',
+        primarydeepo: '#3f44c2',
+        secondarydeepo: '#546ac2',
+        container: '#edefff',
+        processbtnfrom: '#ffa108',
+        processbtnto: '#f67c08',
         thead: '#F3F4F5',
         slate: {
           850: '#172030',
