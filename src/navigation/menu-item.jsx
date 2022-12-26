@@ -25,7 +25,7 @@ export default [
     icon: HomeIcon,
     name: 'transit',
     role: 'transit',
-    showmenu: false,
+    showmenu: true,
     exact: true,
     route: '/request',
     routes: [

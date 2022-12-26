@@ -1,5 +1,6 @@
 import React from 'react';
 import { Input, InputGroup, InputLeftElement } from '@chakra-ui/react';
+import { Controller } from 'react-hook-form';
 
 function InputComponent(props) {
   const {
@@ -18,6 +19,7 @@ function InputComponent(props) {
     readOnly = false,
     array,
     key,
+    control,
   } = props;
 
   return (
@@ -32,20 +34,33 @@ function InputComponent(props) {
               <InputLeftElement fontSize="md" pointerEvents="none" className="ml-2">
                 {icon}
               </InputLeftElement>
-              <Input
-                {...register(name)}
-                bg="white"
-                size="sm"
-                width="auto"
-                type={type}
-                isDisabled={disabled}
-                maxLength={maxLength}
-                hidden={hidden}
+              <Controller
                 name={name}
-                id={name}
-                variant={disabled ? 'filled' : 'outline'}
-                className={`${disabled ? 'bg-gray-200' : ''} w-full text-sm rounded-full border-gray-400 pl-12 py-5`}
-                placeholder={placeholder}
+                render={({ field: { onChange, value, name } }) => {
+                  return (
+                    <Input
+                      name={name}
+                      bg="white"
+                      width="auto"
+                      size="sm"
+                      type={type}
+                      disabled={disabled}
+                      placeholder={placeholder}
+                      selected={value}
+                      value={value}
+                      onChange={onChange}
+                      maxLength={maxLength}
+                      id={name}
+                      readOnly={readOnly}
+                      variant={disabled ? 'filled' : 'outline'}
+                      className={`${
+                        disabled ? 'bg-gray-200' : ''
+                      } w-full text-sm rounded-full border-gray-400 pl-12 py-5`}
+                    />
+                  );
+                }}
+                refs={register}
+                control={control}
               />
             </InputGroup>
           ) : array && key ? (
@@ -67,22 +82,31 @@ function InputComponent(props) {
               readOnly={readOnly}
             />
           ) : (
-            <Input
-              {...register(name)}
-              bg="white"
-              size="sm"
-              width="auto"
-              type={type}
-              value={value}
-              isDisabled={disabled}
-              maxLength={maxLength}
-              hidden={hidden}
+            <Controller
               name={name}
-              id={name}
-              variant={disabled ? 'filled' : 'outline'}
-              className={`${disabled ? 'bg-gray-200' : ''} w-full text-sm rounded-full border-gray-400 px-5 py-5`}
-              placeholder={placeholder}
-              readOnly={readOnly}
+              render={({ field: { onChange, value, name } }) => {
+                return (
+                  <Input
+                    name={name}
+                    bg="white"
+                    width="auto"
+                    size="sm"
+                    type={type}
+                    disabled={disabled}
+                    placeholder={placeholder}
+                    selected={value}
+                    value={value}
+                    onChange={onChange}
+                    maxLength={maxLength}
+                    id={name}
+                    readOnly={readOnly}
+                    variant={disabled ? 'filled' : 'outline'}
+                    className={`${disabled ? 'bg-gray-200' : ''} w-full text-sm rounded-full border-gray-400 px-5 py-5`}
+                  />
+                );
+              }}
+              refs={register}
+              control={control}
             />
           )}
         </div>

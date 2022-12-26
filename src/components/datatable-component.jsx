@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon, ArrowSmUpIcon, ArrowSmDownIcon } from '@heroicons/react/solid';
 
 import { useTable, useRowSelect, usePagination, useSortBy } from 'react-table';
@@ -23,6 +23,7 @@ function DataTable(props) {
     limit = 10,
     toolbar,
     noToolbar,
+    filterParams,
     to,
     api,
     checkbox,
@@ -30,8 +31,11 @@ function DataTable(props) {
     name,
     filters,
     onSort = () => {},
+    onActionButton = () => {},
     identifierProperties = 'id',
     hasButtonAction,
+    onSearch,
+    filterEnd,
   } = props;
 
   const {
@@ -93,6 +97,20 @@ function DataTable(props) {
                 </div>
               );
             }
+            if (d.type === 'action-button' && row.original.request_number) {
+              return (
+                <Button
+                  size="xs"
+                  className="text-[#fff] font-bold bg-[#29A373] rounded-2xl"
+                  onClick={() => {
+                    onActionButton(row.original.id, row.original);
+                  }}
+                  px={6}
+                >
+                  Process
+                </Button>
+              );
+            }
 
             return value;
           },
@@ -131,14 +149,13 @@ function DataTable(props) {
 
   useEffect(() => {
     getData();
-  }, [filterData]);
+  }, [filterData, filterParams]);
 
   const getData = () => {
     setLoadingHover(true);
     api
-      .get({ ...filterData })
+      .get({ ...filterData, ...filterParams })
       .then(res => {
-        console.log('res', res);
         setLoadingHover(false);
         setDatas(res.data);
         setTotalData(res.query.total);
@@ -300,6 +317,19 @@ function DataTable(props) {
       ...defaultSort,
     });
   };
+
+  const getDebounce = func => {
+    let timer;
+    return (...args) => {
+      const context = this;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        timer = null;
+        func.apply(context, args);
+      }, 500);
+    };
+  };
+
   const onSubmit = data => {
     // eslint-disable-next-line no-restricted-syntax
     for (const dt in data) {
@@ -336,6 +366,7 @@ function DataTable(props) {
       };
     });
   };
+  const opt = useCallback(getDebounce(onSubmit), []);
 
   const onSubmitRequestProcess = row => {
     setLoadingHover(true);
@@ -369,10 +400,28 @@ function DataTable(props) {
             <h1 className="font-bold text-xl">{displayName}</h1>
           </div>
           <div>
-            <form>
+            <form className={`${onSearch ? 'mb-10' : ''}`} onChange={onSearch ? handleSubmit(opt) : ''}>
               <div className="px-4">
-                <div className="grid grid-cols-6 gap-4 mt-4">
+                <div className={` ${filterEnd ? 'flex justify-between' : 'grid grid-cols-6'} gap-4  mt-4`}>
                   {filter.map((item, idx) => {
+                    if (item.type === 'addtext') {
+                      return (
+                        <div className={`${item.col ? `col-span-${item.col}` : ''}`} key={`component${idx}`}>
+                          <p className="text-md font-bold">{item.text}</p>
+                          <Button
+                            type="button"
+                            size="xs"
+                            width="24"
+                            className="mr-2 bg-[#E3E3E3] text-[#000] hover:bg-[#D9D9D9]"
+                            onClick={() => onReset()}
+                            colorScheme="blackAlpha"
+                            variant="outline"
+                          >
+                            Reset
+                          </Button>
+                        </div>
+                      );
+                    }
                     if (item.type === 'date_picker') {
                       return (
                         <div className={item.col ? `col-span-${item.col}` : ''} key={`component${idx}`}>
@@ -383,6 +432,20 @@ function DataTable(props) {
                             register={register}
                             control={control}
                             errors={errors}
+                          />
+                        </div>
+                      );
+                    }
+                    if (item.type === 'input:addOn') {
+                      return (
+                        <div className={item.col ? `col-span-${item.col}` : ''} key={`component${idx}`}>
+                          <Input
+                            name={item.name}
+                            placeholder={item.placeholder}
+                            addOnleft
+                            register={register}
+                            control={control}
+                            icon={<img src={item.icon} alt={`${item.alt}`} className="h-6" />}
                           />
                         </div>
                       );
@@ -413,31 +476,33 @@ function DataTable(props) {
                   })}
                 </div>
               </div>
-              <div className="col-md-3 offset-md-9 px-0">
-                <div className="flex justify-end mt-3 px-4 py-3">
-                  <Button
-                    type="button"
-                    size="sm"
-                    width="24"
-                    className="mr-2 bg-[#E3E3E3] hover:text-gray-700 hover:bg-[#D9D9D9]"
-                    onClick={() => onReset()}
-                    colorScheme="blackAlpha"
-                    variant="outline"
-                  >
-                    Reset
-                  </Button>
-                  <Button
-                    type="submit"
-                    size="sm"
-                    width="24"
-                    variant="solid"
-                    className="bg-[#232323] hover:bg-black text-white"
-                    onClick={handleSubmit(onSubmit)}
-                  >
-                    Filter
-                  </Button>
+              {!onSearch && (
+                <div className="col-md-3 offset-md-9 px-0">
+                  <div className="flex justify-end mt-3 px-4 py-3">
+                    <Button
+                      type="button"
+                      size="sm"
+                      width="24"
+                      className="mr-2 bg-[#E3E3E3] hover:text-gray-700 hover:bg-[#D9D9D9]"
+                      onClick={() => onReset()}
+                      colorScheme="blackAlpha"
+                      variant="outline"
+                    >
+                      Reset
+                    </Button>
+                    <Button
+                      type="submit"
+                      size="sm"
+                      width="24"
+                      variant="solid"
+                      className="bg-[#232323] hover:bg-black text-white"
+                      onClick={handleSubmit(onSubmit)}
+                    >
+                      Filter
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              )}
             </form>
           </div>
         </div>
