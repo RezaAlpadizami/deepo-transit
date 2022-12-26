@@ -14,9 +14,10 @@ import TextArea from '../../../components/textarea-component';
 import { StorageApi } from '../../../services/api-master';
 import MagnifyClass from '../../../assets/images/magnify-glass.svg';
 import Datatable from '../../../components/datatable-component';
-import Select from '../../../components/select-component';
+
 import LoadingComponent from '../../../components/loading-component';
 import { toCalculate } from '../../../utils/helper';
+import MappingTransit from './mapping-transit';
 
 const totalRFID = 110;
 const swalButton = Swal.mixin({
@@ -66,7 +67,7 @@ function Screen() {
   const [requestDetailData, setRequestDetailData] = useState();
   const [requestId, setRequestId] = useState('');
   const [totalRequest, setTotalRequest] = useState(0);
-  const [counter, setCounter] = useState(1);
+  const [counter, setCounter] = useState(2);
   const [timer, setTimer] = useState();
   const [id, setId] = useState();
 
@@ -126,28 +127,32 @@ function Screen() {
       });
   };
 
-  const onSplit = (idx, qty) => {
-    setId(qty);
-    const findData = data.find(i => i.id === qty);
-    if (qty / counter !== 1 && qty / counter > 1) {
+  const onSplit = (id, qty) => {
+    setId(id);
+    console.log('counter', counter);
+    console.log('qty', qty);
+    console.log('qty / counter', qty / counter);
+    const findData = transitData.find(i => i.product_id === id);
+    if (qty / counter > 1) {
+      console.log('masuk');
       setStoreSplit(prev => {
         if (prev.length === 0) {
           return [
-            { ...findData, ...{ child_qty: findData.id / counter } },
+            { ...findData, ...{ child_qty: findData.qty / counter } },
             ...prev,
-            { child_qty: findData.id / counter },
+            { product_id: findData.product_id, child_qty: findData.qty / counter },
           ];
         }
-        return [...prev, { child_qty: findData.id / counter }];
+        return [...prev, { product_id: findData.product_id, child_qty: findData.qty / counter }];
       });
 
-      setData(data.filter(i => i.id !== qty));
+      setTransitData(transitData.filter(i => i.product_id !== id));
     }
   };
-
+  console.log('store split', storeSplit);
   useEffect(() => {
-    setData(prev => {
-      if (storeSplit.find(i => i.id === id)?.id > prev.find(i => i.id !== id)?.id) {
+    setTransitData(prev => {
+      if (storeSplit.find(i => i.product_id === id)?.id > prev.find(i => i.product_id !== id)?.id) {
         return [...storeSplit, ...prev];
       }
       return [...prev, ...storeSplit];
@@ -178,7 +183,6 @@ function Screen() {
   const onProcess = idx => {
     if (idx) {
       setRequestId(idx);
-
       setOnOverview(!onOverview);
     }
   };
@@ -195,7 +199,6 @@ function Screen() {
         console.log('error', error);
       });
   };
-  console.log('transitData', transitData);
 
   return (
     <div className="bg-white p-5 rounded-[55px] shadow">
@@ -205,7 +208,7 @@ function Screen() {
           <button
             type="submit"
             onClick={() => setOnOverview(!onOverview)}
-            className="bg-gradient-to-r from-processbtnfrom to-processbtnto h-[110px] w-[110px] rounded-lg grid place-content-center ml-6 mt-2 col-span-2 mt-8"
+            className="bg-gradient-to-r from-processbtnfrom to-processbtnto h-[100px] w-[110px] rounded-lg grid place-content-center ml-6 mt-2 col-span-2 mt-8"
           >
             <p className="text-lg text-[#fff] font-bold mb-2">Request</p>
             <CalculatorIcon className="h-10 w-15 bg-gradient-to-r from-processbtnfrom to-processbtnto stroke-[#fff] mx-auto" />
@@ -247,7 +250,7 @@ function Screen() {
                     <Th>No</Th>
                     <Th>SKU</Th>
                     <Th>Product</Th>
-                    <Th isNumeric>Qty</Th>
+                    <Th>Qty</Th>
                   </Tr>
                 </Thead>
 
@@ -258,7 +261,7 @@ function Screen() {
                         <Td>{i + 1}</Td>
                         <Td>{d.product_sku}</Td>
                         <Td>{d.product_name}</Td>
-                        <Td isNumeric>{d.qty}</Td>
+                        <Td>{d.qty}</Td>
                       </Tr>
                     );
                   })}
@@ -276,7 +279,7 @@ function Screen() {
                   <Th>No</Th>
                   <Th>SKU</Th>
                   <Th>Product</Th>
-                  <Th isNumeric>Qty</Th>
+                  <Th>Qty</Th>
                 </Tr>
               </Thead>
               <Tbody>
@@ -286,7 +289,7 @@ function Screen() {
                       <Td>{i + 1}</Td>
                       <Td>{d.request_by}</Td>
                       <Td>{d.status}</Td>
-                      <Td isNumeric>{d.id}</Td>
+                      <Td>{d.id}</Td>
                     </Tr>
                   );
                 })}
@@ -315,7 +318,7 @@ function Screen() {
               }}
               type="button"
               size="sm"
-              px={8}
+              px={10}
               className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
               onClick={scanning ? stopScanning : startScanning}
             >
@@ -391,71 +394,21 @@ function Screen() {
           className=" main-modal fixed w-full h-200 inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
           style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
         >
-          <div className="border shadow-lg modal-container bg-white w-[80%] mx-auto rounded z-50 overflow-y-auto h-80">
-            <form className="modal-content py-4 text-left px-6" onSubmit={handleSubmit(onFinalSubmit)}>
-              <p className="text-md font-bold">Dashboard Transit</p>
-              <div className="flex-1" />
-              <TableContainer>
-                <Table varianT="simple">
-                  <Thead>
-                    <Tr>
-                      <Th>No</Th>
-                      <Th>SKU</Th>
-                      <Th>ProducT</Th>
-                      <Th>QTy(ID val)</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {transitData?.map((d, i) => {
-                      console.log('ddd', d);
-                      return (
-                        <Tr key={i}>
-                          <Td>{i + 1}</Td>
-                          <Td>{d.request_by}</Td>
-                          <Td>{d.status}</Td>
-                          <Td>{d.id}</Td>
-                          <Td>
-                            <div className="w-20">
-                              <Select
-                                name="rack"
-                                placeholder="Rack"
-                                options={[
-                                  {
-                                    value: 'asd',
-                                    label: '123',
-                                  },
-                                ]}
-                                register={register}
-                                control={control}
-                              />
-                            </div>
-                          </Td>
-
-                          <Td>
-                            {d.id ? (
-                              <Button
-                                size="md"
-                                className="text-[#fff] font-bold bg-[#29A373] rounded-2xl"
-                                key={i}
-                                onClick={() => {
-                                  setCounter(count => count + 1);
-                                  onSplit(i + 1, d.id);
-                                }}
-                                px={6}
-                              >
-                                Split
-                              </Button>
-                            ) : null}
-                          </Td>
-                        </Tr>
-                      );
-                    })}
-                  </Tbody>
-                </Table>
-              </TableContainer>
-
+          <div className="border shadow-lg modal-container bg-white w-[80%] mx-auto rounded z-50">
+            <form onSubmit={handleSubmit(onFinalSubmit)}>
+              <div className="overflow-y-auto h-60">
+                <MappingTransit
+                  data={transitData}
+                  register={register}
+                  control={control}
+                  setCounter={setCounter}
+                  setOnOpen={setOnOpen}
+                  onOpen={onOpen}
+                  onSplit={(id, qty) => onSplit(id, qty)}
+                />
+              </div>
               <div className="grid place-items-end pt-4">
-                <div>
+                <div className="mr-4 mb-2">
                   <Button
                     _hover={{
                       shadow: 'md',
@@ -467,7 +420,10 @@ function Screen() {
                     size="sm"
                     px={8}
                     className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
-                    onClick={() => setOnOpen(!onOpen)}
+                    onClick={() => {
+                      setCounter(1);
+                      setOnOpen(!onOpen);
+                    }}
                   >
                     Cancel
                   </Button>
