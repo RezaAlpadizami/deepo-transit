@@ -100,7 +100,13 @@ function Screen() {
     })
       .then(() => {
         setLoading(false);
-        Swal.fire({ text: 'Successfully Saved', icon: 'success' });
+        Swal.fire({
+          text: 'Request baru berhasil ditambahkan',
+          icon: 'success',
+          buttonsStyling: false,
+          confirmButtonColor: 'primarydeepo',
+          confirmButtonText: `<p class="rounded bg-secondarydeepo text-[#fff] px-5 py-2 ml-5 font-bold">OK</p>`,
+        });
         navigate('/request');
       })
       .catch(error => {
@@ -110,122 +116,124 @@ function Screen() {
   };
 
   return (
-    <div className="bg-white p-5 rounded-[55px] shadow py-12">
-      <div className="grid-cols-2 gap-4 flex">
-        <fieldset className="border border-[#7D8F69] w-full h-full px-8 py-12 rounded-[55px]">
-          <legend className="px-2 text-[28px] text-[#7D8F69]">Request</legend>
-          <div className="flex gap-4 justify-center">
-            <div className="w-full">
-              <Select
-                name="activity_name"
-                label="Activity"
-                options={activityProduct?.map(i => {
-                  return {
-                    value: i.activity_name,
-                    label: i.activity_name,
-                  };
-                })}
-                placeholder=""
-                register={register}
-                errors={errors}
-              />
-            </div>
-            <div className="w-full">
-              <DatePicker
-                name="activity_date"
-                label="Date"
-                placeholder="Date / Month / Year"
-                register={register}
-                control={control}
-                errors={errors}
-              />
-            </div>
-          </div>
-          <div>
-            <TextArea name="notes" label="Notes" register={register} errors={errors} />
-          </div>
-        </fieldset>
-
-        <fieldset className="border border-[#7D8F69] w-full h-full px-8 py-12 rounded-[55px]">
-          <legend className="px-2 text-[28px] text-[#7D8F69]">Request Detail</legend>
-          <form onSubmit={handleSubmitProd(onAddProdRequestDetail)}>
+    <div>
+      <div className="bg-white p-5 rounded-[55px] py-12 drop-shadow-md">
+        <div className="grid-cols-2 gap-4 flex">
+          <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
+            <legend className="px-2 text-[28px] text-primarydeep">Request</legend>
             <div className="flex gap-4 justify-center">
-              <div className="w-full col-span-2">
+              <div className="w-full">
                 <Select
-                  name="product_id"
-                  label="Product"
-                  options={dataProduct?.map(i => {
+                  name="activity_name"
+                  label="Activity"
+                  options={activityProduct?.map(i => {
                     return {
-                      value: i.id,
-                      label: i.product_name,
+                      value: i.activity_name,
+                      label: i.activity_name,
                     };
                   })}
-                  placeholder=""
-                  register={registerProd}
-                  errors={errorsProd}
+                  placeholder="Activity"
+                  register={register}
+                  errors={errors}
                 />
               </div>
-              <div className="">
-                <Input name="qty" label="QTY" register={registerProd} errors={errorsProd} />
+              <div className="w-full">
+                <DatePicker
+                  name="activity_date"
+                  label="Date"
+                  placeholder="Date / Month / Year"
+                  register={register}
+                  control={control}
+                  errors={errors}
+                />
               </div>
             </div>
-            <div className="flex justify-end">
-              <Button px={8} type="submit" size="sm" className="rounded-full bg-[#7D8F69] text-[#fff] mr-6">
-                + Add
+            <div>
+              <TextArea name="notes" label="Notes" register={register} errors={errors} />
+            </div>
+          </fieldset>
+
+          <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
+            <legend className="px-2 text-[28px] text-primarydeepo">Request Detail</legend>
+            <form onSubmit={handleSubmitProd(onAddProdRequestDetail)}>
+              <div className="flex gap-4 justify-center">
+                <div className="w-full col-span-2">
+                  <Select
+                    name="product_id"
+                    label="Product"
+                    options={dataProduct?.map(i => {
+                      return {
+                        value: i.id,
+                        label: i.product_name,
+                      };
+                    })}
+                    placeholder="Product"
+                    register={registerProd}
+                    errors={errorsProd}
+                  />
+                </div>
+                <div className="">
+                  <Input name="qty" label="QTY" register={registerProd} errors={errorsProd} />
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <Button px={8} type="submit" size="sm" className="rounded-full bg-primarydeepo text-[#fff] mr-6">
+                  + Add
+                </Button>
+              </div>
+            </form>
+            <div className="border-b border-[#7D8F69] my-6"> </div>
+            {dataAdd?.length > 0 && (
+              <div>
+                {dataAdd.map(val => {
+                  return (
+                    <div className="flex">
+                      <InputDetail
+                        value={`SKU: ${val.sku}`}
+                        label={`${val.product_name}`}
+                        customStyleLabel="font-bold text-md mb-0"
+                        customStyleSpan="text-md"
+                      />
+                      <div className="flex relative gap-20 mt-6">
+                        <span className="absolute right-24">X</span>
+                        <Text>{val.qty}</Text>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            <div className="border-b border-[#7D8F69] my-6"> </div>
+            <div className="flex justify-between">
+              <Text>Total Product</Text>
+              <Text>{getTotalQty}</Text>
+            </div>
+          </fieldset>
+        </div>
+        <div className="flex justify-end mt-6">
+          <div className="flex">
+            <div>
+              <Button
+                onClick={() => navigate(-1)}
+                px={8}
+                size="sm"
+                className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#184D47] font-bold"
+              >
+                Cancel
               </Button>
             </div>
-          </form>
-          <div className="border-b border-[#7D8F69] my-6"> </div>
-          {dataAdd?.length > 0 && (
             <div>
-              {dataAdd.map(val => {
-                return (
-                  <div className="flex">
-                    <InputDetail
-                      value={`SKU: ${val.sku}`}
-                      label={`${val.product_name}`}
-                      customStyleLabel="font-bold text-md mb-0"
-                      customStyleSpan="text-md"
-                    />
-                    <div className="flex relative gap-20 mt-6">
-                      <span className="absolute right-24">X</span>
-                      <Text>{val.qty}</Text>
-                    </div>
-                  </div>
-                );
-              })}
+              <Button
+                type="submit"
+                onClick={handleSubmit(onSubmitRequest)}
+                px={8}
+                size="sm"
+                className="ml-4 rounded-full bg-[#184D47] drop-shadow-md text-[#fff] font-bold hover:text-[#E4E4E4] mr-14"
+              >
+                Submit
+              </Button>
             </div>
-          )}
-
-          <div className="border-b border-[#7D8F69] my-6"> </div>
-          <div className="flex justify-between">
-            <Text>Total Product</Text>
-            <Text>{getTotalQty}</Text>
-          </div>
-        </fieldset>
-      </div>
-      <div className="flex justify-end mt-6">
-        <div className="flex">
-          <div>
-            <Button
-              onClick={() => navigate(-1)}
-              px={8}
-              size="sm"
-              className="rounded-full bg-white border border-[#7D8F69] text-black mr-6"
-            >
-              Cancel
-            </Button>
-          </div>
-          <div>
-            <Button
-              type="submit"
-              onClick={handleSubmit(onSubmitRequest)}
-              px={8}
-              size="sm"
-              className="rounded-full bg-[#7D8F69] text-[#fff] mr-6"
-            >
-              Submit
-            </Button>
           </div>
         </div>
       </div>

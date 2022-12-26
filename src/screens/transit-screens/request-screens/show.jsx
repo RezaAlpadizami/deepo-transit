@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 import Swal from 'sweetalert2';
 import Moment from 'moment/moment';
-import { Button, Text } from '@chakra-ui/react';
+import { Text, Button } from '@chakra-ui/react';
 
 import { RequestApi } from '../../../services/api-transit';
 import TextArea from '../../../components/textarea-component';
@@ -15,10 +15,10 @@ function Screen() {
   const { id } = useParams();
   const [dataRequesById, setDataRequestById] = useState([]);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const {
     register,
-    handleSubmit,
     formState: { errors },
   } = useForm();
 
@@ -41,7 +41,14 @@ function Screen() {
     RequestApi.createRequestProcess(id)
       .then(() => {
         setLoading(false);
-        Swal.fire({ text: 'Successfully Saved', icon: 'success' });
+        Swal.fire({
+          text: `Request ${dataRequesById.request_number} berhasil di process`,
+          icon: 'success',
+          buttonsStyling: false,
+          confirmButtonColor: 'primarydeepo',
+          confirmButtonText: `<p class="rounded bg-secondarydeepo text-[#fff] px-5 py-2 ml-5 font-bold">OK</p>`,
+        });
+        navigate('/request');
       })
       .catch(error => {
         setLoading(false);
@@ -54,11 +61,11 @@ function Screen() {
   }, 0);
 
   return (
-    <div className="bg-white p-5 rounded-[55px] shadow py-12">
-      <form onSubmit={handleSubmit(onSubmitRequest)}>
+    <div>
+      <div className="bg-white p-5 rounded-[55px] shadow py-12 drop-shadow-md">
         <div className="grid-cols-2 gap-4 flex">
-          <fieldset className="border border-[#7D8F69] w-full h-full px-8 py-12 rounded-[55px]">
-            <legend className="px-2 text-[28px] text-[#7D8F69]">Request</legend>
+          <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
+            <legend className="px-2 text-[28px] text-primarydeepo">Request</legend>
             <div className="flex flex-col">
               <div className="w-full">
                 <InputDetail
@@ -100,8 +107,8 @@ function Screen() {
               />
             </div>
           </fieldset>
-          <fieldset className="border border-[#7D8F69] w-full h-full px-8 py-12 rounded-[55px]">
-            <legend className="px-2 text-[28px] text-[#7D8F69]">Request Detail</legend>
+          <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
+            <legend className="px-2 text-[28px] text-primarydeepo">Request Detail</legend>
             <div>
               <div className="flex justify-between">
                 <Text className="text-gray-400">Product</Text>
@@ -135,18 +142,18 @@ function Screen() {
           <div className="flex">
             <div>
               <Button
-                // onClick={()}
+                onClick={onSubmitRequest}
                 type="submit"
                 px={8}
                 size="sm"
-                className="rounded-full bg-[#7D8F69] text-[#fff] mr-6"
+                className="mr-14 text-white bg-gradient-to-r from-secondarydeepo to-primarydeepo hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mb-2"
               >
                 Process
               </Button>
             </div>
           </div>
         </div>
-      </form>
+      </div>
       {loading && <LoadingHover visible={loading} />}
     </div>
   );

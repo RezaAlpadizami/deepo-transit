@@ -19,7 +19,8 @@ function SelectComponent(props) {
             id={name}
             className="w-full text-sm rounded-full border-gray-400 px-5 py-2.5 h-full"
             isDisabled={disabled}
-            placeholder={placeholder}
+            focusBorderColor="#184D47"
+            placeholder={`Select ${placeholder}`}
           >
             {options.map((el, idx) => (
               <option key={idx} value={el.value}>
