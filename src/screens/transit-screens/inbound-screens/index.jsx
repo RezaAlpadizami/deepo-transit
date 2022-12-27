@@ -1,23 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { Input, Button, Table, Thead, Tbody, Tr, Th, Td, TableContainer } from '@chakra-ui/react';
+import { useFieldArray, useForm, Controller } from 'react-hook-form';
 import * as yup from 'yup';
 import Swal from 'sweetalert2';
-import { Button, Table, Thead, Tbody, Tr, Th, Td, TableContainer } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { CalculatorIcon, XIcon } from '@heroicons/react/outline';
 import Moment from 'moment';
 import { StopIcon } from '@heroicons/react/solid';
 import { RequestApi, TransitApi } from '../../../services/api-transit';
-import Input from '../../../components/input-component';
+import InputComponent from '../../../components/input-component';
 import DatePicker from '../../../components/datepicker-component';
 import TextArea from '../../../components/textarea-component';
 import { StorageApi } from '../../../services/api-master';
 import MagnifyClass from '../../../assets/images/magnify-glass.svg';
 import Datatable from '../../../components/datatable-component';
-
 import LoadingComponent from '../../../components/loading-component';
 import { toCalculate } from '../../../utils/helper';
-import MappingTransit from './mapping-transit';
+import Select from '../../../components/select-component';
+// import MappingTransit from './mapping-transit';
 
 const totalRFID = 110;
 const swalButton = Swal.mixin({
@@ -37,27 +37,28 @@ function Screen() {
   const schema = yup.object({
     friends: yup.array().of(friend).min(1, 'Must have at least one friend').max(4, 'That is too many friends'),
   });
-
   const {
     register,
     control,
     handleSubmit,
     setValue,
     formState: { errors },
+    reset,
   } = useForm({
     resolver: yupResolver(schema),
   });
-  const { fields } = useFieldArray({
+  const { fields, append, remove, insert } = useFieldArray({
     control,
-    name: 'test',
+    name: 'details',
   });
-  console.log('fields', fields);
+
   const defaultSort = {
     sort_by: 'id',
     sort_order: 'desc',
   };
   const [data, setData] = useState([]);
-  const [storeSplit, setStoreSplit] = useState([]);
+  const [storeSplit] = useState([]);
+  // setStoreSplit
   const [transitData, setTransitData] = useState([]);
   const [onOpen, setOnOpen] = useState(false);
   const [onOverview, setOnOverview] = useState(false);
@@ -127,29 +128,33 @@ function Screen() {
       });
   };
 
-  const onSplit = (id, qty) => {
+  const onSplit = (id, qty, idx) => {
     setId(id);
     console.log('counter', counter);
+    console.log('id', id);
     console.log('qty', qty);
+    console.log('index', idx);
     console.log('qty / counter', qty / counter);
-    const findData = transitData.find(i => i.product_id === id);
+    const findData = fields.find(i => i.product_id === id);
     if (qty / counter > 1) {
-      console.log('masuk');
-      setStoreSplit(prev => {
-        if (prev.length === 0) {
-          return [
-            { ...findData, ...{ child_qty: findData.qty / counter } },
-            ...prev,
-            { product_id: findData.product_id, child_qty: findData.qty / counter },
-          ];
-        }
-        return [...prev, { product_id: findData.product_id, child_qty: findData.qty / counter }];
-      });
+      console.log('masuk', findData);
+      insert(idx, { product_id: findData.product_id, child_qty: qty / counter });
+      // setStoreSplit(prev => {
+      //   console.log('prev', prev);
+      //   if (prev.length === 0) {
+      //     return [
+      //       { ...findData, ...{ child_qty: findData.qty / counter } },
+      //       ...prev,
+      //       { product_id: findData.product_id, child_qty: findData.qty / counter },
+      //     ];
+      //   }
+      //   return [...prev, { product_id: findData.product_id, child_qty: findData.qty / counter }];
+      // });
 
-      setTransitData(transitData.filter(i => i.product_id !== id));
+      // setTransitData(transitData.filter(i => i.product_id !== id));
     }
   };
-  console.log('store split', storeSplit);
+
   useEffect(() => {
     setTransitData(prev => {
       if (storeSplit.find(i => i.product_id === id)?.id > prev.find(i => i.product_id !== id)?.id) {
@@ -173,6 +178,7 @@ function Screen() {
         })
         .then(result => {
           if (result.isConfirmed) {
+            append(transitData);
             setOnOpen(!pass);
           }
         });
@@ -215,7 +221,7 @@ function Screen() {
           </button>
 
           <div className="col-span-3">
-            <Input
+            <InputComponent
               name="request_number"
               label="Request Number"
               register={register}
@@ -394,18 +400,122 @@ function Screen() {
           className=" main-modal fixed w-full h-200 inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
           style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
         >
-          <div className="border shadow-lg modal-container bg-white w-[80%] mx-auto rounded z-50">
+          <div className="border shadow-lg modal-container bg-white w-[80%] mx-auto rounded z-50 h-84">
             <form onSubmit={handleSubmit(onFinalSubmit)}>
-              <div className="overflow-y-auto h-60">
-                <MappingTransit
-                  data={transitData}
-                  register={register}
-                  control={control}
-                  setCounter={setCounter}
-                  setOnOpen={setOnOpen}
-                  onOpen={onOpen}
-                  onSplit={(id, qty) => onSplit(id, qty)}
-                />
+              <p className="text-md font-bold py-2 px-4">Dashboard Transit</p>
+              <div className="overflow-y-auto h-60 px-6">
+                <TableContainer>
+                  <Table>
+                    <Thead>
+                      <Tr>
+                        <Th>No</Th>
+                        <Th>SKU</Th>
+                        <Th>ProducT</Th>
+                        <Th>QTy</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {fields.map((item, index) => {
+                        return (
+                          <Tr key={item.id}>
+                            <Td className="w-10">{index + 1}</Td>
+                            <Td className="w-10">
+                              <Controller
+                                render={({ field }) => {
+                                  return <Input variant="unstyled" {...field} disabled />;
+                                }}
+                                name={`details.${index}.product_sku`}
+                                control={control}
+                              />
+                            </Td>
+
+                            <Td className="w-60">
+                              <Controller
+                                render={({ field }) => {
+                                  return <Input variant="unstyled" {...field} disabled />;
+                                }}
+                                name={`details.${index}.product_name`}
+                                control={control}
+                              />
+                            </Td>
+                            <Td className="w-20">
+                              <Controller
+                                render={({ field }) => {
+                                  return <Input variant="unstyled" {...field} disabled />;
+                                }}
+                                name={`details.${index}.qty`}
+                                control={control}
+                              />
+                            </Td>
+                            <Td>
+                              <Controller
+                                render={() => {
+                                  // console.log('field', field, { field });
+                                  return (
+                                    <Select
+                                      name={`details.${index}.rack`}
+                                      placeholder="Rack"
+                                      options={[
+                                        {
+                                          label: '123',
+                                          value: 'asd',
+                                        },
+                                      ]}
+                                      register={register}
+                                      control={control}
+                                    />
+                                  );
+                                }}
+                                name={`details.${index}.rack`}
+                                control={control}
+                              />
+                            </Td>
+                            <Td className="w-20">
+                              <Controller
+                                render={({ field }) => {
+                                  return <Input variant="unstyled" {...field} disabled />;
+                                }}
+                                name={`details.${index}.child_qty`}
+                                control={control}
+                              />
+                            </Td>
+                            <Td>
+                              {item.qty ? (
+                                <Button
+                                  size="sm"
+                                  type="button"
+                                  px={8}
+                                  className="rounded-full text-center text-white font-bold bg-gradient-to-r from-processbtnfrom to-processbtnto hover:bg-gradient-to-br focus:ring-1 focus:outline-none focus:ring-secondarydeepo"
+                                  key={index}
+                                  onClick={() => {
+                                    setCounter(count => count + 1);
+                                    onSplit(item.product_id, item.qty, index + 1);
+                                  }}
+                                >
+                                  Split
+                                </Button>
+                              ) : (
+                                <Button
+                                  px={6}
+                                  size="sm"
+                                  type="button"
+                                  className="rounded-full bg-[#eb6058] hover:bg-[#f35a52] text-[#fff] hover:text-gray-600 font-bold"
+                                  key={index}
+                                  onClick={() => {
+                                    setCounter(count => count - 1);
+                                    remove(index);
+                                  }}
+                                >
+                                  Delete
+                                </Button>
+                              )}
+                            </Td>
+                          </Tr>
+                        );
+                      })}
+                    </Tbody>
+                  </Table>
+                </TableContainer>
               </div>
               <div className="grid place-items-end pt-4">
                 <div className="mr-4 mb-2">
@@ -421,7 +531,8 @@ function Screen() {
                     px={8}
                     className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
                     onClick={() => {
-                      setCounter(1);
+                      setCounter(2);
+                      reset();
                       setOnOpen(!onOpen);
                     }}
                   >
