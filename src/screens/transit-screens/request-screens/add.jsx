@@ -44,6 +44,7 @@ function Screen() {
 
   const {
     register: registerProd,
+    control: controlProd,
     formState: { errors: errorsProd },
     handleSubmit: handleSubmitProd,
   } = useForm({
@@ -169,11 +170,12 @@ function Screen() {
                     })}
                     placeholder="Product"
                     register={registerProd}
+                    control={controlProd}
                     errors={errorsProd}
                   />
                 </div>
                 <div className="">
-                  <Input name="qty" label="QTY" register={registerProd} errors={errorsProd} />
+                  <Input name="qty" label="QTY" register={registerProd} errors={errorsProd} control={controlProd} />
                 </div>
               </div>
               <div className="flex justify-end">
