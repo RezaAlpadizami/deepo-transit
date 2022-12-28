@@ -12,7 +12,7 @@ module.exports = {
         container: '#edefff',
         processbtnfrom: '#ffa108',
         processbtnto: '#f67c08',
-        thead: '#F3F4F5',
+        thead: '#bbc9ff',
         slate: {
           850: '#172030',
         },

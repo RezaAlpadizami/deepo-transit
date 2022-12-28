@@ -709,8 +709,8 @@ function DataTable(props) {
                       disabled={pages === i + p}
                       onClick={() => changePage(i + p)}
                       className={`${
-                        pages === i + p ? 'bg-gray-700 text-white' : 'bg-white'
-                      } py-2 px-3 mx-0.5 leading-tight text-black bg-gray-100 rounded-lg hover:bg-gray-700 hover:text-white disabled:text-white`}
+                        pages === i + p ? 'bg-secondarydeepo text-white' : 'bg-thead'
+                      } py-2 px-3 mx-0.5 leading-tight text-black bg-secondarydeepo rounded-lg hover:bg-thead hover:text-white disabled:text-white`}
                     >
                       {i + p}
                     </button>

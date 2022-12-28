@@ -10,14 +10,12 @@ import { StopIcon } from '@heroicons/react/solid';
 import { RequestApi, TransitApi } from '../../../services/api-transit';
 import InputComponent from '../../../components/input-component';
 import DatePicker from '../../../components/datepicker-component';
-import TextArea from '../../../components/textarea-component';
 import { StorageApi } from '../../../services/api-master';
 import MagnifyClass from '../../../assets/images/magnify-glass.svg';
 import Datatable from '../../../components/datatable-component';
 import LoadingComponent from '../../../components/loading-component';
 import { toCalculate } from '../../../utils/helper';
 import Select from '../../../components/select-component';
-// import MappingTransit from './mapping-transit';
 
 const totalRFID = 110;
 const swalButton = Swal.mixin({
@@ -29,13 +27,31 @@ const swalButton = Swal.mixin({
   buttonsStyling: false,
 });
 function Screen() {
-  const friend = yup.object({
-    rack: yup.string().required('Required').default(''),
-    name: yup.string().required('Required').default(''),
+  const storage = yup.object({
+    rack: yup.string().test('rack', 'Rack is required', value => {
+      if (value) {
+        return true;
+      }
+      return false;
+    }),
+    // .required(), .required() .required() .required()
+    bay: yup.string().test('bay', 'Bay is required', value => {
+      if (value) {
+        return true;
+      }
+      return false;
+    }),
+    level: yup.string().test('level', 'Level is required', value => {
+      if (value) {
+        return true;
+      }
+      return false;
+    }),
+    child_qty: yup.string(),
   });
 
   const schema = yup.object({
-    friends: yup.array().of(friend).min(1, 'Must have at least one friend').max(4, 'That is too many friends'),
+    details: yup.array().of(storage).min(1, 'Must have at least one data'),
   });
   const {
     register,
@@ -47,30 +63,32 @@ function Screen() {
   } = useForm({
     resolver: yupResolver(schema),
   });
-  const { fields, append, remove, insert } = useFieldArray({
+  const { fields, append, remove, insert, update } = useFieldArray({
     control,
     name: 'details',
   });
+  console.log('error', errors.details);
+  console.log('type of', typeof errors.details);
 
   const defaultSort = {
     sort_by: 'id',
     sort_order: 'desc',
   };
   const [data, setData] = useState([]);
-  const [storeSplit] = useState([]);
-  // setStoreSplit
+  const [storageData, setStorageData] = useState([]);
   const [transitData, setTransitData] = useState([]);
   const [onOpen, setOnOpen] = useState(false);
   const [onOverview, setOnOverview] = useState(false);
   const [isScanned, setIsScanned] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [loadingRequest, setLoadingRequest] = useState(false);
+  const [loadingRFID, setLoadingRFID] = useState(false);
+  const [error, setError] = useState(false);
   const [requestDetailData, setRequestDetailData] = useState();
   const [requestId, setRequestId] = useState('');
   const [totalRequest, setTotalRequest] = useState(0);
   const [counter, setCounter] = useState(2);
   const [timer, setTimer] = useState();
-  const [id, setId] = useState();
 
   useEffect(() => {
     getDetailRequest();
@@ -83,7 +101,7 @@ function Screen() {
       RequestApi.find(requestId)
         .then(res => {
           setTransitData(res.detail);
-          setValue('activity_date', res?.activity_date ? Moment(res?.activity_date).toDate() : null);
+          setValue('activity_date_from', res?.activity_date ? Moment(res?.activity_date).toDate() : null);
           setValue('request_number', res?.request_number ? res?.request_number : '-');
           setTotalRequest(toCalculate(res.detail, 'qty'));
           setRequestDetailData(res.detail);
@@ -112,63 +130,44 @@ function Screen() {
   };
 
   const getDetailRequest = () => {
-    // if (Object.entries(filterData).length !== 0) {
+    setLoadingRFID(true);
     Promise.allSettled([
       RequestApi.get({ ...defaultSort }).then(res => res),
       StorageApi.get({ warehouse_id: 2 }).then(res => res),
-      // TransitApi.get({ warehouse_id: 2, product_id: 2 }).then(res => res),
     ])
       .then(result => {
-        setData(result[1].value.data);
-        // setStorageData(result[2].value.data);
-        // console.log('result', result);
+        setData(result[0].value.data);
+        setStorageData(result[1].value.data);
+        setLoadingRFID(false);
       })
       .catch(error => {
         Swal.fire({ text: error?.message || error?.data?.error, icon: 'error' });
       });
   };
 
-  const onSplit = (id, qty, idx) => {
-    setId(id);
-    console.log('counter', counter);
+  const onSplit = (id, qty, idx, child) => {
     console.log('id', id);
     console.log('qty', qty);
-    console.log('index', idx);
-    console.log('qty / counter', qty / counter);
+    console.log('idx', idx);
+    console.log('child', child);
     const findData = fields.find(i => i.product_id === id);
     if (qty / counter > 1) {
-      console.log('masuk', findData);
+      if (counter === 2) {
+        update(idx - 1, { ...findData, child_qty: qty / counter });
+      }
+      if (!child) {
+        setCounter(2);
+      }
       insert(idx, { product_id: findData.product_id, child_qty: qty / counter });
-      // setStoreSplit(prev => {
-      //   console.log('prev', prev);
-      //   if (prev.length === 0) {
-      //     return [
-      //       { ...findData, ...{ child_qty: findData.qty / counter } },
-      //       ...prev,
-      //       { product_id: findData.product_id, child_qty: findData.qty / counter },
-      //     ];
-      //   }
-      //   return [...prev, { product_id: findData.product_id, child_qty: findData.qty / counter }];
-      // });
-
-      // setTransitData(transitData.filter(i => i.product_id !== id));
     }
   };
-
-  useEffect(() => {
-    setTransitData(prev => {
-      if (storeSplit.find(i => i.product_id === id)?.id > prev.find(i => i.product_id !== id)?.id) {
-        return [...storeSplit, ...prev];
-      }
-      return [...prev, ...storeSplit];
-    });
-  }, [storeSplit]);
 
   const onSubmitRFID = () => {
     let pass = onOpen;
     if (totalRFID === totalRequest) {
       pass = true;
     } else {
+      setError(true);
       swalButton
         .fire({
           html: '<b> Jumlah data pada Request Detail tidak sesuai dengan data pada RFID Detected. Lanjutkan proses ? <b>',
@@ -180,12 +179,12 @@ function Screen() {
           if (result.isConfirmed) {
             append(transitData);
             setOnOpen(!pass);
+            setError(false);
           }
         });
     }
     return pass;
   };
-
   const onProcess = idx => {
     if (idx) {
       setRequestId(idx);
@@ -194,7 +193,6 @@ function Screen() {
   };
 
   const onFinalSubmit = data => {
-    // console.log('default', defaultData);
     console.log('onFinalSubmit', data);
     const body = [];
     TransitApi.inbound(body)
@@ -214,10 +212,10 @@ function Screen() {
           <button
             type="submit"
             onClick={() => setOnOverview(!onOverview)}
-            className="bg-gradient-to-r from-processbtnfrom to-processbtnto h-[100px] w-[110px] rounded-lg grid place-content-center ml-6 mt-2 col-span-2 mt-8"
+            className="bg-processbtnfrom  h-[100px] w-[110px] rounded-lg grid place-content-center ml-6 mt-2 col-span-2 mt-2"
           >
             <p className="text-lg text-[#fff] font-bold mb-2">Request</p>
-            <CalculatorIcon className="h-10 w-15 bg-gradient-to-r from-processbtnfrom to-processbtnto stroke-[#fff] mx-auto" />
+            <CalculatorIcon className="h-10 w-15 bg-processbtnfrom stroke-[#fff] mx-auto" />
           </button>
 
           <div className="col-span-3">
@@ -229,17 +227,25 @@ function Screen() {
               errors={errors}
               disabled
             />
+          </div>
+          <div className="col-span-3">
             <DatePicker
-              name="activity_date"
+              name="activity_date_from"
               label="Date"
               register={register}
               control={control}
               errors={errors}
               disabled
             />
-          </div>
-          <div className="col-span-3">
-            <TextArea name="notes" label="Notes" register={register} control={control} errors={errors} />
+            {/* <DatePicker
+              name="activity_date_to"
+              label="Date To"
+              register={register}
+              control={control}
+              errors={errors}
+              disabled
+            /> */}
+            {/* <TextArea name="notes" label="Notes" register={register} control={control} errors={errors} /> */}
           </div>
         </div>
       </fieldset>
@@ -249,14 +255,14 @@ function Screen() {
           <legend className="px-2 text-[28px] text-primarydeepo font-semibold">Request Detail</legend>
           <LoadingComponent visible={loadingRequest} />
           {!loadingRequest ? (
-            <TableContainer>
+            <TableContainer className="max-h-60 overflow-y-auto overflow-x-hidden">
               <Table variant="simple">
                 <Thead>
-                  <Tr>
-                    <Th>No</Th>
-                    <Th>SKU</Th>
-                    <Th>Product</Th>
-                    <Th>Qty</Th>
+                  <Tr className="bg-[#bbc9ff] text-bold">
+                    <Th className="text-bold text-[#000] text-center">No</Th>
+                    <Th className="text-bold text-[#000] text-center">SKU</Th>
+                    <Th className="text-bold text-[#000] text-center">Product</Th>
+                    <Th className="text-bold text-[#000] text-center">Qty</Th>
                   </Tr>
                 </Thead>
 
@@ -278,33 +284,40 @@ function Screen() {
         </fieldset>
         <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
           <legend className="px-2 text-[28px] text-primarydeepo font-semibold">RFID Detected</legend>
-          <TableContainer>
-            <Table variant="simple">
-              <Thead>
-                <Tr>
-                  <Th>No</Th>
-                  <Th>SKU</Th>
-                  <Th>Product</Th>
-                  <Th>Qty</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {data?.map((d, i) => {
-                  return (
-                    <Tr key={i}>
-                      <Td>{i + 1}</Td>
-                      <Td>{d.request_by}</Td>
-                      <Td>{d.status}</Td>
-                      <Td>{d.id}</Td>
-                    </Tr>
-                  );
-                })}
-              </Tbody>
-            </Table>
-          </TableContainer>
+          <LoadingComponent visible={loadingRequest} />
+          {!loadingRFID ? (
+            <TableContainer className="max-h-60 overflow-y-auto overflow-x-hidden">
+              <Table variant="simple">
+                <Thead>
+                  <Tr className="bg-[#bbc9ff] text-bold">
+                    <Th className="text-bold text-[#000] text-center">No</Th>
+                    <Th className="text-bold text-[#000] text-center">SKU</Th>
+                    <Th className="text-bold text-[#000] text-center">Product</Th>
+                    <Th className="text-bold text-[#000] text-center">Qty</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {data?.map((d, i) => {
+                    return (
+                      <Tr key={i}>
+                        <Td>{i + 1}</Td>
+                        <Td>{d.request_by}</Td>
+                        <Td>{d.status}</Td>
+                        <Td>{d.id}</Td>
+                      </Tr>
+                    );
+                  })}
+                </Tbody>
+              </Table>
+            </TableContainer>
+          ) : null}
         </fieldset>
       </div>
-      <div className="border border-primarydeepo w-full h-full px-8 rounded-[55px] py-2 mt-10">
+      <div
+        className={`border  ${
+          error ? 'border-[#a2002d]' : 'border-primarydeepo'
+        }  w-full h-full px-8 rounded-[55px] py-2 mt-10`}
+      >
         <div className="grid grid-cols-3 gap-4">
           <div className="pt-2">
             <div>Total Request</div>
@@ -350,6 +363,11 @@ function Screen() {
           </div>
         </div>
       </div>
+      {error && (
+        <p className="text-[#a2002d] pl-10">
+          {totalRequest !== totalRFID ? 'The sum of request and rfid are not the same' : ''}
+        </p>
+      )}
       {onOverview && (
         <div
           className=" main-modal fixed w-full h-200 inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
@@ -403,121 +421,182 @@ function Screen() {
           <div className="border shadow-lg modal-container bg-white w-[80%] mx-auto rounded z-50 h-84">
             <form onSubmit={handleSubmit(onFinalSubmit)}>
               <p className="text-md font-bold py-2 px-4">Dashboard Transit</p>
-              <div className="overflow-y-auto h-60 px-6">
-                <TableContainer>
-                  <Table>
-                    <Thead>
-                      <Tr>
-                        <Th>No</Th>
-                        <Th>SKU</Th>
-                        <Th>ProducT</Th>
-                        <Th>QTy</Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      {fields.map((item, index) => {
-                        return (
-                          <Tr key={item.id}>
-                            <Td className="w-10">{index + 1}</Td>
-                            <Td className="w-10">
-                              <Controller
-                                render={({ field }) => {
-                                  return <Input variant="unstyled" {...field} disabled />;
-                                }}
-                                name={`details.${index}.product_sku`}
-                                control={control}
-                              />
-                            </Td>
+              <div className="overflow-y-auto h-60 px-6 py-2">
+                <table>
+                  <thead>
+                    <tr className="bg-[#bbc9ff] text-bold text-[#000]">
+                      <th className="text-semibold text-[#000] text-center w-10 py-1.5 pl-2">NO</th>
+                      <th className="text-semibold text-[#000] text-center w-20">SKU</th>
+                      <th className="text-semibold text-[#000] text-center">PRODUCT</th>
+                      <th className="text-semibold text-[#000] text-center">QTY</th>
+                      <th aria-label="Mute volume" />
+                      <th aria-label="Mute volume" />
+                      <th aria-label="Mute volume" />
+                      <th aria-label="Mute volume" />
+                      <th aria-label="Mute volume" />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {fields.map((item, index) => {
+                      return (
+                        <tr key={item.id} className={`${index % 2 ? 'bg-gray-100' : ''} w-full`}>
+                          <td className="w-10 text-center px-2">{index + 1}</td>
+                          <td className="w-20 text-center px-2">
+                            {item.product_sku}
+                            <Controller
+                              render={({ field }) => {
+                                return <Input variant="unstyled" {...field} disabled className="hidden" />;
+                              }}
+                              name={`details.${index}.product_sku`}
+                              className="hidden"
+                              control={control}
+                            />
+                          </td>
 
-                            <Td className="w-60">
-                              <Controller
-                                render={({ field }) => {
-                                  return <Input variant="unstyled" {...field} disabled />;
+                          <td className="w-60 px-2">
+                            {item.product_name}
+                            <Controller
+                              render={({ field }) => {
+                                return <Input variant="unstyled" {...field} disabled className="hidden" />;
+                              }}
+                              name={`details.${index}.product_name`}
+                              className="hidden"
+                              control={control}
+                            />
+                          </td>
+                          <td className="w-20 text-center px-2">
+                            {item.qty}
+                            <Controller
+                              render={({ field }) => {
+                                return <Input variant="unstyled" {...field} disabled className="hidden" />;
+                              }}
+                              name={`details.${index}.qty`}
+                              className="hidden"
+                              control={control}
+                            />
+                          </td>
+                          <td className="w-24 px-2">
+                            <Controller
+                              render={() => {
+                                return (
+                                  <Select
+                                    name={`details.${index}.rack`}
+                                    idx={index}
+                                    placeholder="Rack"
+                                    options={storageData?.map(s => {
+                                      return {
+                                        label: s.rack_number,
+                                        value: s.rack_number,
+                                      };
+                                    })}
+                                    register={register}
+                                    control={control}
+                                    errors={errors}
+                                  />
+                                );
+                              }}
+                              name={`details.${index}.rack`}
+                              control={control}
+                            />
+                          </td>
+                          <td className="w-24 px-2">
+                            <Controller
+                              render={() => {
+                                return (
+                                  <Select
+                                    name={`details.${index}.bay`}
+                                    idx={index}
+                                    placeholder="Bay"
+                                    options={storageData?.map(s => {
+                                      return {
+                                        label: s.bay,
+                                        value: s.bay,
+                                      };
+                                    })}
+                                    register={register}
+                                    control={control}
+                                    errors={errors}
+                                  />
+                                );
+                              }}
+                              name={`details.${index}.bay`}
+                              control={control}
+                            />
+                          </td>
+                          <td className="w-24 px-2">
+                            <Controller
+                              render={() => {
+                                return (
+                                  <Select
+                                    name={`details.${index}.level`}
+                                    idx={index}
+                                    placeholder="Level"
+                                    options={storageData?.map(s => {
+                                      return {
+                                        label: s.level,
+                                        value: s.level,
+                                      };
+                                    })}
+                                    register={register}
+                                    control={control}
+                                    errors={errors}
+                                  />
+                                );
+                              }}
+                              name={`details.${index}.level`}
+                              control={control}
+                            />
+                          </td>
+                          <td className="w-20 px-4">
+                            <Controller
+                              render={({ field }) => {
+                                return <Input type="number" {...field} className="w-16" />;
+                              }}
+                              name={`details.${index}.child_qty`}
+                              control={control}
+                            />
+                          </td>
+                          <td className="w-20 px-4">
+                            {item.qty ? (
+                              <Button
+                                size="sm"
+                                type="button"
+                                px={8}
+                                className="rounded-full text-center text-white font-bold bg-gradient-to-r from-processbtnfrom to-processbtnto hover:bg-gradient-to-br focus:ring-1 focus:outline-none focus:ring-secondarydeepo"
+                                key={index}
+                                onClick={() => {
+                                  setCounter(count => count + 1);
+                                  onSplit(item.product_id, item.qty, index + 1, item?.child_qty);
                                 }}
-                                name={`details.${index}.product_name`}
-                                control={control}
-                              />
-                            </Td>
-                            <Td className="w-20">
-                              <Controller
-                                render={({ field }) => {
-                                  return <Input variant="unstyled" {...field} disabled />;
+                                // disabled={errors?.details?.length}
+                              >
+                                Split
+                              </Button>
+                            ) : (
+                              <Button
+                                px={6}
+                                size="sm"
+                                type="button"
+                                className="rounded-full bg-[#eb6058] hover:bg-[#f35a52] text-[#fff] hover:text-gray-600 font-bold"
+                                key={index}
+                                onClick={() => {
+                                  setCounter(count => count - 1);
+                                  remove(index);
                                 }}
-                                name={`details.${index}.qty`}
-                                control={control}
-                              />
-                            </Td>
-                            <Td>
-                              <Controller
-                                render={() => {
-                                  // console.log('field', field, { field });
-                                  return (
-                                    <Select
-                                      name={`details.${index}.rack`}
-                                      placeholder="Rack"
-                                      options={[
-                                        {
-                                          label: '123',
-                                          value: 'asd',
-                                        },
-                                      ]}
-                                      register={register}
-                                      control={control}
-                                    />
-                                  );
-                                }}
-                                name={`details.${index}.rack`}
-                                control={control}
-                              />
-                            </Td>
-                            <Td className="w-20">
-                              <Controller
-                                render={({ field }) => {
-                                  return <Input variant="unstyled" {...field} disabled />;
-                                }}
-                                name={`details.${index}.child_qty`}
-                                control={control}
-                              />
-                            </Td>
-                            <Td>
-                              {item.qty ? (
-                                <Button
-                                  size="sm"
-                                  type="button"
-                                  px={8}
-                                  className="rounded-full text-center text-white font-bold bg-gradient-to-r from-processbtnfrom to-processbtnto hover:bg-gradient-to-br focus:ring-1 focus:outline-none focus:ring-secondarydeepo"
-                                  key={index}
-                                  onClick={() => {
-                                    setCounter(count => count + 1);
-                                    onSplit(item.product_id, item.qty, index + 1);
-                                  }}
-                                >
-                                  Split
-                                </Button>
-                              ) : (
-                                <Button
-                                  px={6}
-                                  size="sm"
-                                  type="button"
-                                  className="rounded-full bg-[#eb6058] hover:bg-[#f35a52] text-[#fff] hover:text-gray-600 font-bold"
-                                  key={index}
-                                  onClick={() => {
-                                    setCounter(count => count - 1);
-                                    remove(index);
-                                  }}
-                                >
-                                  Delete
-                                </Button>
-                              )}
-                            </Td>
-                          </Tr>
-                        );
-                      })}
-                    </Tbody>
-                  </Table>
-                </TableContainer>
+                              >
+                                Delete
+                              </Button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
-              <div className="grid place-items-end pt-4">
+              <div className="flex justify-between">
+                {errors && <span className="pl-10 text-[#a2002d]">{`${errors?.details?.message}`}</span>}
+
                 <div className="mr-4 mb-2">
                   <Button
                     _hover={{
