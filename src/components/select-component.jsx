@@ -2,7 +2,7 @@ import React from 'react';
 import { Select } from '@chakra-ui/react';
 
 function SelectComponent(props) {
-  const { name, label, disabled, register, errors, placeholder, options, idx } = props;
+  const { name, label, disabled, register, errors, placeholder, options, idx, booleans } = props;
 
   return (
     <div className="flex-auto w-full">
@@ -22,18 +22,18 @@ function SelectComponent(props) {
             focusBorderColor="#8335c3"
             placeholder={placeholder}
           >
-            {options.map((el, idx) => (
+            {options?.map((el, idx) => (
               <option key={idx} value={el.value}>
                 {el.label}
               </option>
-            ))}
+            )) || []}
           </Select>
         </div>
       </div>
       {errors &&
         (Array.isArray(errors[name]?.message) ? (
           errors[name]?.message.map(m => <span className="error d-block">{m.toLowerCase()}</span>)
-        ) : errors?.details?.length ? (
+        ) : errors?.details?.length && !booleans ? (
           <span className="text-red-700 ml-1">
             {
               errors?.details?.map(i => {

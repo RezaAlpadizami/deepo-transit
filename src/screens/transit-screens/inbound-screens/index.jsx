@@ -26,33 +26,80 @@ const swalButton = Swal.mixin({
   },
   buttonsStyling: false,
 });
-function Screen() {
-  const storage = yup.object({
-    rack: yup.string().test('rack', 'Rack is required', value => {
-      if (value) {
-        return true;
-      }
-      return false;
-    }),
-    // .required(), .required() .required() .required()
-    bay: yup.string().test('bay', 'Bay is required', value => {
-      if (value) {
-        return true;
-      }
-      return false;
-    }),
-    level: yup.string().test('level', 'Level is required', value => {
-      if (value) {
-        return true;
-      }
-      return false;
-    }),
-    child_qty: yup.string(),
-  });
+const storage = yup.object({
+  rack: yup.string().test('rack', 'Rack is required', value => {
+    if (value) {
+      return true;
+    }
+    return false;
+  }),
+  // .required(), .required() .required() .required()
+  bay: yup.string().test('bay', 'Bay is required', value => {
+    if (value) {
+      return true;
+    }
+    return false;
+  }),
+  level: yup.string().test('level', 'Level is required', value => {
+    if (value) {
+      return true;
+    }
+    return false;
+  }),
+  child_qty: yup.string(),
+});
 
-  const schema = yup.object({
-    details: yup.array().of(storage).min(1, 'Must have at least one data'),
-  });
+const schema = yup.object({
+  details: yup
+    .array()
+    .of(storage)
+    .min(1, 'must have at least one data')
+    .test('details', 'total of splitted quantity must be the same with the actual quantity', function (value) {
+      let pass = true;
+
+      const { filters, isSplitted } = this.parent;
+
+      if (isSplitted) {
+        const filterBy = filters.map(f => {
+          return value.filter(i => i.product_id === f);
+        });
+        if (filterBy.length > 0 && value) {
+          const parentQty = filterBy.map(item => {
+            const quantities = item.map(x => {
+              if (x.qty) {
+                return { qty: x.qty, product_id: x.product_id };
+              }
+              return x.qty;
+            });
+
+            return quantities.find(i => i !== undefined);
+          });
+
+          const childQty = filterBy.map((item, idx) => {
+            return { calc: toCalculate(item, 'child_qty'), product_id: filters[idx] };
+          });
+
+          if (childQty.length > 0 && parentQty.length > 0) {
+            parentQty.map((item, idx) => {
+              if (item.qty) {
+                if (childQty[idx]?.product_id === item.product_id) {
+                  if (item.qty === childQty[idx].calc) {
+                    return pass;
+                  }
+                  pass = false;
+                }
+              }
+              return pass;
+            });
+          }
+          // pass = false;
+        }
+      }
+      return pass;
+    }),
+});
+
+function Screen() {
   const {
     register,
     control,
@@ -67,8 +114,6 @@ function Screen() {
     control,
     name: 'details',
   });
-  console.log('error', errors.details);
-  console.log('type of', typeof errors.details);
 
   const defaultSort = {
     sort_by: 'id',
@@ -89,6 +134,7 @@ function Screen() {
   const [totalRequest, setTotalRequest] = useState(0);
   const [counter, setCounter] = useState(2);
   const [timer, setTimer] = useState();
+  const [isSplit, setIsSplit] = useState(false);
 
   useEffect(() => {
     getDetailRequest();
@@ -100,6 +146,12 @@ function Screen() {
 
       RequestApi.find(requestId)
         .then(res => {
+          const filterByProductId = [
+            ...new Map(res.detail?.map(i => [JSON.stringify(i.product_id), i.product_id])).values(),
+          ];
+          const quantity = [...new Map(res.detail?.map(i => [JSON.stringify(i.qty), i.qty])).values()];
+          setValue('filters', filterByProductId);
+          setValue('quantity', quantity);
           setTransitData(res.detail);
           setValue('activity_date_from', res?.activity_date ? Moment(res?.activity_date).toDate() : null);
           setValue('request_number', res?.request_number ? res?.request_number : '-');
@@ -112,6 +164,10 @@ function Screen() {
         });
     }
   }, [requestId]);
+
+  useEffect(() => {
+    setValue('isSplitted', isSplit);
+  }, [isSplit]);
 
   const startScanning = () => {
     setScanning(true);
@@ -146,10 +202,8 @@ function Screen() {
   };
 
   const onSplit = (id, qty, idx, child) => {
-    console.log('id', id);
-    console.log('qty', qty);
-    console.log('idx', idx);
-    console.log('child', child);
+    setIsSplit(true);
+
     const findData = fields.find(i => i.product_id === id);
     if (qty / counter > 1) {
       if (counter === 2) {
@@ -203,9 +257,19 @@ function Screen() {
         console.log('error', error);
       });
   };
-
+  // console.log(
+  //   'validate array',
+  //   Array.isArray(errors.details) && isSplit
+  //     ? errors?.details.filter(i => i !== undefined)
+  //     : errors?.details?.message || ''
+  // );
+  // console.log('errors?.details?.message ', errors?.details?.message);
+  // console.log('error', errors);
   return (
     <div className="bg-white p-5 rounded-[55px] shadow">
+      <input type="hidden" {...register('filters')} />
+      <input type="hidden" {...register('quantity')} />
+      <input type="hidden" {...register('isSplitted')} />
       <fieldset className="border border-primarydeepo w-full h-full px-8 rounded-[55px] pb-6">
         <legend className="px-2 text-[28px] text-primarydeepo font-semibold">Request</legend>
         <div className="grid grid-cols-8 gap-6">
@@ -237,15 +301,6 @@ function Screen() {
               errors={errors}
               disabled
             />
-            {/* <DatePicker
-              name="activity_date_to"
-              label="Date To"
-              register={register}
-              control={control}
-              errors={errors}
-              disabled
-            /> */}
-            {/* <TextArea name="notes" label="Notes" register={register} control={control} errors={errors} /> */}
           </div>
         </div>
       </fieldset>
@@ -483,6 +538,7 @@ function Screen() {
                                     name={`details.${index}.rack`}
                                     idx={index}
                                     placeholder="Rack"
+                                    booleans={isSplit}
                                     options={storageData?.map(s => {
                                       return {
                                         label: s.rack_number,
@@ -507,6 +563,7 @@ function Screen() {
                                     name={`details.${index}.bay`}
                                     idx={index}
                                     placeholder="Bay"
+                                    booleans={isSplit}
                                     options={storageData?.map(s => {
                                       return {
                                         label: s.bay,
@@ -531,6 +588,7 @@ function Screen() {
                                     name={`details.${index}.level`}
                                     idx={index}
                                     placeholder="Level"
+                                    booleans={isSplit}
                                     options={storageData?.map(s => {
                                       return {
                                         label: s.level,
@@ -580,7 +638,10 @@ function Screen() {
                                 className="rounded-full bg-[#eb6058] hover:bg-[#f35a52] text-[#fff] hover:text-gray-600 font-bold"
                                 key={index}
                                 onClick={() => {
-                                  setCounter(count => count - 1);
+                                  setCounter(count => {
+                                    if (count > 2) return count - 1;
+                                    return count;
+                                  });
                                   remove(index);
                                 }}
                               >
@@ -595,7 +656,13 @@ function Screen() {
                 </table>
               </div>
               <div className="flex justify-between">
-                {errors && <span className="pl-10 text-[#a2002d]">{`${errors?.details?.message}`}</span>}
+                {errors && (
+                  <span className="pl-10 text-[#a2002d]">{`${
+                    Array.isArray(errors.details) && isSplit
+                      ? errors?.details.filter(i => i !== undefined)
+                      : errors?.details?.message || ' '
+                  }`}</span>
+                )}
 
                 <div className="mr-4 mb-2">
                   <Button
