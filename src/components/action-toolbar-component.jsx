@@ -144,17 +144,31 @@ function ActionToolbar(props) {
                 <p className="text-MD font-bold">Are you sure to delete this data ?</p>
                 <div className="flex-1" />
                 <Button
-                  className="rounded-full bg-[#aaa] outline outline-offset-0 outline-[#1F2022] text-[#fff] font-bold"
-                  onClick={() => setOnOpen(!onOpen)}
-                  px={8}
+                  _hover={{
+                    shadow: 'md',
+                    transform: 'translateY(-5px)',
+                    transitionDuration: '0.2s',
+                    transitionTimingFunction: 'ease-in-out',
+                  }}
+                  type="button"
                   size="sm"
+                  px={8}
+                  className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
+                  onClick={() => setOnOpen(!onOpen)}
                 >
                   Cancel
                 </Button>
                 <Button
-                  className="ml-4 rounded-full outline outline-offset-0 outline-[#A6A9B6] bg-[#232323] text-[#fff] font-bold"
-                  px={8}
+                  _hover={{
+                    shadow: 'md',
+                    transform: 'translateY(-5px)',
+                    transitionDuration: '0.2s',
+                    transitionTimingFunction: 'ease-in-out',
+                  }}
+                  type="submit"
                   size="sm"
+                  px={8}
+                  className="ml-4 rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold"
                   onClick={() => {
                     onDelete();
                     setOnOpen(!onOpen);

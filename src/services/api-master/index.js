@@ -1,3 +1,4 @@
+import StorageApi from './resources/storage-api';
 import ProductApi from './resources/product-api';
 
-export default ProductApi;
+export { StorageApi, ProductApi };

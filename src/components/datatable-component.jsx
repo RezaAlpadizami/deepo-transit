@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-
+import React, { useEffect, useState, useCallback } from 'react';
 import XLSX from 'xlsx';
 import Moment from 'moment';
 import Swal from 'sweetalert2';
@@ -10,7 +9,6 @@ import { Button } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
 import { useTable, useRowSelect, usePagination, useSortBy } from 'react-table';
 import { ChevronLeftIcon, ChevronRightIcon, ArrowSmUpIcon, ArrowSmDownIcon } from '@heroicons/react/solid';
-
 import Input from './input-component';
 import Select from './select-component';
 import Checkbox from './checkbox-component';
@@ -25,6 +23,7 @@ function DataTable(props) {
     limit = 10,
     toolbar,
     noToolbar,
+    filterParams,
     to,
     api,
     checkbox,
@@ -32,8 +31,11 @@ function DataTable(props) {
     name,
     filters,
     onSort = () => {},
+    onActionButton = () => {},
     identifierProperties = 'id',
     hasButtonAction,
+    onSearch,
+    filterEnd,
   } = props;
 
   const {
@@ -47,7 +49,7 @@ function DataTable(props) {
   const [pages, setPages] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [datas, setDatas] = useState([]);
-  const [totalData, setTotalData] = useState([]);
+  const [totalData, setTotalData] = useState(0);
   const [loadingHover, setLoadingHover] = useState(false);
   const defaultSort = {
     sort_by: 'id',
@@ -95,6 +97,21 @@ function DataTable(props) {
                 </div>
               );
             }
+            if (d.type === 'action-button' && row.original.request_number) {
+              return (
+                <Button
+                  className="text-white bg-gradient-to-r from-processbtnfrom to-processbtnto hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2"
+                  onClick={() => {
+                    onActionButton(row.original.id, row.original);
+                  }}
+                  type="button"
+                  px={8}
+                  size="sm"
+                >
+                  Process
+                </Button>
+              );
+            }
 
             return value;
           },
@@ -133,12 +150,12 @@ function DataTable(props) {
 
   useEffect(() => {
     getData();
-  }, [filterData]);
+  }, [filterData, filterParams]);
 
   const getData = () => {
     setLoadingHover(true);
     api
-      .get({ ...filterData })
+      .get({ ...filterData, ...filterParams })
       .then(res => {
         setLoadingHover(false);
         setDatas(res.data);
@@ -301,6 +318,19 @@ function DataTable(props) {
       ...defaultSort,
     });
   };
+
+  const getDebounce = func => {
+    let timer;
+    return (...args) => {
+      const context = this;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        timer = null;
+        func.apply(context, args);
+      }, 500);
+    };
+  };
+
   const onSubmit = data => {
     // eslint-disable-next-line no-restricted-syntax
     for (const dt in data) {
@@ -337,6 +367,7 @@ function DataTable(props) {
       };
     });
   };
+  const opt = useCallback(getDebounce(onSubmit), []);
 
   const onSubmitRequestProcess = row => {
     setLoadingHover(true);
@@ -377,10 +408,32 @@ function DataTable(props) {
             <h1 className="font-bold text-xl">{displayName}</h1>
           </div>
           <div>
-            <form>
+            <form className={`${onSearch ? 'mb-10' : ''}`} onChange={onSearch ? handleSubmit(opt) : ''}>
               <div className="px-4">
-                <div className="grid grid-cols-6 gap-4 mt-4">
+                <div className={` ${filterEnd ? 'flex justify-between' : 'grid grid-cols-6'} gap-4  mt-4`}>
                   {filter.map((item, idx) => {
+                    if (item.type === 'addtext') {
+                      return (
+                        <div className={`${item.col ? `col-span-${item.col}` : ''}`} key={`component${idx}`}>
+                          <p className="text-md font-bold">{item.text}</p>
+                          <Button
+                            _hover={{
+                              shadow: 'md',
+                              transform: 'translateY(-5px)',
+                              transitionDuration: '0.2s',
+                              transitionTimingFunction: 'ease-in-out',
+                            }}
+                            type="button"
+                            size="sm"
+                            px={8}
+                            className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold mt-2"
+                            onClick={() => onReset()}
+                          >
+                            Reset
+                          </Button>
+                        </div>
+                      );
+                    }
                     if (item.type === 'date_picker') {
                       return (
                         <div className={item.col ? `col-span-${item.col}` : ''} key={`component${idx}`}>
@@ -391,6 +444,20 @@ function DataTable(props) {
                             register={register}
                             control={control}
                             errors={errors}
+                          />
+                        </div>
+                      );
+                    }
+                    if (item.type === 'input:addOn') {
+                      return (
+                        <div className={item.col ? `col-span-${item.col}` : ''} key={`component${idx}`}>
+                          <Input
+                            name={item.name}
+                            placeholder={item.placeholder}
+                            addOnleft
+                            register={register}
+                            control={control}
+                            icon={<img src={item.icon} alt={`${item.alt}`} className="h-6" />}
                           />
                         </div>
                       );
@@ -421,40 +488,42 @@ function DataTable(props) {
                   })}
                 </div>
               </div>
-              <div className="col-md-3 offset-md-9 px-0">
-                <div className="flex justify-end mt-3 px-4 py-3">
-                  <Button
-                    _hover={{
-                      shadow: 'md',
-                      transform: 'translateY(-5px)',
-                      transitionDuration: '0.2s',
-                      transitionTimingFunction: 'ease-in-out',
-                    }}
-                    type="button"
-                    size="sm"
-                    px={8}
-                    className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#184D47] font-bold"
-                    onClick={() => onReset()}
-                  >
-                    Reset
-                  </Button>
-                  <Button
-                    _hover={{
-                      shadow: 'md',
-                      transform: 'translateY(-5px)',
-                      transitionDuration: '0.2s',
-                      transitionTimingFunction: 'ease-in-out',
-                    }}
-                    type="submit"
-                    size="sm"
-                    px={8}
-                    className="ml-4 rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold"
-                    onClick={handleSubmit(onSubmit)}
-                  >
-                    Filter
-                  </Button>
+              {!onSearch && (
+                <div className="col-md-3 offset-md-9 px-0">
+                  <div className="flex justify-end mt-3 px-4 py-3">
+                    <Button
+                      _hover={{
+                        shadow: 'md',
+                        transform: 'translateY(-5px)',
+                        transitionDuration: '0.2s',
+                        transitionTimingFunction: 'ease-in-out',
+                      }}
+                      type="button"
+                      size="sm"
+                      px={8}
+                      className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
+                      onClick={() => onReset()}
+                    >
+                      Reset
+                    </Button>
+                    <Button
+                      _hover={{
+                        shadow: 'md',
+                        transform: 'translateY(-5px)',
+                        transitionDuration: '0.2s',
+                        transitionTimingFunction: 'ease-in-out',
+                      }}
+                      type="submit"
+                      size="sm"
+                      px={8}
+                      className="ml-4 rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold"
+                      onClick={handleSubmit(onSubmit)}
+                    >
+                      Filter
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              )}
             </form>
           </div>
         </div>
@@ -537,7 +606,7 @@ function DataTable(props) {
                           type="submit"
                           px={8}
                           size="sm"
-                          className="text-white bg-gradient-to-r from-secondarydeepo to-primarydeepo hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2"
+                          className="text-white bg-gradient-to-r from-processbtnfrom to-processbtnto hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2"
                         >
                           Process
                         </Button>
@@ -640,8 +709,8 @@ function DataTable(props) {
                       disabled={pages === i + p}
                       onClick={() => changePage(i + p)}
                       className={`${
-                        pages === i + p ? 'bg-gray-700 text-white' : 'bg-white'
-                      } py-2 px-3 mx-0.5 leading-tight text-black bg-gray-100 rounded-lg hover:bg-gray-700 hover:text-white disabled:text-white`}
+                        pages === i + p ? 'bg-secondarydeepo text-white' : 'bg-thead'
+                      } py-2 px-3 mx-0.5 leading-tight text-black bg-secondarydeepo rounded-lg hover:bg-thead hover:text-white disabled:text-white`}
                     >
                       {i + p}
                     </button>
