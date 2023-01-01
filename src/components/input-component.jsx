@@ -1,5 +1,5 @@
 import React from 'react';
-import { Input, InputGroup, InputLeftElement } from '@chakra-ui/react';
+import { Input, InputGroup, InputLeftElement, InputRightElement } from '@chakra-ui/react';
 import { Controller } from 'react-hook-form';
 
 function InputComponent(props) {
@@ -16,6 +16,7 @@ function InputComponent(props) {
     placeholder,
     icon,
     addOnleft,
+    addOnRight,
     readOnly = false,
     array,
     key,
@@ -62,6 +63,40 @@ function InputComponent(props) {
                 refs={register}
                 control={control}
               />
+            </InputGroup>
+          ) : addOnRight ? (
+            <InputGroup>
+              <Controller
+                name={name}
+                render={({ field: { onChange, value, name } }) => {
+                  return (
+                    <Input
+                      name={name}
+                      bg="white"
+                      width="auto"
+                      size="sm"
+                      type={type}
+                      disabled={disabled}
+                      placeholder={placeholder}
+                      selected={value}
+                      value={value}
+                      onChange={onChange}
+                      maxLength={maxLength}
+                      id={name}
+                      readOnly={readOnly}
+                      variant={disabled ? 'filled' : 'outline'}
+                      className={`${
+                        disabled ? 'bg-gray-200' : ''
+                      } w-full text-sm rounded-full border-gray-400 pl-6 py-5`}
+                    />
+                  );
+                }}
+                refs={register}
+                control={control}
+              />
+              <InputRightElement fontSize="md" pointerEvents="none" className="mx-2">
+                {icon}
+              </InputRightElement>
             </InputGroup>
           ) : array && key ? (
             <Input

@@ -1,4 +1,4 @@
-import RequestHandler from '../../api-transit/request-handler';
+import RequestHandler from '../request-handler';
 import ENDPOINT from '../../../config/api-master';
 
 class WarehouseApi extends RequestHandler {
