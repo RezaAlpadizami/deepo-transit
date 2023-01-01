@@ -92,8 +92,8 @@ function DataTable(props) {
             }
             if (d.type === 'scrollable') {
               return (
-                <div className="max-h-[300px] max-w-[250px] overflow-y-auto no-scrollbar::-webkit-scrollbar no-scrollbar whitespace-pre-line text-justify p-2">
-                  <span>{value}</span>
+                <div className="max-h-[85px] max-w-[250px] overflow-y-auto no-scrollbar::-webkit-scrollbar no-scrollbar whitespace-pre-line p-2">
+                  <span>{value?.length > 25 ? `${value.substring(0, 30)} . . .` : value}</span>
                 </div>
               );
             }
