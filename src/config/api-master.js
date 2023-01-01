@@ -1,5 +1,5 @@
 module.exports = {
-  REQUEST: 'request',
+  STORAGE: 'storage',
   PRODUCT: 'product',
   WAREHOUSE: 'warehouse',
 };

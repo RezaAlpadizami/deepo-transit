@@ -7,8 +7,8 @@ import Swal from 'sweetalert2';
 import { Button, Text } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 
-import ProductApi from '../../../services/api-master';
-import RequestApi from '../../../services/api-transit';
+import { ProductApi } from '../../../services/api-master';
+import { RequestApi } from '../../../services/api-transit';
 import Input from '../../../components/input-component';
 import Select from '../../../components/select-component';
 import TextArea from '../../../components/textarea-component';
@@ -44,6 +44,7 @@ function Screen() {
 
   const {
     register: registerProd,
+    control: controlProd,
     formState: { errors: errorsProd },
     handleSubmit: handleSubmitProd,
   } = useForm({
@@ -169,11 +170,12 @@ function Screen() {
                     })}
                     placeholder="Product"
                     register={registerProd}
+                    control={controlProd}
                     errors={errorsProd}
                   />
                 </div>
                 <div className="">
-                  <Input name="qty" label="QTY" register={registerProd} errors={errorsProd} />
+                  <Input name="qty" label="QTY" register={registerProd} errors={errorsProd} control={controlProd} />
                 </div>
               </div>
               <div className="flex justify-end">
@@ -218,7 +220,7 @@ function Screen() {
                 onClick={() => navigate(-1)}
                 px={8}
                 size="sm"
-                className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#184D47] font-bold"
+                className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
               >
                 Cancel
               </Button>
