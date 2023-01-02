@@ -24,7 +24,7 @@ function Screen() {
 
   const [dataRequesById, setDataRequestById] = useState([]);
   const [dataProduct, setDataProduct] = useState([]);
-  // const [dataInputAdd, setDataInputAdd] = useState([]);
+  const [dataReq, setDataReq] = useState([]);
   const [loading, setLoading] = useState(false);
   const [dataDetail, setDataDetail] = useState([]);
   const [dataNewDetail, setDataNewDetail] = useState([]);
@@ -87,6 +87,7 @@ function Screen() {
         setValue('activity_name', res.activity_name, { value: res.activity_name, label: res.activity_name });
         setValue('activity_date', res.activity_date ? Moment(res.activity_date).toDate() : null);
         setValue('notes', res.notes);
+        setDataReq(res);
         setDataDetail(
           res.detail.map((data, idx) => {
             return {
@@ -117,7 +118,7 @@ function Screen() {
       };
     });
     const dataObject = Object.assign({}, ...handleDataAdd);
-    if (dataRequesById.find(obj => obj.product_id !== dataObject.product_id)) {
+    if (dataReq.detail.includes(dataObject.product_id)) {
       dataNewItem.push({ ...dataObject });
     } else {
       dataDetailUpdate.push({ ...dataObject });
