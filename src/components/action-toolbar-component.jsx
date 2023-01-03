@@ -124,7 +124,7 @@ function ActionToolbar(props) {
         <Button
           className={`${selectedData.length === 0 ? disableButton : button}`}
           onClick={() => setOnOpen(!onOpen)}
-          disabled={selectedData?.find(i => i)?.original.status !== 'PENDING' || selectedData.length === 0}
+          disabled={selectedData?.some(i => i?.original.status !== 'PENDING') || selectedData.length === 0}
         >
           <div className="hover:text-red-200 h-5 w-5 mr-2">
             <img src={deleteIcon} alt="add icon" className="mr-2 drop-shadow-md" />

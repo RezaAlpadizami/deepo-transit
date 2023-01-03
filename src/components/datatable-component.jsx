@@ -270,8 +270,10 @@ function DataTable(props) {
       if (result.value) {
         result.forEach(r => {
           if (r.status === 'fulfilled') {
+            setTimeout(() => {
+              setLoadingHover(false);
+            }, 500);
             success.push(true);
-            setLoadingHover(false);
           } else {
             result.reason.data.error.api.map(m => failed.push(m));
             failed.push(true);

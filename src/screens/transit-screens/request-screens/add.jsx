@@ -104,7 +104,6 @@ function Screen() {
   const onSubmitRequest = data => {
     setLoading(true);
     RequestApi.store({
-      activity_name: data.activity_name,
       request_by: 'testing',
       warehouse_id: 1,
       notes: data.notes,

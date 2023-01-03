@@ -27,16 +27,6 @@ function Screen() {
     getDetailRequest();
   }, []);
 
-  const updateDataRequesById = Array.from(
-    dataRequesByIdDetail
-      .reduce((acc, { qty, ...r }) => {
-        const key = JSON.stringify(r);
-        const current = acc.get(key) || { ...r, qty: 0 };
-        return acc.set(key, { ...current, qty: current.qty + qty });
-      }, new Map())
-      .values()
-  );
-
   const getDetailRequest = () => {
     RequestApi.find(id)
       .then(res => {
@@ -47,6 +37,24 @@ function Screen() {
         Swal.fire({ text: error?.message, icon: 'error' });
       });
   };
+
+  const updateDataRequesById = Object.values(
+    dataRequesByIdDetail.reduce((accu, { product_id, ...item }) => {
+      if (!accu[product_id])
+        accu[product_id] = {
+          qty: 0,
+        };
+
+      accu[product_id] = {
+        product_id,
+        ...accu[product_id],
+        ...item,
+        qty: accu[product_id].qty + item.qty,
+      };
+
+      return accu;
+    }, {})
+  );
 
   const onSubmitRequest = () => {
     setLoading(true);
