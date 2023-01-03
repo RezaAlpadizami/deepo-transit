@@ -72,7 +72,7 @@ function Screen() {
 
   const handleContinue = () => {
     cookies.set('warehouse_id', isSelected, {
-      maxAge: 3600,
+      maxAge: 7200,
       path: '/',
     });
     navigate('/request');
