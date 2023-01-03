@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import Moment from 'moment';
 import Swal from 'sweetalert2';
@@ -7,30 +7,37 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { Text, Button } from '@chakra-ui/react';
 
-import Search from '../../../assets/images/magnify-glass.svg';
 import Input from '../../../components/input-component';
 import { WarehouseApi } from '../../../services/api-master';
+import Search from '../../../assets/images/magnify-glass.svg';
+import LoadingHover from '../../../components/loading-hover-component';
 
 function Screen() {
   const navigate = useNavigate();
   const { register, control, handleSubmit } = useForm();
   const [warehouseData, setWarhouseData] = useState([]);
   const [isSelected, setIsSelected] = useState(-1);
-  // const [filterData, setFilterData] = useState({
-  //   limit: 10,
-  //   offset: 0,
-  // });
+  const [loading, setLoading] = useState(false);
+  const [filterData, setFilterData] = useState({
+    limit: 10,
+    offset: 0,
+    location: null,
+  });
+
   const cookies = new Cookies();
 
   useEffect(() => {
-    WarehouseApi.get()
+    setLoading(true);
+    WarehouseApi.get({ ...filterData })
       .then(res => {
+        setLoading(false);
         setWarhouseData(res.data);
       })
       .catch(error => {
+        setLoading(false);
         Swal.fire({ text: error?.message || error?.originalError, icon: 'error' });
       });
-  }, []);
+  }, [filterData]);
 
   const groupingByLocation = warehouseData.reduce((acc, cur) => {
     const { location, code, ...rest } = cur;
@@ -46,8 +53,20 @@ function Screen() {
     return acc;
   }, []);
 
-  const clickAddressCard = id => {
-    setIsSelected(id);
+  const getDebounce = func => {
+    let timer;
+    return (...args) => {
+      const context = this;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        timer = null;
+        func.apply(context, args);
+      }, 500);
+    };
+  };
+
+  const clickAddressCard = data => {
+    setIsSelected(data.id);
   };
 
   const handleContinue = () => {
@@ -65,11 +84,11 @@ function Screen() {
         if (!data[dt]) {
           delete data[dt];
         }
-        if (data[dt] === 'All') {
-          // setFilterData({
-          //   limit: 10,
-          //   offset: 0,
-          // });
+        if (data[dt] === '') {
+          setFilterData({
+            limit: 10,
+            offset: 0,
+          });
           delete data[dt];
         }
         if (data[dt] instanceof Date) {
@@ -84,24 +103,27 @@ function Screen() {
         }
       }
     }
-    // setFilterData(prev => {
-    //   return {
-    //     ...prev,
-    //     limit: 10,
-    //     offset: 0,
-    //     ...data,
-    //   };
-    // });
+
+    setFilterData(prev => {
+      return {
+        ...prev,
+        limit: 10,
+        offset: 0,
+        ...data,
+      };
+    });
   };
+
+  const opt = useCallback(getDebounce(onSubmit), []);
 
   return (
     <div className="mt-6">
       <div className="flex justify-center mb-6">
-        <h1 className="font-bold text-xl">Select your work area</h1>
+        <h1 className="font-bold text-2xl">SELECT YOUR WORK AREA</h1>
       </div>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onChange={handleSubmit(opt)}>
         <Input
-          name="search"
+          name="name"
           placeholder="Search Warehouse or Location"
           addOnRight
           register={register}
@@ -120,7 +142,7 @@ function Screen() {
                     className={`justify-items-center w-full ${
                       isSelected === d.id ? 'border border-primarydeepo text-primarydeepo' : ''
                     } bg-white py-8 px-8 rounded-[30px] drop-shadow-md cursor-pointer`}
-                    onClick={() => clickAddressCard(d.id)}
+                    onClick={() => clickAddressCard(d)}
                   >
                     <div>
                       <Text>{`${data.location} - ${d.name}`}</Text>
@@ -149,6 +171,7 @@ function Screen() {
           </div>
         </div>
       </div>
+      {loading && <LoadingHover visible={loading} />}
     </div>
   );
 }
