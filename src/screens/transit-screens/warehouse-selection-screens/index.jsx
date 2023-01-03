@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import Swal from 'sweetalert2';
 import Cookies from 'universal-cookie';
@@ -9,33 +9,26 @@ import { Text, Button } from '@chakra-ui/react';
 import Input from '../../../components/input-component';
 import { WarehouseApi } from '../../../services/api-master';
 import Search from '../../../assets/images/magnify-glass.svg';
-import LoadingHover from '../../../components/loading-hover-component';
 
 function Screen() {
   const navigate = useNavigate();
-  const { register, control, handleSubmit, reset } = useForm();
+  const { register, control, handleSubmit } = useForm();
   const [warehouseData, setWarhouseData] = useState([]);
   const [isSelected, setIsSelected] = useState(-1);
-  const [loading, setLoading] = useState(false);
   const [filterData, setFilterData] = useState({
     limit: 10,
     offset: 0,
-  });
-  const [filterParams, setFilterParams] = useState({
-    location: null,
+    name: '',
   });
 
   const cookies = new Cookies();
 
   useEffect(() => {
-    setLoading(true);
-    WarehouseApi.get({ ...filterData, ...filterParams })
+    WarehouseApi.get({ ...filterData })
       .then(res => {
-        setLoading(false);
         setWarhouseData(res.data);
       })
       .catch(error => {
-        setLoading(false);
         Swal.fire({ text: error?.message || error?.originalError, icon: 'error' });
       });
   }, [filterData]);
@@ -54,26 +47,14 @@ function Screen() {
     return acc;
   }, []);
 
-  const getDebounce = func => {
-    let timer;
-    return (...args) => {
-      const context = this;
-      if (timer) clearTimeout(timer);
-      timer = setTimeout(() => {
-        timer = null;
-        func.apply(context, args);
-      }, 500);
-    };
-  };
-
   const clickAddressCard = data => {
     setIsSelected(data.id);
   };
 
   const handleContinue = () => {
     cookies.set('warehouse_id', isSelected, {
-      maxAge: 7200,
       path: '/',
+      expires: new Date(Date.now() + 2592000),
     });
     navigate('/request');
   };
@@ -85,17 +66,11 @@ function Screen() {
         if (!data[dt]) {
           delete data[dt];
         }
-        if (data[dt] === ' ') {
-          reset();
-          setFilterData({
-            limit: 10,
-            offset: 0,
-          });
+        if (data[dt] === '') {
           delete data[dt];
         } else {
           // eslint-disable-next-line no-unused-expressions
           data[dt];
-          setFilterParams({ location: data.name });
         }
       }
     }
@@ -105,27 +80,18 @@ function Screen() {
         ...prev,
         limit: 10,
         offset: 0,
-        ...data,
-      };
-    });
-
-    setFilterParams(prev => {
-      return {
-        ...prev,
-        location: null,
+        name: '',
         ...data,
       };
     });
   };
-
-  const opt = useCallback(getDebounce(onSubmit), []);
 
   return (
     <div className="mt-6">
       <div className="flex justify-center mb-6">
         <h1 className="font-bold text-2xl">SELECT YOUR WORK AREA</h1>
       </div>
-      <form onChange={handleSubmit(opt)}>
+      <form onChange={handleSubmit(onSubmit)}>
         <Input
           name="name"
           placeholder="Search Warehouse or Location"
@@ -175,7 +141,6 @@ function Screen() {
           </div>
         </div>
       </div>
-      {loading && <LoadingHover visible={loading} />}
     </div>
   );
 }
