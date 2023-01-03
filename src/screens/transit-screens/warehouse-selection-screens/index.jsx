@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-import Moment from 'moment';
 import Swal from 'sweetalert2';
 import Cookies from 'universal-cookie';
 import { useForm } from 'react-hook-form';
@@ -14,13 +13,15 @@ import LoadingHover from '../../../components/loading-hover-component';
 
 function Screen() {
   const navigate = useNavigate();
-  const { register, control, handleSubmit } = useForm();
+  const { register, control, handleSubmit, reset } = useForm();
   const [warehouseData, setWarhouseData] = useState([]);
   const [isSelected, setIsSelected] = useState(-1);
   const [loading, setLoading] = useState(false);
   const [filterData, setFilterData] = useState({
     limit: 10,
     offset: 0,
+  });
+  const [filterParams, setFilterParams] = useState({
     location: null,
   });
 
@@ -28,7 +29,7 @@ function Screen() {
 
   useEffect(() => {
     setLoading(true);
-    WarehouseApi.get({ ...filterData })
+    WarehouseApi.get({ ...filterData, ...filterParams })
       .then(res => {
         setLoading(false);
         setWarhouseData(res.data);
@@ -84,22 +85,17 @@ function Screen() {
         if (!data[dt]) {
           delete data[dt];
         }
-        if (data[dt] === '') {
+        if (data[dt] === ' ') {
+          reset();
           setFilterData({
             limit: 10,
             offset: 0,
           });
           delete data[dt];
-        }
-        if (data[dt] instanceof Date) {
-          if (dt.toLowerCase().includes('to')) {
-            data[dt] = Moment(data[dt]).endOf('day').format('YYYY-MM-DD');
-          } else {
-            data[dt] = Moment(data[dt]).startOf('day').format('YYYY-MM-DD');
-          }
         } else {
           // eslint-disable-next-line no-unused-expressions
           data[dt];
+          setFilterParams({ location: data.name });
         }
       }
     }
@@ -109,6 +105,14 @@ function Screen() {
         ...prev,
         limit: 10,
         offset: 0,
+        ...data,
+      };
+    });
+
+    setFilterParams(prev => {
+      return {
+        ...prev,
+        location: null,
         ...data,
       };
     });
