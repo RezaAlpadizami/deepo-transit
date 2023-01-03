@@ -1,39 +1,44 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import * as yup from 'yup';
+import Moment from 'moment';
 import Swal from 'sweetalert2';
 import { Button, Text } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 
-import { ProductApi } from '../../../services/api-master';
-import { RequestApi } from '../../../services/api-transit';
 import Input from '../../../components/input-component';
 import Select from '../../../components/select-component';
+import { ProductApi } from '../../../services/api-master';
+import { RequestApi } from '../../../services/api-transit';
 import TextArea from '../../../components/textarea-component';
+import deleteIcon from '../../../assets/images/deleteItem.svg';
 import DatePicker from '../../../components/datepicker-component';
 import InputDetail from '../../../components/input-detail-component';
 import LoadingHover from '../../../components/loading-hover-component';
 
 function Screen() {
+  const { id } = useParams();
   const navigate = useNavigate();
 
+  const [dataRequesById, setDataRequestById] = useState([]);
   const [dataProduct, setDataProduct] = useState([]);
+  const [dataReq, setDataReq] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [dataAdd, setDataAdd] = useState([]);
-  console.log('dataAdd', dataAdd);
+  const [dataDetail, setDataDetail] = useState([]);
+  const [dataNewDetail, setDataNewDetail] = useState([]);
 
   const activityProduct = [
-    { activity_name: 'INBOUND' },
-    { activity_name: 'OUTBOUND' },
-    { activity_name: 'RELOCATE-IN' },
-    { activity_name: 'RELOCATE-OUT' },
+    { value: 'INBOUND', label: 'INBOUND' },
+    { value: 'OUTBOUND', label: 'OUTBOUND' },
+    { value: 'RELOCATE-IN', label: 'RELOCATE-IN' },
+    { value: 'RELOCATE-OUT', label: 'RELOCATE-OUT' },
   ];
 
   const schemaAddProduct = yup.object().shape({
     product_id: yup.string().nullable().required(),
-    qty: yup.number().nullable().typeError('please input quantity').required(),
+    qty: yup.number().min(1, 'The minimum qty is one').nullable().typeError('please input quantity').required(),
   });
 
   const schemaSubmitRequest = yup.object().shape({
@@ -55,14 +60,16 @@ function Screen() {
     register,
     control,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schemaSubmitRequest),
   });
 
   useEffect(() => {
+    getDetailRequest();
     getData();
-  }, [dataAdd]);
+  }, []);
 
   const getData = () => {
     ProductApi.get()
@@ -74,21 +81,73 @@ function Screen() {
       });
   };
 
+  const getDetailRequest = () => {
+    RequestApi.find(id)
+      .then(res => {
+        setValue('activity_name', res.activity_name, { value: res.activity_name, label: res.activity_name });
+        setValue('activity_date', res.activity_date ? Moment(res.activity_date).toDate() : null);
+        setValue('notes', res.notes);
+        setDataReq(res);
+        setDataDetail(
+          res.detail.map((data, idx) => {
+            return {
+              ...data,
+              id: idx + 1,
+              is_deleted: false,
+            };
+          })
+        );
+        setDataRequestById(res.detail);
+      })
+      .catch(error => {
+        Swal.fire({ text: error?.message, icon: 'error' });
+      });
+  };
+
   const onAddProdRequestDetail = dataInput => {
+    const dataNewItem = [];
+    const dataDetailUpdate = [];
+
     const dataInputAddArray = [dataProduct.find(obj => obj.id === Number(dataInput.product_id))];
     const handleDataAdd = dataInputAddArray.map(data => {
       return {
-        product_id: dataInput.product_id,
+        qty: Number(dataInput.qty),
+        product_id: Number(dataInput.product_id),
         product_sku: data.sku,
         product_name: data.product_name,
-        qty: dataInput.qty,
       };
     });
-    setDataAdd(state => [...state, ...handleDataAdd]);
+    const dataObject = Object.assign({}, ...handleDataAdd);
+    if (dataReq.detail.includes(dataObject.product_id)) {
+      dataNewItem.push({ ...dataObject });
+    } else {
+      dataDetailUpdate.push({ ...dataObject });
+    }
+    setDataDetail([...dataDetail, ...dataDetailUpdate]);
+    setDataNewDetail(state => [...state, ...dataNewItem]);
+    setDataRequestById(state => [...state, dataObject]);
   };
 
-  const updateDataRequesById = Array.from(
-    dataAdd
+  const updateDataDetail = Object.values(
+    dataDetail.reduce((accu, { product_id, ...item }) => {
+      if (!accu[product_id])
+        accu[product_id] = {
+          qty: 0,
+        };
+
+      accu[product_id] = {
+        product_id,
+        ...accu[product_id],
+        ...item,
+        qty: accu[product_id].qty + item.qty,
+      };
+
+      return accu;
+    }, {})
+  );
+
+  const updateNewDetail = Array.from(
+    dataNewDetail
       .reduce((acc, { qty, ...r }) => {
         const key = JSON.stringify(r);
         const current = acc.get(key) || { ...r, qty: 0 };
@@ -97,28 +156,68 @@ function Screen() {
       .values()
   );
 
-  const getTotalQty = updateDataRequesById?.reduce((accumulator, object) => {
+  const getTotalQty = dataRequesById.reduce((accumulator, object) => {
     return accumulator + Number(object.qty);
   }, 0);
 
+  const handleRemove = product_id => {
+    setDataRequestById(updateDataRequesById.filter(item => item.product_id !== product_id));
+    setDataDetail(
+      updateDataDetail.map(data => {
+        if (data.product_id === product_id) {
+          return {
+            ...data,
+            is_deleted: true,
+          };
+        }
+        return { ...data, is_deleted: false };
+      })
+    );
+  };
+
+  const updateDataRequesById = Object.values(
+    dataRequesById.reduce((accu, { product_id, ...item }) => {
+      if (!accu[product_id])
+        accu[product_id] = {
+          qty: 0,
+        };
+
+      accu[product_id] = {
+        product_id,
+        ...accu[product_id],
+        ...item,
+        qty: accu[product_id].qty + item.qty,
+      };
+
+      return accu;
+    }, {})
+  );
+
   const onSubmitRequest = data => {
     setLoading(true);
-    RequestApi.store({
+    RequestApi.update(id, {
       activity_name: data.activity_name,
       request_by: 'testing',
-      warehouse_id: 1,
       notes: data.notes,
-      detail: updateDataRequesById.map(data => {
+      new_detail: updateNewDetail.map(data => {
         return {
-          qty: data.qty,
           product_id: data.product_id,
+          qty: data.qty,
+        };
+      }),
+      detail: updateDataDetail.map(data => {
+        return {
+          product_id: data.product_id,
+          qty: data.qty,
+          is_deleted: data.is_deleted,
+          id: data.id,
         };
       }),
     })
       .then(() => {
         setLoading(false);
         Swal.fire({
-          text: 'Request baru berhasil ditambahkan',
+          text: 'Request berhasil diupdate',
           icon: 'success',
           buttonsStyling: false,
           confirmButtonColor: 'primarydeepo',
@@ -126,9 +225,9 @@ function Screen() {
         });
         navigate('/request');
       })
-      .catch(() => {
+      .catch(error => {
         setLoading(false);
-        Swal.fire({ text: 'Product and QTY please fill in', icon: 'error' });
+        Swal.fire({ text: error?.message, icon: 'error' });
       });
   };
 
@@ -137,7 +236,7 @@ function Screen() {
       <div className="bg-white p-5 rounded-[55px] py-12 drop-shadow-md">
         <div className="grid-cols-2 gap-4 flex">
           <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
-            <legend className="px-2 text-[28px] text-primarydeepo">Request</legend>
+            <legend className="px-2 text-[28px] text-primarydeepo">Edit Request </legend>
             <div className="flex gap-4 justify-center">
               <div className="w-full">
                 <Select
@@ -145,8 +244,8 @@ function Screen() {
                   label="Activity"
                   options={activityProduct?.map(i => {
                     return {
-                      value: i.activity_name,
-                      label: i.activity_name,
+                      value: i.value,
+                      label: i.label,
                     };
                   })}
                   placeholder="Activity"
@@ -171,7 +270,7 @@ function Screen() {
           </fieldset>
 
           <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
-            <legend className="px-2 text-[28px] text-primarydeepo">Request Detail</legend>
+            <legend className="px-2 text-[28px] text-primarydeepo">Edit Request Detail</legend>
             <form onSubmit={handleSubmitProd(onAddProdRequestDetail)}>
               <div className="flex gap-4 justify-center">
                 <div className="w-full col-span-2">
@@ -185,8 +284,8 @@ function Screen() {
                       };
                     })}
                     placeholder="Product"
-                    register={registerProd}
                     control={controlProd}
+                    register={registerProd}
                     errors={errorsProd}
                   />
                 </div>
@@ -200,29 +299,38 @@ function Screen() {
                 </Button>
               </div>
             </form>
-            <div className="border-b border-primarydeepo my-6"> </div>
-            {updateDataRequesById?.length > 0 && (
-              <div>
-                {updateDataRequesById.map((val, id) => {
-                  return (
-                    <div className="flex" key={id}>
-                      <InputDetail
-                        value={`SKU: ${val.product_sku}`}
-                        label={`${val.product_name}`}
-                        customStyleLabel="font-bold text-md mb-0"
-                        customStyleSpan="text-md"
-                      />
-                      <div className="flex relative gap-20 mt-6">
-                        <span className="absolute right-24">X</span>
-                        <Text>{val.qty}</Text>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+            <div className="border-b border-[#7D8F69] my-6"> </div>
+            {updateDataRequesById?.map(({ qty, product_id, product_name, product_sku }) => {
+              return (
+                <div className="flex" key={product_id}>
+                  <div className="my-4 mr-4">
+                    <Button
+                      type="button"
+                      size="sm"
+                      bgColor="transparent"
+                      _hover={{
+                        bgColor: '#EBECF1',
+                      }}
+                      onClick={() => handleRemove(product_id)}
+                    >
+                      <img src={deleteIcon} alt="delete Icon" />
+                    </Button>
+                  </div>
+                  <InputDetail
+                    value={`SKU: ${product_sku}`}
+                    label={product_name}
+                    customStyleLabel="font-bold text-md mb-0"
+                    customStyleSpan="text-md"
+                  />
+                  <div className="flex gap-20 mt-6">
+                    <span className="">X</span>
+                    <Text>{qty}</Text>
+                  </div>
+                </div>
+              );
+            })}
 
-            <div className="border-b border-primarydeepo my-6"> </div>
+            <div className="border-b border-[#7D8F69] my-6"> </div>
             <div className="flex justify-between font-bold">
               <Text>Total Product</Text>
               <Text>{getTotalQty}</Text>
@@ -236,7 +344,7 @@ function Screen() {
                 onClick={() => navigate(-1)}
                 px={8}
                 size="sm"
-                className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
+                className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-primarydeepo font-bold"
               >
                 Cancel
               </Button>
@@ -247,9 +355,9 @@ function Screen() {
                 onClick={handleSubmit(onSubmitRequest)}
                 px={8}
                 size="sm"
-                className="ml-4 rounded-full bg-gradient-to-r from-secondarydeepo to-primarydeepo hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo drop-shadow-md text-[#fff] font-bold  mr-14"
+                className="ml-4 rounded-full bg-gradient-to-r from-secondarydeepo to-primarydeepo hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo drop-shadow-md text-[#fff] font-bold mr-14"
               >
-                Submit
+                Update
               </Button>
             </div>
           </div>

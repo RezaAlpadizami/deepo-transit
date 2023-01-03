@@ -14,6 +14,7 @@ import LoadingHover from '../../../components/loading-hover-component';
 function Screen() {
   const { id } = useParams();
   const [dataRequesById, setDataRequestById] = useState([]);
+  const [dataRequesByIdDetail, setDataRequestByIdDetail] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -26,10 +27,21 @@ function Screen() {
     getDetailRequest();
   }, []);
 
+  const updateDataRequesById = Array.from(
+    dataRequesByIdDetail
+      .reduce((acc, { qty, ...r }) => {
+        const key = JSON.stringify(r);
+        const current = acc.get(key) || { ...r, qty: 0 };
+        return acc.set(key, { ...current, qty: current.qty + qty });
+      }, new Map())
+      .values()
+  );
+
   const getDetailRequest = () => {
     RequestApi.find(id)
       .then(res => {
         setDataRequestById(res);
+        setDataRequestByIdDetail(res.detail);
       })
       .catch(error => {
         Swal.fire({ text: error?.message, icon: 'error' });
@@ -56,9 +68,11 @@ function Screen() {
       });
   };
 
-  const totalQty = dataRequesById?.detail?.reduce((accumulator, object) => {
-    return accumulator + object.qty;
-  }, 0);
+  const totalQty = Array.isArray([])
+    ? updateDataRequesById.reduce((accumulator, object) => {
+        return accumulator + object.qty;
+      }, 0)
+    : '-';
 
   return (
     <div>
@@ -114,7 +128,7 @@ function Screen() {
                 <Text className="text-gray-400">Product</Text>
                 <Text className="text-gray-400">Qty</Text>
               </div>
-              {dataRequesById?.detail?.map(({ qty, product_id, product_name, product_sku }) => {
+              {updateDataRequesById.map(({ qty, product_id, product_name, product_sku }) => {
                 return (
                   <div className="flex" key={product_id}>
                     <InputDetail
@@ -131,8 +145,8 @@ function Screen() {
                 );
               })}
             </div>
-            <div className="border-b border-[#7D8F69] my-6"> </div>
-            <div className="flex justify-between">
+            <div className="border-b border-primarydeepo my-6"> </div>
+            <div className="flex justify-between font-bold">
               <Text>Total Product</Text>
               <Text>{totalQty}</Text>
             </div>

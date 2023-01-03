@@ -1,8 +1,18 @@
 import React, { useState } from 'react';
+
+import Swal from 'sweetalert2';
 import copy from 'copy-to-clipboard';
 import { Button } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2';
+
+import {
+  addIcon,
+  editIcon,
+  deleteIcon,
+  saveExcelIcon,
+  copyClipboardIcon,
+  showHideTableIcon,
+} from '../assets/images/index';
 import ShowHide from './show-hide-component';
 import DeletedList from './delete-list-component';
 import { getNestedObject } from '../utils/helper';
@@ -84,11 +94,17 @@ function ActionToolbar(props) {
           onClick={() => navigate(`${navTo?.path}/add`)}
           className="hover:bg-secondarydeepo hover:outline-none outline outline-offset-0 outline-[#aaa] bg-[#fff] text-sm rounded-xl px-4 text-black hover:text-white"
         >
-          + Add {displayName}
+          <div className="hover:text-red-200 h-4 w-4 mr-2">
+            <img src={addIcon} alt="add icon" className="mr-2 drop-shadow-md" />
+          </div>
+          Add {displayName}
         </Button>
       )}
       {onDownload && (
         <Button className={button} onClick={onDownload}>
+          <div className="hover:text-red-200 h-3.5 w-3.5 mr-2">
+            <img src={saveExcelIcon} alt="add icon" className="mr-2 drop-shadow-md" />
+          </div>
           Save to Excel
         </Button>
       )}
@@ -96,8 +112,11 @@ function ActionToolbar(props) {
         <Button
           className={`${selectedData.length !== 1 ? disableButton : button}`}
           onClick={() => navigate(`${navTo?.path}/${selectedData?.find(i => i).original.id}/edit`)}
-          disabled={selectedData.length !== 1}
+          disabled={selectedData?.find(i => i)?.original.status !== 'PENDING' || selectedData.length !== 1}
         >
+          <div className="hover:text-red-200 h-5 w-5 mr-2">
+            <img src={editIcon} alt="add icon" className="mr-2 drop-shadow-md" />
+          </div>
           Update
         </Button>
       )}
@@ -105,8 +124,11 @@ function ActionToolbar(props) {
         <Button
           className={`${selectedData.length === 0 ? disableButton : button}`}
           onClick={() => setOnOpen(!onOpen)}
-          disabled={selectedData.length === 0}
+          disabled={selectedData?.find(i => i)?.original.status !== 'PENDING' || selectedData.length === 0}
         >
+          <div className="hover:text-red-200 h-5 w-5 mr-2">
+            <img src={deleteIcon} alt="add icon" className="mr-2 drop-shadow-md" />
+          </div>
           Delete
         </Button>
       )}
@@ -117,12 +139,19 @@ function ActionToolbar(props) {
           onClick={onCopy}
           disabled={selectedData.length === 0}
         >
+          {' '}
+          <div className="hover:text-red-200 h-5 w-5 mr-2">
+            <img src={copyClipboardIcon} alt="add icon" className="mr-2 drop-shadow-md" />
+          </div>
           Copy to Clipboard
         </Button>
       )}
       {onShowHideColumn && (
         <>
           <Button className={button} onClick={() => setShowHide(!showHide)}>
+            <div className="hover:text-red-200 h-5 w-5 mr-2">
+              <img src={showHideTableIcon} alt="add icon" className="mr-2 drop-shadow-md" />
+            </div>
             Show / Hide Column(s)
           </Button>
           <ShowHide
