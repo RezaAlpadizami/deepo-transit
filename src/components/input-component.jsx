@@ -79,6 +79,7 @@ function InputComponent(props) {
                       disabled={disabled}
                       placeholder={placeholder}
                       selected={value}
+                      autoComplete="off"
                       value={value}
                       onChange={onChange}
                       maxLength={maxLength}

@@ -7,6 +7,7 @@ const Home = React.lazy(() => import('../screens/transit-screens/warehouse-selec
 const RequestScreens = React.lazy(() => import('../screens/transit-screens/request-screens/index'));
 const RequestScreensAdd = React.lazy(() => import('../screens/transit-screens/request-screens/add'));
 const RequestScreenShow = React.lazy(() => import('../screens/transit-screens/request-screens/show'));
+const RequestScreensEdit = React.lazy(() => import('../screens/transit-screens/request-screens/edit'));
 
 const InboundScreens = React.lazy(() => import('../screens/transit-screens/inbound-screens/index'));
 
@@ -67,6 +68,16 @@ export default [
             exact: true,
             route: '/request/:id/show',
             component: RequestScreenShow,
+          },
+          {
+            displayName: 'Edit Request',
+            icon: HomeIcon,
+            name: 'transit-request-edit',
+            role: 'transit-request',
+            showmenu: false,
+            exact: true,
+            route: '/request/:id/edit',
+            component: RequestScreensEdit,
           },
         ],
       },

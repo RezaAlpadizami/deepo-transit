@@ -20,9 +20,9 @@ function Screen() {
   const navigate = useNavigate();
 
   const [dataProduct, setDataProduct] = useState([]);
-  const [dataInputAdd, setDataInputAdd] = useState([]);
   const [loading, setLoading] = useState(false);
   const [dataAdd, setDataAdd] = useState([]);
+  console.log('dataAdd', dataAdd);
 
   const activityProduct = [
     { activity_name: 'INBOUND' },
@@ -78,26 +78,41 @@ function Screen() {
     const dataInputAddArray = [dataProduct.find(obj => obj.id === Number(dataInput.product_id))];
     const handleDataAdd = dataInputAddArray.map(data => {
       return {
-        ...data,
+        product_id: dataInput.product_id,
+        product_sku: data.sku,
+        product_name: data.product_name,
         qty: dataInput.qty,
       };
     });
     setDataAdd(state => [...state, ...handleDataAdd]);
-    setDataInputAdd(state => [...state, dataInput]);
   };
 
-  const getTotalQty = dataAdd?.reduce((accumulator, object) => {
+  const updateDataRequesById = Array.from(
+    dataAdd
+      .reduce((acc, { qty, ...r }) => {
+        const key = JSON.stringify(r);
+        const current = acc.get(key) || { ...r, qty: 0 };
+        return acc.set(key, { ...current, qty: current.qty + qty });
+      }, new Map())
+      .values()
+  );
+
+  const getTotalQty = updateDataRequesById?.reduce((accumulator, object) => {
     return accumulator + Number(object.qty);
   }, 0);
 
   const onSubmitRequest = data => {
     setLoading(true);
     RequestApi.store({
-      activity_name: data.activity_name,
       request_by: 'testing',
       warehouse_id: 1,
       notes: data.notes,
-      detail: dataInputAdd,
+      detail: updateDataRequesById.map(data => {
+        return {
+          qty: data.qty,
+          product_id: data.product_id,
+        };
+      }),
     })
       .then(() => {
         setLoading(false);
@@ -110,9 +125,9 @@ function Screen() {
         });
         navigate('/request');
       })
-      .catch(error => {
+      .catch(() => {
         setLoading(false);
-        Swal.fire({ text: error?.message, icon: 'error' });
+        Swal.fire({ text: 'Product and QTY please fill in', icon: 'error' });
       });
   };
 
@@ -121,7 +136,7 @@ function Screen() {
       <div className="bg-white p-5 rounded-[55px] py-12 drop-shadow-md">
         <div className="grid-cols-2 gap-4 flex">
           <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
-            <legend className="px-2 text-[28px] text-primarydeep">Request</legend>
+            <legend className="px-2 text-[28px] text-primarydeepo">Request</legend>
             <div className="flex gap-4 justify-center">
               <div className="w-full">
                 <Select
@@ -184,14 +199,14 @@ function Screen() {
                 </Button>
               </div>
             </form>
-            <div className="border-b border-[#7D8F69] my-6"> </div>
-            {dataAdd?.length > 0 && (
+            <div className="border-b border-primarydeepo my-6"> </div>
+            {updateDataRequesById?.length > 0 && (
               <div>
-                {dataAdd.map(val => {
+                {updateDataRequesById.map((val, id) => {
                   return (
-                    <div className="flex">
+                    <div className="flex" key={id}>
                       <InputDetail
-                        value={`SKU: ${val.sku}`}
+                        value={`SKU: ${val.product_sku}`}
                         label={`${val.product_name}`}
                         customStyleLabel="font-bold text-md mb-0"
                         customStyleSpan="text-md"
@@ -206,8 +221,8 @@ function Screen() {
               </div>
             )}
 
-            <div className="border-b border-[#7D8F69] my-6"> </div>
-            <div className="flex justify-between">
+            <div className="border-b border-primarydeepo my-6"> </div>
+            <div className="flex justify-between font-bold">
               <Text>Total Product</Text>
               <Text>{getTotalQty}</Text>
             </div>
@@ -231,7 +246,7 @@ function Screen() {
                 onClick={handleSubmit(onSubmitRequest)}
                 px={8}
                 size="sm"
-                className="ml-4 rounded-full bg-[#184D47] drop-shadow-md text-[#fff] font-bold hover:text-[#E4E4E4] mr-14"
+                className="ml-4 rounded-full bg-gradient-to-r from-secondarydeepo to-primarydeepo hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo drop-shadow-md text-[#fff] font-bold  mr-14"
               >
                 Submit
               </Button>

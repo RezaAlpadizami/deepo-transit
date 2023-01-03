@@ -24,7 +24,7 @@ function InputComponent(props) {
         <div className="mt-1 flex shadow-sm">
           <Textarea
             {...register(name)}
-            bg="white"
+            bg={`${disabled ? '#EDEDED' : 'white'}`}
             size="sm"
             width="auto"
             type={type}
@@ -35,8 +35,8 @@ function InputComponent(props) {
             name={name}
             id={name}
             isInvalid={errors[name]}
-            className="w-full text-sm rounded-2xl border-gray-300 px-3 py-1"
-            focusBorderColor="#184D47"
+            className="w-full text-md rounded-2xl border-gray-300 px-3 py-1"
+            focusBorderColor="#3f44c2"
             placeholder={placeholder}
           />
         </div>
