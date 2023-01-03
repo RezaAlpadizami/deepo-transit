@@ -89,10 +89,9 @@ function Screen() {
         setValue('notes', res.notes);
         setDataReq(res);
         setDataDetail(
-          res.detail.map((data, idx) => {
+          res.detail.map(data => {
             return {
               ...data,
-              id: idx + 1,
               is_deleted: false,
             };
           })
@@ -118,10 +117,10 @@ function Screen() {
       };
     });
     const dataObject = Object.assign({}, ...handleDataAdd);
-    if (dataReq.detail.includes(dataObject.product_id)) {
-      dataNewItem.push({ ...dataObject });
-    } else {
+    if (dataReq.detail.some(item => item.product_id === dataObject.product_id)) {
       dataDetailUpdate.push({ ...dataObject });
+    } else {
+      dataNewItem.push({ ...dataObject });
     }
     setDataDetail([...dataDetail, ...dataDetailUpdate]);
     setDataNewDetail(state => [...state, ...dataNewItem]);
@@ -146,14 +145,22 @@ function Screen() {
     }, {})
   );
 
-  const updateNewDetail = Array.from(
-    dataNewDetail
-      .reduce((acc, { qty, ...r }) => {
-        const key = JSON.stringify(r);
-        const current = acc.get(key) || { ...r, qty: 0 };
-        return acc.set(key, { ...current, qty: current.qty + qty });
-      }, new Map())
-      .values()
+  const updateNewDetail = Object.values(
+    dataNewDetail.reduce((accu, { product_id, ...item }) => {
+      if (!accu[product_id])
+        accu[product_id] = {
+          qty: 0,
+        };
+
+      accu[product_id] = {
+        product_id,
+        ...accu[product_id],
+        ...item,
+        qty: accu[product_id].qty + item.qty,
+      };
+
+      return accu;
+    }, {})
   );
 
   const getTotalQty = dataRequesById.reduce((accumulator, object) => {
@@ -162,6 +169,7 @@ function Screen() {
 
   const handleRemove = product_id => {
     setDataRequestById(updateDataRequesById.filter(item => item.product_id !== product_id));
+    setDataNewDetail(updateDataDetail.filter(item => item.product_id !== product_id));
     setDataDetail(
       updateDataDetail.map(data => {
         if (data.product_id === product_id) {
