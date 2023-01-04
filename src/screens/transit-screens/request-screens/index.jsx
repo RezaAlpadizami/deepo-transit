@@ -12,6 +12,7 @@ function Screen(props) {
     { activity_name: 'RELOCATE-IN' },
     { activity_name: 'RELOCATE-OUT' },
   ];
+  const statusRequest = [{ status: 'PENDING' }, { status: 'PROCESS' }, { status: 'COMPLETED' }];
 
   return (
     <div className="">
@@ -40,8 +41,15 @@ function Screen(props) {
             col: 2,
           },
           {
-            name: 'activity_date',
-            label: 'Date',
+            name: 'date_from',
+            label: 'Date From',
+            type: 'date_picker',
+            placeholder: 'Select date',
+            col: 2,
+          },
+          {
+            name: 'date_to',
+            label: 'Date To',
             type: 'date_picker',
             placeholder: 'Select date',
             col: 2,
@@ -49,6 +57,13 @@ function Screen(props) {
           {
             name: 'status',
             label: 'Status',
+            type: 'select',
+            data: statusRequest?.map(i => {
+              return {
+                value: i.status,
+                label: i.status,
+              };
+            }),
             col: 2,
           },
         ]}
@@ -63,6 +78,7 @@ function Screen(props) {
         toolbar={{
           action: {
             add: true,
+            edit: true,
             delete: true,
             'copy-to-clipboard': true,
             'show-hide-column': true,
