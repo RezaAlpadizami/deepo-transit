@@ -2,7 +2,7 @@ import React from 'react';
 import { HomeIcon } from '@heroicons/react/solid';
 
 const NotFound = React.lazy(() => import('../screens/home-screens/404'));
-const Home = React.lazy(() => import('../screens/home-screens/index'));
+const Home = React.lazy(() => import('../screens/transit-screens/warehouse-selection-screens/index'));
 
 const RequestScreens = React.lazy(() => import('../screens/transit-screens/request-screens/index'));
 const RequestScreensAdd = React.lazy(() => import('../screens/transit-screens/request-screens/add'));
