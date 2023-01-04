@@ -11,7 +11,8 @@ class TransitApi extends RequestHandler {
       this.api
         .post(`${this.url}/inbound`, body)
         .then(response => {
-          resolve(response);
+          if (response.ok) resolve(response);
+          else reject(response);
         })
         .catch(error => {
           reject(error);

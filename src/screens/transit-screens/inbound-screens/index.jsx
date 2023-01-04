@@ -19,6 +19,7 @@ import Select from '../../../components/select-component';
 import TableCh from './table';
 
 const totalRFID = 110;
+
 const swalButton = Swal.mixin({
   customClass: {
     confirmButton: 'rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold w-20',
@@ -84,23 +85,10 @@ const schema = yup.object({
           const val = toCalculate(
             value.filter(i => i.product_id === currentProductId),
             'child_qty'
-            // 'test'
           );
-          // console.log('validation bawah', value.filter(i => i.qty).find(i => i.product_id === currentProductId)?.qty);
-          // console.log('CALCULATE', val);
-          // if (childQty.length > 0 && parentQty.length > 0) {
-          //   const parent = parentQty.find(i => i.product_id === currentProductId);
-          //   const child = childQty.find(i => i.product_id === currentProductId);
-
           // if (parent?.product_id === currentProductId && child?.product_id === currentProductId) {
           if (value.filter(i => i.qty).find(i => i.product_id === currentProductId)?.qty === val) {
-            // console.log('masuk', val);
             return pass;
-            // }
-            // if (parent?.qty !== val) {
-
-            //   pass = false;
-            // }
           }
           pass = false;
 
@@ -114,27 +102,18 @@ const schema = yup.object({
           //       }
           //     }
           //   } else {
-          //     console.log('kena disini', item);
+
           //     pass = false;
           //   }
-          //   console.log('ini', item);
+
           //   return pass;
           // });
           // } else {
-          //   console.log('value', value);
-          //   console.log('to cal', val);
-
-          //   console.log('kena ini?');
-
           // }
         }
       }
 
       return pass;
-      // console.log('oass', pass);
-      // return ;
-      // console.log('pass??',);
-      // return pass;
     }),
 });
 
@@ -177,9 +156,7 @@ function Screen() {
   const [counter, setCounter] = useState(2);
   const [splitValue, setSplitValue] = useState({});
   const [newData, setNewData] = useState([]);
-  // const [splitArr, setSplitArr] = useState([]);
-  // const [residualValue] = useState({});
-  // setResidualValue
+  const [notes, setNotes] = useState('');
   const [loadingTransit, setLoadingTransit] = useState(false);
   const [timer, setTimer] = useState();
   const [isSplit, setIsSplit] = useState(false);
@@ -219,37 +196,19 @@ function Screen() {
       setNewData(
         fields.map((item, index) => {
           if (splitValue.product_id === item.product_id) {
+            // item.is_latest = fields.filter(i => i.product_id === item.product_id).length === index + 1;
             if (item.child_qty !== splitValue.value) {
               item.child_qty = splitValue.value;
             }
             if (item.resividual_qty) {
-              // console.log('item', item);
-              // console.log('item resividual_qty', item);
               item.child_qty = item.resividual_qty;
               update(index + 1, item);
               setValue(`details.${index + 1}.child_qty`, item.child_qty);
             }
-            // } else {
-            //   console.log(' splitValue.value', splitValue.value);
-            //   // console.log('item', item);
-            //   update(index, item);
-            //   setValue(`details.${index}.child_qty`, splitValue.value);
-            // }
-            // }
-            // setValue(`details.${index}.child_qty`, splitValue.value);
           }
-
           return item;
-
-          //   // if (residualValue.product_id === item.product_id) {  counter += 1;
-          //   //   return setValue(`details.${counter + 1}.child_qty`, residualValue.value);
-          //   // } splitValue
-          // }
-          // setLoadingTransit(false);
-          // return item; residualValue
         })
       );
-      // console.log('newData', newData);
 
       if (splitValue.product_id) {
         setValue('currentProductId', splitValue.product_id);
@@ -302,93 +261,166 @@ function Screen() {
       });
   };
 
-  const onSplit = (id, qty) => {
-    console.log('COUNTER ON SPLIT', counter);
+  const onSplit = (id, qty, index) => {
     setIsSplit(true);
     setLoadingTransit(true);
-    // console.log('current condition', !currentProductId);
-    // console.log('qty', qty);
 
-    // console.log('product id', id);
-    // console.log('child', child);
-    // console.log('data', data);
-    // // console.log(' ! % counter ', qty % counter);
-
-    // // console.log('minuss', 100 - Math.round(qty / counter));
-    // // console.log('TIMESSS', qty - Math.round(qty / counter) * counter);
-    // console.log('COUNTER', counter);
-    // // console.log('sameeee', counter <= qty);
-    // console.log(
-    //   'filter',
-    //   fields.filter(i => i.product_id === id)
-    // );
-    // console.log(
-    //   'fields',
-    //   fields.find(i => i.product_id !== id)
-    // );
     const findData = fields.filter(i => i.qty)?.find(i => i.product_id === id);
     const fieldLength = fields.filter(i => i.product_id === id).length;
+    const fieldLengthLess = fields.filter(i => i.product_id < id).length;
     const value = {
       product_id: findData.product_id,
       child_qty: Math.floor(qty / counter),
     };
     const splitVal = { product_id: id, value: Math.floor(qty / counter) };
-    console.log('fields.filter(i => i.product_id === id).length', fields.filter(i => i.product_id === id).length);
-    if (findData && counter <= qty) {
-      // console.log('idd', id);
-      // console.log('current onSplit', currentProductId);
-      // console.log('COUNTER', counter);
-      // // else if (counter >= 2 && currentProductId) {
-      // //   insert(fieldLength, value);
-      // // }
-      // // if (id && qty) {
-      if (qty / counter > 1) {
-        if (qty % counter === 0) {
-          // if (fields.findIndex(i => i.resividual_qty) === -1) {
+    if (Math.floor(qty / counter) > 1) {
+      if (index === 0) {
+        if (fields.findIndex(i => i.resividual_qty) !== -1) {
+          remove(fields.findIndex(i => i.resividual_qty));
+          insert(
+            fields.findIndex(i => i.resividual_qty),
+            value
+          );
+        } else if (qty % counter === 0) {
           update(
             fields.findIndex(i => i.product_id === id),
             { ...findData, child_qty: qty / counter }
           );
-          if (counter === 2) {
-            if (fields.filter(i => i.product_id < id).length > 0) {
-              insert(fieldLength + fields.filter(i => i.product_id < id).length, value);
-            } else {
-              insert(fieldLength, value);
-            }
-          } else {
-            insert(fieldLength, value);
-          }
-          setSplitValue(splitVal);
-          // } else {
-          //   remove(fields.findIndex(i => i.resividual_qty));
-          //   insert(
-          //     fields.findIndex(i => i.resividual_qty),
-          //     value
-          //   );
-          //   setSplitValue(splitVal);
-          // }
-        } else {
+          insert(fieldLength, value);
+        } else if (qty % counter !== 0) {
           insert(fieldLength, {
             product_id: findData.product_id,
             child_qty: qty - Math.floor(qty / counter) * counter,
-            // resividual_qty: qty - Math.floor(qty / counter) * counter,
           });
-          if (qty % counter !== 0) {
-            // console.log('qty - Math.floor(qty / counter) * counter', qty - Math.floor(qty / counter) * counter);
-            insert(fieldLength + 1, {
+          insert(fieldLength + 1, {
+            product_id: findData.product_id,
+            child_qty: qty - Math.floor(qty / counter) * counter,
+            resividual_qty: qty - Math.floor(qty / counter) * counter,
+          });
+        }
+        setSplitValue(splitVal);
+      } else if (index !== 0) {
+        if (fieldLengthLess > 0 && fieldLength > 0) {
+          if (fields.findIndex(i => i.resividual_qty) !== -1) {
+            if (qty % counter !== 0) {
+              remove(fields.findIndex(i => i.resividual_qty));
+              insert(
+                fields.findIndex(i => i.resividual_qty),
+                value
+              );
+              insert(fields.findIndex(i => i.resividual_qty) + 1, value);
+            } else {
+              remove(fields.findIndex(i => i.resividual_qty));
+              insert(
+                fields.findIndex(i => i.resividual_qty),
+                value
+              );
+            }
+
+            setSplitValue(splitVal);
+          } else if (qty % counter === 0) {
+            if (counter === 2) {
+              update(fieldLengthLess, { ...findData, child_qty: qty / counter });
+              insert(fieldLengthLess + fieldLength, value);
+              setCounter(count => count + 1);
+              if (counter > 2 && id === currentProductId) {
+                if (qty - Math.floor(qty / counter) * counter === 0) {
+                  update(fieldLength, value);
+                } else {
+                  insert(fieldLengthLess + fieldLength, value);
+                }
+              }
+              setSplitValue(splitVal);
+            }
+          } else if (qty % counter !== 0 && id === currentProductId) {
+            insert(fieldLengthLess + fieldLength, {
+              product_id: findData.product_id,
+              child_qty: qty - Math.floor(qty / counter) * counter,
+            });
+            insert(fieldLengthLess + fieldLength + 1, {
               product_id: findData.product_id,
               child_qty: qty - Math.floor(qty / counter) * counter,
               resividual_qty: qty - Math.floor(qty / counter) * counter,
             });
+            setSplitValue(splitVal);
           }
-          setSplitValue(splitVal);
         }
       }
-      // }
     }
   };
-  const onRemove = idx => {
-    remove(idx);
+  const onRemove = (idx, id) => {
+    // const fieldLength = newData.filter(i => i.product_id === id && !i.qty);  item, childQty
+    const data = newData[newData.findIndex((item, i) => i === idx)];
+    const findData = fields.filter(i => i.qty)?.find(i => i.product_id === data.product_id);
+    // const findDataId = fields.filter(i => i.qty)?.find(i => i.product_id === id);
+    const dt = fields.filter((item, i) => item.product_id === id && i !== idx && i !== idx - 1);
+
+    const value = {
+      product_id: findData.product_id,
+      value: Math.floor(findData.qty / fields.filter(i => i.product_id === id && !i.qty).length),
+    };
+    const values = {
+      product_id: findData.product_id,
+      value: Math.floor(findData.qty / dt.length),
+    };
+    // const val = {
+    //   product_id: findData.product_id,
+    //   value: Math.floor(findData.qty / dt.length),
+    // };
+    // console.log('findData', findData);
+    // console.log('findDataId', findDataId);
+    // console.log('value', value);
+    // console.log('val', val);
+    // console.log('findData modulus', findData.qty % findData.child_qty);
+    if (counter <= 3) {
+      delete findData.child_qty;
+      setSplitValue(findData);
+      remove(idx);
+    } else if (findData.qty % findData.child_qty === 0) {
+      if (findData.qty % value.value !== 0) {
+        remove(idx);
+        remove(idx - 1);
+        setSplitValue(values);
+      } else {
+        if (dt.length === 0) {
+          delete findData.child_qty;
+          setSplitValue(findData);
+        } else {
+          setSplitValue(value);
+        }
+        remove(idx);
+      }
+    } else if (findData.qty % findData.child_qty !== 0) {
+      const resividualValue = {
+        product_id: findData.product_id,
+        value: Math.floor(findData.qty / dt.length),
+        resividual_qty: Math.floor(findData.qty / dt.length),
+      };
+      if (findData.qty % value.value !== 0) {
+        if (value.value !== resividualValue.value) {
+          if (fields.findIndex(i => i.resividual_qty) !== -1) {
+            if (newData.findIndex((item, i) => i === idx) === idx) {
+              update(
+                newData.findIndex((item, i) => i === idx),
+                values
+              );
+              remove(newData.findIndex((item, i) => i === idx));
+              remove(fields.findIndex(i => i.resividual_qty));
+            } else {
+              remove(fields.findIndex(i => i.resividual_qty));
+              remove(idx - 1);
+            }
+            setSplitValue(values);
+          } else {
+            remove(idx);
+            setSplitValue(values);
+          }
+        }
+      } else {
+        remove(idx);
+        setSplitValue(values);
+      }
+    }
   };
   const onSubmitRFID = () => {
     let pass = onOpen;
@@ -398,13 +430,24 @@ function Screen() {
       setError(true);
       swalButton
         .fire({
+          title: 'NOTES',
           html: '<b> Jumlah data pada Request Detail tidak sesuai dengan data pada RFID Detected. Lanjutkan proses ? <b>',
-          icon: 'warning',
+          text: 'Notes',
+          input: 'text',
           showCancelButton: true,
           confirmButtonColor: '#3085d6',
+          preConfirm: pre => {
+            if (!pre && pre.length === 0) {
+              Swal.showValidationMessage(`notes is a required field`);
+            } else if (pre.length <= 5) {
+              Swal.showValidationMessage(`notes length must be more than 5`);
+            }
+            return pre;
+          },
         })
         .then(result => {
           if (result.isConfirmed) {
+            setNotes(result.value);
             append(transitData);
             setOnOpen(!pass);
             setError(false);
@@ -421,24 +464,23 @@ function Screen() {
   };
 
   const onFinalSubmit = data => {
-    console.log('onFinalSubmit', data);
-    const body = [];
+    const body = {
+      request_id: requestId,
+      notes,
+      details: [...data.details],
+    };
+    console.log('body', body);
     TransitApi.inbound(body)
-      .then(() => {
+      .then(res => {
+        console.log('res', res);
+        Swal.fire({ text: 'Sucessfully Saved', icon: 'success' });
         // setOnOpen(!onOpen);
       })
       .catch(error => {
-        console.log('error', error);
+        Swal.fire({ text: error?.message || error?.data?.message, icon: 'error' });
       });
   };
-  // console.log(
-  //   'validate array',
-  //   Array.isArray(errors.details) && isSplit
-  //     ? errors?.details.filter(i => i !== undefined)
-  //     : errors?.details?.message || ''
-  // );
-  // console.log('errors?.details?.message ', errors?.details?.message);
-  // console.log('error', errors);
+
   return (
     <div className="bg-white p-5 rounded-[55px] shadow">
       <input type="hidden" {...register('filters')} />
@@ -617,209 +659,196 @@ function Screen() {
                     </tr>
                   </thead>
                   <LoadingComponent loading={loadingTransit} />
-                  {/* {!loadingTransit ? ( */}
+
                   <tbody>
-                    {fields.map((item, index) => {
-                      return (
-                        <tr key={item.id} className={`${index % 2 ? 'bg-gray-100' : ''} w-full`}>
-                          <td className="w-10 text-center px-2">{index + 1}</td>
-                          <td className="w-20 text-center px-2">
-                            {item.product_sku}
-                            <Controller
-                              render={({ field }) => {
-                                return <Input variant="unstyled" {...field} disabled className="hidden" />;
-                              }}
-                              name={`details.${index}.product_sku`}
-                              className="hidden"
-                              control={control}
-                            />
-                          </td>
+                    {fields.length > 0 ? (
+                      fields.map((item, index) => {
+                        // console.log('fields.length === index + 1', fields.length === index + 1);
+                        return (
+                          <tr key={item.id} className={`${index % 2 ? 'bg-gray-100' : ''} w-full`}>
+                            <td className="w-10 text-center px-2">{index + 1}</td>
+                            <td className="w-20 text-center px-2">
+                              {item.product_sku}
+                              <Controller
+                                render={({ field }) => {
+                                  return <Input variant="unstyled" {...field} disabled className="hidden" />;
+                                }}
+                                name={`details.${index}.product_sku`}
+                                className="hidden"
+                                control={control}
+                              />
+                            </td>
 
-                          <td className="w-60 px-2">
-                            {item.product_name}
-                            <Controller
-                              render={({ field }) => {
-                                return <Input variant="unstyled" {...field} disabled className="hidden" />;
-                              }}
-                              name={`details.${index}.product_name`}
-                              className="hidden"
-                              control={control}
-                            />
-                          </td>
-                          <td className="w-20 text-center px-2">
-                            {item.qty}
-                            <Controller
-                              render={({ field }) => {
-                                return <Input variant="unstyled" {...field} disabled className="hidden" />;
-                              }}
-                              name={`details.${index}.qty`}
-                              className="hidden"
-                              control={control}
-                            />
-                          </td>
-                          <td className="w-24 px-2">
-                            <Controller
-                              render={() => {
-                                return (
-                                  <Select
-                                    name={`details.${index}.rack`}
-                                    idx={index}
-                                    placeholder="Rack"
-                                    booleans={isSplit}
-                                    options={storageData?.map(s => {
-                                      return {
-                                        label: s.rack_number,
-                                        value: s.rack_number,
-                                      };
-                                    })}
-                                    register={register}
-                                    control={control}
-                                    errors={errors}
-                                  />
-                                );
-                              }}
-                              name={`details.${index}.rack`}
-                              control={control}
-                            />
-                          </td>
-                          <td className="w-24 px-2">
-                            <Controller
-                              render={() => {
-                                return (
-                                  <Select
-                                    name={`details.${index}.bay`}
-                                    idx={index}
-                                    placeholder="Bay"
-                                    booleans={isSplit}
-                                    options={storageData?.map(s => {
-                                      return {
-                                        label: s.bay,
-                                        value: s.bay,
-                                      };
-                                    })}
-                                    register={register}
-                                    control={control}
-                                    errors={errors}
-                                  />
-                                );
-                              }}
-                              name={`details.${index}.bay`}
-                              control={control}
-                            />
-                          </td>
-                          <td className="w-24 px-2">
-                            <Controller
-                              render={() => {
-                                return (
-                                  <Select
-                                    name={`details.${index}.level`}
-                                    idx={index}
-                                    placeholder="Level"
-                                    booleans={isSplit}
-                                    options={storageData?.map(s => {
-                                      return {
-                                        label: s.level,
-                                        value: s.level,
-                                      };
-                                    })}
-                                    register={register}
-                                    control={control}
-                                    errors={errors}
-                                  />
-                                );
-                              }}
-                              name={`details.${index}.level`}
-                              control={control}
-                            />
-                          </td>
-                          <td className="w-20 px-4">
-                            <Controller
-                              render={({ field }) => {
-                                return <Input type="number" {...field} className="w-16" />;
-                              }}
-                              name={`details.${index}.child_qty`}
-                              control={control}
-                            />
-                          </td>
-                          <td className="w-20 px-4">
-                            {item.qty ? (
-                              <Button
-                                size="sm"
-                                type="button"
-                                px={8}
-                                className="rounded-full text-center text-white font-bold bg-gradient-to-r from-processbtnfrom to-processbtnto hover:bg-gradient-to-br focus:ring-1 focus:outline-none focus:ring-secondarydeepo"
-                                key={index}
-                                onClick={() => {
-                                  // console.log('currentProductId', currentProductId);
-                                  // console.log('PRODUCT ID', item.product_id);
-                                  // if (!currentProductId) {
-                                  // setCounter(count => count + 1);
-
-                                  if (!currentProductId) {
-                                    setCounter(count => count + 1);
-                                    console.log('counter333');
-                                  } else if (item.product_id === currentProductId) {
-                                    console.log('counter44');
-                                    if (counter >= 2) {
+                            <td className="w-60 px-2">
+                              {item.product_name}
+                              <Controller
+                                render={({ field }) => {
+                                  return <Input variant="unstyled" {...field} disabled className="hidden" />;
+                                }}
+                                name={`details.${index}.product_name`}
+                                className="hidden"
+                                control={control}
+                              />
+                            </td>
+                            <td className="w-20 text-center px-2">
+                              {item.qty}
+                              <Controller
+                                render={({ field }) => {
+                                  return <Input variant="unstyled" {...field} disabled className="hidden" />;
+                                }}
+                                name={`details.${index}.qty`}
+                                className="hidden"
+                                control={control}
+                              />
+                            </td>
+                            <td className="w-24 px-2">
+                              <Controller
+                                render={() => {
+                                  return (
+                                    <Select
+                                      name={`details.${index}.rack`}
+                                      idx={index}
+                                      placeholder="Rack"
+                                      booleans={isSplit}
+                                      options={storageData?.map(s => {
+                                        return {
+                                          label: s.rack_number,
+                                          value: s.rack_number,
+                                        };
+                                      })}
+                                      register={register}
+                                      control={control}
+                                      errors={errors}
+                                    />
+                                  );
+                                }}
+                                name={`details.${index}.rack`}
+                                control={control}
+                              />
+                            </td>
+                            <td className="w-24 px-2">
+                              <Controller
+                                render={() => {
+                                  return (
+                                    <Select
+                                      name={`details.${index}.bay`}
+                                      idx={index}
+                                      placeholder="Bay"
+                                      booleans={isSplit}
+                                      options={storageData?.map(s => {
+                                        return {
+                                          label: s.bay,
+                                          value: s.bay,
+                                        };
+                                      })}
+                                      register={register}
+                                      control={control}
+                                      errors={errors}
+                                    />
+                                  );
+                                }}
+                                name={`details.${index}.bay`}
+                                control={control}
+                              />
+                            </td>
+                            <td className="w-24 px-2">
+                              <Controller
+                                render={() => {
+                                  return (
+                                    <Select
+                                      name={`details.${index}.level`}
+                                      idx={index}
+                                      placeholder="Level"
+                                      booleans={isSplit}
+                                      options={storageData?.map(s => {
+                                        return {
+                                          label: s.level,
+                                          value: s.level,
+                                        };
+                                      })}
+                                      register={register}
+                                      control={control}
+                                      errors={errors}
+                                    />
+                                  );
+                                }}
+                                name={`details.${index}.level`}
+                                control={control}
+                              />
+                            </td>
+                            <td className="w-20 px-4">
+                              <Controller
+                                render={({ field }) => {
+                                  return <Input type="number" {...field} className="w-16" />;
+                                }}
+                                name={`details.${index}.child_qty`}
+                                control={control}
+                              />
+                            </td>
+                            <td className="w-20 px-4">
+                              {item.qty ? (
+                                <Button
+                                  size="sm"
+                                  type="button"
+                                  px={8}
+                                  className="rounded-full text-center text-white font-bold bg-gradient-to-r from-processbtnfrom to-processbtnto hover:bg-gradient-to-br focus:ring-1 focus:outline-none focus:ring-secondarydeepo"
+                                  key={index}
+                                  onClick={() => {
+                                    if (index === 0) {
                                       setCounter(count => count + 1);
+                                    } else if (index !== 0) {
+                                      if (item.product_id !== currentProductId) {
+                                        setCounter(2);
+                                        setValue('currentProductId', item.product_id);
+                                      } else if (item.product_id === currentProductId) {
+                                        setCounter(count => count + 1);
+                                      }
                                     }
-                                  } else if (item.product_id !== currentProductId) {
-                                    if (fields.filter(f => f.product_id === item.product_id).length > 0) {
-                                      setCounter(fields.filter(f => f.product_id === item.product_id).length + 1);
-                                      console.log(
-                                        'counter fields',
-                                        fields.filter(f => f.product_id === item.product_id).length + 1
-                                      );
-                                      console.log('counter00');
-                                    }
-                                    setCounter(2);
-                                    console.log('counter11');
-                                  }
 
-                                  onSplit(item.product_id, item.qty, index, item?.child_qty, item);
-                                }}
-                                // disabled={errors?.details?.length}
-                              >
-                                Split
-                              </Button>
-                            ) : (
-                              <Button
-                                px={6}
-                                size="sm"
-                                type="button"
-                                className="rounded-full bg-[#eb6058] hover:bg-[#f35a52] text-[#fff] hover:text-gray-600 font-bold"
-                                key={index}
-                                onClick={() => {
-                                  setCounter(count => {
-                                    if (count > 2) return count - 1;
-                                    return count;
-                                  });
-                                  onRemove(index, item.product_id, item.qty, index, item?.child_qty, item);
-                                }}
-                              >
-                                Delete
-                              </Button>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                  {/* ) : ( */}
-                  {/* <tbody>
-                      <tr className="bg-gray-100 w-full">
-                        <td className="w-10 text-center px-2">{` `}</td>
-                        <td className="w-10 text-center px-2">{` `}</td>
-                        <td className="w-10 text-center px-2">{` `}</td>
-                        <td className="w-10 text-center px-2">{` `}</td>
-                        <td className="w-10 text-center px-2">{` `}</td>
-                        <td className="w-10 text-center px-2">{` `}</td>
-                        <td className="w-10 text-center px-2">{` `}</td>
-                        <td className="w-10 text-center px-2">{` `}</td>
-                        <td className="w-10 text-center px-2">{` `}</td>
+                                    onSplit(item.product_id, item.qty, index, item?.child_qty, item);
+                                  }}
+                                >
+                                  Split
+                                </Button>
+                              ) : (
+                                // item.is_latest ?
+                                <Button
+                                  px={6}
+                                  size="sm"
+                                  type="button"
+                                  className="rounded-full bg-[#eb6058] hover:bg-[#f35a52] text-[#fff] hover:text-gray-600 font-bold"
+                                  key={index}
+                                  onClick={() => {
+                                    const data = newData[newData.findIndex((item, i) => i === index)];
+                                    const findData = fields
+                                      .filter(i => i.qty)
+                                      ?.find(i => i.product_id === data.product_id);
+
+                                    if (findData.qty % counter !== 0) {
+                                      setCounter(count => count - 2);
+                                    } else {
+                                      setCounter(count => {
+                                        if (count > 2) return count - 1;
+                                        return 2;
+                                      });
+                                    }
+
+                                    onRemove(index, item.product_id, item, item?.child_qty);
+                                  }}
+                                >
+                                  Delete
+                                </Button>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      <tr className="bg-gray-100 w-full border-2 border-solid border-[#f3f4f6] border-red-500">
+                        <td className="w-10 text-center px-2  text-red-500 h-[170px]" colSpan={9} rowSpan={5} />
                       </tr>
-                    </tbody>
-                  )} */}
+                    )}
+                  </tbody>
                 </table>
               </div>
 
@@ -848,6 +877,7 @@ function Screen() {
                       setCounter(2);
                       reset();
                       setOnOpen(!onOpen);
+                      setNotes('');
                     }}
                   >
                     Cancel
