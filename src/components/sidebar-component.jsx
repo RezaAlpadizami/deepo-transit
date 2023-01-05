@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import Cookies from 'universal-cookie';
 import { observer } from 'mobx-react-lite';
 import { ChevronRightIcon } from '@heroicons/react/solid';
 import ArrowUpTray from '../assets/images/arrow-up-tray.svg';
@@ -11,6 +12,7 @@ function SidebarComponent() {
   const { store } = useContext(Context);
   const location = useLocation();
   const [menuParent, setMenuParent] = useState(null);
+  const cookies = new Cookies();
 
   useEffect(() => {
     setMenuParent(findParent(menuItem, location));
@@ -23,6 +25,11 @@ function SidebarComponent() {
       store.setIsDrawerOpen(true);
     }
   }, [JSON.stringify(menuParent)]);
+
+  const handleLogOut = () => {
+    cookies.remove('warehouse_id', { path: '/' });
+    window.location.reload();
+  };
 
   return (
     <aside
@@ -86,7 +93,7 @@ function SidebarComponent() {
           type="button"
           onClick={() => {}}
         >
-          <div className="flex pl-6">
+          <div className="flex pl-6" onClick={() => handleLogOut()}>
             <img src={ArrowUpTray} alt="arrow up" className="h-7 rotate-90 text-black" />
             <h3 className="pt-0 pl-6 transition-all ease-in-out duration-300 font-bold text-md text-[#fff]">Log out</h3>
           </div>

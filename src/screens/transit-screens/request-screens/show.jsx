@@ -39,23 +39,21 @@ function Screen() {
   };
 
   const updateDataRequesById = Object.values(
-    Array.isArray([])
-      ? dataRequesByIdDetail.reduce((accu, { product_id, ...item }) => {
-          if (!accu[product_id])
-            accu[product_id] = {
-              qty: 0,
-            };
+    dataRequesByIdDetail.reduce((accu, { product_id, ...item }) => {
+      if (!accu[product_id])
+        accu[product_id] = {
+          qty: 0,
+        };
 
-          accu[product_id] = {
-            product_id,
-            ...accu[product_id],
-            ...item,
-            qty: accu[product_id].qty + item.qty,
-          };
+      accu[product_id] = {
+        product_id,
+        ...accu[product_id],
+        ...item,
+        qty: accu[product_id].qty + item.qty,
+      };
 
-          return accu;
-        }, {})
-      : []
+      return accu;
+    }, [])
   );
 
   const onSubmitRequest = () => {

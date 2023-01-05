@@ -371,26 +371,6 @@ function DataTable(props) {
   };
   const opt = useCallback(getDebounce(onSubmit), []);
 
-  const onSubmitRequestProcess = row => {
-    setLoadingHover(true);
-    api
-      .createRequestProcess(row.original.id)
-      .then(() => {
-        setLoadingHover(false);
-        getData();
-        Swal.fire({
-          text: `Request ${row.original.request_number} berhasil di process`,
-          icon: 'success',
-          buttonsStyling: false,
-          confirmButtonColor: 'primarydeepo',
-          confirmButtonText: `<p class="rounded bg-secondarydeepo text-[#fff] px-5 py-2 ml-5 font-bold">OK</p>`,
-        });
-      })
-      .catch(error => {
-        setLoadingHover(false);
-        Swal.fire({ text: error?.message, icon: 'error' });
-      });
-  };
   return (
     <>
       {download && (
@@ -603,15 +583,15 @@ function DataTable(props) {
                     ))}
                     {hasButtonAction && (
                       <td className="text-black py-1 px-6">
-                        <Button
-                          onClick={e => onSubmitRequestProcess(row, row.id, e)}
+                        <Link
                           type="submit"
+                          to="/inbound"
                           px={8}
                           size="sm"
                           className="text-white bg-gradient-to-r from-processbtnfrom to-processbtnto hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2"
                         >
                           Process
-                        </Button>
+                        </Link>
                       </td>
                     )}
                   </tr>
