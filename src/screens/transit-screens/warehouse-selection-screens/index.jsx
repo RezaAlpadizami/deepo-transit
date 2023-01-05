@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import Swal from 'sweetalert2';
 import Cookies from 'universal-cookie';
@@ -17,7 +17,6 @@ function Screen() {
   const [filterData, setFilterData] = useState({
     limit: 10,
     offset: 0,
-    search: '',
   });
 
   const cookies = new Cookies();
@@ -48,6 +47,18 @@ function Screen() {
 
   const clickAddressCard = data => {
     setIsSelected(data.id);
+  };
+
+  const getDebounce = func => {
+    let timer;
+    return (...args) => {
+      const context = this;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        timer = null;
+        func.apply(context, args);
+      }, 500);
+    };
   };
 
   const handleContinue = () => {
@@ -86,12 +97,14 @@ function Screen() {
     });
   };
 
+  const opt = useCallback(getDebounce(onSubmit), []);
+
   return (
     <div className="mt-6">
       <div className="flex justify-center mb-6">
         <h1 className="font-bold text-2xl">SELECT YOUR WORK AREA</h1>
       </div>
-      <form onChange={handleSubmit(onSubmit)}>
+      <form onChange={handleSubmit(opt)}>
         <Input
           name="search"
           placeholder="Search Warehouse or Location"
