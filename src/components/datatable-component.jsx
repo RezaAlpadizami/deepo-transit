@@ -270,9 +270,7 @@ function DataTable(props) {
       if (result.value) {
         result.forEach(r => {
           if (r.status === 'fulfilled') {
-            setTimeout(() => {
-              setLoadingHover(false);
-            }, 500);
+            setLoadingHover(false);
             success.push(true);
           } else {
             result.reason.data.error.api.map(m => failed.push(m));
@@ -283,7 +281,9 @@ function DataTable(props) {
         Swal.fire({ text: `Something When Wrong`, icon: 'error' });
       }
       if (success.length > 0) {
-        Swal.fire({ text: 'Data Deleted Successfully', icon: 'success' });
+        setTimeout(() => {
+          Swal.fire({ text: 'Data Deleted Successfully', icon: 'success' });
+        }, 500);
       } else if (failed.length > 0) {
         Swal.fire({ text: 'Something Went Wrong', icon: 'error' });
       }

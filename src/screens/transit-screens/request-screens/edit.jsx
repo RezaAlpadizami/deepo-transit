@@ -89,7 +89,7 @@ function Screen() {
         setValue('notes', res.notes);
         setDataReq(res);
         setDataDetail(
-          res.detail.map(data => {
+          res?.detail?.map(data => {
             return {
               ...data,
               is_deleted: false,
@@ -117,7 +117,7 @@ function Screen() {
       };
     });
     const dataObject = Object.assign({}, ...handleDataAdd);
-    if (dataReq.detail.some(item => item.product_id === dataObject.product_id)) {
+    if (dataReq?.detail?.some(item => item.product_id === dataObject.product_id)) {
       dataDetailUpdate.push({ ...dataObject });
     } else {
       dataNewItem.push({ ...dataObject });
@@ -128,48 +128,53 @@ function Screen() {
   };
 
   const updateDataDetail = Object.values(
-    dataDetail.reduce((accu, { product_id, ...item }) => {
-      if (!accu[product_id])
-        accu[product_id] = {
-          qty: 0,
-        };
+    Array.isArray([])
+      ? dataDetail.reduce((accu, { product_id, ...item }) => {
+          if (!accu[product_id])
+            accu[product_id] = {
+              qty: 0,
+            };
 
-      accu[product_id] = {
-        product_id,
-        ...accu[product_id],
-        ...item,
-        qty: accu[product_id].qty + item.qty,
-      };
+          accu[product_id] = {
+            product_id,
+            ...accu[product_id],
+            ...item,
+            qty: accu[product_id].qty + item.qty,
+          };
 
-      return accu;
-    }, {})
+          return accu;
+        }, {})
+      : []
   );
 
   const updateNewDetail = Object.values(
-    dataNewDetail.reduce((accu, { product_id, ...item }) => {
-      if (!accu[product_id])
-        accu[product_id] = {
-          qty: 0,
-        };
+    Array.isArray([])
+      ? dataNewDetail.reduce((accu, { product_id, ...item }) => {
+          if (!accu[product_id])
+            accu[product_id] = {
+              qty: 0,
+            };
 
-      accu[product_id] = {
-        product_id,
-        ...accu[product_id],
-        ...item,
-        qty: accu[product_id].qty + item.qty,
-      };
+          accu[product_id] = {
+            product_id,
+            ...accu[product_id],
+            ...item,
+            qty: accu[product_id].qty + item.qty,
+          };
 
-      return accu;
-    }, {})
+          return accu;
+        }, {})
+      : []
   );
 
-  const getTotalQty = dataRequesById.reduce((accumulator, object) => {
-    return accumulator + Number(object.qty);
-  }, 0);
+  const getTotalQty = Array.isArray([])
+    ? dataRequesById.reduce((accumulator, object) => {
+        return accumulator + object.qty;
+      }, 0)
+    : '-';
 
   const handleRemove = product_id => {
     setDataRequestById(updateDataRequesById.filter(item => item.product_id !== product_id));
-    setDataNewDetail(updateDataDetail.filter(item => item.product_id !== product_id));
     setDataDetail(
       updateDataDetail.map(data => {
         if (data.product_id === product_id) {
@@ -184,21 +189,23 @@ function Screen() {
   };
 
   const updateDataRequesById = Object.values(
-    dataRequesById.reduce((accu, { product_id, ...item }) => {
-      if (!accu[product_id])
-        accu[product_id] = {
-          qty: 0,
-        };
+    Array.isArray([])
+      ? dataRequesById.reduce((accu, { product_id, ...item }) => {
+          if (!accu[product_id])
+            accu[product_id] = {
+              qty: 0,
+            };
 
-      accu[product_id] = {
-        product_id,
-        ...accu[product_id],
-        ...item,
-        qty: accu[product_id].qty + item.qty,
-      };
+          accu[product_id] = {
+            product_id,
+            ...accu[product_id],
+            ...item,
+            qty: accu[product_id].qty + item.qty,
+          };
 
-      return accu;
-    }, {})
+          return accu;
+        }, {})
+      : []
   );
 
   const onSubmitRequest = data => {
@@ -307,7 +314,7 @@ function Screen() {
                 </Button>
               </div>
             </form>
-            <div className="border-b border-[#7D8F69] my-6"> </div>
+            <div className="border-b border-primarydeepo my-6"> </div>
             {updateDataRequesById?.map(({ qty, product_id, product_name, product_sku }) => {
               return (
                 <div className="flex" key={product_id}>
@@ -338,7 +345,7 @@ function Screen() {
               );
             })}
 
-            <div className="border-b border-[#7D8F69] my-6"> </div>
+            <div className="border-b border-primarydeepo my-6"> </div>
             <div className="flex justify-between font-bold">
               <Text>Total Product</Text>
               <Text>{getTotalQty}</Text>

@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 import { Button, Text } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 
+import CookieService from '../../../services/api-master/cookie-service.js/cookie-service';
 import { ProductApi } from '../../../services/api-master';
 import { RequestApi } from '../../../services/api-transit';
 import Input from '../../../components/input-component';
@@ -22,7 +23,6 @@ function Screen() {
   const [dataProduct, setDataProduct] = useState([]);
   const [loading, setLoading] = useState(false);
   const [dataAdd, setDataAdd] = useState([]);
-  console.log('dataAdd', dataAdd);
 
   const activityProduct = [
     { activity_name: 'INBOUND' },
@@ -97,15 +97,17 @@ function Screen() {
       .values()
   );
 
-  const getTotalQty = updateDataRequesById?.reduce((accumulator, object) => {
-    return accumulator + Number(object.qty);
-  }, 0);
+  const getTotalQty = Array.isArray([])
+    ? updateDataRequesById.reduce((accumulator, object) => {
+        return accumulator + object.qty;
+      }, 0)
+    : '-';
 
   const onSubmitRequest = data => {
     setLoading(true);
     RequestApi.store({
       request_by: 'testing',
-      warehouse_id: 1,
+      warehouse_id: CookieService.getCookies('warehouse_id'),
       notes: data.notes,
       detail: updateDataRequesById.map(data => {
         return {
@@ -125,9 +127,13 @@ function Screen() {
         });
         navigate('/request');
       })
-      .catch(() => {
+      .catch(error => {
         setLoading(false);
-        Swal.fire({ text: 'Product and QTY please fill in', icon: 'error' });
+        if (error.message === 'Validation Failed') {
+          Swal.fire({ text: 'Please fill in Product or Qty fields', icon: 'error' });
+        } else {
+          Swal.fire({ text: error?.message || error?.originalError, icon: 'error' });
+        }
       });
   };
 
