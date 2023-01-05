@@ -169,7 +169,6 @@ function Screen() {
 
   const handleRemove = product_id => {
     setDataRequestById(updateDataRequesById.filter(item => item.product_id !== product_id));
-    setDataNewDetail(updateDataDetail.filter(item => item.product_id !== product_id));
     setDataDetail(
       updateDataDetail.map(data => {
         if (data.product_id === product_id) {
