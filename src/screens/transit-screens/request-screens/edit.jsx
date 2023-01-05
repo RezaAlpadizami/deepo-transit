@@ -117,7 +117,7 @@ function Screen() {
       };
     });
     const dataObject = Object.assign({}, ...handleDataAdd);
-    if (dataReq.detail.some(item => item.product_id === dataObject.product_id)) {
+    if (dataReq?.detail?.some(item => item.product_id === dataObject.product_id)) {
       dataDetailUpdate.push({ ...dataObject });
     } else {
       dataNewItem.push({ ...dataObject });

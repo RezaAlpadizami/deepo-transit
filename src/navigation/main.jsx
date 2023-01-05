@@ -12,7 +12,6 @@ import NoAccessScreen from '../screens/home-screens/no-access';
 import LoadingHover from '../components/loading-hover-component';
 
 function MainNavigation() {
-  console.log('cekk iniii', CookieService.isSelectedWarehouse());
   return (
     <BrowserRouter basename={process.env.PUBLIC_URL}>
       {!CookieService.isSelectedWarehouse() ? (

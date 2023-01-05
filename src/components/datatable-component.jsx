@@ -272,8 +272,8 @@ function DataTable(props) {
           if (r.status === 'fulfilled') {
             setTimeout(() => {
               setLoadingHover(false);
+              success.push(true);
             }, 500);
-            success.push(true);
           } else {
             result.reason.data.error.api.map(m => failed.push(m));
             failed.push(true);
