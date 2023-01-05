@@ -30,6 +30,7 @@ const swalButton = Swal.mixin({
 });
 const storage = yup.object({
   rack: yup.string().test('rack', 'Rack is required', value => {
+    // console.log('rack value', value);
     if (value) {
       return true;
     }
@@ -60,6 +61,7 @@ const schema = yup.object({
       let pass = true;
 
       const { isSplitted, currentProductId } = this.parent;
+      // console.log('this.parent', this.parent);
 
       if (isSplitted) {
         // const filterBy = filters.map(f => { filters
@@ -130,6 +132,7 @@ function Screen() {
   } = useForm({
     resolver: yupResolver(schema),
   });
+
   const { currentProductId } = watch();
   const { fields, append, remove, insert, update } = useFieldArray({
     control,
@@ -140,26 +143,31 @@ function Screen() {
     sort_by: 'id',
     sort_order: 'desc',
   };
-  const [data, setData] = useState([]);
-  const [storageData, setStorageData] = useState([]);
+  const [requestDetailData, setRequestDetailData] = useState([]);
   const [transitData, setTransitData] = useState([]);
-  const [onOpen, setOnOpen] = useState(false);
+  const [storageData, setStorageData] = useState([]);
+  const [bayLevel, setBayLevel] = useState([]);
+  const [newData, setNewData] = useState([]);
+  const [data, setData] = useState([]);
+  const [loadingRequest, setLoadingRequest] = useState(false);
+  const [loadingTransit, setLoadingTransit] = useState(false);
+  const [loadingRFID, setLoadingRFID] = useState(false);
   const [onOverview, setOnOverview] = useState(false);
   const [isScanned, setIsScanned] = useState(false);
   const [scanning, setScanning] = useState(false);
-  const [loadingRequest, setLoadingRequest] = useState(false);
-  const [loadingRFID, setLoadingRFID] = useState(false);
+  const [isSplit, setIsSplit] = useState(false);
+  const [onOpen, setOnOpen] = useState(false);
   const [error, setError] = useState(false);
-  const [requestDetailData, setRequestDetailData] = useState();
   const [requestId, setRequestId] = useState('');
+  const [notes, setNotes] = useState('');
   const [totalRequest, setTotalRequest] = useState(0);
   const [counter, setCounter] = useState(2);
   const [splitValue, setSplitValue] = useState({});
-  const [newData, setNewData] = useState([]);
-  const [notes, setNotes] = useState('');
-  const [loadingTransit, setLoadingTransit] = useState(false);
+
   const [timer, setTimer] = useState();
-  const [isSplit, setIsSplit] = useState(false);
+  const [filterParams, setFilterParams] = useState({
+    warehouse_id: 2,
+  });
 
   useEffect(() => {
     getDetailRequest();
@@ -245,20 +253,52 @@ function Screen() {
     clearInterval(timer);
   };
 
-  const getDetailRequest = () => {
-    setLoadingRFID(true);
+  useEffect(() => {
     Promise.allSettled([
-      RequestApi.get({ ...defaultSort }).then(res => res),
       StorageApi.get({ warehouse_id: 2 }).then(res => res),
+      StorageApi.get(filterParams).then(res => res),
     ])
       .then(result => {
-        setData(result[0].value.data);
-        setStorageData(result[1].value.data);
+        console.log('resultult', result);
+        setStorageData(result[0].value.data);
+        setBayLevel(result[1].value.data);
+      })
+      .catch(error => {
+        Swal.fire({ text: error?.message || error?.data?.message, icon: 'error' });
+      });
+  }, [filterParams]);
+
+  const getDetailRequest = () => {
+    setLoadingRFID(true);
+    RequestApi.get({ ...defaultSort })
+      .then(res => {
+        setData(res.data);
         setLoadingRFID(false);
       })
       .catch(error => {
         Swal.fire({ text: error?.message || error?.data?.error, icon: 'error' });
       });
+  };
+
+  const onChangeValue = rack => {
+    console.log('eeee', rack);
+
+    if (rack) {
+      setFilterParams(prev => ({
+        ...prev,
+        rack_number: rack,
+      }));
+    } else {
+      setBayLevel([]);
+    }
+  };
+  const onChangeBay = bay => {
+    if (bay) {
+      setFilterParams(prev => ({
+        ...prev,
+        bay,
+      }));
+    }
   };
 
   const onSplit = (id, qty, index) => {
@@ -268,81 +308,219 @@ function Screen() {
     const findData = fields.filter(i => i.qty)?.find(i => i.product_id === id);
     const fieldLength = fields.filter(i => i.product_id === id).length;
     const fieldLengthLess = fields.filter(i => i.product_id < id).length;
+    const fieldLengthMore = fields.filter(i => i.product_id > id).length;
+
     const value = {
       product_id: findData.product_id,
       child_qty: Math.floor(qty / counter),
     };
+
     const splitVal = { product_id: id, value: Math.floor(qty / counter) };
     if (Math.floor(qty / counter) > 1) {
       if (index === 0) {
-        if (fields.findIndex(i => i.resividual_qty) !== -1) {
-          remove(fields.findIndex(i => i.resividual_qty));
-          insert(
-            fields.findIndex(i => i.resividual_qty),
-            value
-          );
-        } else if (qty % counter === 0) {
-          update(
-            fields.findIndex(i => i.product_id === id),
-            { ...findData, child_qty: qty / counter }
-          );
-          insert(fieldLength, value);
+        if (qty % counter === 0) {
+          if (fieldLength === 1) {
+            insert(fieldLength, value);
+
+            setSplitValue(splitVal);
+          } else if (fields.findIndex(i => i.resividual_qty && i.product_id === id) !== -1 && id === currentProductId) {
+            remove(fields.findIndex(i => i.resividual_qty));
+            insert(
+              fields.findIndex(i => i.resividual_qty),
+              value
+            );
+
+            setSplitValue(splitVal);
+          } else if (
+            fields.findIndex(i => i.resividual_qty && i.product_id === currentProductId) !== -1 &&
+            id !== currentProductId
+          ) {
+            if (counter !== fields.filter(i => i.product_id === currentProductId && !i.resividual_qty).length) {
+              setCounter(
+                fields.filter(i => i.product_id === currentProductId && !i.resividual_qty).length > 0
+                  ? fields.filter(i => i.product_id === currentProductId && !i.resividual_qty).length
+                  : 2
+              );
+            } else if (fields.findIndex(i => i.product_id === currentProductId && i.resividual_qty === -1)) {
+              remove(fields.findIndex(i => i.resividual_qty));
+              insert(
+                fields.findIndex(i => i.resividual_qty),
+                value
+              );
+              setSplitValue(splitVal);
+            }
+          } else {
+            insert(fieldLength, value);
+
+            setSplitValue(splitVal);
+          }
         } else if (qty % counter !== 0) {
-          insert(fieldLength, {
-            product_id: findData.product_id,
-            child_qty: qty - Math.floor(qty / counter) * counter,
-          });
-          insert(fieldLength + 1, {
-            product_id: findData.product_id,
-            child_qty: qty - Math.floor(qty / counter) * counter,
-            resividual_qty: qty - Math.floor(qty / counter) * counter,
-          });
-        }
-        setSplitValue(splitVal);
-      } else if (index !== 0) {
-        if (fieldLengthLess > 0 && fieldLength > 0) {
-          if (fields.findIndex(i => i.resividual_qty) !== -1) {
-            if (qty % counter !== 0) {
+          if (id === currentProductId) {
+            if (fields.findIndex(i => i.resividual_qty && i.product_id === id) !== -1) {
               remove(fields.findIndex(i => i.resividual_qty));
               insert(
                 fields.findIndex(i => i.resividual_qty),
-                value
+                {
+                  product_id: findData.product_id,
+                  child_qty: qty - Math.floor(qty / counter) * counter,
+                }
               );
-              insert(fields.findIndex(i => i.resividual_qty) + 1, value);
+              insert(fields.findIndex(i => i.resividual_qty) + 1, {
+                product_id: findData.product_id,
+                child_qty: qty - Math.floor(qty / counter) * counter,
+                resividual_qty: qty - Math.floor(qty / counter) * counter,
+              });
             } else {
-              remove(fields.findIndex(i => i.resividual_qty));
-              insert(
-                fields.findIndex(i => i.resividual_qty),
-                value
-              );
+              insert(fieldLength, {
+                product_id: findData.product_id,
+                child_qty: qty - Math.floor(qty / counter) * counter,
+              });
+              insert(fieldLength + 1, {
+                product_id: findData.product_id,
+                child_qty: qty - Math.floor(qty / counter) * counter,
+                resividual_qty: qty - Math.floor(qty / counter) * counter,
+              });
             }
 
             setSplitValue(splitVal);
-          } else if (qty % counter === 0) {
-            if (counter === 2) {
-              update(fieldLengthLess, { ...findData, child_qty: qty / counter });
-              insert(fieldLengthLess + fieldLength, value);
-              setCounter(count => count + 1);
-              if (counter > 2 && id === currentProductId) {
-                if (qty - Math.floor(qty / counter) * counter === 0) {
-                  update(fieldLength, value);
-                } else {
-                  insert(fieldLengthLess + fieldLength, value);
-                }
+          } else {
+            setCounter(fieldLength > 1 ? fieldLength : 2);
+          }
+        }
+      } else if (index !== 0) {
+        if (fieldLengthLess > 0 && fieldLength > 0) {
+          if (id === currentProductId) {
+            if (qty % counter !== 0) {
+              if (fields.findIndex(i => i.resividual_qty && i.product_id === id) !== -1) {
+                remove(fields.findIndex(i => i.resividual_qty && i.product_id === id));
+                insert(
+                  fields.findIndex(i => i.resividual_qty && i.product_id === id),
+                  value
+                );
+                insert(fields.findIndex(i => i.resividual_qty && i.product_id === id) + 1, {
+                  product_id: findData.product_id,
+                  child_qty: qty - Math.floor(qty / counter) * counter,
+                  resividual_qty: qty - Math.floor(qty / counter) * counter,
+                });
+                setSplitValue(splitVal);
+              } else {
+                insert(fields.findIndex(i => i.product_id === id) + fieldLength, {
+                  product_id: findData.product_id,
+                  child_qty: qty - Math.floor(qty / counter) * counter,
+                });
+
+                insert(fields.findIndex(i => i.product_id === id) + fieldLength + 1, {
+                  product_id: findData.product_id,
+                  child_qty: qty - Math.floor(qty / counter) * counter,
+                  resividual_qty: qty - Math.floor(qty / counter) * counter,
+                });
               }
+
+              setSplitValue(splitVal);
+            } else if (fields.findIndex(i => i.resividual_qty && i.product_id === id) !== -1) {
+              remove(fields.findIndex(i => i.resividual_qty && i.product_id === id));
+              insert(
+                fields.findIndex(i => i.resividual_qty),
+                value
+              );
+              setSplitValue(splitVal);
+            } else {
+              update(
+                fields.findIndex(i => i.product_id === id),
+                { ...findData, child_qty: Math.floor(qty / counter) }
+              );
+              insert(fields.findIndex(i => i.product_id === id) + fieldLength, value);
+
               setSplitValue(splitVal);
             }
-          } else if (qty % counter !== 0 && id === currentProductId) {
-            insert(fieldLengthLess + fieldLength, {
-              product_id: findData.product_id,
-              child_qty: qty - Math.floor(qty / counter) * counter,
-            });
-            insert(fieldLengthLess + fieldLength + 1, {
-              product_id: findData.product_id,
-              child_qty: qty - Math.floor(qty / counter) * counter,
-              resividual_qty: qty - Math.floor(qty / counter) * counter,
-            });
-            setSplitValue(splitVal);
+          } else if (id !== currentProductId) {
+            if (fieldLength > 1 && fields.findIndex(i => i.product_id === id && i.resividual_qty) === -1) {
+              setCounter(fields.findIndex(i => i.product_id === id && i.resividual_qty));
+            } else if (fieldLength > 1 && fields.findIndex(i => i.product_id === id && i.resividual_qty) !== -1) {
+              setCounter(fieldLength);
+              setValue('currentProductId', id);
+            } else {
+              setCounter(2);
+            }
+          }
+          // else if (id === currentProductId) {
+          //   if (fieldLength > 1 && fields.findIndex(i => i.product_id === id && i.resividual_qty)) {
+          //     remove(fields.findIndex(i => i.product_id === id && i.resividual_qty));
+          //     insert(
+          //       fields.findIndex(i => i.product_id === id && i.resividual_qty),
+          //       value
+          //     );
+          //     insert(fields.findIndex(i => i.product_id === id && i.resividual_qty) + 1, value);
+          //     setSplitValue(splitVal);
+          //   }
+          // }
+        } else if (fieldLengthMore > 0 && fieldLength > 0) {
+          if (id === currentProductId) {
+            if (qty % counter !== 0) {
+              if (fields.findIndex(i => i.resividual_qty && i.product_id === id) !== -1) {
+                remove(fields.findIndex(i => i.resividual_qty && i.product_id === id));
+                insert(
+                  fields.findIndex(i => i.resividual_qty && i.product_id === id),
+                  value
+                );
+                insert(fields.findIndex(i => i.resividual_qty && i.product_id === id) + 1, {
+                  product_id: findData.product_id,
+                  child_qty: qty - Math.floor(qty / counter) * counter,
+                  resividual_qty: qty - Math.floor(qty / counter) * counter,
+                });
+              } else {
+                insert(fields.findIndex(i => i.product_id === id) + fieldLength, {
+                  product_id: findData.product_id,
+                  child_qty: qty - Math.floor(qty / counter) * counter,
+                });
+
+                insert(fields.findIndex(i => i.product_id === id) + fieldLength + 1, {
+                  product_id: findData.product_id,
+                  child_qty: qty - Math.floor(qty / counter) * counter,
+                  resividual_qty: qty - Math.floor(qty / counter) * counter,
+                });
+              }
+
+              setSplitValue(splitVal);
+            } else if (fields.findIndex(i => i.resividual_qty && i.product_id === id) !== -1) {
+              if (qty % counter !== 0) {
+                remove(fields.findIndex(i => i.resividual_qty && i.product_id === id));
+                insert(
+                  fields.findIndex(i => i.resividual_qty && i.product_id === id),
+                  value
+                );
+                insert(fields.findIndex(i => i.resividual_qty && i.product_id === id) + 1, {
+                  product_id: findData.product_id,
+                  child_qty: qty - Math.floor(qty / counter) * counter,
+                  resividual_qty: qty - Math.floor(qty / counter) * counter,
+                });
+              } else {
+                remove(fields.findIndex(i => i.resividual_qty && i.product_id === id));
+                insert(
+                  fields.findIndex(i => i.resividual_qty && i.product_id === id),
+                  value
+                );
+              }
+
+              setSplitValue(splitVal);
+            } else {
+              update(
+                fields.findIndex(i => i.product_id === id),
+                { ...findData, child_qty: Math.floor(qty / counter) }
+              );
+              insert(fields.findIndex(i => i.product_id === id) + fieldLength, value);
+
+              setSplitValue(splitVal);
+            }
+          } else if (id !== currentProductId) {
+            if (fieldLength > 1 && fields.findIndex(i => i.product_id === id && i.resividual_qty) === -1) {
+              setCounter(fields.findIndex(i => i.product_id === id && i.resividual_qty));
+            } else if (fieldLength > 1 && fields.findIndex(i => i.product_id === id && i.resividual_qty) !== -1) {
+              setCounter(fieldLength);
+              setValue('currentProductId', id);
+            } else {
+              setCounter(2);
+            }
           }
         }
       }
@@ -373,50 +551,72 @@ function Screen() {
     // console.log('val', val);
     // console.log('findData modulus', findData.qty % findData.child_qty);
     if (counter <= 3) {
+      console.log('counter');
       delete findData.child_qty;
       setSplitValue(findData);
       remove(idx);
     } else if (findData.qty % findData.child_qty === 0) {
+      console.log('kesini');
       if (findData.qty % value.value !== 0) {
+        console.log('kesana');
         remove(idx);
         remove(idx - 1);
         setSplitValue(values);
       } else {
         if (dt.length === 0) {
+          console.log('dt length');
           delete findData.child_qty;
           setSplitValue(findData);
         } else {
+          console.log('elsee');
           setSplitValue(value);
         }
         remove(idx);
       }
     } else if (findData.qty % findData.child_qty !== 0) {
+      console.log('qty % child');
       const resividualValue = {
         product_id: findData.product_id,
         value: Math.floor(findData.qty / dt.length),
         resividual_qty: Math.floor(findData.qty / dt.length),
       };
       if (findData.qty % value.value !== 0) {
+        console.log('value value !== 0');
         if (value.value !== resividualValue.value) {
+          console.log('resividual');
           if (fields.findIndex(i => i.resividual_qty) !== -1) {
+            console.log('minus one');
             if (newData.findIndex((item, i) => i === idx) === idx) {
-              update(
-                newData.findIndex((item, i) => i === idx),
-                values
-              );
+              console.log('berarti kesini');
+              // update(
+              //   newData.findIndex((item, i) => i === idx),
+              //   values
+              // );
+              // console.log(
+              //   'newData.findIndex((item, i) => i === idx)',
+              //   newData.findIndex((item, i) => i === idx)
+              // );
+              // console.log(
+              //   'fields.findIndex(i => i.resividual_qty)',
+              //   fields.findIndex(i => i.resividual_qty)
+              // );
+              console.log('indexxx', idx);
               remove(newData.findIndex((item, i) => i === idx));
-              remove(fields.findIndex(i => i.resividual_qty));
+              remove(fields.findIndex(i => i.resividual_qty) - 1);
             } else {
+              console.log('elseminus');
               remove(fields.findIndex(i => i.resividual_qty));
               remove(idx - 1);
             }
             setSplitValue(values);
           } else {
+            console.log('elsse lagi');
             remove(idx);
             setSplitValue(values);
           }
         }
       } else {
+        console.log('elsessss');
         remove(idx);
         setSplitValue(values);
       }
@@ -481,12 +681,18 @@ function Screen() {
       });
   };
 
+  const deleteDuplicates = (array, key) => {
+    const data = new Set();
+    return array.filter(obj => !data.has(obj[key]) && data.add(obj[key]));
+  };
+
   return (
     <div className="bg-white p-5 rounded-[55px] shadow">
       <input type="hidden" {...register('filters')} />
       <input type="hidden" {...register('quantity')} />
       <input type="hidden" {...register('isSplitted')} />
       <input type="hidden" {...register('currentProductId')} />
+      <input type="hidden" {...register('bay_level')} />
       <fieldset className="border border-primarydeepo w-full h-full px-8 rounded-[55px] pb-6">
         <legend className="px-2 text-[28px] text-primarydeepo font-semibold">Request</legend>
         <div className="grid grid-cols-8 gap-6">
@@ -703,19 +909,29 @@ function Screen() {
                             </td>
                             <td className="w-24 px-2">
                               <Controller
-                                render={() => {
+                                render={({ field }) => {
+                                  // { onChange, value }
+                                  // console.log('onChange rack', field);
+                                  // console.log('value', value);
                                   return (
                                     <Select
                                       name={`details.${index}.rack`}
                                       idx={index}
                                       placeholder="Rack"
                                       booleans={isSplit}
-                                      options={storageData?.map(s => {
-                                        return {
-                                          label: s.rack_number,
-                                          value: s.rack_number,
-                                        };
-                                      })}
+                                      options={deleteDuplicates(
+                                        storageData?.map(s => {
+                                          return {
+                                            label: s.rack_number,
+                                            value: s.rack_number,
+                                          };
+                                        }),
+                                        'label'
+                                      )}
+                                      onChangeValue={e => {
+                                        field.onChange(e);
+                                        onChangeValue(e);
+                                      }}
                                       register={register}
                                       control={control}
                                       errors={errors}
@@ -735,12 +951,22 @@ function Screen() {
                                       idx={index}
                                       placeholder="Bay"
                                       booleans={isSplit}
-                                      options={storageData?.map(s => {
-                                        return {
-                                          label: s.bay,
-                                          value: s.bay,
-                                        };
-                                      })}
+                                      options={
+                                        bayLevel.length === 0
+                                          ? storageData?.map(s => {
+                                              return {
+                                                label: s.bay,
+                                                value: s.bay,
+                                              };
+                                            })
+                                          : bayLevel.map(i => {
+                                              return {
+                                                label: i.bay,
+                                                value: i.bay,
+                                              };
+                                            })
+                                      }
+                                      onChangeValue={e => onChangeBay(e)}
                                       register={register}
                                       control={control}
                                       errors={errors}
@@ -760,12 +986,21 @@ function Screen() {
                                       idx={index}
                                       placeholder="Level"
                                       booleans={isSplit}
-                                      options={storageData?.map(s => {
-                                        return {
-                                          label: s.level,
-                                          value: s.level,
-                                        };
-                                      })}
+                                      options={
+                                        bayLevel.length === 0
+                                          ? storageData?.map(s => {
+                                              return {
+                                                label: s.level,
+                                                value: s.level,
+                                              };
+                                            })
+                                          : bayLevel.map(i => {
+                                              return {
+                                                label: i.level,
+                                                value: i.level,
+                                              };
+                                            })
+                                      }
                                       register={register}
                                       control={control}
                                       errors={errors}
@@ -797,7 +1032,10 @@ function Screen() {
                                     if (index === 0) {
                                       setCounter(count => count + 1);
                                     } else if (index !== 0) {
-                                      if (item.product_id !== currentProductId) {
+                                      if (
+                                        item.product_id !== currentProductId &&
+                                        fields.filter(i => i.product_id === item.product_id).length === 1
+                                      ) {
                                         setCounter(2);
                                         setValue('currentProductId', item.product_id);
                                       } else if (item.product_id === currentProductId) {
@@ -855,8 +1093,10 @@ function Screen() {
               <div className="flex justify-between">
                 {errors && (
                   <span className="pl-10 text-[#a2002d]">{`${
-                    Array.isArray(errors.details) && isSplit
-                      ? errors?.details.filter(i => i !== undefined)
+                    Array.isArray(errors.details)
+                      ? errors?.details?.filter(i => i !== undefined).length > 0
+                        ? 'storage is required'
+                        : ''
                       : errors?.details?.message || ' '
                   }`}</span>
                 )}
