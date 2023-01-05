@@ -3,12 +3,11 @@ import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import Cookies from 'universal-cookie';
 import { useForm } from 'react-hook-form';
-// import { useNavigate } from 'react-router-dom';
 import { Text, Button } from '@chakra-ui/react';
 
 import CookieService from '../../../services/api-master/cookie-service.js/cookie-service';
 import Input from '../../../components/input-component';
-import { WarehouseApi } from '../../../services/api-master';
+import { WarehouseApi } from '../../../services/api-transit';
 import Search from '../../../assets/images/magnify-glass.svg';
 
 function Screen() {
@@ -18,7 +17,7 @@ function Screen() {
   const [filterData, setFilterData] = useState({
     limit: 10,
     offset: 0,
-    name: '',
+    search: '',
   });
 
   const cookies = new Cookies();
@@ -81,7 +80,7 @@ function Screen() {
         ...prev,
         limit: 10,
         offset: 0,
-        name: '',
+        search: '',
         ...data,
       };
     });
@@ -94,7 +93,7 @@ function Screen() {
       </div>
       <form onChange={handleSubmit(onSubmit)}>
         <Input
-          name="name"
+          name="search"
           placeholder="Search Warehouse or Location"
           addOnRight
           register={register}
@@ -117,7 +116,9 @@ function Screen() {
                   >
                     <div className="text-[18px]">
                       <Text>{`${group.location} - ${d.name}`}</Text>
-                      <Text className="my-2">{`${d.address}`}</Text>
+                      <Text className="my-2">{`${
+                        d.address === undefined ? 'Jalan malam malam berbahaya' : d.address
+                      }`}</Text>
                       <Text>{`${d.phone}`}</Text>
                     </div>
                   </div>

@@ -97,9 +97,11 @@ function Screen() {
       .values()
   );
 
-  const getTotalQty = updateDataRequesById?.reduce((accumulator, object) => {
-    return accumulator + Number(object.qty);
-  }, 0);
+  const getTotalQty = Array.isArray([])
+    ? updateDataRequesById.reduce((accumulator, object) => {
+        return accumulator + object.qty;
+      }, 0)
+    : '-';
 
   const onSubmitRequest = data => {
     setLoading(true);
