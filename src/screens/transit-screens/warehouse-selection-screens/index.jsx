@@ -3,15 +3,15 @@ import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import Cookies from 'universal-cookie';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import { Text, Button } from '@chakra-ui/react';
 
+import CookieService from '../../../services/api-master/cookie-service.js/cookie-service';
 import Input from '../../../components/input-component';
 import { WarehouseApi } from '../../../services/api-master';
 import Search from '../../../assets/images/magnify-glass.svg';
 
 function Screen() {
-  const navigate = useNavigate();
   const { register, control, handleSubmit } = useForm();
   const [warehouseData, setWarhouseData] = useState([]);
   const [isSelected, setIsSelected] = useState(-1);
@@ -54,9 +54,10 @@ function Screen() {
   const handleContinue = () => {
     cookies.set('warehouse_id', isSelected, {
       path: '/',
-      expires: new Date(Date.now() + 2592000),
+      maxAge: 12 * 24 * 390,
     });
-    navigate('/request');
+    CookieService.getCookies('warehouse_id');
+    window.location.reload();
   };
 
   const onSubmit = data => {
@@ -101,22 +102,22 @@ function Screen() {
           icon={<img src={Search} alt="search" className="h-6" />}
         />
       </form>
-      {groupingByLocation.map(data => {
+      {groupingByLocation.map(group => {
         return (
           <div>
-            <h2 className="font-bold mb-2 ml-1 my-6">{data.location}</h2>
+            <h2 className="font-bold mb-2 ml-1 my-6 text-lg">{group.location}</h2>
             <div className="grid gap-x-5 gap-y-9 grid-cols-4 text-center">
-              {data.data.map(d => {
+              {group.data.map(d => {
                 return (
                   <div
                     className={`justify-items-center w-full ${
                       isSelected === d.id ? 'border border-primarydeepo text-primarydeepo' : ''
-                    } bg-white py-8 px-8 rounded-[30px] drop-shadow-md cursor-pointer`}
+                    } bg-white py-8 px-8 rounded-full drop-shadow-md cursor-pointer`}
                     onClick={() => clickAddressCard(d)}
                   >
-                    <div>
-                      <Text>{`${data.location} - ${d.name}`}</Text>
-                      <Text>{`${d.address}`}</Text>
+                    <div className="text-[18px]">
+                      <Text>{`${group.location} - ${d.name}`}</Text>
+                      <Text className="my-2">{`${d.address}`}</Text>
                       <Text>{`${d.phone}`}</Text>
                     </div>
                   </div>

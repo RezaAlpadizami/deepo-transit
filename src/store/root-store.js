@@ -4,13 +4,17 @@ import UserStore from './user-store';
 const RootStore = types
   .model({
     isLogin: types.boolean,
-    isDrawerOpen: types.optional(types.boolean, true),
+    isSelectedWarehouse: types.optional(types.boolean, false),
+    isDrawerOpen: types.optional(types.boolean, false),
     isLoadEdit: types.optional(types.boolean, false),
     user: types.optional(UserStore, {}),
   })
   .actions(self => ({
     setLogin(isLogin) {
       self.isLogin = isLogin;
+    },
+    setIsSelectedWarehouse(isSelectedWarehouse) {
+      self.isSelectedWarehouse = isSelectedWarehouse;
     },
     setIsDrawerOpen(isOpen) {
       self.isDrawerOpen = isOpen;
