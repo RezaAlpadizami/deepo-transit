@@ -260,7 +260,7 @@ function Screen() {
             <div className="border-b border-primarydeepo my-6"> </div>
             <div className="flex justify-between font-bold">
               <Text>Total Product</Text>
-              <Text>{getTotalQty}</Text>
+              <Text className={`${getTotalQty < 1 ? 'hidden' : ''}`}>{getTotalQty}</Text>
             </div>
           </fieldset>
         </div>
