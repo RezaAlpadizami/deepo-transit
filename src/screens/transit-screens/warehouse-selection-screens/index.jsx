@@ -15,6 +15,7 @@ function Screen() {
   const { register, control, handleSubmit } = useForm();
   const [warehouseData, setWarhouseData] = useState([]);
   const [isSelected, setIsSelected] = useState(-1);
+  const [isSelectedWarehouse, setIsSelectedWarehouse] = useState(null);
   const [filterData, setFilterData] = useState({
     limit: 10,
     offset: 0,
@@ -48,7 +49,7 @@ function Screen() {
 
   const clickAddressCard = data => {
     setIsSelected(data.id);
-    LocalStorage.set('Warehouse', JSON.stringify(data));
+    setIsSelectedWarehouse(data);
   };
 
   const getDebounce = func => {
@@ -68,8 +69,9 @@ function Screen() {
       path: '/',
       maxAge: 12 * 24 * 390,
     });
+    LocalStorage.set('Warehouse', JSON.stringify(isSelectedWarehouse));
     CookieService.getCookies('warehouse_id');
-    CookieService.warehouse();
+
     window.location.reload();
   };
 

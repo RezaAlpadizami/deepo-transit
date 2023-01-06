@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 
+import LocalStorage from 'local-storage';
 import { observer } from 'mobx-react-lite';
 import { ChevronRightIcon } from '@heroicons/react/solid';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
@@ -30,6 +31,7 @@ function SidebarComponent() {
 
   const handleLogOut = () => {
     CookieService.removeCookies();
+    LocalStorage.remove('Warehouse');
     navigate('/');
     window.location.reload();
   };
