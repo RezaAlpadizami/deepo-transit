@@ -204,6 +204,7 @@ function Screen() {
       setNewData(
         fields.map((item, index) => {
           if (splitValue.product_id === item.product_id) {
+            item.index = index;
             // item.is_latest = fields.filter(i => i.product_id === item.product_id).length === index + 1;
             if (item.child_qty !== splitValue.value) {
               item.child_qty = splitValue.value;
@@ -526,10 +527,11 @@ function Screen() {
       }
     }
   };
+  // console.log('COUTER OUTSIDE', counter);
   const onRemove = (idx, id) => {
-    // const fieldLength = newData.filter(i => i.product_id === id && !i.qty);  item, childQty
-    const data = newData[newData.findIndex((item, i) => i === idx)];
-    const findData = fields.filter(i => i.qty)?.find(i => i.product_id === data.product_id);
+    const fieldLength = fields.filter(i => i.product_id === id).length;
+    const dataIndex = newData[newData.findIndex((item, i) => i === idx)];
+    const findData = fields.filter(i => i.qty)?.find(i => i.product_id === dataIndex.product_id);
     // const findDataId = fields.filter(i => i.qty)?.find(i => i.product_id === id);
     const dt = fields.filter((item, i) => item.product_id === id && i !== idx && i !== idx - 1);
 
@@ -541,87 +543,68 @@ function Screen() {
       product_id: findData.product_id,
       value: Math.floor(findData.qty / dt.length),
     };
-    // const val = {
-    //   product_id: findData.product_id,
-    //   value: Math.floor(findData.qty / dt.length),
-    // };
-    // console.log('findData', findData);
-    // console.log('findDataId', findDataId);
-    // console.log('value', value);
-    // console.log('val', val);
-    // console.log('findData modulus', findData.qty % findData.child_qty);
-    if (counter <= 3) {
-      console.log('counter');
+
+    if (counter <= 3 && fieldLength === 2) {
+      // console.log('test 1');
       delete findData.child_qty;
       setSplitValue(findData);
       remove(idx);
+      setCounter(2);
     } else if (findData.qty % findData.child_qty === 0) {
-      console.log('kesini');
+      // console.log('test 2');
       if (findData.qty % value.value !== 0) {
-        console.log('kesana');
+        // console.log('test 3');
         remove(idx);
         remove(idx - 1);
         setSplitValue(values);
       } else {
         if (dt.length === 0) {
-          console.log('dt length');
+          // console.log('test 4');
           delete findData.child_qty;
           setSplitValue(findData);
         } else {
-          console.log('elsee');
+          // console.log('test 5');
           setSplitValue(value);
         }
         remove(idx);
       }
     } else if (findData.qty % findData.child_qty !== 0) {
-      console.log('qty % child');
+      // console.log('test 6');
       const resividualValue = {
         product_id: findData.product_id,
         value: Math.floor(findData.qty / dt.length),
         resividual_qty: Math.floor(findData.qty / dt.length),
       };
       if (findData.qty % value.value !== 0) {
-        console.log('value value !== 0');
+        // console.log('test 7');
         if (value.value !== resividualValue.value) {
-          console.log('resividual');
+          // console.log('test 8');
           if (fields.findIndex(i => i.resividual_qty) !== -1) {
-            console.log('minus one');
+            // console.log('test 9');
             if (newData.findIndex((item, i) => i === idx) === idx) {
-              console.log('berarti kesini');
-              // update(
-              //   newData.findIndex((item, i) => i === idx),
-              //   values
-              // );
-              // console.log(
-              //   'newData.findIndex((item, i) => i === idx)',
-              //   newData.findIndex((item, i) => i === idx)
-              // );
-              // console.log(
-              //   'fields.findIndex(i => i.resividual_qty)',
-              //   fields.findIndex(i => i.resividual_qty)
-              // );
-              console.log('indexxx', idx);
+              // console.log('test 10');
               remove(newData.findIndex((item, i) => i === idx));
               remove(fields.findIndex(i => i.resividual_qty) - 1);
             } else {
-              console.log('elseminus');
+              // console.log('test 11');
               remove(fields.findIndex(i => i.resividual_qty));
               remove(idx - 1);
             }
             setSplitValue(values);
           } else {
-            console.log('elsse lagi');
+            // console.log('test 12');
             remove(idx);
             setSplitValue(values);
           }
         }
       } else {
-        console.log('elsessss');
+        // console.log('test 13');
         remove(idx);
         setSplitValue(values);
       }
     }
   };
+
   const onSubmitRFID = () => {
     let pass = onOpen;
     if (totalRFID === totalRequest) {
@@ -869,7 +852,6 @@ function Screen() {
                   <tbody>
                     {fields.length > 0 ? (
                       fields.map((item, index) => {
-                        // console.log('fields.length === index + 1', fields.length === index + 1);
                         return (
                           <tr key={item.id} className={`${index % 2 ? 'bg-gray-100' : ''} w-full`}>
                             <td className="w-10 text-center px-2">{index + 1}</td>
@@ -910,9 +892,6 @@ function Screen() {
                             <td className="w-24 px-2">
                               <Controller
                                 render={({ field }) => {
-                                  // { onChange, value }
-                                  // console.log('onChange rack', field);
-                                  // console.log('value', value);
                                   return (
                                     <Select
                                       name={`details.${index}.rack`}
