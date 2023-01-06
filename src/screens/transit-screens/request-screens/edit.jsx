@@ -50,6 +50,7 @@ function Screen() {
   const {
     register: registerProd,
     control: controlProd,
+    reset,
     formState: { errors: errorsProd },
     handleSubmit: handleSubmitProd,
   } = useForm({
@@ -125,6 +126,7 @@ function Screen() {
     setDataDetail([...dataDetail, ...dataDetailUpdate]);
     setDataNewDetail(state => [...state, ...dataNewItem]);
     setDataRequestById(state => [...state, dataObject]);
+    reset();
   };
 
   const updateDataDetail = Object.values(
@@ -348,7 +350,7 @@ function Screen() {
             <div className="border-b border-primarydeepo my-6"> </div>
             <div className="flex justify-between font-bold">
               <Text>Total Product</Text>
-              <Text>{getTotalQty}</Text>
+              <Text className={`${getTotalQty < 1 ? 'hidden' : ''}`}>{getTotalQty}</Text>
             </div>
           </fieldset>
         </div>

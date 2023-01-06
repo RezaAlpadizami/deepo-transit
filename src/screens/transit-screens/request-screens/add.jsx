@@ -147,7 +147,7 @@ function Screen() {
       .catch(error => {
         setLoading(false);
         if (error.message === 'Validation Failed') {
-          Swal.fire({ text: 'Please fill in Product or Qty fields', icon: 'error' });
+          Swal.fire({ text: 'Product or Qty still empty', icon: 'error' });
         } else {
           Swal.fire({ text: error?.message || error?.originalError, icon: 'error' });
         }
