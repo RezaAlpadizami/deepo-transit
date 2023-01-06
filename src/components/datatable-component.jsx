@@ -264,26 +264,22 @@ function DataTable(props) {
             .catch(e => reject(e));
         });
       }),
-    ]).then(result => {
+    ]).then(res => {
       const success = [];
       const failed = [];
-      if (result.value) {
-        result.forEach(r => {
-          if (r.status === 'fulfilled') {
-            setLoadingHover(false);
-            success.push(true);
-          } else {
-            result.reason.data.error.api.map(m => failed.push(m));
-            failed.push(true);
-          }
-        });
-      } else if (result.value === 'undefined') {
-        Swal.fire({ text: `Something When Wrong`, icon: 'error' });
-      }
+      res.forEach(result => {
+        if (result.status === 'fulfilled') {
+          success.push(true);
+          setLoadingHover(false);
+        } else {
+          result.reason.data.error.api.map(m => failed.push(m));
+          failed.push(true);
+          setLoadingHover(false);
+        }
+      });
+
       if (success.length > 0) {
-        setTimeout(() => {
-          Swal.fire({ text: 'Data Deleted Successfully', icon: 'success' });
-        }, 500);
+        Swal.fire({ text: 'Data Deleted Successfully', icon: 'success' });
       } else if (failed.length > 0) {
         Swal.fire({ text: 'Something Went Wrong', icon: 'error' });
       }
@@ -584,6 +580,7 @@ function DataTable(props) {
                     {hasButtonAction && (
                       <td className="text-black py-1 px-6">
                         <Link
+                          hidden={row.original.status !== 'PENDING'}
                           type="submit"
                           to="/inbound"
                           px={8}

@@ -1,18 +1,20 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import Cookies from 'universal-cookie';
+
 import { observer } from 'mobx-react-lite';
 import { ChevronRightIcon } from '@heroicons/react/solid';
-import ArrowUpTray from '../assets/images/arrow-up-tray.svg';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+
 import Context from '../context';
 import menuItem from '../navigation/menu-item';
+import ArrowUpTray from '../assets/images/arrow-up-tray.svg';
+import CookieService from '../services/cookies/cookie-service';
 import { findParent, findTree } from '../utils/navigation-utils';
 
 function SidebarComponent() {
-  const { store } = useContext(Context);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { store } = useContext(Context);
   const [menuParent, setMenuParent] = useState(null);
-  const cookies = new Cookies();
 
   useEffect(() => {
     setMenuParent(findParent(menuItem, location));
@@ -27,7 +29,8 @@ function SidebarComponent() {
   }, [JSON.stringify(menuParent)]);
 
   const handleLogOut = () => {
-    cookies.remove('warehouse_id', { path: '/' });
+    CookieService.removeCookies();
+    navigate('/');
     window.location.reload();
   };
 
@@ -89,11 +92,11 @@ function SidebarComponent() {
           )}
         </ul>
         <button
-          className="absolute inset-x-0 bottom-10 h-15 py-3 hover:bg-hoversidebar"
+          className="absolute inset-x-0 bottom-10 h-15 py-3 hover:bg-secondarydeepo"
           type="button"
-          onClick={() => {}}
+          onClick={handleLogOut}
         >
-          <div className="flex pl-6" onClick={() => handleLogOut()}>
+          <div className="flex pl-6">
             <img src={ArrowUpTray} alt="arrow up" className="h-7 rotate-90 text-black" />
             <h3 className="pt-0 pl-6 transition-all ease-in-out duration-300 font-bold text-md text-[#fff]">Log out</h3>
           </div>

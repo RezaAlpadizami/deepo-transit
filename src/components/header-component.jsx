@@ -1,7 +1,9 @@
 import React, { useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { UserCircleIcon } from '@heroicons/react/solid';
+import { UserCircleIcon, ChevronDownIcon, OfficeBuildingIcon } from '@heroicons/react/solid';
+import { Popover, PopoverArrow, PopoverBody, PopoverContent, PopoverTrigger, Button } from '@chakra-ui/react';
 
+import LocalStorage from 'local-storage';
 import Context from '../context';
 import menuItem from '../navigation/menu-item';
 import logo from '../assets/images/logo.svg';
@@ -11,6 +13,7 @@ function Header() {
   const { store } = useContext(Context);
   const location = useLocation();
 
+  const getWarehouse = () => JSON.parse(LocalStorage.get('Warehouse'));
   return (
     <header className="flex p-5 border-b">
       <div className="mx-3 mt-0.5 cursor-pointer" onClick={() => store.toggleDrawer()}>
@@ -30,9 +33,27 @@ function Header() {
             );
           })}
       </ul>
-      <div className="flex">
-        <UserCircleIcon className="w-6 h-6" />
-        <span className="ml-2">Administrator</span>
+      <div className="flex mr-4">
+        <UserCircleIcon className="w-6 h-6 m-auto" />
+        <Popover>
+          <PopoverTrigger>
+            <Button rightIcon={<ChevronDownIcon className="w-[15px]" />} type="button" size="sm">
+              Administrator
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent marginEnd={6} width="auto">
+            <PopoverArrow />
+            <PopoverBody className="py-3 px-4 text-sm text-secondarydeepo">
+              <div className="flex">
+                <OfficeBuildingIcon className="w-10 h-10" />
+                <div>
+                  <p>{getWarehouse().name}</p>
+                  <p className="font-medium truncate">{getWarehouse().address}</p>
+                </div>
+              </div>
+            </PopoverBody>
+          </PopoverContent>
+        </Popover>
       </div>
     </header>
   );

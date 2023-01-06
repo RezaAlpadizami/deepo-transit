@@ -4,8 +4,9 @@ import Swal from 'sweetalert2';
 import Cookies from 'universal-cookie';
 import { useForm } from 'react-hook-form';
 import { Text, Button } from '@chakra-ui/react';
+import LocalStorage from 'local-storage';
 
-import CookieService from '../../../services/api-master/cookie-service.js/cookie-service';
+import CookieService from '../../../services/cookies/cookie-service';
 import Input from '../../../components/input-component';
 import { WarehouseApi } from '../../../services/api-transit';
 import Search from '../../../assets/images/magnify-glass.svg';
@@ -47,6 +48,7 @@ function Screen() {
 
   const clickAddressCard = data => {
     setIsSelected(data.id);
+    LocalStorage.set('Warehouse', JSON.stringify(data));
   };
 
   const getDebounce = func => {
@@ -67,6 +69,7 @@ function Screen() {
       maxAge: 12 * 24 * 390,
     });
     CookieService.getCookies('warehouse_id');
+    CookieService.warehouse();
     window.location.reload();
   };
 

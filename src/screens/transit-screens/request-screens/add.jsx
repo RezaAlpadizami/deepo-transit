@@ -8,7 +8,7 @@ import { Button, Text } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 
 import deleteIcon from '../../../assets/images/deleteItem.svg';
-import CookieService from '../../../services/api-master/cookie-service.js/cookie-service';
+import CookieService from '../../../services/cookies/cookie-service';
 import { ProductApi } from '../../../services/api-master';
 import { RequestApi } from '../../../services/api-transit';
 import Input from '../../../components/input-component';
@@ -34,7 +34,7 @@ function Screen() {
 
   const schemaAddProduct = yup.object().shape({
     product_id: yup.string().nullable().required(),
-    qty: yup.number().nullable().typeError('please input quantity').required(),
+    qty: yup.number().nullable().min(1, 'The minimum qty is one').typeError('please input quantity').required(),
   });
 
   const schemaSubmitRequest = yup.object().shape({

@@ -10,14 +10,14 @@ function Screen() {
         ...Ooops
       </h1>
       <p className="mb-4 tracking-wide" style={{ color: '#676464' }}>
-        Kamu belum menentukan Area kerja kamu
+        Your access is terminated
       </p>
       <p className="mb-4 tracking-wide" style={{ color: '#676464' }}>
-        Pastikan kamu sudah memilih area kerja kamu untuk akses ke halaman ini.
+        Please define your work area first
       </p>
       <div className="grid place-content-center mt-10">
         <Button px={8} onClick={() => navigate('/')} colorScheme="red" variant="solid">
-          Pilih Area
+          Select Work Area
         </Button>
       </div>
     </div>
