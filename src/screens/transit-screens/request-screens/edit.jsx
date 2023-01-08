@@ -28,6 +28,7 @@ function Screen() {
   const [loading, setLoading] = useState(false);
   const [dataDetail, setDataDetail] = useState([]);
   const [dataNewDetail, setDataNewDetail] = useState([]);
+  const [isDelete, setIsDelete] = useState(false);
 
   const activityProduct = [
     { value: 'INBOUND', label: 'INBOUND' },
@@ -105,6 +106,7 @@ function Screen() {
   };
 
   const onAddProdRequestDetail = dataInput => {
+    setIsDelete(false);
     const dataNewItem = [];
     const dataDetailUpdate = [];
 
@@ -115,6 +117,7 @@ function Screen() {
         product_id: Number(dataInput.product_id),
         product_sku: data.sku,
         product_name: data.product_name,
+        is_deleted: isDelete,
       };
     });
     const dataObject = Object.assign({}, ...handleDataAdd);
@@ -175,21 +178,6 @@ function Screen() {
       }, 0)
     : '-';
 
-  const handleRemove = product_id => {
-    setDataRequestById(updateDataRequesById.filter(item => item.product_id !== product_id));
-    setDataDetail(
-      updateDataDetail.map(data => {
-        if (data.product_id === product_id) {
-          return {
-            ...data,
-            is_deleted: true,
-          };
-        }
-        return { ...data, is_deleted: false };
-      })
-    );
-  };
-
   const updateDataRequesById = Object.values(
     Array.isArray([])
       ? dataRequesById.reduce((accu, { product_id, ...item }) => {
@@ -209,6 +197,38 @@ function Screen() {
         }, {})
       : []
   );
+
+  const handleRemove = product_id => {
+    if (updateDataRequesById.filter(item => item.product_id !== product_id).length < 1) {
+      Swal.fire({ text: 'product cannot be empty', icon: 'error' });
+    } else {
+      setDataRequestById(updateDataRequesById.filter(item => item.product_id !== product_id));
+      setDataDetail(
+        updateDataDetail.map(data => {
+          if (data.product_id === product_id) {
+            return {
+              product_id: data.product_id,
+              qty: data.qty,
+              id: data.id,
+              is_deleted: !isDelete,
+            };
+          }
+          return { ...data, is_deleted: false };
+        })
+      );
+      setDataNewDetail(
+        updateNewDetail.map(data => {
+          if (data.product_id === product_id) {
+            return {
+              product_id: data.product_id,
+              qty: 0,
+            };
+          }
+          return { product_id: data.product_id, qty: data.qty };
+        })
+      );
+    }
+  };
 
   const onSubmitRequest = data => {
     setLoading(true);
