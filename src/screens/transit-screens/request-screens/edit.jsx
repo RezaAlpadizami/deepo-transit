@@ -208,7 +208,7 @@ function Screen() {
           if (data.product_id === product_id) {
             return {
               product_id: data.product_id,
-              qty: data.qty,
+              qty: 0,
               id: data.id,
               is_deleted: !isDelete,
             };
