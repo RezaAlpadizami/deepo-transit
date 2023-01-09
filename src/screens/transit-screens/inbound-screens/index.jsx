@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Input, Button } from '@chakra-ui/react';
+import { Input, Button, Fade } from '@chakra-ui/react';
 import { useFieldArray, useForm, Controller } from 'react-hook-form';
 import * as yup from 'yup';
 import Swal from 'sweetalert2';
@@ -745,7 +745,7 @@ function Screen() {
     }, 500);
   };
   return (
-    <div className="bg-white p-5 rounded-[55px] shadow">
+    <div className="bg-white p-5 rounded-[55px] shadow px-6 pb-11">
       <input type="hidden" {...register('filters')} />
       <input type="hidden" {...register('isSplitted')} value={isSplit} />
       <input type="hidden" {...register('currentProductId')} />
@@ -753,7 +753,7 @@ function Screen() {
       <input type="hidden" {...register('onChangeBay')} />
       <input type="hidden" {...register('onChangeLevel')} />
 
-      <fieldset className="border border-primarydeepo w-full h-full px-8 rounded-[55px] pb-6">
+      <fieldset className="border border-primarydeepo w-full h-full px-8 rounded-[30px] pb-6">
         <legend className="px-2 text-[28px] text-primarydeepo font-semibold">Request</legend>
         <div className="grid grid-cols-8 gap-6">
           <button
@@ -796,12 +796,12 @@ function Screen() {
       </fieldset>
 
       <div className="grid-cols-2 gap-4 flex">
-        <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
+        <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[30px]">
           <legend className="px-2 text-[28px] text-primarydeepo font-semibold">Request Detail</legend>
           <LoadingComponent visible={loadingRequest} />
           {!loadingRequest ? <TableCh data={requestDetailData} /> : null}
         </fieldset>
-        <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
+        <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[30px]">
           <legend className="px-2 text-[28px] text-primarydeepo font-semibold">RFID Detected</legend>
           <LoadingComponent visible={loadingRFID} />
           {!loadingRFID ? <TableCh data={rfidData} /> : null}
@@ -810,14 +810,14 @@ function Screen() {
       <div
         className={`border  ${
           error ? 'border-[#a2002d]' : 'border-primarydeepo'
-        }  w-full h-full px-8 rounded-[55px] py-2 mt-10`}
+        }  w-full h-full px-8 rounded-[30px] py-2 mt-10`}
       >
         <div className="grid grid-cols-3 gap-4">
-          <div className="pt-2">
+          <div className="py-auto">
             <div>Total Request</div>
             <div>Total RFID Detected</div>
           </div>
-          <div className="pt-2">
+          <div className="py-auto">
             <div className="font-bold">{totalRequest}</div>
             <div className="font-bold">{totalRFID}</div>
           </div>
@@ -881,49 +881,51 @@ function Screen() {
         </p>
       )}
       {onOverview && (
-        <div
-          className=" main-modal fixed w-full h-200 inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
-          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
-        >
-          <div className="rounded rounded-2xl border shadow-lg modal-container bg-white w-[80%] mx-auto z-50 overflow-y-auto ">
-            <div className="grid justify-items-end">
-              <XIcon className="h-6 stroke-2" onClick={() => setOnOverview(!onOverview)} />
-            </div>
-            <div className="modal-content py-4 text-left px-6">
-              <Datatable
-                api={RequestApi}
-                filterParams={{ status: 'PENDING' }}
-                filterEnd
-                filters={[
-                  {
-                    name: 'text',
-                    type: 'addtext',
-                    text: 'Request Overview',
-                  },
-                  {
-                    name: 'request_number',
-                    placeholder: 'Request Number',
-                    icon: MagnifyClass,
-                    alt: 'magnify',
-                    type: 'input:addOn',
-                    col: 2,
-                  },
-                ]}
-                columns={[
-                  { header: 'Request Number', value: 'request_number', copy: true, type: 'link' },
-                  { header: 'User', value: 'request_by', copy: true },
-                  { header: 'Activity', value: 'activity_name', copy: true },
-                  { header: 'Date', value: 'activity_date', copy: true, type: 'date' },
-                  { header: 'Notes', value: 'notes', copy: true, type: 'scrollable' },
-                  { header: 'Status', value: 'status', copy: true },
-                  { header: ' ', value: ' ', type: 'action-button' },
-                ]}
-                onSearch
-                onActionButton={(id, data) => onProcess(id, data)}
-              />
+        <Fade in={onOverview}>
+          <div
+            className=" main-modal fixed w-full h-200 inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
+            style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          >
+            <div className="rounded rounded-2xl border shadow-lg modal-container bg-white w-[80%] mx-auto z-50 overflow-y-auto ">
+              <div className="grid justify-items-end">
+                <XIcon className="h-6 stroke-2" onClick={() => setOnOverview(!onOverview)} />
+              </div>
+              <div className="modal-content py-4 text-left px-6">
+                <Datatable
+                  api={RequestApi}
+                  filterParams={{ status: 'PENDING' }}
+                  filterEnd
+                  filters={[
+                    {
+                      name: 'text',
+                      type: 'addtext',
+                      text: 'Request Overview',
+                    },
+                    {
+                      name: 'request_number',
+                      placeholder: 'Request Number',
+                      icon: MagnifyClass,
+                      alt: 'magnify',
+                      type: 'input:addOn',
+                      col: 2,
+                    },
+                  ]}
+                  columns={[
+                    { header: 'Request Number', value: 'request_number', copy: true, type: 'link' },
+                    { header: 'User', value: 'request_by', copy: true },
+                    { header: 'Activity', value: 'activity_name', copy: true },
+                    { header: 'Date', value: 'activity_date', copy: true, type: 'date' },
+                    { header: 'Notes', value: 'notes', copy: true, type: 'scrollable' },
+                    { header: 'Status', value: 'status', copy: true },
+                    { header: ' ', value: ' ', type: 'action-button' },
+                  ]}
+                  onSearch
+                  onActionButton={(id, data) => onProcess(id, data)}
+                />
+              </div>
             </div>
           </div>
-        </div>
+        </Fade>
       )}
       {onOpen && (
         <div
