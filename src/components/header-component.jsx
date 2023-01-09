@@ -47,8 +47,8 @@ function Header() {
               <div className="flex">
                 <OfficeBuildingIcon className="w-10 h-10" />
                 <div>
-                  <p>{getWarehouse().name}</p>
-                  <p className="font-medium truncate">{getWarehouse().address}</p>
+                  <p>{getWarehouse()?.name}</p>
+                  <p className="font-medium truncate">{getWarehouse()?.address}</p>
                 </div>
               </div>
             </PopoverBody>

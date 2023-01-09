@@ -5,10 +5,11 @@ import Swal from 'sweetalert2';
 import { saveAs } from 'file-saver';
 import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Button } from '@chakra-ui/react';
+import { Button, Stack, Fade, Skeleton } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
 import { useTable, useRowSelect, usePagination, useSortBy } from 'react-table';
-import { ChevronLeftIcon, ChevronRightIcon, ArrowSmUpIcon, ArrowSmDownIcon } from '@heroicons/react/solid';
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/solid';
+import { ArrowSmUpIcon, ArrowSmDownIcon } from '@heroicons/react/outline';
 import Input from './input-component';
 import Select from './select-component';
 import Checkbox from './checkbox-component';
@@ -16,6 +17,7 @@ import { hasProperty } from '../utils/helper';
 import TableComponent from './table-component';
 import DatePicker from './datepicker-component';
 import Toolbar from './action-toolbar-component';
+import LoadingHover from './loading-hover-component';
 
 function DataTable(props) {
   const {
@@ -30,7 +32,6 @@ function DataTable(props) {
     displayName,
     name,
     filters,
-    onSort = () => {},
     onActionButton = () => {},
     identifierProperties = 'id',
     hasButtonAction,
@@ -51,10 +52,14 @@ function DataTable(props) {
   const [datas, setDatas] = useState([]);
   const [totalData, setTotalData] = useState(0);
   const [loadingHover, setLoadingHover] = useState(false);
-  const defaultSort = {
+  const [columnId, setColumnId] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [isSort, setIsSort] = useState(false);
+  const [isDesc, setIsDesc] = useState(false);
+  const [defaultSort, setDefaulSort] = useState({
     sort_by: 'id',
     sort_order: 'desc',
-  };
+  });
 
   const [filter, setFilter] = useState([]);
   const [filterData, setFilterData] = useState({
@@ -153,16 +158,16 @@ function DataTable(props) {
   }, [filterData, filterParams]);
 
   const getData = () => {
-    setLoadingHover(true);
+    setLoading(true);
     api
-      .get({ ...filterData, ...filterParams })
+      .get({ ...filterData, ...defaultSort, ...filterParams })
       .then(res => {
-        setLoadingHover(false);
+        setLoading(false);
         setDatas(res.data);
         setTotalData(res.query.total);
       })
       .catch(error => {
-        setLoadingHover(false);
+        setLoading(false);
         Swal.fire({ text: error?.message || error?.originalError, icon: 'error' });
       });
   };
@@ -299,8 +304,8 @@ function DataTable(props) {
     function s2ab(data) {
       const buf = new ArrayBuffer(data.length);
       const view = new Uint8Array(buf);
-      // eslint-disable-next-line no-bitwise, no-plusplus
-      for (let i = 0; i < data.length; i++) view[i] = data.charCodeAt(i) & 0xff;
+      // eslint-disable-next-line no-bitwise,
+      for (let i = 0; i < data.length; i += 1) view[i] = data.charCodeAt(i) & 0xff;
       return buf;
     }
     setTimeout(() => {
@@ -310,6 +315,8 @@ function DataTable(props) {
   };
   const onReset = () => {
     reset();
+    setIsSort(false);
+    setIsDesc(false);
     setFilterData({
       limit: 10,
       offset: 0,
@@ -367,8 +374,26 @@ function DataTable(props) {
   };
   const opt = useCallback(getDebounce(onSubmit), []);
 
+  const onSortChange = column => {
+    setColumnId(column.id);
+    if (isSort) {
+      setIsDesc(!isDesc);
+
+      setDefaulSort({
+        sort_by: column.id ? column.id.toLowerCase() : 'id',
+        sort_order: isDesc ? 'desc' : 'asc',
+      });
+    }
+  };
+
+  const onChangeHeader = () => {
+    if (isSort && isDesc) {
+      return isDesc ? 'desc' : 'asc';
+    }
+    return '';
+  };
   return (
-    <>
+    <Fade in={filters.length > 0}>
       {download && (
         <div style={{ display: 'none' }}>
           <TableComponent
@@ -455,14 +480,12 @@ function DataTable(props) {
                           />
                         </div>
                       );
-                      // eslint-disable-next-line no-else-return
-                    } else {
-                      return (
-                        <div className={item.col ? `col-span-${item.col}` : ''} key={`component${idx}`}>
-                          <Input name={item.name} label={item.label} register={register} control={control} />
-                        </div>
-                      );
                     }
+                    return (
+                      <div className={item.col ? `col-span-${item.col}` : ''} key={`component${idx}`}>
+                        <Input name={item.name} label={item.label} register={register} control={control} />
+                      </div>
+                    );
                   })}
                 </div>
               </div>
@@ -525,213 +548,217 @@ function DataTable(props) {
           onShowHideColumn={enableAction('show-hide-column')}
         />
       )}
-
-      <div className="overflow-x-auto relative px-6 pb-11 bg-white rounded-b-3xl drop-shadow-md">
-        <table {...getTableProps()} className="table-auto w-full text-sm text-left text-gray-500 border-t">
-          <thead className="text-xs text-black uppercase bg-thead">
-            {headerGroups.map((headerGroup, idxgroup) => (
-              <tr key={idxgroup} {...headerGroup.getHeaderGroupProps()}>
-                {headerGroup.headers.map((column, columnidx) => (
-                  <th key={columnidx} {...column.getHeaderProps(column.getSortByToggleProps())} className="py-3 px-6">
-                    <div
-                      className="flex"
-                      onClick={() =>
-                        onSort({
-                          sort_by: column.id,
-                          sort_order: column.isSorted ? (column.isSortedDesc ? 'desc' : 'asc') : 'desc',
-                        })
-                      }
-                    >
-                      {column.render('Header')}
-                      <span>
-                        {column.isSorted ? (
-                          column.isSortedDesc ? (
-                            <ArrowSmDownIcon className="ml-2 h-4" />
-                          ) : (
-                            <ArrowSmUpIcon className="ml-2 h-4" />
-                          )
-                        ) : (
-                          ''
-                        )}
-                      </span>
-                    </div>
-                  </th>
-                ))}
-                {hasButtonAction && <th> </th>}
-              </tr>
-            ))}
-          </thead>
-
-          {!loadingHover && (
-            <tbody {...getTableBodyProps()}>
-              {rows.map((row, i) => {
-                prepareRow(row);
-                return (
-                  <tr
-                    key={i}
-                    {...row.getRowProps()}
-                    className={`${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}border-b hover:bg-slate-100`}
-                  >
-                    {row.cells.map((cell, idx) => (
-                      <td key={idx} {...cell.getCellProps()} className="py-2 px-6">
-                        {cell.render('Cell')}
-                      </td>
-                    ))}
-                    {hasButtonAction && (
-                      <td className="text-black py-1 px-6">
-                        <Link
-                          hidden={row.original.status !== 'PENDING'}
-                          type="submit"
-                          to="/inbound"
-                          px={8}
-                          size="sm"
-                          className="text-white bg-gradient-to-r from-processbtnfrom to-processbtnto hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2"
+      {loadingHover && <LoadingHover text="Please Wait..." />}
+      {filter.length !== 0 && (
+        <div className="overflow-x-hidden relative px-6 pb-11 bg-white drop-shadow-md rounded-b-3xl">
+          <div className="scrollbar-x-auto">
+            <table {...getTableProps()} className="table-auto w-full text-sm text-left text-gray-500 border-t">
+              <thead className="text-xs text-black uppercase bg-thead">
+                {headerGroups.map((headerGroup, idxgroup) => (
+                  <tr key={idxgroup} {...headerGroup.getHeaderGroupProps()}>
+                    {headerGroup.headers.map((column, columnidx) => (
+                      <th
+                        key={columnidx}
+                        {...column.getHeaderProps(column.getSortByToggleProps())}
+                        className="py-3 px-6"
+                      >
+                        <div
+                          className="flex"
+                          onClick={() => {
+                            if (column.id !== 'selection') {
+                              setIsSort(true);
+                              onSortChange(column);
+                            }
+                          }}
                         >
-                          Process
-                        </Link>
-                      </td>
-                    )}
+                          <div>{column.render('Header')}</div>
+                          <div className="my-auto">
+                            {isSort && column.id === columnId && column.id !== 'selection' ? (
+                              onChangeHeader() === 'desc' && isDesc ? (
+                                <ArrowSmUpIcon className="ml-2 h-4 stroke-[#eb6058]" />
+                              ) : (
+                                <ArrowSmDownIcon className="ml-2 h-4 stroke-[#eb6058]" />
+                              )
+                            ) : (
+                              ''
+                            )}
+                          </div>
+                        </div>
+                      </th>
+                    ))}
+                    {hasButtonAction && <th> </th>}
                   </tr>
-                );
-              })}
-            </tbody>
-          )}
-        </table>
+                ))}
+              </thead>
 
-        {loadingHover && (
-          <div className="w-full">
-            <div className="bg-[#fff]">
-              <div className="flex p-3">
-                <div className="h-5 rounded-lg bg-gray-100 w-[5%]" />
-                <div className="h-5 ml-3 rounded-lg bg-gray-100 w-[95%] " />
-              </div>
-              <div className="flex mt-1 p-3">
-                <div className="h-5 rounded-lg bg-gray-100 w-[5%]" />
-                <div className="h-5 ml-3 rounded-lg bg-gray-100 w-[95%] " />
-              </div>
-              <div className="flex mt-1 p-3">
-                <div className="h-5 rounded-lg bg-gray-100 w-[5%]" />
-                <div className="h-5 ml-3 rounded-lg bg-gray-100 w-[95%] " />
-              </div>
-              <div className="flex mt-1 p-3">
-                <div className="h-5 rounded-lg bg-gray-100 w-[5%]" />
-                <div className="h-5 ml-3 rounded-lg bg-gray-100 w-[95%] " />
-              </div>
-              <div className="flex mt-1 p-3">
-                <div className="h-5 rounded-lg bg-gray-100 w-[5%]" />
-                <div className="h-5 ml-3 rounded-lg bg-gray-100 w-[95%] " />
-              </div>
-              <div className="flex mt-1 p-3">
-                <div className="h-5 rounded-lg bg-gray-100 w-[5%]" />
-                <div className="h-5 ml-3 rounded-lg bg-gray-100 w-[95%] " />
-              </div>
-            </div>
+              {!loading && (
+                <tbody {...getTableBodyProps()}>
+                  {rows.map((row, i) => {
+                    prepareRow(row);
+                    return (
+                      <tr
+                        key={i}
+                        {...row.getRowProps()}
+                        className={`${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}border-b hover:bg-slate-100`}
+                      >
+                        {row.cells.map((cell, idx) => (
+                          <td key={idx} {...cell.getCellProps()} className="py-2 px-6">
+                            {cell.render('Cell')}
+                          </td>
+                        ))}
+                        {hasButtonAction && (
+                          <td className="text-black py-1 px-6">
+                            <Link
+                              hidden={row.original.status !== 'PENDING'}
+                              type="submit"
+                              to="/inbound"
+                              px={8}
+                              size="sm"
+                              className="text-white bg-gradient-to-r from-processbtnfrom to-processbtnto hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2"
+                            >
+                              Process
+                            </Link>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              )}
+            </table>
+
+            {loading && (
+              <Stack>
+                <div className="flex p-3 gap-2">
+                  <Skeleton height="20px" width="5%" />
+                  <Skeleton height="20px" width="95%" />
+                </div>
+                <div className="flex p-3 gap-2">
+                  <Skeleton height="20px" width="5%" />
+                  <Skeleton height="20px" width="95%" />
+                </div>
+                <div className="flex p-3 gap-2">
+                  <Skeleton height="20px" width="5%" />
+                  <Skeleton height="20px" width="95%" />
+                </div>
+                <div className="flex p-3 gap-2">
+                  <Skeleton height="20px" width="5%" />
+                  <Skeleton height="20px" width="95%" />
+                </div>
+              </Stack>
+            )}
+
+            <nav className="flex justify-between items-center bg-white pl-4" aria-label="Table navigation">
+              <span className="text-sm font-normal text-gray-500 ">
+                {totalData <= 0 ? null : (
+                  <>
+                    Showing <span className="font-semibold text-gray-900 ">{`${limit * (pages - 1) + 1} - `}</span>
+                    <span className="font-semibold text-gray-900">
+                      {pages * limit > totalData ? totalData : pages * limit}
+                    </span>{' '}
+                    of <span className="font-semibold text-gray-900 ">{totalData}</span>
+                  </>
+                )}
+              </span>
+              <ul className="inline-flex items-center text-sm -space-x-px py-4 mr-8">
+                <li>
+                  <button
+                    type="button"
+                    disabled={pages === 1}
+                    onClick={() => (pages === 1 ? {} : changePage(pages - 1))}
+                    className="block py-2 px-3 ml-0 leading-tight text-gray-500 bg-white disabled:text-gray-300 disabled:hover:bg-white hover:bg-gray-100 hover:text-gray-700"
+                  >
+                    <span className="sr-only">Previous</span>
+                    <ChevronLeftIcon className="w-5 h-5" />
+                  </button>
+                </li>
+                {lastPage > 7 && pages >= 4 && (
+                  <>
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => changePage(1)}
+                        className="py-2 px-3 leading-tight text-black rounded-lg bg-gray-100 mr-1  hover:bg-gray-700 hover:text-white"
+                      >
+                        1
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        type="button"
+                        className="py-2 px-3 leading-tight text-black rounded-lg mr-0.5 bg-gray-100 hover:bg-gray-700 hover:text-white"
+                      >
+                        ...
+                      </button>
+                    </li>
+                  </>
+                )}
+                {Array(
+                  lastPage > 7 && lastPage - pages < 3
+                    ? 5
+                    : lastPage > 7 && pages >= 4
+                    ? 3
+                    : lastPage > 7
+                    ? 5
+                    : lastPage
+                )
+                  .fill('')
+                  .map((_, i) => {
+                    const p =
+                      lastPage > 7 && lastPage - pages < 3 ? lastPage - 4 : lastPage > 7 && pages >= 4 ? pages - 1 : 1;
+                    return (
+                      <li key={i}>
+                        <button
+                          type="button"
+                          disabled={pages === i + p}
+                          onClick={() => changePage(i + p)}
+                          className={`${
+                            pages === i + p ? 'bg-secondarydeepo text-white' : 'bg-thead'
+                          } py-2 px-3 mx-0.5 leading-tight text-black bg-secondarydeepo rounded-lg hover:bg-thead hover:text-white disabled:text-white`}
+                        >
+                          {i + p}
+                        </button>
+                      </li>
+                    );
+                  })}
+                {lastPage > 7 && lastPage - pages >= 3 && (
+                  <>
+                    <li>
+                      <button
+                        type="button"
+                        className="py-2 px-3 mr-1 ml-0.5 leading-tight text-black rounded-lg bg-gray-100 hover:bg-gray-700 hover:text-white"
+                      >
+                        ...
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => changePage(lastPage)}
+                        className="py-2 px-3 leading-tight text-black rounded-lg bg-gray-100 hover:bg-gray-700 hover:text-white"
+                      >
+                        {lastPage}
+                      </button>
+                    </li>
+                  </>
+                )}
+                <li>
+                  <button
+                    type="button"
+                    disabled={pages === lastPage}
+                    onClick={() => (pages === lastPage ? {} : changePage(pages + 1))}
+                    className="block py-2 px-3 leading-tight text-gray-500 bg-white disabled:text-gray-300 disabled:hover:bg-white hover:bg-gray-100 hover:text-gray-700"
+                  >
+                    <span className="sr-only">Next</span>
+                    {totalData <= 0 ? null : <ChevronRightIcon className="w-5 h-5" />}
+                  </button>
+                </li>
+              </ul>
+            </nav>
           </div>
-        )}
-
-        <nav className="flex justify-between items-center bg-white pl-4" aria-label="Table navigation">
-          <span className="text-sm font-normal text-gray-500 ">
-            {totalData <= 0 ? null : (
-              <>
-                Showing <span className="font-semibold text-gray-900 ">{`${limit * (pages - 1) + 1} - `}</span>
-                <span className="font-semibold text-gray-900">
-                  {pages * limit > totalData ? totalData : pages * limit}
-                </span>{' '}
-                of <span className="font-semibold text-gray-900 ">{totalData}</span>
-              </>
-            )}
-          </span>
-          <ul className="inline-flex items-center text-sm -space-x-px py-4 mr-8">
-            <li>
-              <button
-                type="button"
-                disabled={pages === 1}
-                onClick={() => (pages === 1 ? {} : changePage(pages - 1))}
-                className="block py-2 px-3 ml-0 leading-tight text-gray-500 bg-white disabled:text-gray-300 disabled:hover:bg-white hover:bg-gray-100 hover:text-gray-700"
-              >
-                <span className="sr-only">Previous</span>
-                <ChevronLeftIcon className="w-5 h-5" />
-              </button>
-            </li>
-            {lastPage > 7 && pages >= 4 && (
-              <>
-                <li>
-                  <button
-                    type="button"
-                    onClick={() => changePage(1)}
-                    className="py-2 px-3 leading-tight text-black rounded-lg bg-gray-100 mr-1  hover:bg-gray-700 hover:text-white"
-                  >
-                    1
-                  </button>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    className="py-2 px-3 leading-tight text-black rounded-lg mr-0.5 bg-gray-100 hover:bg-gray-700 hover:text-white"
-                  >
-                    ...
-                  </button>
-                </li>
-              </>
-            )}
-            {Array(
-              lastPage > 7 && lastPage - pages < 3 ? 5 : lastPage > 7 && pages >= 4 ? 3 : lastPage > 7 ? 5 : lastPage
-            )
-              .fill('')
-              .map((_, i) => {
-                const p =
-                  lastPage > 7 && lastPage - pages < 3 ? lastPage - 4 : lastPage > 7 && pages >= 4 ? pages - 1 : 1;
-                return (
-                  <li key={i}>
-                    <button
-                      type="button"
-                      disabled={pages === i + p}
-                      onClick={() => changePage(i + p)}
-                      className={`${
-                        pages === i + p ? 'bg-secondarydeepo text-white' : 'bg-thead'
-                      } py-2 px-3 mx-0.5 leading-tight text-black bg-secondarydeepo rounded-lg hover:bg-thead hover:text-white disabled:text-white`}
-                    >
-                      {i + p}
-                    </button>
-                  </li>
-                );
-              })}
-            {lastPage > 7 && lastPage - pages >= 3 && (
-              <>
-                <li>
-                  <button
-                    type="button"
-                    className="py-2 px-3 mr-1 ml-0.5 leading-tight text-black rounded-lg bg-gray-100 hover:bg-gray-700 hover:text-white"
-                  >
-                    ...
-                  </button>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    onClick={() => changePage(lastPage)}
-                    className="py-2 px-3 leading-tight text-black rounded-lg bg-gray-100 hover:bg-gray-700 hover:text-white"
-                  >
-                    {lastPage}
-                  </button>
-                </li>
-              </>
-            )}
-            <li>
-              <button
-                type="button"
-                disabled={pages === lastPage}
-                onClick={() => (pages === lastPage ? {} : changePage(pages + 1))}
-                className="block py-2 px-3 leading-tight text-gray-500 bg-white disabled:text-gray-300 disabled:hover:bg-white hover:bg-gray-100 hover:text-gray-700"
-              >
-                <span className="sr-only">Next</span>
-                {totalData <= 0 ? null : <ChevronRightIcon className="w-5 h-5" />}
-              </button>
-            </li>
-          </ul>
-        </nav>
-      </div>
-    </>
+        </div>
+      )}
+    </Fade>
   );
 }
 
