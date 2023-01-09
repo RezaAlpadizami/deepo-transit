@@ -18,8 +18,6 @@ import { toCalculate } from '../../../utils/helper';
 import Select from '../../../components/select-component';
 import TableCh from './table';
 
-const totalRFID = 110;
-
 const swalButton = Swal.mixin({
   customClass: {
     confirmButton: 'rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold w-20',
@@ -28,106 +26,138 @@ const swalButton = Swal.mixin({
   },
   buttonsStyling: false,
 });
-const storage = yup.object({
-  rack: yup.string().test('rack', 'Rack is required', value => {
-    // console.log('rack value', value);
-    if (value) {
-      return true;
-    }
-    return false;
-  }),
-  // .required(), .required() .required() .required()
-  bay: yup.string().test('bay', 'Bay is required', value => {
-    if (value) {
-      return true;
-    }
-    return false;
-  }),
-  level: yup.string().test('level', 'Level is required', value => {
-    if (value) {
-      return true;
-    }
-    return false;
-  }),
-  child_qty: yup.string(),
-});
-
-const schema = yup.object({
-  details: yup
-    .array()
-    .of(storage)
-    .min(1, 'must have at least one data')
-    .test('details', 'total of splitted quantity must be the same with the actual quantity', function (value) {
-      let pass = true;
-
-      const { isSplitted, currentProductId } = this.parent;
-      // console.log('this.parent', this.parent);
-
-      if (isSplitted) {
-        // const filterBy = filters.map(f => { filters
-        //   return value.filter(i => i.product_id === f);
-        // });
-        if (value.length > 0) {
-          // filterBy.length > 0 &&
-          // const parentQty = filterBy.map(item => {
-          //   const quantities = item.map(x => {
-          //     if (x.qty) {
-          //       return { qty: x.qty, product_id: x.product_id };
-          //     }
-          //     return x.qty;
-          //   });
-
-          //   return quantities.find(i => i !== undefined);
-          // });
-
-          // const childQty = filterBy.map((item, idx) => {
-          //   return { calc: toCalculate(item, 'child_qty'), product_id: filters[idx] };
-          // });
-
-          const val = toCalculate(
-            value.filter(i => i.product_id === currentProductId),
-            'child_qty'
-          );
-          // if (parent?.product_id === currentProductId && child?.product_id === currentProductId) {
-          if (value.filter(i => i.qty).find(i => i.product_id === currentProductId)?.qty === val) {
-            return pass;
-          }
-          pass = false;
-
-          // parentQty.map((item, idx) => {
-          //   console.log('item', item);
-          //   if (item.qty && item.product_id === currentProductId) {
-          //     if (childQty[idx]?.product_id === item.product_id) {
-          //       if (item.qty === childQty[idx].calc) {
-          //         console.log('childQty[idx].calc', item.qty === childQty[idx].calc);
-          //         return pass;
-          //       }
-          //     }
-          //   } else {
-
-          //     pass = false;
-          //   }
-
-          //   return pass;
-          // });
-          // } else {
-          // }
-        }
-      }
-
-      return pass;
-    }),
-});
 
 function Screen() {
+  const storage = yup.object({
+    rack: yup.string().test('rack', 'rack is required', value => {
+      if (value) {
+        return true;
+      }
+      return false;
+    }),
+
+    level: yup
+      .string()
+      .test('level', 'level is required', value => {
+        if (value) {
+          return true;
+        }
+        return false;
+      })
+      .test('level', 'cannot select the same level with the same bay in one rack', (value, context) => {
+        const parentsData = context.from[1].value;
+
+        const { details, onChangeRack, onChangeBay, onChangeLevel } = parentsData;
+        const comparison = details.filter(i => i.rack !== '' && i.bay !== '' && i.level !== '');
+
+        const failed = [];
+        const success = [];
+        comparison.map((i, idx) => {
+          if (i.product_id !== onChangeRack.item.product_id) {
+            if (i.rack === onChangeRack.rack) {
+              if (i.bay === onChangeBay.bay) {
+                if (i.rack === onChangeLevel.level) {
+                  failed.push({ state: false, index: idx });
+                } else {
+                  success.push({ state: true, index: idx });
+                }
+              }
+            }
+          }
+          return i;
+        });
+
+        if (failed.every(i => i.state === true)) {
+          return true;
+        }
+        if (success.every(i => i.state === false)) {
+          return false;
+        }
+        return false;
+      }),
+
+    bay: yup
+      .string()
+      .test('bay', 'bay is required', value => {
+        if (value) {
+          return true;
+        }
+        return false;
+      })
+      .test('bay', 'cannot select the same bay at the same level in one rack', (value, context) => {
+        const parentsData = context.from[1].value;
+
+        const { details, onChangeBay, onChangeRack, onChangeLevel } = parentsData;
+        const comparison = details.filter(i => i.rack !== '' && i.bay !== '' && i.level !== '');
+        // const currentProduct = details.filter(i => i.product_id === onChangeLevel.item.product_id);
+
+        const failed = [];
+        const success = [];
+        comparison.map((i, idx) => {
+          if (i.product_id !== onChangeRack.item.product_id) {
+            if (i.rack === onChangeRack.rack) {
+              if (i.bay === onChangeBay.bay) {
+                if (i.rack === onChangeLevel.level) {
+                  failed.push({ state: false, index: idx });
+                } else {
+                  success.push({ state: true, index: idx });
+                }
+              }
+            }
+          }
+          return i;
+        });
+
+        if (failed.every(i => i.state === true)) {
+          return true;
+        }
+        if (success.every(i => i.state === false)) {
+          return false;
+        }
+        return false;
+      }),
+
+    child_qty: yup.string(),
+  });
+
+  const schema = yup.object({
+    details: yup
+      .array()
+      .of(storage)
+      .min(1, 'must have at least one data')
+      .test('details', 'total of splitted quantity must be the same with the actual quantity', (value, context) => {
+        let pass = true;
+
+        const { isSplitted, currentProductId } = context.parent;
+
+        if (isSplitted) {
+          if (value.length > 0) {
+            const val = toCalculate(
+              value.filter(i => i.product_id === currentProductId),
+              'child_qty'
+            );
+
+            if (value.filter(i => i.qty).find(i => i.product_id === currentProductId)?.qty === val) {
+              return pass;
+            }
+            pass = false;
+          }
+        } else {
+          pass = true;
+        }
+
+        return pass;
+      }),
+  });
+
   const {
     register,
     control,
     handleSubmit,
     setValue,
-    // getValues,
     watch,
     formState: { errors },
+    setError,
     reset,
   } = useForm({
     resolver: yupResolver(schema),
@@ -139,16 +169,12 @@ function Screen() {
     name: 'details',
   });
 
-  const defaultSort = {
-    sort_by: 'id',
-    sort_order: 'desc',
-  };
   const [requestDetailData, setRequestDetailData] = useState([]);
   const [transitData, setTransitData] = useState([]);
   const [storageData, setStorageData] = useState([]);
-  const [bayLevel, setBayLevel] = useState([]);
+  const [rfidData, setRfidData] = useState([]);
   const [newData, setNewData] = useState([]);
-  const [data, setData] = useState([]);
+
   const [loadingRequest, setLoadingRequest] = useState(false);
   const [loadingTransit, setLoadingTransit] = useState(false);
   const [loadingRFID, setLoadingRFID] = useState(false);
@@ -157,26 +183,26 @@ function Screen() {
   const [scanning, setScanning] = useState(false);
   const [isSplit, setIsSplit] = useState(false);
   const [onOpen, setOnOpen] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setErrors] = useState(false);
+
   const [requestId, setRequestId] = useState('');
   const [notes, setNotes] = useState('');
   const [totalRequest, setTotalRequest] = useState(0);
   const [counter, setCounter] = useState(2);
-  const [splitValue, setSplitValue] = useState({});
-
   const [timer, setTimer] = useState();
+  const [splitValue, setSplitValue] = useState({});
   const [filterParams, setFilterParams] = useState({
     warehouse_id: 2,
   });
-
-  useEffect(() => {
-    getDetailRequest();
-  }, []);
+  const [filterBay, setFilterBay] = useState({
+    warehouse_id: 2,
+  });
+  const totalRFID = rfidData.length;
 
   useEffect(() => {
     if (requestId !== '') {
       setLoadingRequest(true);
-
+      setLoadingRFID(true);
       RequestApi.find(requestId)
         .then(res => {
           const filterByProductId = [
@@ -191,6 +217,7 @@ function Screen() {
           setTotalRequest(toCalculate(res.detail, 'qty'));
           setRequestDetailData(res.detail);
           setLoadingRequest(false);
+          setLoadingRFID(false);
         })
         .catch(error => {
           Swal.fire({ text: error?.message, icon: 'error' });
@@ -205,7 +232,7 @@ function Screen() {
         fields.map((item, index) => {
           if (splitValue.product_id === item.product_id) {
             item.index = index;
-            // item.is_latest = fields.filter(i => i.product_id === item.product_id).length === index + 1;
+
             if (item.child_qty !== splitValue.value) {
               item.child_qty = splitValue.value;
             }
@@ -230,22 +257,30 @@ function Screen() {
     if (newData.length > 0) {
       setValue('details', newData);
     }
+    if (newData.filter(i => i.child_qty).length === 0) {
+      setIsSplit(false);
+      setValue('isSplitted', false);
+    }
   }, [newData]);
 
   const startScanning = () => {
     setScanning(true);
+    if (rfidData.length !== 0) {
+      setRfidData([]);
+    } else {
+      setTimer(
+        setInterval(() => {
+          TransitApi.get()
+            .then(res => {
+              setRfidData(res.data);
+            })
+            .catch(error => {
+              Swal.fire({ text: error?.message, icon: 'error' });
+            });
+        }, 5000)
+      );
+    }
 
-    setTimer(
-      setInterval(() => {
-        TransitApi.get()
-          .then(res => {
-            console.log('TransitApi', res);
-          })
-          .catch(error => {
-            Swal.fire({ text: error?.message, icon: 'error' });
-          });
-      }, 5000)
-    );
     setIsScanned(false);
   };
   const stopScanning = () => {
@@ -258,48 +293,43 @@ function Screen() {
     Promise.allSettled([
       StorageApi.get({ warehouse_id: 2 }).then(res => res),
       StorageApi.get(filterParams).then(res => res),
+      StorageApi.get(filterBay).then(res => res),
     ])
       .then(result => {
-        console.log('resultult', result);
         setStorageData(result[0].value.data);
-        setBayLevel(result[1].value.data);
+        setValue('storageData', result[0].value.data);
+
+        setIsSplit(false);
       })
       .catch(error => {
         Swal.fire({ text: error?.message || error?.data?.message, icon: 'error' });
       });
-  }, [filterParams]);
+  }, [filterParams, filterBay]);
 
-  const getDetailRequest = () => {
-    setLoadingRFID(true);
-    RequestApi.get({ ...defaultSort })
-      .then(res => {
-        setData(res.data);
-        setLoadingRFID(false);
-      })
-      .catch(error => {
-        Swal.fire({ text: error?.message || error?.data?.error, icon: 'error' });
-      });
-  };
-
-  const onChangeValue = rack => {
-    console.log('eeee', rack);
+  const onChangeValue = (rack, item, index) => {
+    const onChangeData = { rack, item, idx: index };
+    setValue('onChangeRack', onChangeData);
 
     if (rack) {
       setFilterParams(prev => ({
         ...prev,
         rack_number: rack,
       }));
-    } else {
-      setBayLevel([]);
     }
   };
-  const onChangeBay = bay => {
+  const onChangeBay = (bay, item, index) => {
+    const onChangeData = { bay, item, idx: index };
+    setValue('onChangeBay', onChangeData);
     if (bay) {
-      setFilterParams(prev => ({
+      setFilterBay(prev => ({
         ...prev,
         bay,
       }));
     }
+  };
+  const onChangeLevel = (level, item, index) => {
+    const onChangeData = { level, item, idx: index };
+    setValue('onChangeLevel', onChangeData);
   };
 
   const onSplit = (id, qty, index) => {
@@ -444,17 +474,6 @@ function Screen() {
               setCounter(2);
             }
           }
-          // else if (id === currentProductId) {
-          //   if (fieldLength > 1 && fields.findIndex(i => i.product_id === id && i.resividual_qty)) {
-          //     remove(fields.findIndex(i => i.product_id === id && i.resividual_qty));
-          //     insert(
-          //       fields.findIndex(i => i.product_id === id && i.resividual_qty),
-          //       value
-          //     );
-          //     insert(fields.findIndex(i => i.product_id === id && i.resividual_qty) + 1, value);
-          //     setSplitValue(splitVal);
-          //   }
-          // }
         } else if (fieldLengthMore > 0 && fieldLength > 0) {
           if (id === currentProductId) {
             if (qty % counter !== 0) {
@@ -527,12 +546,12 @@ function Screen() {
       }
     }
   };
-  // console.log('COUTER OUTSIDE', counter);
+
   const onRemove = (idx, id) => {
     const fieldLength = fields.filter(i => i.product_id === id).length;
     const dataIndex = newData[newData.findIndex((item, i) => i === idx)];
     const findData = fields.filter(i => i.qty)?.find(i => i.product_id === dataIndex.product_id);
-    // const findDataId = fields.filter(i => i.qty)?.find(i => i.product_id === id);
+
     const dt = fields.filter((item, i) => item.product_id === id && i !== idx && i !== idx - 1);
 
     const value = {
@@ -545,60 +564,47 @@ function Screen() {
     };
 
     if (counter <= 3 && fieldLength === 2) {
-      // console.log('test 1');
       delete findData.child_qty;
       setSplitValue(findData);
       remove(idx);
       setCounter(2);
     } else if (findData.qty % findData.child_qty === 0) {
-      // console.log('test 2');
       if (findData.qty % value.value !== 0) {
-        // console.log('test 3');
         remove(idx);
         remove(idx - 1);
         setSplitValue(values);
       } else {
         if (dt.length === 0) {
-          // console.log('test 4');
           delete findData.child_qty;
           setSplitValue(findData);
         } else {
-          // console.log('test 5');
           setSplitValue(value);
         }
         remove(idx);
       }
     } else if (findData.qty % findData.child_qty !== 0) {
-      // console.log('test 6');
       const resividualValue = {
         product_id: findData.product_id,
         value: Math.floor(findData.qty / dt.length),
         resividual_qty: Math.floor(findData.qty / dt.length),
       };
       if (findData.qty % value.value !== 0) {
-        // console.log('test 7');
         if (value.value !== resividualValue.value) {
-          // console.log('test 8');
           if (fields.findIndex(i => i.resividual_qty) !== -1) {
-            // console.log('test 9');
             if (newData.findIndex((item, i) => i === idx) === idx) {
-              // console.log('test 10');
               remove(newData.findIndex((item, i) => i === idx));
               remove(fields.findIndex(i => i.resividual_qty) - 1);
             } else {
-              // console.log('test 11');
               remove(fields.findIndex(i => i.resividual_qty));
               remove(idx - 1);
             }
             setSplitValue(values);
           } else {
-            // console.log('test 12');
             remove(idx);
             setSplitValue(values);
           }
         }
       } else {
-        // console.log('test 13');
         remove(idx);
         setSplitValue(values);
       }
@@ -610,12 +616,10 @@ function Screen() {
     if (totalRFID === totalRequest) {
       pass = true;
     } else {
-      setError(true);
+      setErrors(true);
       swalButton
         .fire({
-          title: 'NOTES',
-          html: '<b> Jumlah data pada Request Detail tidak sesuai dengan data pada RFID Detected. Lanjutkan proses ? <b>',
-          text: 'Notes',
+          html: '<b> NOTES </b> <br/> <p class="text-[15px]">The amount of data in Request Detail does not match the data in RFID Detected. Continue process?<p>',
           input: 'text',
           showCancelButton: true,
           confirmButtonColor: '#3085d6',
@@ -633,35 +637,92 @@ function Screen() {
             setNotes(result.value);
             append(transitData);
             setOnOpen(!pass);
-            setError(false);
+            setErrors(false);
           }
         });
     }
     return pass;
   };
-  const onProcess = idx => {
-    if (idx) {
-      setRequestId(idx);
+  const onProcess = id => {
+    if (id) {
+      setRequestId(id);
       setOnOverview(!onOverview);
     }
   };
 
+  const validateStorageId = data => {
+    let pass = false;
+    const datas = data.details.map(i => {
+      return storageData.find(f => f.rack_number === i.rack && f.bay === i.bay)?.id;
+    });
+
+    if (datas.includes(undefined)) {
+      if (datas.findIndex(i => i === undefined) !== -1) {
+        pass = false;
+
+        setError('details', {
+          type: 'error',
+          message: `this storage combination cannot be done in ${data.details
+            .find(
+              i =>
+                i.product_id ===
+                data.details.find((i, idx) => idx === datas.findIndex(i => i === undefined))?.product_id
+            )
+            ?.product_sku.toUpperCase()} `,
+        });
+      }
+    } else {
+      pass = true;
+    }
+
+    return pass;
+  };
+
+  const validateIsDuplicate = data => {
+    let pass = false;
+    const datas = data.details.map(i => {
+      return storageData.find(f => f.rack_number === i.rack && f.bay === i.bay)?.id;
+    });
+    if (datas) {
+      if (new Set(datas).size !== datas.length) {
+        pass = false;
+        setError('details', {
+          type: 'error',
+          message: `cannot contain duplicate storage id `,
+        });
+      } else {
+        pass = true;
+      }
+    }
+    return pass;
+  };
+
   const onFinalSubmit = data => {
-    const body = {
-      request_id: requestId,
-      notes,
-      details: [...data.details],
-    };
-    console.log('body', body);
-    TransitApi.inbound(body)
-      .then(res => {
-        console.log('res', res);
-        Swal.fire({ text: 'Sucessfully Saved', icon: 'success' });
-        // setOnOpen(!onOpen);
-      })
-      .catch(error => {
-        Swal.fire({ text: error?.message || error?.data?.message, icon: 'error' });
-      });
+    if (validateStorageId(data)) {
+      if (validateIsDuplicate(data)) {
+        const body = {
+          request_id: requestId,
+          notes,
+          detail: data.details.map(i => {
+            return {
+              product_id: i.product_id,
+              warehouse_id: 2,
+              storage_id: storageData.find(f => f.rack_number === i.rack && f.bay === i.bay && f.level === i.level)?.id,
+              qty: i.child_qty ? i.child_qty : i.qty,
+            };
+          }),
+        };
+
+        TransitApi.inbound(body)
+          .then(() => {
+            Swal.fire({ text: 'Sucessfully Saved', icon: 'success' });
+            setOnOpen(!onOpen);
+          })
+          .catch(error => {
+            Swal.fire({ text: error?.message || error?.data?.message, icon: 'error' });
+          });
+      }
+    }
   };
 
   const deleteDuplicates = (array, key) => {
@@ -669,23 +730,46 @@ function Screen() {
     return array.filter(obj => !data.has(obj[key]) && data.add(obj[key]));
   };
 
+  const onReset = () => {
+    setLoadingRequest(true);
+    setLoadingRFID(true);
+    setIsScanned(false);
+    setRequestDetailData([]);
+    setRfidData([]);
+    setRequestId('');
+    setValue('activity_date_from', null);
+    setValue('request_number', '');
+    setTimeout(() => {
+      setLoadingRequest(false);
+      setLoadingRFID(false);
+    }, 500);
+  };
   return (
     <div className="bg-white p-5 rounded-[55px] shadow">
       <input type="hidden" {...register('filters')} />
-      <input type="hidden" {...register('quantity')} />
-      <input type="hidden" {...register('isSplitted')} />
+      <input type="hidden" {...register('isSplitted')} value={isSplit} />
       <input type="hidden" {...register('currentProductId')} />
-      <input type="hidden" {...register('bay_level')} />
+      <input type="hidden" {...register('onChangeRack')} />
+      <input type="hidden" {...register('onChangeBay')} />
+      <input type="hidden" {...register('onChangeLevel')} />
+
       <fieldset className="border border-primarydeepo w-full h-full px-8 rounded-[55px] pb-6">
         <legend className="px-2 text-[28px] text-primarydeepo font-semibold">Request</legend>
         <div className="grid grid-cols-8 gap-6">
           <button
             type="submit"
             onClick={() => setOnOverview(!onOverview)}
-            className="bg-processbtnfrom  h-[100px] w-[110px] rounded-lg grid place-content-center ml-6 mt-2 col-span-2 mt-2"
+            className={`${
+              scanning ? 'bg-[#ffc108]' : 'bg-processbtnfrom'
+            }  h-[100px] w-[110px] rounded-lg grid place-content-center ml-6 mt-2 col-span-2 mt-2`}
+            disabled={scanning}
           >
             <p className="text-lg text-[#fff] font-bold mb-2">Request</p>
-            <CalculatorIcon className="h-10 w-15 bg-processbtnfrom stroke-[#fff] mx-auto" />
+            <CalculatorIcon
+              className={`${
+                scanning ? 'bg-[#ffc108]' : 'bg-processbtnfrom'
+              } h-10 w-15 bg-processbtnfrom stroke-[#fff] mx-auto`}
+            />
           </button>
 
           <div className="col-span-3">
@@ -719,8 +803,8 @@ function Screen() {
         </fieldset>
         <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
           <legend className="px-2 text-[28px] text-primarydeepo font-semibold">RFID Detected</legend>
-          <LoadingComponent visible={loadingRequest} />
-          {!loadingRFID ? <TableCh data={data} /> : null}
+          <LoadingComponent visible={loadingRFID} />
+          {!loadingRFID ? <TableCh data={rfidData} /> : null}
         </fieldset>
       </div>
       <div
@@ -737,7 +821,7 @@ function Screen() {
             <div className="font-bold">{totalRequest}</div>
             <div className="font-bold">{totalRFID}</div>
           </div>
-          <div className="flex py-4">
+          <div className="flex py-2">
             <Button
               _hover={{
                 shadow: 'md',
@@ -747,9 +831,10 @@ function Screen() {
               }}
               type="button"
               size="sm"
-              px={10}
+              px={6}
               className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
               onClick={scanning ? stopScanning : startScanning}
+              disabled={requestDetailData.length === 0}
             >
               {scanning ? <StopIcon className="h-6 animate-pulse" /> : <p className="tracking-wide">Scan</p>}
             </Button>
@@ -761,14 +846,31 @@ function Screen() {
                 transitionDuration: '0.2s',
                 transitionTimingFunction: 'ease-in-out',
               }}
+              type="button"
+              size="sm"
+              px={6}
+              className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold mx-4"
+              onClick={onReset}
+              disabled={scanning}
+            >
+              <p className="tracking-wide">Reset</p>
+            </Button>
+
+            <Button
+              _hover={{
+                shadow: 'md',
+                transform: 'translateY(-5px)',
+                transitionDuration: '0.2s',
+                transitionTimingFunction: 'ease-in-out',
+              }}
               type="submit"
               size="sm"
-              px={8}
-              className="ml-4 rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold"
+              px={6}
+              className="rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold"
               onClick={onSubmitRFID}
               disabled={!isScanned}
             >
-              Submit
+              Next
             </Button>
           </div>
         </div>
@@ -817,7 +919,7 @@ function Screen() {
                   { header: ' ', value: ' ', type: 'action-button' },
                 ]}
                 onSearch
-                onActionButton={(idx, data) => onProcess(idx, data)}
+                onActionButton={(id, data) => onProcess(id, data)}
               />
             </div>
           </div>
@@ -854,7 +956,19 @@ function Screen() {
                       fields.map((item, index) => {
                         return (
                           <tr key={item.id} className={`${index % 2 ? 'bg-gray-100' : ''} w-full`}>
-                            <td className="w-10 text-center px-2">{index + 1}</td>
+                            <td className="w-10 text-center px-2">
+                              {index + 1}
+                              <Controller
+                                render={({ field }) => {
+                                  return (
+                                    <Input variant="unstyled" {...field} disabled className="hidden" value={index} />
+                                  );
+                                }}
+                                name="index"
+                                className="hidden"
+                                control={control}
+                              />
+                            </td>
                             <td className="w-20 text-center px-2">
                               {item.product_sku}
                               <Controller
@@ -909,7 +1023,7 @@ function Screen() {
                                       )}
                                       onChangeValue={e => {
                                         field.onChange(e);
-                                        onChangeValue(e);
+                                        onChangeValue(e, item, index);
                                       }}
                                       register={register}
                                       control={control}
@@ -923,29 +1037,27 @@ function Screen() {
                             </td>
                             <td className="w-24 px-2">
                               <Controller
-                                render={() => {
+                                {...register(`details.${index}.bay`)}
+                                render={({ field }) => {
                                   return (
                                     <Select
                                       name={`details.${index}.bay`}
                                       idx={index}
                                       placeholder="Bay"
                                       booleans={isSplit}
-                                      options={
-                                        bayLevel.length === 0
-                                          ? storageData?.map(s => {
-                                              return {
-                                                label: s.bay,
-                                                value: s.bay,
-                                              };
-                                            })
-                                          : bayLevel.map(i => {
-                                              return {
-                                                label: i.bay,
-                                                value: i.bay,
-                                              };
-                                            })
-                                      }
-                                      onChangeValue={e => onChangeBay(e)}
+                                      options={deleteDuplicates(
+                                        storageData.map(i => {
+                                          return {
+                                            label: i.bay,
+                                            value: i.bay,
+                                          };
+                                        }),
+                                        'label'
+                                      )}
+                                      onChangeValue={e => {
+                                        field.onChange(e);
+                                        onChangeBay(e, item, index);
+                                      }}
                                       register={register}
                                       control={control}
                                       errors={errors}
@@ -958,28 +1070,26 @@ function Screen() {
                             </td>
                             <td className="w-24 px-2">
                               <Controller
-                                render={() => {
+                                render={({ field }) => {
                                   return (
                                     <Select
                                       name={`details.${index}.level`}
                                       idx={index}
                                       placeholder="Level"
                                       booleans={isSplit}
-                                      options={
-                                        bayLevel.length === 0
-                                          ? storageData?.map(s => {
-                                              return {
-                                                label: s.level,
-                                                value: s.level,
-                                              };
-                                            })
-                                          : bayLevel.map(i => {
-                                              return {
-                                                label: i.level,
-                                                value: i.level,
-                                              };
-                                            })
-                                      }
+                                      options={deleteDuplicates(
+                                        storageData.map(i => {
+                                          return {
+                                            label: i.level,
+                                            value: i.level,
+                                          };
+                                        }),
+                                        'label'
+                                      )}
+                                      onChangeValue={e => {
+                                        field.onChange(e);
+                                        onChangeLevel(e, item, index);
+                                      }}
                                       register={register}
                                       control={control}
                                       errors={errors}
@@ -1028,7 +1138,6 @@ function Screen() {
                                   Split
                                 </Button>
                               ) : (
-                                // item.is_latest ?
                                 <Button
                                   px={6}
                                   size="sm"
