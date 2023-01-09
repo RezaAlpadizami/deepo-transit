@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useContext } from 'react';
 import XLSX from 'xlsx';
 import Moment from 'moment';
 import Swal from 'sweetalert2';
@@ -18,6 +18,7 @@ import TableComponent from './table-component';
 import DatePicker from './datepicker-component';
 import Toolbar from './action-toolbar-component';
 import LoadingHover from './loading-hover-component';
+import Context from '../context';
 
 function DataTable(props) {
   const {
@@ -47,6 +48,7 @@ function DataTable(props) {
     formState: { errors },
   } = useForm();
 
+  const { store } = useContext(Context);
   const [pages, setPages] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [datas, setDatas] = useState([]);
@@ -304,8 +306,8 @@ function DataTable(props) {
     function s2ab(data) {
       const buf = new ArrayBuffer(data.length);
       const view = new Uint8Array(buf);
-      // eslint-disable-next-line no-bitwise,
-      for (let i = 0; i < data.length; i += 1) view[i] = data.charCodeAt(i) & 0xff;
+
+      for (let i = 0; i < data.length; i += 1) view[i] = data.charCodeAt(i) && 0xff;
       return buf;
     }
     setTimeout(() => {
@@ -610,7 +612,10 @@ function DataTable(props) {
                           <td className="text-black py-1 px-6">
                             <Link
                               hidden={row.original.status !== 'PENDING'}
-                              type="submit"
+                              type="button"
+                              onClick={() => {
+                                store.setRequestNumber(row.original.id);
+                              }}
                               to="/inbound"
                               px={8}
                               size="sm"

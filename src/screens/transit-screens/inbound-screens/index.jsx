@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Input, Button, Fade } from '@chakra-ui/react';
 import { useFieldArray, useForm, Controller } from 'react-hook-form';
 import * as yup from 'yup';
@@ -7,6 +7,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { CalculatorIcon, XIcon } from '@heroicons/react/outline';
 import Moment from 'moment';
 import { StopIcon } from '@heroicons/react/solid';
+
 import { RequestApi, TransitApi } from '../../../services/api-transit';
 import InputComponent from '../../../components/input-component';
 import DatePicker from '../../../components/datepicker-component';
@@ -17,6 +18,8 @@ import LoadingComponent from '../../../components/loading-component';
 import { toCalculate } from '../../../utils/helper';
 import Select from '../../../components/select-component';
 import TableCh from './table';
+import Context from '../../../context';
+import LoadingHover from '../../../components/loading-hover-component';
 
 const swalButton = Swal.mixin({
   customClass: {
@@ -163,6 +166,8 @@ function Screen() {
     resolver: yupResolver(schema),
   });
 
+  const { store } = useContext(Context);
+
   const { currentProductId } = watch();
   const { fields, append, remove, insert, update } = useFieldArray({
     control,
@@ -177,6 +182,7 @@ function Screen() {
 
   const [loadingRequest, setLoadingRequest] = useState(false);
   const [loadingTransit, setLoadingTransit] = useState(false);
+  const [loadingHover, setLoadingHover] = useState(false);
   const [loadingRFID, setLoadingRFID] = useState(false);
   const [onOverview, setOnOverview] = useState(false);
   const [isScanned, setIsScanned] = useState(false);
@@ -200,7 +206,14 @@ function Screen() {
   const totalRFID = rfidData.length;
 
   useEffect(() => {
+    if (store?.getRequestNumber()) {
+      setRequestId(store?.getRequestNumber());
+    }
+  }, [store]);
+
+  useEffect(() => {
     if (requestId !== '') {
+      setLoadingHover(true);
       setLoadingRequest(true);
       setLoadingRFID(true);
       RequestApi.find(requestId)
@@ -218,6 +231,7 @@ function Screen() {
           setRequestDetailData(res.detail);
           setLoadingRequest(false);
           setLoadingRFID(false);
+          setLoadingHover(false);
         })
         .catch(error => {
           Swal.fire({ text: error?.message, icon: 'error' });
@@ -752,7 +766,7 @@ function Screen() {
       <input type="hidden" {...register('onChangeRack')} />
       <input type="hidden" {...register('onChangeBay')} />
       <input type="hidden" {...register('onChangeLevel')} />
-
+      {loadingHover && <LoadingHover left="[20%]" top="[9%]" />}
       <fieldset className="border border-primarydeepo w-full h-full px-8 rounded-[30px] pb-6">
         <legend className="px-2 text-[28px] text-primarydeepo font-semibold">Request</legend>
         <div className="grid grid-cols-8 gap-6">

@@ -8,9 +8,9 @@ const UserStore = types
     setProfile(profile) {
       self.roles = profile.roles;
     },
-    hasRole(role_name) {
+    hasRole(roleName) {
       let has = false;
-      if (role_name) {
+      if (roleName) {
         has = true;
       }
       return has;
