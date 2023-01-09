@@ -5,6 +5,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import Moment from 'moment/moment';
 import { Text, Button } from '@chakra-ui/react';
+import { ArrowNarrowLeftIcon } from '@heroicons/react/solid';
 
 import { RequestApi } from '../../../services/api-transit';
 import TextArea from '../../../components/textarea-component';
@@ -86,7 +87,13 @@ function Screen() {
 
   return (
     <div>
-      <div className="bg-white p-5 rounded-[55px] shadow py-12 drop-shadow-md">
+      <div className="bg-white p-5 rounded-[55px] shadow py-8 drop-shadow-md">
+        <div
+          className="cursor-pointer p-2 w-12 flex justify-center hover:bg-gray-200 hover:rounded-lg mb-4"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowNarrowLeftIcon className="w-6 h-6 text-secondarydeepo text-center" />
+        </div>
         <div className="grid-cols-2 gap-4 flex">
           <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
             <legend className="px-2 text-[28px] text-primarydeepo">Request</legend>

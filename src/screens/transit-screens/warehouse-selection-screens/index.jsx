@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import Swal from 'sweetalert2';
 import Cookies from 'universal-cookie';
 import { useForm } from 'react-hook-form';
 import { Text, Button } from '@chakra-ui/react';
+import LocalStorage from 'local-storage';
 
-import CookieService from '../../../services/api-master/cookie-service.js/cookie-service';
+import CookieService from '../../../services/cookies/cookie-service';
 import Input from '../../../components/input-component';
 import { WarehouseApi } from '../../../services/api-transit';
 import Search from '../../../assets/images/magnify-glass.svg';
@@ -14,10 +15,10 @@ function Screen() {
   const { register, control, handleSubmit } = useForm();
   const [warehouseData, setWarhouseData] = useState([]);
   const [isSelected, setIsSelected] = useState(-1);
+  const [isSelectedWarehouse, setIsSelectedWarehouse] = useState(null);
   const [filterData, setFilterData] = useState({
     limit: 10,
     offset: 0,
-    search: '',
   });
 
   const cookies = new Cookies();
@@ -48,6 +49,19 @@ function Screen() {
 
   const clickAddressCard = data => {
     setIsSelected(data.id);
+    setIsSelectedWarehouse(data);
+  };
+
+  const getDebounce = func => {
+    let timer;
+    return (...args) => {
+      const context = this;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        timer = null;
+        func.apply(context, args);
+      }, 500);
+    };
   };
 
   const handleContinue = () => {
@@ -55,7 +69,9 @@ function Screen() {
       path: '/',
       maxAge: 12 * 24 * 390,
     });
+    LocalStorage.set('Warehouse', JSON.stringify(isSelectedWarehouse));
     CookieService.getCookies('warehouse_id');
+
     window.location.reload();
   };
 
@@ -86,12 +102,14 @@ function Screen() {
     });
   };
 
+  const opt = useCallback(getDebounce(onSubmit), []);
+
   return (
     <div className="mt-6">
       <div className="flex justify-center mb-6">
         <h1 className="font-bold text-2xl">SELECT YOUR WORK AREA</h1>
       </div>
-      <form onChange={handleSubmit(onSubmit)}>
+      <form onChange={handleSubmit(opt)}>
         <Input
           name="search"
           placeholder="Search Warehouse or Location"
@@ -116,9 +134,7 @@ function Screen() {
                   >
                     <div className="text-[18px]">
                       <Text>{`${group.location} - ${d.name}`}</Text>
-                      <Text className="my-2">{`${
-                        d.address === undefined ? 'Jalan malam malam berbahaya' : d.address
-                      }`}</Text>
+                      <Text className="my-2">{`${d.address}`}</Text>
                       <Text>{`${d.phone}`}</Text>
                     </div>
                   </div>

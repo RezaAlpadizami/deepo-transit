@@ -7,7 +7,8 @@ import Swal from 'sweetalert2';
 import { Button, Text } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 
-import CookieService from '../../../services/api-master/cookie-service.js/cookie-service';
+import deleteIcon from '../../../assets/images/deleteItem.svg';
+import CookieService from '../../../services/cookies/cookie-service';
 import { ProductApi } from '../../../services/api-master';
 import { RequestApi } from '../../../services/api-transit';
 import Input from '../../../components/input-component';
@@ -33,7 +34,7 @@ function Screen() {
 
   const schemaAddProduct = yup.object().shape({
     product_id: yup.string().nullable().required(),
-    qty: yup.number().nullable().typeError('please input quantity').required(),
+    qty: yup.number().nullable().min(1, 'The minimum qty is one').typeError('please input quantity').required(),
   });
 
   const schemaSubmitRequest = yup.object().shape({
@@ -46,6 +47,7 @@ function Screen() {
     register: registerProd,
     control: controlProd,
     formState: { errors: errorsProd },
+    reset,
     handleSubmit: handleSubmitProd,
   } = useForm({
     resolver: yupResolver(schemaAddProduct),
@@ -85,20 +87,35 @@ function Screen() {
       };
     });
     setDataAdd(state => [...state, ...handleDataAdd]);
+    reset();
   };
 
-  const updateDataRequesById = Array.from(
-    dataAdd
-      .reduce((acc, { qty, ...r }) => {
-        const key = JSON.stringify(r);
-        const current = acc.get(key) || { ...r, qty: 0 };
-        return acc.set(key, { ...current, qty: current.qty + qty });
-      }, new Map())
-      .values()
+  const handleRemove = product_id => {
+    setDataAdd(dataAdd.filter(item => item.product_id !== product_id));
+  };
+
+  const updateDataUpdate = Object.values(
+    Array.isArray([])
+      ? dataAdd.reduce((accu, { product_id, ...item }) => {
+          if (!accu[product_id])
+            accu[product_id] = {
+              qty: 0,
+            };
+
+          accu[product_id] = {
+            product_id,
+            ...accu[product_id],
+            ...item,
+            qty: accu[product_id].qty + item.qty,
+          };
+
+          return accu;
+        }, {})
+      : []
   );
 
   const getTotalQty = Array.isArray([])
-    ? updateDataRequesById.reduce((accumulator, object) => {
+    ? updateDataUpdate.reduce((accumulator, object) => {
         return accumulator + object.qty;
       }, 0)
     : '-';
@@ -109,7 +126,7 @@ function Screen() {
       request_by: 'testing',
       warehouse_id: CookieService.getCookies('warehouse_id'),
       notes: data.notes,
-      detail: updateDataRequesById.map(data => {
+      detail: updateDataUpdate.map(data => {
         return {
           qty: data.qty,
           product_id: data.product_id,
@@ -130,7 +147,7 @@ function Screen() {
       .catch(error => {
         setLoading(false);
         if (error.message === 'Validation Failed') {
-          Swal.fire({ text: 'Please fill in Product or Qty fields', icon: 'error' });
+          Swal.fire({ text: 'Product or Qty still empty', icon: 'error' });
         } else {
           Swal.fire({ text: error?.message || error?.originalError, icon: 'error' });
         }
@@ -206,11 +223,24 @@ function Screen() {
               </div>
             </form>
             <div className="border-b border-primarydeepo my-6"> </div>
-            {updateDataRequesById?.length > 0 && (
+            {updateDataUpdate?.length > 0 && (
               <div>
-                {updateDataRequesById.map((val, id) => {
+                {updateDataUpdate.map((val, id) => {
                   return (
                     <div className="flex" key={id}>
+                      <div className="my-4 mr-4">
+                        <Button
+                          type="button"
+                          size="sm"
+                          bgColor="transparent"
+                          _hover={{
+                            bgColor: '#EBECF1',
+                          }}
+                          onClick={() => handleRemove(val.product_id)}
+                        >
+                          <img src={deleteIcon} alt="delete Icon" />
+                        </Button>
+                      </div>
                       <InputDetail
                         value={`SKU: ${val.product_sku}`}
                         label={`${val.product_name}`}
@@ -230,7 +260,7 @@ function Screen() {
             <div className="border-b border-primarydeepo my-6"> </div>
             <div className="flex justify-between font-bold">
               <Text>Total Product</Text>
-              <Text>{getTotalQty}</Text>
+              <Text className={`${getTotalQty < 1 ? 'hidden' : ''}`}>{getTotalQty}</Text>
             </div>
           </fieldset>
         </div>

@@ -264,26 +264,22 @@ function DataTable(props) {
             .catch(e => reject(e));
         });
       }),
-    ]).then(result => {
+    ]).then(res => {
       const success = [];
       const failed = [];
-      if (result.value) {
-        result.forEach(r => {
-          if (r.status === 'fulfilled') {
-            setLoadingHover(false);
-            success.push(true);
-          } else {
-            result.reason.data.error.api.map(m => failed.push(m));
-            failed.push(true);
-          }
-        });
-      } else if (result.value === 'undefined') {
-        Swal.fire({ text: `Something When Wrong`, icon: 'error' });
-      }
+      res.forEach(result => {
+        if (result.status === 'fulfilled') {
+          success.push(true);
+          setLoadingHover(false);
+        } else {
+          result.reason.data.error.api.map(m => failed.push(m));
+          failed.push(true);
+          setLoadingHover(false);
+        }
+      });
+
       if (success.length > 0) {
-        setTimeout(() => {
-          Swal.fire({ text: 'Data Deleted Successfully', icon: 'success' });
-        }, 500);
+        Swal.fire({ text: 'Data Deleted Successfully', icon: 'success' });
       } else if (failed.length > 0) {
         Swal.fire({ text: 'Something Went Wrong', icon: 'error' });
       }
@@ -371,26 +367,6 @@ function DataTable(props) {
   };
   const opt = useCallback(getDebounce(onSubmit), []);
 
-  const onSubmitRequestProcess = row => {
-    setLoadingHover(true);
-    api
-      .createRequestProcess(row.original.id)
-      .then(() => {
-        setLoadingHover(false);
-        getData();
-        Swal.fire({
-          text: `Request ${row.original.request_number} berhasil di process`,
-          icon: 'success',
-          buttonsStyling: false,
-          confirmButtonColor: 'primarydeepo',
-          confirmButtonText: `<p class="rounded bg-secondarydeepo text-[#fff] px-5 py-2 ml-5 font-bold">OK</p>`,
-        });
-      })
-      .catch(error => {
-        setLoadingHover(false);
-        Swal.fire({ text: error?.message, icon: 'error' });
-      });
-  };
   return (
     <>
       {download && (
@@ -603,15 +579,16 @@ function DataTable(props) {
                     ))}
                     {hasButtonAction && (
                       <td className="text-black py-1 px-6">
-                        <Button
-                          onClick={e => onSubmitRequestProcess(row, row.id, e)}
+                        <Link
+                          hidden={row.original.status !== 'PENDING'}
                           type="submit"
+                          to="/inbound"
                           px={8}
                           size="sm"
                           className="text-white bg-gradient-to-r from-processbtnfrom to-processbtnto hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2"
                         >
                           Process
-                        </Button>
+                        </Link>
                       </td>
                     )}
                   </tr>
