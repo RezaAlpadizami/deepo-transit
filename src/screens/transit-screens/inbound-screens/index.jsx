@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Input, Button } from '@chakra-ui/react';
+import React, { useContext, useEffect, useState } from 'react';
+import { Input, Button, Fade } from '@chakra-ui/react';
 import { useFieldArray, useForm, Controller } from 'react-hook-form';
 import * as yup from 'yup';
 import Swal from 'sweetalert2';
@@ -7,6 +7,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { CalculatorIcon, XIcon } from '@heroicons/react/outline';
 import Moment from 'moment';
 import { StopIcon } from '@heroicons/react/solid';
+
 import { RequestApi, TransitApi } from '../../../services/api-transit';
 import InputComponent from '../../../components/input-component';
 import DatePicker from '../../../components/datepicker-component';
@@ -17,8 +18,8 @@ import LoadingComponent from '../../../components/loading-component';
 import { toCalculate } from '../../../utils/helper';
 import Select from '../../../components/select-component';
 import TableCh from './table';
-
-const totalRFID = 110;
+import Context from '../../../context';
+import LoadingHover from '../../../components/loading-hover-component';
 
 const swalButton = Swal.mixin({
   customClass: {
@@ -28,147 +29,193 @@ const swalButton = Swal.mixin({
   },
   buttonsStyling: false,
 });
-const storage = yup.object({
-  rack: yup.string().test('rack', 'Rack is required', value => {
-    if (value) {
-      return true;
-    }
-    return false;
-  }),
-  // .required(), .required() .required() .required()
-  bay: yup.string().test('bay', 'Bay is required', value => {
-    if (value) {
-      return true;
-    }
-    return false;
-  }),
-  level: yup.string().test('level', 'Level is required', value => {
-    if (value) {
-      return true;
-    }
-    return false;
-  }),
-  child_qty: yup.string(),
-});
-
-const schema = yup.object({
-  details: yup
-    .array()
-    .of(storage)
-    .min(1, 'must have at least one data')
-    .test('details', 'total of splitted quantity must be the same with the actual quantity', function (value) {
-      let pass = true;
-
-      const { isSplitted, currentProductId } = this.parent;
-
-      if (isSplitted) {
-        // const filterBy = filters.map(f => { filters
-        //   return value.filter(i => i.product_id === f);
-        // });
-        if (value.length > 0) {
-          // filterBy.length > 0 &&
-          // const parentQty = filterBy.map(item => {
-          //   const quantities = item.map(x => {
-          //     if (x.qty) {
-          //       return { qty: x.qty, product_id: x.product_id };
-          //     }
-          //     return x.qty;
-          //   });
-
-          //   return quantities.find(i => i !== undefined);
-          // });
-
-          // const childQty = filterBy.map((item, idx) => {
-          //   return { calc: toCalculate(item, 'child_qty'), product_id: filters[idx] };
-          // });
-
-          const val = toCalculate(
-            value.filter(i => i.product_id === currentProductId),
-            'child_qty'
-          );
-          // if (parent?.product_id === currentProductId && child?.product_id === currentProductId) {
-          if (value.filter(i => i.qty).find(i => i.product_id === currentProductId)?.qty === val) {
-            return pass;
-          }
-          pass = false;
-
-          // parentQty.map((item, idx) => {
-          //   console.log('item', item);
-          //   if (item.qty && item.product_id === currentProductId) {
-          //     if (childQty[idx]?.product_id === item.product_id) {
-          //       if (item.qty === childQty[idx].calc) {
-          //         console.log('childQty[idx].calc', item.qty === childQty[idx].calc);
-          //         return pass;
-          //       }
-          //     }
-          //   } else {
-
-          //     pass = false;
-          //   }
-
-          //   return pass;
-          // });
-          // } else {
-          // }
-        }
-      }
-
-      return pass;
-    }),
-});
 
 function Screen() {
+  const storage = yup.object({
+    rack: yup.string().test('rack', 'rack is required', value => {
+      if (value) {
+        return true;
+      }
+      return false;
+    }),
+
+    level: yup
+      .string()
+      .test('level', 'level is required', value => {
+        if (value) {
+          return true;
+        }
+        return false;
+      })
+      .test('level', 'cannot select the same level with the same bay in one rack', (value, context) => {
+        const parentsData = context.from[1].value;
+
+        const { details, onChangeRack, onChangeBay, onChangeLevel } = parentsData;
+        const comparison = details.filter(i => i.rack !== '' && i.bay !== '' && i.level !== '');
+
+        const failed = [];
+        const success = [];
+        comparison.map((i, idx) => {
+          if (i.product_id !== onChangeRack.item.product_id) {
+            if (i.rack === onChangeRack.rack) {
+              if (i.bay === onChangeBay.bay) {
+                if (i.rack === onChangeLevel.level) {
+                  failed.push({ state: false, index: idx });
+                } else {
+                  success.push({ state: true, index: idx });
+                }
+              }
+            }
+          }
+          return i;
+        });
+
+        if (failed.every(i => i.state === true)) {
+          return true;
+        }
+        if (success.every(i => i.state === false)) {
+          return false;
+        }
+        return false;
+      }),
+
+    bay: yup
+      .string()
+      .test('bay', 'bay is required', value => {
+        if (value) {
+          return true;
+        }
+        return false;
+      })
+      .test('bay', 'cannot select the same bay at the same level in one rack', (value, context) => {
+        const parentsData = context.from[1].value;
+
+        const { details, onChangeBay, onChangeRack, onChangeLevel } = parentsData;
+        const comparison = details.filter(i => i.rack !== '' && i.bay !== '' && i.level !== '');
+        // const currentProduct = details.filter(i => i.product_id === onChangeLevel.item.product_id);
+
+        const failed = [];
+        const success = [];
+        comparison.map((i, idx) => {
+          if (i.product_id !== onChangeRack.item.product_id) {
+            if (i.rack === onChangeRack.rack) {
+              if (i.bay === onChangeBay.bay) {
+                if (i.rack === onChangeLevel.level) {
+                  failed.push({ state: false, index: idx });
+                } else {
+                  success.push({ state: true, index: idx });
+                }
+              }
+            }
+          }
+          return i;
+        });
+
+        if (failed.every(i => i.state === true)) {
+          return true;
+        }
+        if (success.every(i => i.state === false)) {
+          return false;
+        }
+        return false;
+      }),
+
+    child_qty: yup.string(),
+  });
+
+  const schema = yup.object({
+    details: yup
+      .array()
+      .of(storage)
+      .min(1, 'must have at least one data')
+      .test('details', 'total of splitted quantity must be the same with the actual quantity', (value, context) => {
+        let pass = true;
+
+        const { isSplitted, currentProductId } = context.parent;
+
+        if (isSplitted) {
+          if (value.length > 0) {
+            const val = toCalculate(
+              value.filter(i => i.product_id === currentProductId),
+              'child_qty'
+            );
+
+            if (value.filter(i => i.qty).find(i => i.product_id === currentProductId)?.qty === val) {
+              return pass;
+            }
+            pass = false;
+          }
+        } else {
+          pass = true;
+        }
+
+        return pass;
+      }),
+  });
+
   const {
     register,
     control,
     handleSubmit,
     setValue,
-    // getValues,
     watch,
     formState: { errors },
+    setError,
     reset,
   } = useForm({
     resolver: yupResolver(schema),
   });
+
+  const { store } = useContext(Context);
+
   const { currentProductId } = watch();
   const { fields, append, remove, insert, update } = useFieldArray({
     control,
     name: 'details',
   });
 
-  const defaultSort = {
-    sort_by: 'id',
-    sort_order: 'desc',
-  };
-  const [data, setData] = useState([]);
-  const [storageData, setStorageData] = useState([]);
+  const [requestDetailData, setRequestDetailData] = useState([]);
   const [transitData, setTransitData] = useState([]);
-  const [onOpen, setOnOpen] = useState(false);
+  const [storageData, setStorageData] = useState([]);
+  const [rfidData, setRfidData] = useState([]);
+  const [newData, setNewData] = useState([]);
+
+  const [loadingRequest, setLoadingRequest] = useState(false);
+  const [loadingTransit, setLoadingTransit] = useState(false);
+  const [loadingHover, setLoadingHover] = useState(false);
+  const [loadingRFID, setLoadingRFID] = useState(false);
   const [onOverview, setOnOverview] = useState(false);
   const [isScanned, setIsScanned] = useState(false);
   const [scanning, setScanning] = useState(false);
-  const [loadingRequest, setLoadingRequest] = useState(false);
-  const [loadingRFID, setLoadingRFID] = useState(false);
-  const [error, setError] = useState(false);
-  const [requestDetailData, setRequestDetailData] = useState();
+  const [isSplit, setIsSplit] = useState(false);
+  const [onOpen, setOnOpen] = useState(false);
+  const [error, setErrors] = useState(false);
+
   const [requestId, setRequestId] = useState('');
+  const [notes, setNotes] = useState('');
   const [totalRequest, setTotalRequest] = useState(0);
   const [counter, setCounter] = useState(2);
-  const [splitValue, setSplitValue] = useState({});
-  const [newData, setNewData] = useState([]);
-  const [notes, setNotes] = useState('');
-  const [loadingTransit, setLoadingTransit] = useState(false);
   const [timer, setTimer] = useState();
-  const [isSplit, setIsSplit] = useState(false);
+  const [splitValue, setSplitValue] = useState({});
+  const [filterParams, setFilterParams] = useState({
+    warehouse_id: 2,
+  });
+  const [filterBay, setFilterBay] = useState({
+    warehouse_id: 2,
+  });
+  const totalRFID = rfidData.length;
 
   useEffect(() => {
-    getDetailRequest();
-  }, []);
+    if (store?.getRequestNumber()) {
+      setRequestId(store?.getRequestNumber());
+    }
+  }, [store]);
 
   useEffect(() => {
     if (requestId !== '') {
+      setLoadingHover(true);
       setLoadingRequest(true);
-
+      setLoadingRFID(true);
       RequestApi.find(requestId)
         .then(res => {
           const filterByProductId = [
@@ -183,6 +230,8 @@ function Screen() {
           setTotalRequest(toCalculate(res.detail, 'qty'));
           setRequestDetailData(res.detail);
           setLoadingRequest(false);
+          setLoadingRFID(false);
+          setLoadingHover(false);
         })
         .catch(error => {
           Swal.fire({ text: error?.message, icon: 'error' });
@@ -196,7 +245,8 @@ function Screen() {
       setNewData(
         fields.map((item, index) => {
           if (splitValue.product_id === item.product_id) {
-            // item.is_latest = fields.filter(i => i.product_id === item.product_id).length === index + 1;
+            item.index = index;
+
             if (item.child_qty !== splitValue.value) {
               item.child_qty = splitValue.value;
             }
@@ -221,22 +271,30 @@ function Screen() {
     if (newData.length > 0) {
       setValue('details', newData);
     }
+    if (newData.filter(i => i.child_qty).length === 0) {
+      setIsSplit(false);
+      setValue('isSplitted', false);
+    }
   }, [newData]);
 
   const startScanning = () => {
     setScanning(true);
+    if (rfidData.length !== 0) {
+      setRfidData([]);
+    } else {
+      setTimer(
+        setInterval(() => {
+          TransitApi.get()
+            .then(res => {
+              setRfidData(res.data);
+            })
+            .catch(error => {
+              Swal.fire({ text: error?.message, icon: 'error' });
+            });
+        }, 5000)
+      );
+    }
 
-    setTimer(
-      setInterval(() => {
-        TransitApi.get()
-          .then(res => {
-            console.log('TransitApi', res);
-          })
-          .catch(error => {
-            Swal.fire({ text: error?.message, icon: 'error' });
-          });
-      }, 5000)
-    );
     setIsScanned(false);
   };
   const stopScanning = () => {
@@ -245,20 +303,47 @@ function Screen() {
     clearInterval(timer);
   };
 
-  const getDetailRequest = () => {
-    setLoadingRFID(true);
+  useEffect(() => {
     Promise.allSettled([
-      RequestApi.get({ ...defaultSort }).then(res => res),
       StorageApi.get({ warehouse_id: 2 }).then(res => res),
+      StorageApi.get(filterParams).then(res => res),
+      StorageApi.get(filterBay).then(res => res),
     ])
       .then(result => {
-        setData(result[0].value.data);
-        setStorageData(result[1].value.data);
-        setLoadingRFID(false);
+        setStorageData(result[0].value.data);
+        setValue('storageData', result[0].value.data);
+
+        setIsSplit(false);
       })
       .catch(error => {
-        Swal.fire({ text: error?.message || error?.data?.error, icon: 'error' });
+        Swal.fire({ text: error?.message || error?.data?.message, icon: 'error' });
       });
+  }, [filterParams, filterBay]);
+
+  const onChangeValue = (rack, item, index) => {
+    const onChangeData = { rack, item, idx: index };
+    setValue('onChangeRack', onChangeData);
+
+    if (rack) {
+      setFilterParams(prev => ({
+        ...prev,
+        rack_number: rack,
+      }));
+    }
+  };
+  const onChangeBay = (bay, item, index) => {
+    const onChangeData = { bay, item, idx: index };
+    setValue('onChangeBay', onChangeData);
+    if (bay) {
+      setFilterBay(prev => ({
+        ...prev,
+        bay,
+      }));
+    }
+  };
+  const onChangeLevel = (level, item, index) => {
+    const onChangeData = { level, item, idx: index };
+    setValue('onChangeLevel', onChangeData);
   };
 
   const onSplit = (id, qty, index) => {
@@ -268,91 +353,219 @@ function Screen() {
     const findData = fields.filter(i => i.qty)?.find(i => i.product_id === id);
     const fieldLength = fields.filter(i => i.product_id === id).length;
     const fieldLengthLess = fields.filter(i => i.product_id < id).length;
+    const fieldLengthMore = fields.filter(i => i.product_id > id).length;
+
     const value = {
       product_id: findData.product_id,
       child_qty: Math.floor(qty / counter),
     };
+
     const splitVal = { product_id: id, value: Math.floor(qty / counter) };
     if (Math.floor(qty / counter) > 1) {
       if (index === 0) {
-        if (fields.findIndex(i => i.resividual_qty) !== -1) {
-          remove(fields.findIndex(i => i.resividual_qty));
-          insert(
-            fields.findIndex(i => i.resividual_qty),
-            value
-          );
-        } else if (qty % counter === 0) {
-          update(
-            fields.findIndex(i => i.product_id === id),
-            { ...findData, child_qty: qty / counter }
-          );
-          insert(fieldLength, value);
+        if (qty % counter === 0) {
+          if (fieldLength === 1) {
+            insert(fieldLength, value);
+
+            setSplitValue(splitVal);
+          } else if (fields.findIndex(i => i.resividual_qty && i.product_id === id) !== -1 && id === currentProductId) {
+            remove(fields.findIndex(i => i.resividual_qty));
+            insert(
+              fields.findIndex(i => i.resividual_qty),
+              value
+            );
+
+            setSplitValue(splitVal);
+          } else if (
+            fields.findIndex(i => i.resividual_qty && i.product_id === currentProductId) !== -1 &&
+            id !== currentProductId
+          ) {
+            if (counter !== fields.filter(i => i.product_id === currentProductId && !i.resividual_qty).length) {
+              setCounter(
+                fields.filter(i => i.product_id === currentProductId && !i.resividual_qty).length > 0
+                  ? fields.filter(i => i.product_id === currentProductId && !i.resividual_qty).length
+                  : 2
+              );
+            } else if (fields.findIndex(i => i.product_id === currentProductId && i.resividual_qty === -1)) {
+              remove(fields.findIndex(i => i.resividual_qty));
+              insert(
+                fields.findIndex(i => i.resividual_qty),
+                value
+              );
+              setSplitValue(splitVal);
+            }
+          } else {
+            insert(fieldLength, value);
+
+            setSplitValue(splitVal);
+          }
         } else if (qty % counter !== 0) {
-          insert(fieldLength, {
-            product_id: findData.product_id,
-            child_qty: qty - Math.floor(qty / counter) * counter,
-          });
-          insert(fieldLength + 1, {
-            product_id: findData.product_id,
-            child_qty: qty - Math.floor(qty / counter) * counter,
-            resividual_qty: qty - Math.floor(qty / counter) * counter,
-          });
-        }
-        setSplitValue(splitVal);
-      } else if (index !== 0) {
-        if (fieldLengthLess > 0 && fieldLength > 0) {
-          if (fields.findIndex(i => i.resividual_qty) !== -1) {
-            if (qty % counter !== 0) {
+          if (id === currentProductId) {
+            if (fields.findIndex(i => i.resividual_qty && i.product_id === id) !== -1) {
               remove(fields.findIndex(i => i.resividual_qty));
               insert(
                 fields.findIndex(i => i.resividual_qty),
-                value
+                {
+                  product_id: findData.product_id,
+                  child_qty: qty - Math.floor(qty / counter) * counter,
+                }
               );
-              insert(fields.findIndex(i => i.resividual_qty) + 1, value);
+              insert(fields.findIndex(i => i.resividual_qty) + 1, {
+                product_id: findData.product_id,
+                child_qty: qty - Math.floor(qty / counter) * counter,
+                resividual_qty: qty - Math.floor(qty / counter) * counter,
+              });
             } else {
-              remove(fields.findIndex(i => i.resividual_qty));
-              insert(
-                fields.findIndex(i => i.resividual_qty),
-                value
-              );
+              insert(fieldLength, {
+                product_id: findData.product_id,
+                child_qty: qty - Math.floor(qty / counter) * counter,
+              });
+              insert(fieldLength + 1, {
+                product_id: findData.product_id,
+                child_qty: qty - Math.floor(qty / counter) * counter,
+                resividual_qty: qty - Math.floor(qty / counter) * counter,
+              });
             }
 
             setSplitValue(splitVal);
-          } else if (qty % counter === 0) {
-            if (counter === 2) {
-              update(fieldLengthLess, { ...findData, child_qty: qty / counter });
-              insert(fieldLengthLess + fieldLength, value);
-              setCounter(count => count + 1);
-              if (counter > 2 && id === currentProductId) {
-                if (qty - Math.floor(qty / counter) * counter === 0) {
-                  update(fieldLength, value);
-                } else {
-                  insert(fieldLengthLess + fieldLength, value);
-                }
+          } else {
+            setCounter(fieldLength > 1 ? fieldLength : 2);
+          }
+        }
+      } else if (index !== 0) {
+        if (fieldLengthLess > 0 && fieldLength > 0) {
+          if (id === currentProductId) {
+            if (qty % counter !== 0) {
+              if (fields.findIndex(i => i.resividual_qty && i.product_id === id) !== -1) {
+                remove(fields.findIndex(i => i.resividual_qty && i.product_id === id));
+                insert(
+                  fields.findIndex(i => i.resividual_qty && i.product_id === id),
+                  value
+                );
+                insert(fields.findIndex(i => i.resividual_qty && i.product_id === id) + 1, {
+                  product_id: findData.product_id,
+                  child_qty: qty - Math.floor(qty / counter) * counter,
+                  resividual_qty: qty - Math.floor(qty / counter) * counter,
+                });
+                setSplitValue(splitVal);
+              } else {
+                insert(fields.findIndex(i => i.product_id === id) + fieldLength, {
+                  product_id: findData.product_id,
+                  child_qty: qty - Math.floor(qty / counter) * counter,
+                });
+
+                insert(fields.findIndex(i => i.product_id === id) + fieldLength + 1, {
+                  product_id: findData.product_id,
+                  child_qty: qty - Math.floor(qty / counter) * counter,
+                  resividual_qty: qty - Math.floor(qty / counter) * counter,
+                });
               }
+
+              setSplitValue(splitVal);
+            } else if (fields.findIndex(i => i.resividual_qty && i.product_id === id) !== -1) {
+              remove(fields.findIndex(i => i.resividual_qty && i.product_id === id));
+              insert(
+                fields.findIndex(i => i.resividual_qty),
+                value
+              );
+              setSplitValue(splitVal);
+            } else {
+              update(
+                fields.findIndex(i => i.product_id === id),
+                { ...findData, child_qty: Math.floor(qty / counter) }
+              );
+              insert(fields.findIndex(i => i.product_id === id) + fieldLength, value);
+
               setSplitValue(splitVal);
             }
-          } else if (qty % counter !== 0 && id === currentProductId) {
-            insert(fieldLengthLess + fieldLength, {
-              product_id: findData.product_id,
-              child_qty: qty - Math.floor(qty / counter) * counter,
-            });
-            insert(fieldLengthLess + fieldLength + 1, {
-              product_id: findData.product_id,
-              child_qty: qty - Math.floor(qty / counter) * counter,
-              resividual_qty: qty - Math.floor(qty / counter) * counter,
-            });
-            setSplitValue(splitVal);
+          } else if (id !== currentProductId) {
+            if (fieldLength > 1 && fields.findIndex(i => i.product_id === id && i.resividual_qty) === -1) {
+              setCounter(fields.findIndex(i => i.product_id === id && i.resividual_qty));
+            } else if (fieldLength > 1 && fields.findIndex(i => i.product_id === id && i.resividual_qty) !== -1) {
+              setCounter(fieldLength);
+              setValue('currentProductId', id);
+            } else {
+              setCounter(2);
+            }
+          }
+        } else if (fieldLengthMore > 0 && fieldLength > 0) {
+          if (id === currentProductId) {
+            if (qty % counter !== 0) {
+              if (fields.findIndex(i => i.resividual_qty && i.product_id === id) !== -1) {
+                remove(fields.findIndex(i => i.resividual_qty && i.product_id === id));
+                insert(
+                  fields.findIndex(i => i.resividual_qty && i.product_id === id),
+                  value
+                );
+                insert(fields.findIndex(i => i.resividual_qty && i.product_id === id) + 1, {
+                  product_id: findData.product_id,
+                  child_qty: qty - Math.floor(qty / counter) * counter,
+                  resividual_qty: qty - Math.floor(qty / counter) * counter,
+                });
+              } else {
+                insert(fields.findIndex(i => i.product_id === id) + fieldLength, {
+                  product_id: findData.product_id,
+                  child_qty: qty - Math.floor(qty / counter) * counter,
+                });
+
+                insert(fields.findIndex(i => i.product_id === id) + fieldLength + 1, {
+                  product_id: findData.product_id,
+                  child_qty: qty - Math.floor(qty / counter) * counter,
+                  resividual_qty: qty - Math.floor(qty / counter) * counter,
+                });
+              }
+
+              setSplitValue(splitVal);
+            } else if (fields.findIndex(i => i.resividual_qty && i.product_id === id) !== -1) {
+              if (qty % counter !== 0) {
+                remove(fields.findIndex(i => i.resividual_qty && i.product_id === id));
+                insert(
+                  fields.findIndex(i => i.resividual_qty && i.product_id === id),
+                  value
+                );
+                insert(fields.findIndex(i => i.resividual_qty && i.product_id === id) + 1, {
+                  product_id: findData.product_id,
+                  child_qty: qty - Math.floor(qty / counter) * counter,
+                  resividual_qty: qty - Math.floor(qty / counter) * counter,
+                });
+              } else {
+                remove(fields.findIndex(i => i.resividual_qty && i.product_id === id));
+                insert(
+                  fields.findIndex(i => i.resividual_qty && i.product_id === id),
+                  value
+                );
+              }
+
+              setSplitValue(splitVal);
+            } else {
+              update(
+                fields.findIndex(i => i.product_id === id),
+                { ...findData, child_qty: Math.floor(qty / counter) }
+              );
+              insert(fields.findIndex(i => i.product_id === id) + fieldLength, value);
+
+              setSplitValue(splitVal);
+            }
+          } else if (id !== currentProductId) {
+            if (fieldLength > 1 && fields.findIndex(i => i.product_id === id && i.resividual_qty) === -1) {
+              setCounter(fields.findIndex(i => i.product_id === id && i.resividual_qty));
+            } else if (fieldLength > 1 && fields.findIndex(i => i.product_id === id && i.resividual_qty) !== -1) {
+              setCounter(fieldLength);
+              setValue('currentProductId', id);
+            } else {
+              setCounter(2);
+            }
           }
         }
       }
     }
   };
+
   const onRemove = (idx, id) => {
-    // const fieldLength = newData.filter(i => i.product_id === id && !i.qty);  item, childQty
-    const data = newData[newData.findIndex((item, i) => i === idx)];
-    const findData = fields.filter(i => i.qty)?.find(i => i.product_id === data.product_id);
-    // const findDataId = fields.filter(i => i.qty)?.find(i => i.product_id === id);
+    const fieldLength = fields.filter(i => i.product_id === id).length;
+    const dataIndex = newData[newData.findIndex((item, i) => i === idx)];
+    const findData = fields.filter(i => i.qty)?.find(i => i.product_id === dataIndex.product_id);
+
     const dt = fields.filter((item, i) => item.product_id === id && i !== idx && i !== idx - 1);
 
     const value = {
@@ -363,19 +576,12 @@ function Screen() {
       product_id: findData.product_id,
       value: Math.floor(findData.qty / dt.length),
     };
-    // const val = {
-    //   product_id: findData.product_id,
-    //   value: Math.floor(findData.qty / dt.length),
-    // };
-    // console.log('findData', findData);
-    // console.log('findDataId', findDataId);
-    // console.log('value', value);
-    // console.log('val', val);
-    // console.log('findData modulus', findData.qty % findData.child_qty);
-    if (counter <= 3) {
+
+    if (counter <= 3 && fieldLength === 2) {
       delete findData.child_qty;
       setSplitValue(findData);
       remove(idx);
+      setCounter(2);
     } else if (findData.qty % findData.child_qty === 0) {
       if (findData.qty % value.value !== 0) {
         remove(idx);
@@ -400,12 +606,8 @@ function Screen() {
         if (value.value !== resividualValue.value) {
           if (fields.findIndex(i => i.resividual_qty) !== -1) {
             if (newData.findIndex((item, i) => i === idx) === idx) {
-              update(
-                newData.findIndex((item, i) => i === idx),
-                values
-              );
               remove(newData.findIndex((item, i) => i === idx));
-              remove(fields.findIndex(i => i.resividual_qty));
+              remove(fields.findIndex(i => i.resividual_qty) - 1);
             } else {
               remove(fields.findIndex(i => i.resividual_qty));
               remove(idx - 1);
@@ -422,17 +624,16 @@ function Screen() {
       }
     }
   };
+
   const onSubmitRFID = () => {
     let pass = onOpen;
     if (totalRFID === totalRequest) {
       pass = true;
     } else {
-      setError(true);
+      setErrors(true);
       swalButton
         .fire({
-          title: 'NOTES',
-          html: '<b> Jumlah data pada Request Detail tidak sesuai dengan data pada RFID Detected. Lanjutkan proses ? <b>',
-          text: 'Notes',
+          html: '<b> NOTES </b> <br/> <p class="text-[15px]">The amount of data in Request Detail does not match the data in RFID Detected. Continue process?<p>',
           input: 'text',
           showCancelButton: true,
           confirmButtonColor: '#3085d6',
@@ -450,53 +651,139 @@ function Screen() {
             setNotes(result.value);
             append(transitData);
             setOnOpen(!pass);
-            setError(false);
+            setErrors(false);
           }
         });
     }
     return pass;
   };
-  const onProcess = idx => {
-    if (idx) {
-      setRequestId(idx);
+  const onProcess = id => {
+    if (id) {
+      setRequestId(id);
       setOnOverview(!onOverview);
     }
   };
 
-  const onFinalSubmit = data => {
-    const body = {
-      request_id: requestId,
-      notes,
-      details: [...data.details],
-    };
-    console.log('body', body);
-    TransitApi.inbound(body)
-      .then(res => {
-        console.log('res', res);
-        Swal.fire({ text: 'Sucessfully Saved', icon: 'success' });
-        // setOnOpen(!onOpen);
-      })
-      .catch(error => {
-        Swal.fire({ text: error?.message || error?.data?.message, icon: 'error' });
-      });
+  const validateStorageId = data => {
+    let pass = false;
+    const datas = data.details.map(i => {
+      return storageData.find(f => f.rack_number === i.rack && f.bay === i.bay)?.id;
+    });
+
+    if (datas.includes(undefined)) {
+      if (datas.findIndex(i => i === undefined) !== -1) {
+        pass = false;
+
+        setError('details', {
+          type: 'error',
+          message: `this storage combination cannot be done in ${data.details
+            .find(
+              i =>
+                i.product_id ===
+                data.details.find((i, idx) => idx === datas.findIndex(i => i === undefined))?.product_id
+            )
+            ?.product_sku.toUpperCase()} `,
+        });
+      }
+    } else {
+      pass = true;
+    }
+
+    return pass;
   };
 
+  const validateIsDuplicate = data => {
+    let pass = false;
+    const datas = data.details.map(i => {
+      return storageData.find(f => f.rack_number === i.rack && f.bay === i.bay)?.id;
+    });
+    if (datas) {
+      if (new Set(datas).size !== datas.length) {
+        pass = false;
+        setError('details', {
+          type: 'error',
+          message: `cannot contain duplicate storage id `,
+        });
+      } else {
+        pass = true;
+      }
+    }
+    return pass;
+  };
+
+  const onFinalSubmit = data => {
+    if (validateStorageId(data)) {
+      if (validateIsDuplicate(data)) {
+        const body = {
+          request_id: requestId,
+          notes,
+          detail: data.details.map(i => {
+            return {
+              product_id: i.product_id,
+              warehouse_id: 2,
+              storage_id: storageData.find(f => f.rack_number === i.rack && f.bay === i.bay && f.level === i.level)?.id,
+              qty: i.child_qty ? i.child_qty : i.qty,
+            };
+          }),
+        };
+
+        TransitApi.inbound(body)
+          .then(() => {
+            Swal.fire({ text: 'Sucessfully Saved', icon: 'success' });
+            setOnOpen(!onOpen);
+          })
+          .catch(error => {
+            Swal.fire({ text: error?.message || error?.data?.message, icon: 'error' });
+          });
+      }
+    }
+  };
+
+  const deleteDuplicates = (array, key) => {
+    const data = new Set();
+    return array.filter(obj => !data.has(obj[key]) && data.add(obj[key]));
+  };
+
+  const onReset = () => {
+    setLoadingRequest(true);
+    setLoadingRFID(true);
+    setIsScanned(false);
+    setRequestDetailData([]);
+    setRfidData([]);
+    setRequestId('');
+    setValue('activity_date_from', null);
+    setValue('request_number', '');
+    setTimeout(() => {
+      setLoadingRequest(false);
+      setLoadingRFID(false);
+    }, 500);
+  };
   return (
-    <div className="bg-white p-5 rounded-[55px] shadow">
+    <div className="bg-white p-5 rounded-[55px] shadow px-6 pb-11">
       <input type="hidden" {...register('filters')} />
-      <input type="hidden" {...register('quantity')} />
-      <input type="hidden" {...register('isSplitted')} />
+      <input type="hidden" {...register('isSplitted')} value={isSplit} />
       <input type="hidden" {...register('currentProductId')} />
-      <fieldset className="border border-primarydeepo w-full h-full px-8 rounded-[55px] pb-6">
+      <input type="hidden" {...register('onChangeRack')} />
+      <input type="hidden" {...register('onChangeBay')} />
+      <input type="hidden" {...register('onChangeLevel')} />
+      {loadingHover && <LoadingHover left="[20%]" top="[9%]" />}
+      <fieldset className="border border-primarydeepo w-full h-full px-8 rounded-[30px] pb-6">
         <legend className="px-2 text-[28px] text-primarydeepo font-semibold">Request</legend>
         <div className="grid grid-cols-8 gap-6">
           <button
             type="submit"
             onClick={() => setOnOverview(!onOverview)}
-            className="bg-processbtnfrom  h-[100px] w-[110px] rounded-lg grid place-content-center ml-6 mt-2 col-span-2 mt-2"
+            className={`${
+              scanning ? 'bg-[#ffc108]' : 'bg-processbtnfrom'
+            }  h-[100px] w-[110px] rounded-lg grid place-content-center ml-6 mt-2 col-span-2 mt-2`}
+            disabled={scanning}
           >
             <p className="text-lg text-[#fff] font-bold mb-2">Request</p>
-            <CalculatorIcon className="h-10 w-15 bg-processbtnfrom stroke-[#fff] mx-auto" />
+            <CalculatorIcon
+              className={`${
+                scanning ? 'bg-[#ffc108]' : 'bg-processbtnfrom'
+              } h-10 w-15 bg-processbtnfrom stroke-[#fff] mx-auto`}
+            />
           </button>
 
           <div className="col-span-3">
@@ -523,32 +810,32 @@ function Screen() {
       </fieldset>
 
       <div className="grid-cols-2 gap-4 flex">
-        <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
+        <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[30px]">
           <legend className="px-2 text-[28px] text-primarydeepo font-semibold">Request Detail</legend>
           <LoadingComponent visible={loadingRequest} />
           {!loadingRequest ? <TableCh data={requestDetailData} /> : null}
         </fieldset>
-        <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
+        <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[30px]">
           <legend className="px-2 text-[28px] text-primarydeepo font-semibold">RFID Detected</legend>
-          <LoadingComponent visible={loadingRequest} />
-          {!loadingRFID ? <TableCh data={data} /> : null}
+          <LoadingComponent visible={loadingRFID} />
+          {!loadingRFID ? <TableCh data={rfidData} /> : null}
         </fieldset>
       </div>
       <div
         className={`border  ${
           error ? 'border-[#a2002d]' : 'border-primarydeepo'
-        }  w-full h-full px-8 rounded-[55px] py-2 mt-10`}
+        }  w-full h-full px-8 rounded-[30px] py-2 mt-10`}
       >
         <div className="grid grid-cols-3 gap-4">
-          <div className="pt-2">
+          <div className="py-auto">
             <div>Total Request</div>
             <div>Total RFID Detected</div>
           </div>
-          <div className="pt-2">
+          <div className="py-auto">
             <div className="font-bold">{totalRequest}</div>
             <div className="font-bold">{totalRFID}</div>
           </div>
-          <div className="flex py-4">
+          <div className="flex py-2">
             <Button
               _hover={{
                 shadow: 'md',
@@ -558,9 +845,10 @@ function Screen() {
               }}
               type="button"
               size="sm"
-              px={10}
+              px={6}
               className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
               onClick={scanning ? stopScanning : startScanning}
+              disabled={requestDetailData.length === 0}
             >
               {scanning ? <StopIcon className="h-6 animate-pulse" /> : <p className="tracking-wide">Scan</p>}
             </Button>
@@ -572,14 +860,31 @@ function Screen() {
                 transitionDuration: '0.2s',
                 transitionTimingFunction: 'ease-in-out',
               }}
+              type="button"
+              size="sm"
+              px={6}
+              className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold mx-4"
+              onClick={onReset}
+              disabled={scanning}
+            >
+              <p className="tracking-wide">Reset</p>
+            </Button>
+
+            <Button
+              _hover={{
+                shadow: 'md',
+                transform: 'translateY(-5px)',
+                transitionDuration: '0.2s',
+                transitionTimingFunction: 'ease-in-out',
+              }}
               type="submit"
               size="sm"
-              px={8}
-              className="ml-4 rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold"
+              px={6}
+              className="rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold"
               onClick={onSubmitRFID}
               disabled={!isScanned}
             >
-              Submit
+              Next
             </Button>
           </div>
         </div>
@@ -590,49 +895,51 @@ function Screen() {
         </p>
       )}
       {onOverview && (
-        <div
-          className=" main-modal fixed w-full h-200 inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
-          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
-        >
-          <div className="rounded rounded-2xl border shadow-lg modal-container bg-white w-[80%] mx-auto z-50 overflow-y-auto ">
-            <div className="grid justify-items-end">
-              <XIcon className="h-6 stroke-2" onClick={() => setOnOverview(!onOverview)} />
-            </div>
-            <div className="modal-content py-4 text-left px-6">
-              <Datatable
-                api={RequestApi}
-                filterParams={{ status: 'PENDING' }}
-                filterEnd
-                filters={[
-                  {
-                    name: 'text',
-                    type: 'addtext',
-                    text: 'Request Overview',
-                  },
-                  {
-                    name: 'request_number',
-                    placeholder: 'Request Number',
-                    icon: MagnifyClass,
-                    alt: 'magnify',
-                    type: 'input:addOn',
-                    col: 2,
-                  },
-                ]}
-                columns={[
-                  { header: 'Request Number', value: 'request_number', copy: true, type: 'link' },
-                  { header: 'User', value: 'request_by', copy: true },
-                  { header: 'Activity', value: 'activity_name', copy: true },
-                  { header: 'Date', value: 'activity_date', copy: true, type: 'date' },
-                  { header: 'Notes', value: 'notes', copy: true, type: 'scrollable' },
-                  { header: 'Status', value: 'status', copy: true },
-                  { header: ' ', value: ' ', type: 'action-button' },
-                ]}
-                onSearch
-                onActionButton={(idx, data) => onProcess(idx, data)}
-              />
+        <Fade in={onOverview}>
+          <div
+            className=" main-modal fixed w-full h-200 inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
+            style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          >
+            <div className="rounded rounded-2xl border shadow-lg modal-container bg-white w-[80%] mx-auto z-50 overflow-y-auto ">
+              <div className="grid justify-items-end">
+                <XIcon className="h-6 stroke-2" onClick={() => setOnOverview(!onOverview)} />
+              </div>
+              <div className="modal-content py-4 text-left px-6">
+                <Datatable
+                  api={RequestApi}
+                  filterParams={{ status: 'PENDING' }}
+                  filterEnd
+                  filters={[
+                    {
+                      name: 'text',
+                      type: 'addtext',
+                      text: 'Request Overview',
+                    },
+                    {
+                      name: 'request_number',
+                      placeholder: 'Request Number',
+                      icon: MagnifyClass,
+                      alt: 'magnify',
+                      type: 'input:addOn',
+                      col: 2,
+                    },
+                  ]}
+                  columns={[
+                    { header: 'Request Number', value: 'request_number', copy: true, type: 'link' },
+                    { header: 'User', value: 'request_by', copy: true },
+                    { header: 'Activity', value: 'activity_name', copy: true },
+                    { header: 'Date', value: 'activity_date', copy: true, type: 'date' },
+                    { header: 'Notes', value: 'notes', copy: true, type: 'scrollable' },
+                    { header: 'Status', value: 'status', copy: true },
+                    { header: ' ', value: ' ', type: 'action-button' },
+                  ]}
+                  onSearch
+                  onActionButton={(id, data) => onProcess(id, data)}
+                />
+              </div>
             </div>
           </div>
-        </div>
+        </Fade>
       )}
       {onOpen && (
         <div
@@ -663,10 +970,21 @@ function Screen() {
                   <tbody>
                     {fields.length > 0 ? (
                       fields.map((item, index) => {
-                        // console.log('fields.length === index + 1', fields.length === index + 1);
                         return (
                           <tr key={item.id} className={`${index % 2 ? 'bg-gray-100' : ''} w-full`}>
-                            <td className="w-10 text-center px-2">{index + 1}</td>
+                            <td className="w-10 text-center px-2">
+                              {index + 1}
+                              <Controller
+                                render={({ field }) => {
+                                  return (
+                                    <Input variant="unstyled" {...field} disabled className="hidden" value={index} />
+                                  );
+                                }}
+                                name="index"
+                                className="hidden"
+                                control={control}
+                              />
+                            </td>
                             <td className="w-20 text-center px-2">
                               {item.product_sku}
                               <Controller
@@ -703,19 +1021,26 @@ function Screen() {
                             </td>
                             <td className="w-24 px-2">
                               <Controller
-                                render={() => {
+                                render={({ field }) => {
                                   return (
                                     <Select
                                       name={`details.${index}.rack`}
                                       idx={index}
                                       placeholder="Rack"
                                       booleans={isSplit}
-                                      options={storageData?.map(s => {
-                                        return {
-                                          label: s.rack_number,
-                                          value: s.rack_number,
-                                        };
-                                      })}
+                                      options={deleteDuplicates(
+                                        storageData?.map(s => {
+                                          return {
+                                            label: s.rack_number,
+                                            value: s.rack_number,
+                                          };
+                                        }),
+                                        'label'
+                                      )}
+                                      onChangeValue={e => {
+                                        field.onChange(e);
+                                        onChangeValue(e, item, index);
+                                      }}
                                       register={register}
                                       control={control}
                                       errors={errors}
@@ -728,19 +1053,27 @@ function Screen() {
                             </td>
                             <td className="w-24 px-2">
                               <Controller
-                                render={() => {
+                                {...register(`details.${index}.bay`)}
+                                render={({ field }) => {
                                   return (
                                     <Select
                                       name={`details.${index}.bay`}
                                       idx={index}
                                       placeholder="Bay"
                                       booleans={isSplit}
-                                      options={storageData?.map(s => {
-                                        return {
-                                          label: s.bay,
-                                          value: s.bay,
-                                        };
-                                      })}
+                                      options={deleteDuplicates(
+                                        storageData.map(i => {
+                                          return {
+                                            label: i.bay,
+                                            value: i.bay,
+                                          };
+                                        }),
+                                        'label'
+                                      )}
+                                      onChangeValue={e => {
+                                        field.onChange(e);
+                                        onChangeBay(e, item, index);
+                                      }}
                                       register={register}
                                       control={control}
                                       errors={errors}
@@ -753,19 +1086,26 @@ function Screen() {
                             </td>
                             <td className="w-24 px-2">
                               <Controller
-                                render={() => {
+                                render={({ field }) => {
                                   return (
                                     <Select
                                       name={`details.${index}.level`}
                                       idx={index}
                                       placeholder="Level"
                                       booleans={isSplit}
-                                      options={storageData?.map(s => {
-                                        return {
-                                          label: s.level,
-                                          value: s.level,
-                                        };
-                                      })}
+                                      options={deleteDuplicates(
+                                        storageData.map(i => {
+                                          return {
+                                            label: i.level,
+                                            value: i.level,
+                                          };
+                                        }),
+                                        'label'
+                                      )}
+                                      onChangeValue={e => {
+                                        field.onChange(e);
+                                        onChangeLevel(e, item, index);
+                                      }}
                                       register={register}
                                       control={control}
                                       errors={errors}
@@ -797,7 +1137,10 @@ function Screen() {
                                     if (index === 0) {
                                       setCounter(count => count + 1);
                                     } else if (index !== 0) {
-                                      if (item.product_id !== currentProductId) {
+                                      if (
+                                        item.product_id !== currentProductId &&
+                                        fields.filter(i => i.product_id === item.product_id).length === 1
+                                      ) {
                                         setCounter(2);
                                         setValue('currentProductId', item.product_id);
                                       } else if (item.product_id === currentProductId) {
@@ -811,7 +1154,6 @@ function Screen() {
                                   Split
                                 </Button>
                               ) : (
-                                // item.is_latest ?
                                 <Button
                                   px={6}
                                   size="sm"
@@ -855,8 +1197,10 @@ function Screen() {
               <div className="flex justify-between">
                 {errors && (
                   <span className="pl-10 text-[#a2002d]">{`${
-                    Array.isArray(errors.details) && isSplit
-                      ? errors?.details.filter(i => i !== undefined)
+                    Array.isArray(errors.details)
+                      ? errors?.details?.filter(i => i !== undefined).length > 0
+                        ? 'storage is required'
+                        : ''
                       : errors?.details?.message || ' '
                   }`}</span>
                 )}

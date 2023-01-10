@@ -111,6 +111,7 @@ export default [
     name: '404',
     showmenu: false,
     exact: false,
+    role: '',
     route: '/*',
     component: NotFound,
   },

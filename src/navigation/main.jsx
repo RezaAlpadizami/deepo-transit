@@ -2,7 +2,6 @@ import React, { Suspense, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 
-import CookieService from '../services/api-master/cookie-service.js/cookie-service';
 import Context from '../context';
 import MenuItem from './menu-item';
 import MenuPublicItem from './menu-public-item';
@@ -10,6 +9,7 @@ import Header from '../components/header-component';
 import Sidebar from '../components/sidebar-component';
 import NoAccessScreen from '../screens/home-screens/no-access';
 import LoadingHover from '../components/loading-hover-component';
+import CookieService from '../services/cookies/cookie-service';
 
 function MainNavigation() {
   return (
@@ -23,7 +23,7 @@ function MainNavigation() {
           <Header />
           <div className="flex">
             <Sidebar />
-            <div className="p-6 bg-container min-h-screen flex-auto transition-width ease-in-out delay-150 duration-300 w-5/6 ">
+            <div className="p-6 bg-container min-h-screen flex-auto transition-width ease-in-out delay-150 duration-300 w-5/6">
               <Content />
             </div>
           </div>

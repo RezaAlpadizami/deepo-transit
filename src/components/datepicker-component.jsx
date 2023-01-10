@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import DatePicker from 'react-datepicker';
 import { Input, InputRightElement, InputGroup } from '@chakra-ui/react';
 import { Controller } from 'react-hook-form';
@@ -8,10 +8,17 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 function InputElement(props) {
   const { errors, name, disabled } = props;
+
+  const ref = useRef(null);
+
+  const handleClick = () => {
+    ref.current.focus();
+  };
   return (
     <InputGroup size="sm">
       <Input
         {...props}
+        ref={ref}
         bg="white"
         size="sm"
         width="auto"
@@ -19,9 +26,9 @@ function InputElement(props) {
         isInvalid={errors[name]}
         variant={disabled ? 'filled' : 'outline'}
         className={` ${disabled ? 'bg-gray-200' : ''} w-full text-sm border-gray-400 py-5 rounded-full px-8`}
-        focusBorderColor="primarydeepo"
+        focusBorderColor="#546ac2"
       />
-      <InputRightElement className="rounded-r-full w-14 bg-primarydeepo h-full">
+      <InputRightElement className="rounded-r-full w-14 bg-primarydeepo h-full cursor-pointer" onClick={handleClick}>
         <CalendarIcon color="white" className="w-5 h-5 mt-0.5" />
       </InputRightElement>
     </InputGroup>
