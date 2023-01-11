@@ -267,8 +267,12 @@ function DataTable(props) {
         return new Promise((resolve, reject) => {
           api
             .delete(d.original[identifierProperties])
-            .then(r => resolve(r))
-            .catch(e => reject(e));
+            .then(r => {
+              return resolve(r);
+            })
+            .catch(e => {
+              return reject(e);
+            });
         });
       }),
     ]).then(res => {
@@ -473,7 +477,6 @@ function DataTable(props) {
                           <Select
                             name={item.name}
                             label={item.label}
-                            placeholder={item.label}
                             options={item.data}
                             register={register}
                             control={control}

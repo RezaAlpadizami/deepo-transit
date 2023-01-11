@@ -8,6 +8,7 @@ import Swal from 'sweetalert2';
 import { Button, Text } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 
+import { thousandSeparator } from '../../../utils/helper';
 import Input from '../../../components/input-component';
 import Select from '../../../components/select-component';
 import { ProductApi } from '../../../services/api-master';
@@ -285,7 +286,6 @@ function Screen() {
                       label: i.label,
                     };
                   })}
-                  placeholder="Activity"
                   register={register}
                   errors={errors}
                 />
@@ -320,7 +320,6 @@ function Screen() {
                         label: i.product_name,
                       };
                     })}
-                    placeholder="Product"
                     control={controlProd}
                     register={registerProd}
                     errors={errorsProd}
@@ -361,7 +360,7 @@ function Screen() {
                   />
                   <div className="flex gap-20 mt-6">
                     <span className="">X</span>
-                    <Text>{qty}</Text>
+                    <Text>{thousandSeparator(qty)}</Text>
                   </div>
                 </div>
               );
@@ -370,7 +369,7 @@ function Screen() {
             <div className="border-b border-primarydeepo my-6"> </div>
             <div className="flex justify-between font-bold">
               <Text>Total Product</Text>
-              <Text className={`${getTotalQty < 1 ? 'hidden' : ''}`}>{getTotalQty}</Text>
+              <Text className={`${getTotalQty < 1 ? 'hidden' : ''}`}>{thousandSeparator(getTotalQty)}</Text>
             </div>
           </fieldset>
         </div>

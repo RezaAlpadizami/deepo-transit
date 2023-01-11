@@ -11,6 +11,7 @@ import { RequestApi } from '../../../services/api-transit';
 import TextArea from '../../../components/textarea-component';
 import InputDetail from '../../../components/input-detail-component';
 import LoadingHover from '../../../components/loading-hover-component';
+import { thousandSeparator } from '../../../utils/helper';
 
 function Screen() {
   const { id } = useParams();
@@ -156,7 +157,7 @@ function Screen() {
                     />
                     <div className="flex gap-20 mt-6">
                       <span className="">X</span>
-                      <Text>{qty}</Text>
+                      <Text>{thousandSeparator(qty)}</Text>
                     </div>
                   </div>
                 );
@@ -165,7 +166,7 @@ function Screen() {
             <div className="border-b border-primarydeepo my-6"> </div>
             <div className="flex justify-between font-bold">
               <Text>Total Product</Text>
-              <Text>{totalQty}</Text>
+              <Text>{thousandSeparator(totalQty)}</Text>
             </div>
           </fieldset>
         </div>
