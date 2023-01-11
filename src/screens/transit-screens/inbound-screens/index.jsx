@@ -166,7 +166,7 @@ function Screen() {
     resolver: yupResolver(schema),
   });
 
-  const { store } = useContext(Context);
+  const { boundActivity } = useContext(Context);
 
   const { currentProductId } = watch();
   const { fields, append, remove, insert, update } = useFieldArray({
@@ -206,10 +206,10 @@ function Screen() {
   const totalRFID = rfidData.length;
 
   useEffect(() => {
-    if (store?.getRequestNumber()) {
-      setRequestId(store?.getRequestNumber());
+    if (boundActivity?.getRequestNumber()) {
+      setRequestId(boundActivity?.getRequestNumber());
     }
-  }, [store]);
+  }, [boundActivity]);
 
   useEffect(() => {
     if (requestId !== '') {

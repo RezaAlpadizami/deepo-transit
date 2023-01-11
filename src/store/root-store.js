@@ -1,5 +1,6 @@
 import { types } from 'mobx-state-tree';
 import UserStore from './user-store';
+import BoundActivity from './bound-activity-store';
 
 const RootStore = types
   .model({
@@ -7,7 +8,7 @@ const RootStore = types
     isSelectedWarehouse: types.optional(types.boolean, false),
     isDrawerOpen: types.optional(types.boolean, false),
     isLoadEdit: types.optional(types.boolean, false),
-    request_number: types.optional(types.integer, 0),
+    activity: types.optional(BoundActivity, {}),
     user: types.optional(UserStore, {}),
   })
   .actions(self => ({
@@ -25,12 +26,6 @@ const RootStore = types
     },
     setIsLoadEdit(isLoad) {
       self.isLoadEdit = isLoad;
-    },
-    setRequestNumber(data) {
-      self.request_number = data;
-    },
-    getRequestNumber() {
-      return self.request_number;
     },
   }));
 

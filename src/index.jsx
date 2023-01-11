@@ -8,6 +8,7 @@ import './assets/styles/custom.css';
 import Context from './context';
 import RootStore from './store/root-store';
 import reportWebVitals from './reportWebVitals';
+import BoundActivity from './store/bound-activity-store';
 
 const App = React.lazy(() => import('./navigation/main'));
 
@@ -29,12 +30,12 @@ const components = {
 const theme = extendTheme({ colors, components });
 
 const store = RootStore.create({ isLogin: false });
-
+const boundActivity = BoundActivity.create();
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <ChakraProvider theme={theme}>
-      <Context.Provider value={{ store }}>
+      <Context.Provider value={{ store, boundActivity }}>
         <App />
       </Context.Provider>
     </ChakraProvider>

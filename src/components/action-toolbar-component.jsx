@@ -87,7 +87,7 @@ function ActionToolbar(props) {
   };
 
   return (
-    <div className="flex gap-4 bg-white py-6 px-6 rounded-t-3xl">
+    <div className="flex gap-4 bg-white py-6 px-6 rounded-t-3xl overflow-x-auto">
       {onAdd && (
         <Button
           type="button"

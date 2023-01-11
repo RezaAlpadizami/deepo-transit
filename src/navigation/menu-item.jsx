@@ -10,7 +10,7 @@ const RequestScreenShow = React.lazy(() => import('../screens/transit-screens/re
 const RequestScreensEdit = React.lazy(() => import('../screens/transit-screens/request-screens/edit'));
 
 const InboundScreens = React.lazy(() => import('../screens/transit-screens/inbound-screens/index'));
-
+const OutboundSCreens = React.lazy(() => import('../screens/transit-screens/outbond-screens/index'));
 export default [
   {
     displayName: 'Home',
@@ -84,10 +84,9 @@ export default [
       {
         displayName: 'Inbound',
         icon: HomeIcon,
-        name: 'request',
-        role: 'request',
+        name: 'inbound',
+        role: 'inbound',
         showmenu: true,
-
         exact: true,
         route: '/inbound',
         component: InboundScreens,
@@ -95,12 +94,34 @@ export default [
           {
             displayName: 'Inbound',
             icon: HomeIcon,
-            name: 'request',
-            role: 'request',
+            name: 'inbound',
+            role: 'inbound',
             showmenu: false,
             exact: true,
             route: '/inbound',
             component: InboundScreens,
+          },
+        ],
+      },
+      {
+        displayName: 'Outbond',
+        icon: HomeIcon,
+        name: 'outbond',
+        role: 'outbond',
+        showmenu: true,
+        exact: true,
+        route: '/outbond',
+        component: OutboundSCreens,
+        routes: [
+          {
+            displayName: 'Inbound',
+            icon: HomeIcon,
+            name: 'outbond',
+            role: 'outbond',
+            showmenu: false,
+            exact: true,
+            route: '/outbond',
+            component: OutboundSCreens,
           },
         ],
       },

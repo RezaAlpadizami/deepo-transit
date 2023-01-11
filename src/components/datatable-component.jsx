@@ -48,7 +48,7 @@ function DataTable(props) {
     formState: { errors },
   } = useForm();
 
-  const { store } = useContext(Context);
+  const { boundActivity } = useContext(Context);
   const [pages, setPages] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [datas, setDatas] = useState([]);
@@ -104,7 +104,8 @@ function DataTable(props) {
                 </div>
               );
             }
-            if (d.type === 'action-button' && row.original.request_number) {
+            if (d.type === 'action-button' && row.original.id) {
+              // row.original.request_number
               return (
                 <Button
                   className="text-white bg-gradient-to-r from-processbtnfrom to-processbtnto hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2"
@@ -614,7 +615,7 @@ function DataTable(props) {
                               hidden={row.original.status !== 'PENDING'}
                               type="button"
                               onClick={() => {
-                                store.setRequestNumber(row.original.id);
+                                boundActivity.setRequestNumber(row.original.id);
                               }}
                               to="/inbound"
                               px={8}
