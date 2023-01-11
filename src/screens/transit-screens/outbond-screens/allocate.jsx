@@ -10,7 +10,7 @@ import Context from '../../../context';
 const product = yup.object({
   actual_qty: yup.string(),
 });
-// actual quantity must be less than qty it self
+// actual quantity must be less or equal than qty it self
 const schema = yup.object({
   allocate: yup.array().of(product).min(1, 'must have at least one data'),
 });
@@ -32,17 +32,8 @@ function Allocate(props) {
     control,
     name: 'allocate',
   });
-  // allocateData.filter(
-  //   (i, idx) =>
-  //     i.product_id === productId &&
-  //     idx === allocateData.filter(i => i.product_id === productId).findIndex(i => i.actual_qty !== undefined)
-  // )[idx]?.actual_qty;
-
   const filter = allocateData.filter(i => i.product_id === productId && i.actual_qty !== undefined);
 
-  // console.log('tessss', filter);
-
-  // console.log('allocate', allocateData);
   useEffect(() => {
     setValue(
       'allocate',
@@ -80,28 +71,16 @@ function Allocate(props) {
     if (body.allocate.filter(i => i.qty !== undefined).length !== 0) {
       boundActivity.setAllocate([{ isAllocate: true, product_id: productId }]);
       setOnAllocate(!onAllocate);
-      setAllocateData(prev => {
-        if (prev.filter(f => f.product_id !== productId).length > 0) {
-          console.log('previous', prev);
-          console.log('body', body);
-          return body.allocate.map(i => {
-            if (i.actual_qty === undefined) {
-              i.isAllocate = false;
-            } else {
-              i.isAllocate = true;
-            }
-            return i;
-          });
-        }
-        return body.allocate.map(i => {
+      setAllocateData(
+        body.allocate.map(i => {
           if (i.actual_qty === undefined) {
             i.isAllocate = false;
           } else {
             i.isAllocate = true;
           }
           return i;
-        });
-      });
+        })
+      );
     } else {
       setError('allocate', { type: 'server', message: 'at least submit one data' });
     }
@@ -205,6 +184,7 @@ function Allocate(props) {
                               <InputComponent
                                 name={`allocate.${index}.actual_qty`}
                                 idx={index}
+                                placeholder="Qty"
                                 type="number"
                                 {...field}
                                 className="w-16"

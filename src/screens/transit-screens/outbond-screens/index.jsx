@@ -31,8 +31,9 @@ const swalButton = Swal.mixin({
   },
   buttonsStyling: false,
 });
+const allocated = [];
 const product = yup.object({
-  isAllocate: yup.boolean().required(),
+  isAllocate: yup.boolean(),
 });
 
 const schema = yup.object({
@@ -40,7 +41,7 @@ const schema = yup.object({
     .array()
     .of(product)
     .min(1, 'must have at least one data')
-    .test('details', 'products must be allocated first', value => {
+    .test('details', 'all products must be allocated', value => {
       if (value.every(i => i.actual_qty)) {
         return true;
       }
@@ -62,7 +63,7 @@ function Screen() {
     resolver: yupResolver(schema),
   });
   // append
-  console.log('error ', errors);
+
   const { fields } = useFieldArray({
     control,
     name: 'details',
@@ -72,7 +73,6 @@ function Screen() {
   const [allocateData, setAllocateData] = useState([]);
   const [journeyData, setJourneyData] = useState([]);
   const [rfidData, setRfidData] = useState([]);
-  // console.log('allocatedata index', allocateData);
 
   const [loadingRequest, setLoadingRequest] = useState(false);
   const [onOpenTransit, setOnOpenTransit] = useState(false);
@@ -90,7 +90,7 @@ function Screen() {
   const [productId, setProductId] = useState('');
   const [notes, setNotes] = useState('');
   const [timer, setTimer] = useState();
-  console.log('note', notes);
+
   useEffect(() => {
     if (boundActivity?.getRequestNumber()) {
       setRequestId(boundActivity?.getRequestNumber());
@@ -104,16 +104,9 @@ function Screen() {
       setLoadingRFID(true);
       RequestApi.find(requestId)
         .then(res => {
-          const filterByProductId = [
-            ...new Map(res.detail?.map(i => [JSON.stringify(i.product_id), i.product_id])).values(),
-          ];
-          const quantity = [...new Map(res.detail?.map(i => [JSON.stringify(i.qty), i.qty])).values()];
-          setValue('filters', filterByProductId);
-          setValue('quantity', quantity);
-
           setValue('details', res.detail);
           setRequestDetailData(res.detail);
-          setValue('activity_date_from', res?.activity_date ? Moment(res?.activity_date).toDate() : null);
+          setValue('activity_date', res?.activity_date ? Moment(res?.activity_date).toDate() : null);
           setValue('request_number', res?.request_number ? res?.request_number : '-');
           setTotalRequest(toCalculate(res.detail, 'qty'));
           setLoadingRFID(false);
@@ -158,7 +151,7 @@ function Screen() {
     setRequestDetailData([]);
     setRfidData([]);
     setRequestId('');
-    setValue('activity_date_from', null);
+    setValue('activity_date', null);
     setValue('request_number', '');
     setTimeout(() => {
       setLoadingRequest(false);
@@ -181,7 +174,6 @@ function Screen() {
       swalButton
         .fire({
           html: '<b> NOTES </b> <br/> <p class="text-[15px]">The amount of data in Request Detail does not match the data in RFID Detected. Continue process?<p>',
-          input: 'text',
           showCancelButton: true,
           confirmButtonColor: '#3085d6',
           preConfirm: pre => {
@@ -215,15 +207,20 @@ function Screen() {
         });
     }
   }, [productId]);
-
+  console.log('allocatedData', allocateData);
+  console.log('allocated', allocated);
   useEffect(() => {
     if (allocateData.length > 0) {
       const filter = allocateData.filter(i => i.product_id === productId && i.actual_qty !== undefined);
+      allocated.push(...allocateData);
       setValue(
         'details',
         fields.map(item => {
           if (filter.length > 0) {
-            item.actual_qty = toCalculate(filter, 'actual_qty');
+            if (filter.find(i => i)?.product_id === item.product_id) {
+              item.actual_qty = toCalculate(filter, 'actual_qty');
+              item.source = filter.length;
+            }
           }
 
           return item;
@@ -232,8 +229,22 @@ function Screen() {
     }
   }, [allocateData]);
 
+  const onCancel = () => {
+    Swal.fire({
+      html: '<p>Transit data may not be <b>saved</b> ! <br/> Are your sure to cancel ?</p>',
+      showCancelButton: true,
+      confirmButtonColor: '#ff0000',
+      confirmButtonText: 'Yes',
+      cancelButtonText: 'No',
+    }).then(result => {
+      if (result.isConfirmed) {
+        setOnOpenTransit(!onOpenTransit);
+      }
+    });
+  };
   const onFinalSubmit = data => {
     console.log('onFInalSubmit data', data);
+    console.log('note', notes);
   };
   // const onFinalSubmit = data => {
   //   const body = {
@@ -258,7 +269,7 @@ function Screen() {
   //       Swal.fire({ text: error?.message || error?.data?.message, icon: 'error' });
   //     });
   // };
-  // console.log('final', onFinalSubmit);
+
   return (
     <div className="bg-white p-5 rounded-[55px] shadow px-6 pb-11">
       {loadingHover && <LoadingHover left="[20%]" top="[9%]" />}
@@ -293,7 +304,7 @@ function Screen() {
           </div>
           <div className="col-span-3">
             <DatePicker
-              name="activity_date_from"
+              name="activity_date"
               label="Date"
               register={register}
               control={control}
@@ -379,7 +390,7 @@ function Screen() {
               onClick={onSubmitRFID}
               disabled={!isScanned}
             >
-              Next
+              Submit
             </Button>
           </div>
         </div>
@@ -460,30 +471,9 @@ function Screen() {
                     <Tbody>
                       {fields.length > 0 ? (
                         fields.map((item, index) => {
-                          console.log('item', item);
-                          console.log(
-                            'filterssss',
-                            allocateData
-                              .filter(f => f.product_id === item.product_id)
-                              .some(s => {
-                                return s.isAllocate === true;
-                              })
-                          );
                           return (
                             <Tr key={item.id} className={`${index % 2 ? 'bg-gray-100' : ''} w-full`}>
-                              <Td className="w-10 text-center px-2">
-                                {index + 1}
-                                <Controller
-                                  render={({ field }) => {
-                                    return (
-                                      <Input variant="unstyled" {...field} disabled className="hidden" value={index} />
-                                    );
-                                  }}
-                                  name="index"
-                                  className="hidden"
-                                  control={control}
-                                />
-                              </Td>
+                              <Td className="w-10 text-center px-2">{index + 1}</Td>
                               <Td className="w-20 text-center px-2">
                                 {item.product_sku}
                                 <Controller
@@ -530,7 +520,7 @@ function Screen() {
                                 />
                               </Td>
                               <Td className="w-20 text-center px-2">
-                                {item.actual_qty}
+                                {item.source ? `${item.source} Rack` : ''}
                                 <Controller
                                   render={({ field }) => {
                                     return <Input variant="unstyled" {...field} disabled className="hidden" />;
@@ -614,9 +604,7 @@ function Screen() {
                     size="sm"
                     px={8}
                     className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
-                    onClick={() => {
-                      setOnOpenTransit(!onOpenTransit);
-                    }}
+                    onClick={onCancel}
                   >
                     Cancel
                   </Button>
