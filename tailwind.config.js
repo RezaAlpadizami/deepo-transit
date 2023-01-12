@@ -10,9 +10,6 @@ module.exports = {
       '400%': '400%',
     },
     extend: {
-      colors: {
-        borders: 'rgba(0, 0, 255, .5)',
-      },
       boxShadow: {
         custom: '12px 12px 2px 1px rgba(0, 0, 255, .2)',
         hover: '-12px 12px 2px -1px rgba(0, 0, 255, .2)',
@@ -33,6 +30,7 @@ module.exports = {
         container: '#edefff',
         processbtnfrom: '#ffa108',
         processbtnto: '#f67c08',
+        borders: 'rgba(0, 0, 255, .2)',
         thead: '#bbc9ff',
         slate: {
           850: '#172030',
