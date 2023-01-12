@@ -5,7 +5,21 @@ module.exports = {
   important: true,
   content: ['./src/**/*.{js,jsx,ts,tsx}'],
   theme: {
+    backgroundSize: {
+      '300%': '300%',
+      '400%': '400%',
+    },
     extend: {
+      animation: {
+        ani: 'ani 8s linear infinite',
+        border: 'none',
+      },
+      keyframes: {
+        ani: {
+          '0%': { backgroundPosition: '0%' },
+          '100%': { backgroundPosition: '400%' },
+        },
+      },
       colors: {
         primarydeepo: '#3f44c2',
         secondarydeepo: '#546ac2',

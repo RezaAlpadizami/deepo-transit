@@ -622,9 +622,9 @@ function DataTable(props) {
                               to="/inbound"
                               px={8}
                               size="sm"
-                              className="text-white bg-gradient-to-r from-processbtnfrom to-processbtnto hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2"
+                              className="relative border-none font-bold text-sm text-[#fff] w-[6rem] h-[2rem] leading-[2rem] text-center from-processbtnfrom via-processbtnto to-processbtnfrom bg-gradient-to-r bg-300% rounded-[30px] z-[1] before:absolute before:-top-[5px] before:-right-[5px] before:-left-[5px] before:-bottom-[5px] before:-z-[1] before:bg-gradient-to-r hover:animate-ani hover:before:blur-[10px] before:from-processbtnfrom before:via-processbtnto before:to-processbtnfrom before:bg-400% before:rounded-[35px] before:duration-1000 active:bg-gradient-to-r active:from-processbtnfrom active:via-processbtnto active:to-processbtnfrom my-2"
                             >
-                              Process
+                              PROCESS
                             </Link>
                           </td>
                         )}
