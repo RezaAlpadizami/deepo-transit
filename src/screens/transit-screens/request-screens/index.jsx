@@ -12,7 +12,7 @@ function Screen(props) {
     { activity_name: 'RELOCATE-IN' },
     { activity_name: 'RELOCATE-OUT' },
   ];
-  const statusRequest = [{ status: 'PENDING' }, { status: 'PROCESS' }, { status: 'COMPLETED' }];
+  const statusRequest = [{ status: 'PENDING' }, { status: 'COMPLETED' }];
 
   return (
     <div className="">

@@ -134,7 +134,7 @@ function Screen() {
                   >
                     <div className="text-[18px]">
                       <Text>{`${group.location} - ${d.name}`}</Text>
-                      <Text className="my-2">{`${d.address}`}</Text>
+                      <Text className="my-2">{`${d.address !== null ? d.address : '-'}`}</Text>
                       <Text>{`${d.phone}`}</Text>
                     </div>
                   </div>

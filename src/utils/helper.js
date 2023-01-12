@@ -5,6 +5,10 @@ export function getNestedObject(nestedObj, pathArr) {
   return pathArr.reduce((obj, key) => (obj && obj[key] !== 'undefined' ? obj[key] : undefined), nestedObj);
 }
 
+export function thousandSeparator(number) {
+  return number?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
 export function toCalculate(data, type) {
   let total = 0;
   for (let i = 0; i < data.length; i += 1) {

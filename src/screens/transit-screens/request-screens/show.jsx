@@ -11,6 +11,7 @@ import { RequestApi } from '../../../services/api-transit';
 import TextArea from '../../../components/textarea-component';
 import InputDetail from '../../../components/input-detail-component';
 import LoadingHover from '../../../components/loading-hover-component';
+import { thousandSeparator } from '../../../utils/helper';
 
 function Screen() {
   const { id } = useParams();
@@ -95,7 +96,7 @@ function Screen() {
           <ArrowNarrowLeftIcon className="w-6 h-6 text-secondarydeepo text-center" />
         </div>
         <div className="grid-cols-2 gap-4 flex">
-          <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
+          <fieldset className="border border-borders shadow-custom hover:shadow-hover transition-all duration-200  w-full h-full px-8 py-12 rounded-[55px] mx-4">
             <legend className="px-2 text-[28px] text-primarydeepo">Request</legend>
             <div className="flex flex-col">
               <div className="w-full">
@@ -138,7 +139,7 @@ function Screen() {
               />
             </div>
           </fieldset>
-          <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
+          <fieldset className="border border-borders shadow-custom hover:shadow-hover transition-all duration-200  w-full h-full px-8 py-12 rounded-[55px] mx-4">
             <legend className="px-2 text-[28px] text-primarydeepo">Request Detail</legend>
             <div>
               <div className="flex justify-between">
@@ -156,7 +157,7 @@ function Screen() {
                     />
                     <div className="flex gap-20 mt-6">
                       <span className="">X</span>
-                      <Text>{qty}</Text>
+                      <Text>{thousandSeparator(qty)}</Text>
                     </div>
                   </div>
                 );
@@ -165,7 +166,7 @@ function Screen() {
             <div className="border-b border-primarydeepo my-6"> </div>
             <div className="flex justify-between font-bold">
               <Text>Total Product</Text>
-              <Text>{totalQty}</Text>
+              <Text>{thousandSeparator(totalQty)}</Text>
             </div>
           </fieldset>
         </div>
