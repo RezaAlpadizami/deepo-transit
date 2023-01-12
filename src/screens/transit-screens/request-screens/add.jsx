@@ -125,7 +125,7 @@ function Screen() {
     setLoading(true);
     RequestApi.store({
       request_by: 'testing',
-      warehouse_id: CookieService.getCookies('warehouse_id'),
+      warehouse_id: Number(CookieService.getCookies('warehouse_id')),
       notes: data.notes,
       detail: updateDataUpdate.map(data => {
         return {
