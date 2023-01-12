@@ -8,6 +8,7 @@ import Swal from 'sweetalert2';
 import { Button, Text } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 
+import { thousandSeparator } from '../../../utils/helper';
 import Input from '../../../components/input-component';
 import Select from '../../../components/select-component';
 import { ProductApi } from '../../../services/api-master';
@@ -272,7 +273,7 @@ function Screen() {
     <div>
       <div className="bg-white p-5 rounded-[55px] py-12 drop-shadow-md">
         <div className="grid-cols-2 gap-4 flex">
-          <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
+          <fieldset className="border border-borders shadow-custom hover:shadow-hover transition-all duration-200  w-full h-full px-8 py-12 rounded-[55px] mx-4">
             <legend className="px-2 text-[28px] text-primarydeepo">Edit Request </legend>
             <div className="flex gap-4 justify-center">
               <div className="w-full">
@@ -285,7 +286,6 @@ function Screen() {
                       label: i.label,
                     };
                   })}
-                  placeholder="Activity"
                   register={register}
                   errors={errors}
                 />
@@ -306,7 +306,7 @@ function Screen() {
             </div>
           </fieldset>
 
-          <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
+          <fieldset className="border border-borders shadow-custom hover:shadow-hover transition-all duration-200  w-full h-full px-8 py-12 rounded-[55px] mx-4">
             <legend className="px-2 text-[28px] text-primarydeepo">Edit Request Detail</legend>
             <form onSubmit={handleSubmitProd(onAddProdRequestDetail)}>
               <div className="flex gap-4 justify-center">
@@ -320,7 +320,6 @@ function Screen() {
                         label: i.product_name,
                       };
                     })}
-                    placeholder="Product"
                     control={controlProd}
                     register={registerProd}
                     errors={errorsProd}
@@ -361,7 +360,7 @@ function Screen() {
                   />
                   <div className="flex gap-20 mt-6">
                     <span className="">X</span>
-                    <Text>{qty}</Text>
+                    <Text>{thousandSeparator(qty)}</Text>
                   </div>
                 </div>
               );
@@ -370,7 +369,7 @@ function Screen() {
             <div className="border-b border-primarydeepo my-6"> </div>
             <div className="flex justify-between font-bold">
               <Text>Total Product</Text>
-              <Text className={`${getTotalQty < 1 ? 'hidden' : ''}`}>{getTotalQty}</Text>
+              <Text className={`${getTotalQty < 1 ? 'hidden' : ''}`}>{thousandSeparator(getTotalQty)}</Text>
             </div>
           </fieldset>
         </div>

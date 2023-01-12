@@ -17,6 +17,7 @@ import TextArea from '../../../components/textarea-component';
 import DatePicker from '../../../components/datepicker-component';
 import InputDetail from '../../../components/input-detail-component';
 import LoadingHover from '../../../components/loading-hover-component';
+import { thousandSeparator } from '../../../utils/helper';
 
 function Screen() {
   const navigate = useNavigate();
@@ -124,7 +125,7 @@ function Screen() {
     setLoading(true);
     RequestApi.store({
       request_by: 'testing',
-      warehouse_id: CookieService.getCookies('warehouse_id'),
+      warehouse_id: Number(CookieService.getCookies('warehouse_id')),
       notes: data.notes,
       detail: updateDataUpdate.map(data => {
         return {
@@ -158,7 +159,7 @@ function Screen() {
     <div>
       <div className="bg-white p-5 rounded-[55px] py-12 drop-shadow-md">
         <div className="grid-cols-2 gap-4 flex">
-          <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
+          <fieldset className="border border-borders shadow-custom hover:shadow-hover transition-all duration-200 w-full h-full px-8 py-12 mx-4 rounded-[55px]">
             <legend className="px-2 text-[28px] text-primarydeepo">Request</legend>
             <div className="flex gap-4 justify-center">
               <div className="w-full">
@@ -171,7 +172,6 @@ function Screen() {
                       label: i.activity_name,
                     };
                   })}
-                  placeholder="Activity"
                   register={register}
                   errors={errors}
                 />
@@ -192,7 +192,7 @@ function Screen() {
             </div>
           </fieldset>
 
-          <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
+          <fieldset className="border border-borders shadow-custom hover:shadow-hover transition-all duration-200 w-full h-full px-8 py-12 mx-4 rounded-[55px]">
             <legend className="px-2 text-[28px] text-primarydeepo">Request Detail</legend>
             <form onSubmit={handleSubmitProd(onAddProdRequestDetail)}>
               <div className="flex gap-4 justify-center">
@@ -206,7 +206,6 @@ function Screen() {
                         label: i.product_name,
                       };
                     })}
-                    placeholder="Product"
                     register={registerProd}
                     control={controlProd}
                     errors={errorsProd}
@@ -249,7 +248,7 @@ function Screen() {
                       />
                       <div className="flex relative gap-20 mt-6">
                         <span className="absolute right-24">X</span>
-                        <Text>{val.qty}</Text>
+                        <Text>{thousandSeparator(val.qty)}</Text>
                       </div>
                     </div>
                   );
@@ -260,7 +259,7 @@ function Screen() {
             <div className="border-b border-primarydeepo my-6"> </div>
             <div className="flex justify-between font-bold">
               <Text>Total Product</Text>
-              <Text className={`${getTotalQty < 1 ? 'hidden' : ''}`}>{getTotalQty}</Text>
+              <Text className={`${getTotalQty < 1 ? 'hidden' : ''}`}>{thousandSeparator(getTotalQty)}</Text>
             </div>
           </fieldset>
         </div>
