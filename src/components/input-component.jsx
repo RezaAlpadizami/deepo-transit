@@ -153,11 +153,12 @@ function InputComponent(props) {
           errors[name]?.message.map(m => <span className="error d-block">{m.toLowerCase()}</span>)
         ) : errors?.allocate?.length ? (
           <span className="text-red-700 ml-1">
-            {
+            {errors?.allocate?.map(i => {
+              return i[name.split('.')[2]]?.message.split('.')[1];
+            })[idx] ||
               errors?.allocate?.map(i => {
-                return i[[name.split('.')[2]]]?.message.split('.')[1];
-              })[idx]
-            }
+                return i[name.split('.')[2]]?.message;
+              })}
           </span>
         ) : (
           <span className="text-red-700 ml-1">

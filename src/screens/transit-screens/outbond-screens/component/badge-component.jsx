@@ -8,7 +8,15 @@ function SelectComponent(props) {
     <div className="flex-auto w-full">
       <div>
         <div className="mt-1 flex  shadow-sm">
-          <Badge {...register(name)} size="sm" name={name} id={name} colorScheme="green" isDisabled={disabled}>
+          <Badge
+            className="rounded-[10px] px-2"
+            {...register(name)}
+            size="sm"
+            name={name}
+            id={name}
+            colorScheme="green"
+            isDisabled={disabled}
+          >
             {label}
           </Badge>
         </div>

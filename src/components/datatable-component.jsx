@@ -395,6 +395,21 @@ function DataTable(props) {
     }
     return '';
   };
+  const route = name => {
+    let to;
+    switch (name.toLowerCase()) {
+      case 'inbound':
+        to = 'inbound';
+        break;
+      case 'outbound':
+        to = 'outbound';
+        break;
+      default:
+        break;
+    }
+    return to;
+  };
+
   return (
     <Fade in={filters.length > 0}>
       {download && (
@@ -617,7 +632,7 @@ function DataTable(props) {
                               onClick={() => {
                                 boundActivity.setRequestNumber(row.original.id);
                               }}
-                              to="/inbound"
+                              to={`/${route(row.original.activity_name)}`}
                               px={8}
                               size="sm"
                               className="text-white bg-gradient-to-r from-processbtnfrom to-processbtnto hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2"

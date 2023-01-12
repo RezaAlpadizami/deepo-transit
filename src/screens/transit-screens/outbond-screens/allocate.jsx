@@ -4,18 +4,34 @@ import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { Table, Thead, Tbody, Tr, Th, Td, TableContainer, Input, Button } from '@chakra-ui/react';
 import * as yup from 'yup';
 import Moment from 'moment';
+import LoadingComponent from '../../../components/loading-component';
 import InputComponent from '../../../components/input-component';
+import NoContent from './component/no-content';
 import Context from '../../../context';
 
 const product = yup.object({
-  actual_qty: yup.string(),
+  actual_qty: yup.string().test('actual_qty', ' actual quantity must be less or equal than qty it self', () => {
+    return true;
+  }),
 });
-// actual quantity must be less or equal than qty it self
+
 const schema = yup.object({
-  allocate: yup.array().of(product).min(1, 'must have at least one data'),
+  allocate: yup
+    .array()
+    .of(product)
+    .min(1, 'must have at least one data')
+    .test('allocate', 'should fill at least one rack', value => {
+      return value.some(i => i.actual_qty);
+    })
+    .test('allocate', 'cannot process the value less than zero ', value => {
+      if (value.some(i => i.actual_qty <= 0)) {
+        return false;
+      }
+      return true;
+    }),
 });
 function Allocate(props) {
-  const { onAllocate, setOnAllocate, data, setAllocateData, productId, allocateData } = props;
+  const { onAllocate, setOnAllocate, data, setAllocateData, productId, allocateData, loadingTransit } = props;
   const { boundActivity } = useContext(Context);
   const {
     register,
@@ -37,7 +53,7 @@ function Allocate(props) {
   useEffect(() => {
     setValue(
       'allocate',
-      data.map((item, idx) => {
+      data?.product_info?.map((item, idx) => {
         if (allocateData.filter(i => i.product_id === productId && i.actual_qty !== undefined).length > 0) {
           const actual = [];
 
@@ -53,9 +69,9 @@ function Allocate(props) {
     );
   }, [data]);
 
-  const onSubmit = data => {
+  const onSubmit = dt => {
     const body = {
-      allocate: data.allocate.map(item => {
+      allocate: dt.allocate.map(item => {
         return {
           inbound_date: Moment(item.date).format('YYYY-MM-DD'),
           rack: item.rack,
@@ -64,6 +80,7 @@ function Allocate(props) {
           qty: 0,
           actual_qty: item.actual_qty,
           product_id: productId,
+          sku: data?.product_sku,
         };
       }),
     };
@@ -90,6 +107,7 @@ function Allocate(props) {
     <form onSubmit={handleSubmit(onSubmit)}>
       <p className="text-md font-bold py-2 px-4">Dashboard Transit</p>
       <div className="max-h-80 overflow-y-auto overflow-x-hidden p-5">
+        <LoadingComponent loading={loadingTransit} />
         <TableContainer>
           <Table>
             <Thead>
@@ -202,9 +220,7 @@ function Allocate(props) {
                   );
                 })
               ) : (
-                <Tr className="bg-gray-100 w-full border-2 border-solid border-[#f3f4f6] border-red-500">
-                  <Td className="w-10 text-center px-2  text-red-500 h-[170px]" colSpan={9} rowSpan={5} />
-                </Tr>
+                <NoContent />
               )}
             </Tbody>
           </Table>
@@ -213,9 +229,7 @@ function Allocate(props) {
 
       <div className="  flex justify-between">
         {errors && (
-          <span className="pl-10 text-[#a2002d]">{`${
-            errors?.allocate?.type === 'server' ? errors?.allocate.message : ''
-          }`}</span>
+          <span className="pl-10 text-[#a2002d]">{`${errors?.allocate ? errors?.allocate.message : ''}`}</span>
         )}
         <div className="mr-4 mb-2">
           <Button

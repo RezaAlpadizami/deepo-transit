@@ -20,9 +20,11 @@ import InputComponent from '../../../components/input-component';
 import TableCh from './table';
 import Allocate from './allocate';
 import Badge from './component/badge-component';
+import NoContent from './component/no-content';
 import Context from '../../../context';
 
 const totalRFID = 5;
+
 const swalButton = Swal.mixin({
   customClass: {
     confirmButton: 'rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold w-20',
@@ -31,6 +33,7 @@ const swalButton = Swal.mixin({
   },
   buttonsStyling: false,
 });
+
 const allocated = [];
 const product = yup.object({
   isAllocate: yup.boolean(),
@@ -55,19 +58,15 @@ function Screen() {
     control,
     handleSubmit,
     setValue,
-    // watch,
     formState: { errors },
-    // setError,
-    // reset,
   } = useForm({
     resolver: yupResolver(schema),
   });
-  // append
-
   const { fields } = useFieldArray({
     control,
     name: 'details',
   });
+
   const { boundActivity } = useContext(Context);
   const [requestDetailData, setRequestDetailData] = useState([]);
   const [allocateData, setAllocateData] = useState([]);
@@ -75,6 +74,7 @@ function Screen() {
   const [rfidData, setRfidData] = useState([]);
 
   const [loadingRequest, setLoadingRequest] = useState(false);
+  const [loadingTransit, setLoadingTransit] = useState(false);
   const [onOpenTransit, setOnOpenTransit] = useState(false);
   const [loadingHover, setLoadingHover] = useState(false);
   const [loadingRFID, setLoadingRFID] = useState(false);
@@ -139,11 +139,13 @@ function Screen() {
 
     setIsScanned(false);
   };
+
   const stopScanning = () => {
     setScanning(false);
     setIsScanned(true);
     clearInterval(timer);
   };
+
   const onReset = () => {
     setLoadingRequest(true);
     setLoadingRFID(true);
@@ -158,13 +160,16 @@ function Screen() {
       setLoadingRFID(false);
     }, 500);
   };
+
   const onProcess = id => {
     if (id) {
       setRequestId(id);
       setOnOverview(!onOverview);
       setOnOpenTransit(!onOpenTransit);
+      setLoadingTransit(true);
     }
   };
+
   const onSubmitRFID = () => {
     let pass = onOpen;
     if (totalRFID === totalRequest) {
@@ -196,23 +201,37 @@ function Screen() {
     }
     return pass;
   };
+
   useEffect(() => {
     if (productId && onAllocate) {
       ProductInfoApi.find(productId)
         .then(res => {
-          setJourneyData(res.product.product_info);
+          setJourneyData(res.product);
         })
         .catch(error => {
           Swal.fire({ text: error?.message, icon: 'error' });
         });
     }
   }, [productId]);
-  console.log('allocatedData', allocateData);
-  console.log('allocated', allocated);
+
   useEffect(() => {
     if (allocateData.length > 0) {
       const filter = allocateData.filter(i => i.product_id === productId && i.actual_qty !== undefined);
-      allocated.push(...allocateData);
+      if (allocated.length === 0) {
+        allocated.push(...allocateData);
+      } else if (allocated.length > 0) {
+        if (allocated[allocated.findIndex(f => f.product_id === productId)]?.product_id === productId) {
+          allocated
+            .filter(f => f.product_id === productId)
+            .map((item, idx) => {
+              item.actual_qty = allocateData[idx].actual_qty;
+              return item;
+            });
+        } else {
+          allocated.push(...allocateData);
+        }
+      }
+
       setValue(
         'details',
         fields.map(item => {
@@ -231,10 +250,13 @@ function Screen() {
 
   const onCancel = () => {
     Swal.fire({
-      html: '<p>Transit data may not be <b>saved</b> ! <br/> Are your sure to cancel ?</p>',
+      html: '<p class="font-semibold">Transit data may not be saved <br/> Are your sure to cancel ?</p>',
+      width: '30%',
       showCancelButton: true,
-      confirmButtonColor: '#ff0000',
+      confirmButtonColor: '#ee5e68',
+      cancelButtonColor: '#8388a5',
       confirmButtonText: 'Yes',
+      reverseButtons: true,
       cancelButtonText: 'No',
     }).then(result => {
       if (result.isConfirmed) {
@@ -242,33 +264,25 @@ function Screen() {
       }
     });
   };
-  const onFinalSubmit = data => {
-    console.log('onFInalSubmit data', data);
-    console.log('note', notes);
-  };
-  // const onFinalSubmit = data => {
-  //   const body = {
-  //     request_id: requestId,
-  //     notes,
-  //     detail: data.details.map(i => {
-  //       return {
-  //         product_id: i.product_id,
-  //         warehouse_id: 2,
-  //         storage_id: storageData.find(f => f.rack_number === i.rack && f.bay === i.bay && f.level === i.level)?.id,
-  //         qty: i.child_qty ? i.child_qty : i.qty,
-  //       };
-  //     }),
-  //   };
 
-  //   TransitApi.inbound(body)
-  //     .then(() => {
-  //       Swal.fire({ text: 'Sucessfully Saved', icon: 'success' });
-  //       setOnOpen(!onOpen);
-  //     })
-  //     .catch(error => {
-  //       Swal.fire({ text: error?.message || error?.data?.message, icon: 'error' });
-  //     });
-  // };
+  const onFinalSubmit = data => {
+    const body = {
+      request_id: '',
+      notes,
+      warehouse_id: '',
+      details: data.details.map(i => {
+        i.allocate = allocated.filter(f => f.product_id === i.product_id && f.actual_qty !== undefined);
+        return i;
+      }),
+    };
+    TransitApi.outbound(body)
+      .then(() => {
+        Swal.fire({ text: 'Successfully Saved', icon: 'success' });
+      })
+      .catch(error => {
+        Swal.fire({ text: error?.message, icon: 'error' });
+      });
+  };
 
   return (
     <div className="bg-white p-5 rounded-[55px] shadow px-6 pb-11">
@@ -452,6 +466,7 @@ function Screen() {
               <p className="text-md font-bold py-2 px-4">Dashboard Transit</p>
 
               <div className="overflow-y-auto h-60 px-6 py-2">
+                <LoadingComponent loading={loadingTransit} />
                 <TableContainer>
                   <Table>
                     <Thead>
@@ -466,7 +481,6 @@ function Screen() {
                         <Th aria-label="Mute volume" className="w-10" />
                       </Tr>
                     </Thead>
-                    {/* <LoadingComponent loading={loadingTransit} /> */}
 
                     <Tbody>
                       {fields.length > 0 ? (
@@ -558,7 +572,7 @@ function Screen() {
                                   size="sm"
                                   type="button"
                                   px={6}
-                                  className="rounded-full text-center text-white font-bold bg-green-500 border-2 border-green-700 hover:bg-gradient-to-br focus:ring-1 focus:outline-none focus:ring-secondarydeepo"
+                                  className="rounded-full border-2 border-[#9bd0b4] bg-[#fff] hover:bg-[#E4E4E4] text-[#5dc08b] font-bold"
                                   key={index}
                                   onClick={() => {
                                     setProductId(item.product_id);
@@ -572,9 +586,7 @@ function Screen() {
                           );
                         })
                       ) : (
-                        <Tr className="bg-gray-100 w-full border-2 border-solid border-[#f3f4f6] border-red-500">
-                          <Td className="w-10 text-center px-2  text-red-500 h-[170px]" colSpan={9} rowSpan={5} />
-                        </Tr>
+                        <NoContent />
                       )}
                     </Tbody>
                   </Table>
@@ -641,6 +653,7 @@ function Screen() {
               data={journeyData}
               allocateData={allocateData}
               setAllocateData={setAllocateData}
+              loadingTransit={loadingTransit}
             />
           </div>
         </div>
