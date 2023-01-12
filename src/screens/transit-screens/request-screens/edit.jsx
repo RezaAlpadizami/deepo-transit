@@ -273,7 +273,7 @@ function Screen() {
     <div>
       <div className="bg-white p-5 rounded-[55px] py-12 drop-shadow-md">
         <div className="grid-cols-2 gap-4 flex">
-          <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
+          <fieldset className="border border-borders shadow-custom hover:shadow-hover transition-all duration-200  w-full h-full px-8 py-12 rounded-[55px] mx-4">
             <legend className="px-2 text-[28px] text-primarydeepo">Edit Request </legend>
             <div className="flex gap-4 justify-center">
               <div className="w-full">
@@ -306,7 +306,7 @@ function Screen() {
             </div>
           </fieldset>
 
-          <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[55px]">
+          <fieldset className="border border-borders shadow-custom hover:shadow-hover transition-all duration-200  w-full h-full px-8 py-12 rounded-[55px] mx-4">
             <legend className="px-2 text-[28px] text-primarydeepo">Edit Request Detail</legend>
             <form onSubmit={handleSubmitProd(onAddProdRequestDetail)}>
               <div className="flex gap-4 justify-center">
