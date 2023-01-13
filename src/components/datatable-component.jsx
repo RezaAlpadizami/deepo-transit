@@ -35,7 +35,6 @@ function DataTable(props) {
     filters,
     onActionButton = () => {},
     identifierProperties = 'id',
-    hasButtonAction,
     onSearch,
     filterEnd,
   } = props;
@@ -117,6 +116,23 @@ function DataTable(props) {
                 >
                   Process
                 </Button>
+              );
+            }
+            if (d.type === 'action-button-index') {
+              return (
+                <Link
+                  hidden={row.original.status !== 'PENDING'}
+                  type="button"
+                  onClick={() => {
+                    store.setRequestNumber(row.original.id);
+                  }}
+                  to="/inbound"
+                  px={8}
+                  size="sm"
+                  className="relative border-none font-bold text-[12px] text-[#fff] w-[6rem] h-[2rem] leading-[2rem] text-center from-processbtnfrom via-processbtnto to-processbtnfrom bg-gradient-to-r bg-300% rounded-[30px] z-[1] before:absolute before:-top-[5px] before:-right-[5px] before:-left-[5px] before:-bottom-[5px] before:-z-[1] before:bg-gradient-to-r hover:animate-ani hover:before:blur-[10px] before:from-processbtnfrom before:via-processbtnto before:to-processbtnfrom before:bg-400% before:rounded-[35px] before:duration-1000 active:bg-gradient-to-r active:from-processbtnfrom active:via-processbtnto active:to-processbtnfrom my-2"
+                >
+                  PROCESS
+                </Link>
               );
             }
 
@@ -587,7 +603,6 @@ function DataTable(props) {
                         </div>
                       </th>
                     ))}
-                    {hasButtonAction && <th> </th>}
                   </tr>
                 ))}
               </thead>
@@ -607,23 +622,6 @@ function DataTable(props) {
                             {cell.render('Cell')}
                           </td>
                         ))}
-                        {hasButtonAction && (
-                          <td className="text-black py-1 px-6">
-                            <Link
-                              hidden={row.original.status !== 'PENDING'}
-                              type="button"
-                              onClick={() => {
-                                store.setRequestNumber(row.original.id);
-                              }}
-                              to="/inbound"
-                              px={8}
-                              size="sm"
-                              className="relative border-none font-bold text-sm text-[#fff] w-[6rem] h-[2rem] leading-[2rem] text-center from-processbtnfrom via-processbtnto to-processbtnfrom bg-gradient-to-r bg-300% rounded-[30px] z-[1] before:absolute before:-top-[5px] before:-right-[5px] before:-left-[5px] before:-bottom-[5px] before:-z-[1] before:bg-gradient-to-r hover:animate-ani hover:before:blur-[10px] before:from-processbtnfrom before:via-processbtnto before:to-processbtnfrom before:bg-400% before:rounded-[35px] before:duration-1000 active:bg-gradient-to-r active:from-processbtnfrom active:via-processbtnto active:to-processbtnfrom my-2"
-                            >
-                              PROCESS
-                            </Link>
-                          </td>
-                        )}
                       </tr>
                     );
                   })}
