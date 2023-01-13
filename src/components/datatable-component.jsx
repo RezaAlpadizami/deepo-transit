@@ -99,7 +99,7 @@ function DataTable(props) {
             }
             if (d.type === 'scrollable') {
               return (
-                <div className="max-h-[85px] max-w-[250px] overflow-y-auto no-scrollbar::-webkit-scrollbar no-scrollbar whitespace-pre-line p-2">
+                <div className="whitespace-pre-line">
                   <span>{value?.length > 25 ? `${value.substring(0, 30)} . . .` : value}</span>
                 </div>
               );
@@ -267,12 +267,8 @@ function DataTable(props) {
         return new Promise((resolve, reject) => {
           api
             .delete(d.original[identifierProperties])
-            .then(r => {
-              return resolve(r);
-            })
-            .catch(e => {
-              return reject(e);
-            });
+            .then(r => resolve(r))
+            .catch(e => reject(e));
         });
       }),
     ]).then(res => {

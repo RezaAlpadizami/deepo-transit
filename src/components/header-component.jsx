@@ -49,7 +49,7 @@ function Header() {
                 <div>
                   <p>{getWarehouse()?.name}</p>
                   <p className="font-medium truncate text-center">
-                    {getWarehouse()?.address !== null ? getWarehouse().address : '-'}
+                    {getWarehouse()?.address !== null ? getWarehouse()?.address : '-'}
                   </p>
                 </div>
               </div>
