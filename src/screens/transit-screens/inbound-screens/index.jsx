@@ -194,17 +194,16 @@ function Screen() {
   const [requestId, setRequestId] = useState('');
   const [notes, setNotes] = useState('');
   const [totalRequest, setTotalRequest] = useState(0);
+  const [totalRFID, setTotalRFID] = useState(0);
   const [counter, setCounter] = useState(2);
   const [timer, setTimer] = useState();
   const [splitValue, setSplitValue] = useState({});
   const [filterParams, setFilterParams] = useState({
-    warehouse_id: 2,
+    warehouse_id: store?.getWarehouseId(),
   });
   const [filterBay, setFilterBay] = useState({
-    warehouse_id: 2,
+    warehouse_id: store?.getWarehouseId(),
   });
-  const totalRFID = rfidData.length;
-
   useEffect(() => {
     if (store?.getRequestNumber()) {
       setRequestId(store?.getRequestNumber());
@@ -277,22 +276,35 @@ function Screen() {
     }
   }, [newData]);
 
+  const getTransit = () => {
+    setTimer(
+      setInterval(() => {
+        TransitApi.get({ warehouse_id: store?.getWarehouseId() })
+          .then(res => {
+            setRfidData(res.data);
+            setTotalRFID(res.query.total || 0);
+          })
+          .catch(error => {
+            Swal.fire({ text: error?.data?.message, icon: 'error' });
+          });
+      }, 5000)
+    );
+  };
+
   const startScanning = () => {
     setScanning(true);
-    if (rfidData.length !== 0) {
+
+    if (!scanning && rfidData.length > 0) {
+      setLoadingRFID(true);
       setRfidData([]);
+      setTotalRFID();
+      setTimeout(() => {
+        setLoadingRFID(false);
+      }, 500);
+
+      getTransit();
     } else {
-      setTimer(
-        setInterval(() => {
-          TransitApi.get()
-            .then(res => {
-              setRfidData(res.data);
-            })
-            .catch(error => {
-              Swal.fire({ text: error?.message, icon: 'error' });
-            });
-        }, 5000)
-      );
+      getTransit();
     }
 
     setIsScanned(false);
@@ -305,7 +317,7 @@ function Screen() {
 
   useEffect(() => {
     Promise.allSettled([
-      StorageApi.get({ warehouse_id: 2 }).then(res => res),
+      StorageApi.get({ warehouse_id: store?.getWarehouseId() }).then(res => res),
       StorageApi.get(filterParams).then(res => res),
       StorageApi.get(filterBay).then(res => res),
     ])
@@ -663,6 +675,18 @@ function Screen() {
       setOnOverview(!onOverview);
     }
   };
+  const onDisabled = () => {
+    let pass = false;
+
+    if (!isScanned && totalRFID > 0) {
+      pass = true;
+    } else if (!isScanned && !totalRFID) {
+      pass = true;
+    } else if (isScanned && !totalRFID) {
+      pass = true;
+    }
+    return pass;
+  };
 
   const validateStorageId = data => {
     let pass = false;
@@ -720,7 +744,7 @@ function Screen() {
           detail: data.details.map(i => {
             return {
               product_id: i.product_id,
-              warehouse_id: 2,
+              warehouse_id: store?.getWarehouseId(),
               storage_id: storageData.find(f => f.rack_number === i.rack && f.bay === i.bay && f.level === i.level)?.id,
               qty: i.child_qty ? i.child_qty : i.qty,
             };
@@ -750,6 +774,8 @@ function Screen() {
     setIsScanned(false);
     setRequestDetailData([]);
     setRfidData([]);
+    setTotalRequest(0);
+    setTotalRFID(0);
     setRequestId('');
     setValue('activity_date_from', null);
     setValue('request_number', '');
@@ -780,9 +806,7 @@ function Screen() {
           >
             <p className="text-lg text-[#fff] font-bold mb-2">Request</p>
             <CalculatorIcon
-              className={`${
-                scanning ? 'bg-[#ffc108]' : 'bg-processbtnfrom'
-              } h-10 w-15 bg-processbtnfrom stroke-[#fff] mx-auto`}
+              className={`${scanning ? 'bg-[#ffc108]' : 'bg-processbtnfrom'} h-10 w-15 stroke-[#fff] mx-auto`}
             />
           </button>
 
@@ -882,7 +906,7 @@ function Screen() {
               px={6}
               className="rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold"
               onClick={onSubmitRFID}
-              disabled={!isScanned}
+              disabled={onDisabled}
             >
               Next
             </Button>
@@ -891,7 +915,9 @@ function Screen() {
       </div>
       {error && (
         <p className="text-[#a2002d] pl-10">
-          {totalRequest !== totalRFID ? 'The sum of request and rfid are not the same' : ''}
+          {totalRequest !== totalRFID
+            ? 'The amount of data in Request Detail does not match the data in RFID Detected.'
+            : ''}
         </p>
       )}
       {onOverview && (

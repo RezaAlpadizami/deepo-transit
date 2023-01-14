@@ -32,6 +32,12 @@ const RootStore = types
     getRequestNumber() {
       return self.request_number;
     },
+    setWarehouseId(id) {
+      self.warehouseId = id;
+    },
+    getWarehouseId() {
+      return self.warehouseId;
+    },
   }));
 
 export default RootStore;
