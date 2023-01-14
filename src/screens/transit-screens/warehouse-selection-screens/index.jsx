@@ -105,11 +105,11 @@ function Screen() {
   const opt = useCallback(getDebounce(onSubmit), []);
 
   return (
-    <div className="mt-6">
-      <div className="flex justify-center mb-6">
+    <div className="mt-6 max-[640px]:w-[280px]">
+      <div className="flex justify-center mb-6 max-[640px]:text-center">
         <h1 className="font-bold text-2xl">SELECT YOUR WORK AREA</h1>
       </div>
-      <form onChange={handleSubmit(opt)}>
+      <form onChange={handleSubmit(opt)} className="max-[640px]:w-full">
         <Input
           name="search"
           placeholder="Search Warehouse or Location"
@@ -123,7 +123,7 @@ function Screen() {
         return (
           <div>
             <h2 className="font-bold mb-2 ml-1 my-6 text-lg">{group.location}</h2>
-            <div className="grid gap-x-5 gap-y-9 grid-cols-4 text-center">
+            <div className="grid gap-x-5 gap-y-9 grid-cols-4 max-[640px]:grid-cols-1 text-center">
               {group.data.map(d => {
                 return (
                   <div
@@ -132,7 +132,7 @@ function Screen() {
                     } bg-white py-8 px-8 rounded-full drop-shadow-md cursor-pointer`}
                     onClick={() => clickAddressCard(d)}
                   >
-                    <div className="text-[18px]">
+                    <div className="text-[18px] max-[640px]:text-[12px]">
                       <Text>{`${group.location} - ${d.name}`}</Text>
                       <Text className="my-2">{`${d.address !== null ? d.address : '-'}`}</Text>
                       <Text>{`${d.phone}`}</Text>
