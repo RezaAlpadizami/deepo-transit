@@ -105,7 +105,6 @@ function DataTable(props) {
               );
             }
             if (d.type === 'action-button' && row.original.id) {
-              // row.original.request_number
               return (
                 <Button
                   className="text-white bg-gradient-to-r from-processbtnfrom to-processbtnto hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2"
