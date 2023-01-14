@@ -4,11 +4,14 @@ import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { Table, Thead, Tbody, Tr, Th, Td, TableContainer, Input, Button } from '@chakra-ui/react';
 import * as yup from 'yup';
 import Moment from 'moment';
+import { observer } from 'mobx-react-lite';
 import LoadingComponent from '../../../components/loading-component';
 import InputComponent from '../../../components/input-component';
 import NoContent from './component/no-content';
 import Context from '../../../context';
+import { toCalculate } from '../../../utils/helper';
 
+const state = [];
 const product = yup.object({
   actual_qty: yup.string().test('actual_qty', ' actual quantity must be less or equal than qty it self', () => {
     return true;
@@ -31,8 +34,9 @@ const schema = yup.object({
     }),
 });
 function Allocate(props) {
-  const { onAllocate, setOnAllocate, data, setAllocateData, productId, allocateData, loadingTransit } = props;
-  const { boundActivity } = useContext(Context);
+  const { onAllocate, setOnAllocate, data, setAllocateData, productId, allocateData, loadingTransit, setIsAllocate } =
+    props;
+  const { activityStore } = useContext(Context);
   const {
     register,
     control,
@@ -73,20 +77,23 @@ function Allocate(props) {
     const body = {
       allocate: dt.allocate.map(item => {
         return {
-          inbound_date: Moment(item.date).format('YYYY-MM-DD'),
-          rack: item.rack,
-          bay: item.bay,
-          level: item.level,
-          qty: 0,
+          product_info_id: item.id,
+          storage_id: item.storage_id,
+          product_id: item.product_id,
           actual_qty: item.actual_qty,
-          product_id: productId,
-          sku: data?.product_sku,
         };
       }),
     };
 
-    if (body.allocate.filter(i => i.qty !== undefined).length !== 0) {
-      boundActivity.setAllocate([{ isAllocate: true, product_id: productId }]);
+    if (body.allocate.filter(i => i.actual_qty !== undefined).length !== 0) {
+      state.push({
+        isAllocate: true,
+        product_id: productId,
+        actual_qty: toCalculate(body, 'actual_qty'),
+        source: filter.length,
+      });
+      setIsAllocate(Array.from(new Set(state.map(JSON.stringify))).map(JSON.parse));
+      activityStore.setIsAllocate(Array.from(new Set(state.map(JSON.stringify))).map(JSON.parse));
       setOnAllocate(!onAllocate);
       setAllocateData(
         body.allocate.map(i => {
@@ -269,4 +276,4 @@ function Allocate(props) {
   );
 }
 
-export default Allocate;
+export default observer(Allocate);

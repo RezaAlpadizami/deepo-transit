@@ -3,7 +3,7 @@ import { types } from 'mobx-state-tree';
 const BoundActivity = types
   .model('BoundActivity', {
     request_number: types.optional(types.integer, 0),
-    groups: types.optional(
+    allocates: types.optional(
       types.array(
         types.model({
           isAllocate: types.optional(types.boolean, false),
@@ -20,9 +20,11 @@ const BoundActivity = types
     getRequestNumber() {
       return self.request_number;
     },
-    setAllocate(data) {
-      self.groups = data;
-      console.log('groups', data);
+    setIsAllocate(data) {
+      self.allocates = data;
+    },
+    getIsAllocate() {
+      return self.allocates;
     },
   }));
 export default BoundActivity;

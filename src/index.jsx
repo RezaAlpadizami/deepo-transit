@@ -30,12 +30,16 @@ const components = {
 const theme = extendTheme({ colors, components });
 
 const store = RootStore.create({ isLogin: false });
-const boundActivity = BoundActivity.create();
+const activityStore = BoundActivity.create();
+
+const c = document.cookie;
+store.setWarehouseId(c.split('=')[1]);
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <ChakraProvider theme={theme}>
-      <Context.Provider value={{ store, boundActivity }}>
+      <Context.Provider value={{ store, activityStore }}>
         <App />
       </Context.Provider>
     </ChakraProvider>

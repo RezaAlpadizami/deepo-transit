@@ -8,6 +8,7 @@ const RootStore = types
     isSelectedWarehouse: types.optional(types.boolean, false),
     isDrawerOpen: types.optional(types.boolean, false),
     isLoadEdit: types.optional(types.boolean, false),
+    warehouseId: types.optional(types.string, ''),
     activity: types.optional(BoundActivity, {}),
     user: types.optional(UserStore, {}),
   })
@@ -26,6 +27,12 @@ const RootStore = types
     },
     setIsLoadEdit(isLoad) {
       self.isLoadEdit = isLoad;
+    },
+    setWarehouseId(id) {
+      self.warehouseId = id;
+    },
+    getWarehouseId() {
+      return self.warehouseId;
     },
   }));
 

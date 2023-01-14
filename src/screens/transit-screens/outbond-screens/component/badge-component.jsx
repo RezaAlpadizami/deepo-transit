@@ -2,7 +2,7 @@ import React from 'react';
 import { Badge } from '@chakra-ui/react';
 
 function SelectComponent(props) {
-  const { name, label, disabled, register, errors, idx, booleans } = props;
+  const { name, label, register, errors, idx, booleans } = props;
 
   return (
     <div className="flex-auto w-full">
@@ -15,7 +15,6 @@ function SelectComponent(props) {
             name={name}
             id={name}
             colorScheme="green"
-            isDisabled={disabled}
           >
             {label}
           </Badge>

@@ -48,7 +48,7 @@ function DataTable(props) {
     formState: { errors },
   } = useForm();
 
-  const { boundActivity } = useContext(Context);
+  const { activityStore } = useContext(Context);
   const [pages, setPages] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [datas, setDatas] = useState([]);
@@ -633,7 +633,7 @@ function DataTable(props) {
                               hidden={row.original.status !== 'PENDING'}
                               type="button"
                               onClick={() => {
-                                boundActivity.setRequestNumber(row.original.id);
+                                activityStore.setRequestNumber(row.original.id);
                               }}
                               to={`/${route(row.original.activity_name)}`}
                               px={8}

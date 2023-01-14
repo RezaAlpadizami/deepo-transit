@@ -108,7 +108,7 @@ function InputComponent(props) {
               width="auto"
               type={type}
               value={value}
-              isDisabled={disabled}
+              disabled={disabled}
               maxLength={maxLength}
               hidden={hidden}
               name={name}

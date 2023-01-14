@@ -23,8 +23,6 @@ import Badge from './component/badge-component';
 import NoContent from './component/no-content';
 import Context from '../../../context';
 
-const totalRFID = 5;
-
 const swalButton = Swal.mixin({
   customClass: {
     confirmButton: 'rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold w-20',
@@ -67,11 +65,13 @@ function Screen() {
     name: 'details',
   });
 
-  const { boundActivity } = useContext(Context);
+  const { activityStore, store } = useContext(Context);
   const [requestDetailData, setRequestDetailData] = useState([]);
+  const [transitData, setTransitData] = useState();
   const [allocateData, setAllocateData] = useState([]);
-  const [journeyData, setJourneyData] = useState([]);
+  const [productInfoData, setproductInfoData] = useState([]);
   const [rfidData, setRfidData] = useState([]);
+  const [isAllocate, setIsAllocate] = useState([]);
 
   const [loadingRequest, setLoadingRequest] = useState(false);
   const [loadingTransit, setLoadingTransit] = useState(false);
@@ -85,17 +85,18 @@ function Screen() {
   const [onOpen, setOnOpen] = useState(false);
   const [error, setErrors] = useState(false);
 
-  const [totalRequest, setTotalRequest] = useState();
+  const [totalRequest, setTotalRequest] = useState(0);
+  const [errMessage, setErrMessage] = useState('');
+  const [totalRFID, setTotalRFID] = useState(0);
   const [requestId, setRequestId] = useState('');
   const [productId, setProductId] = useState('');
-  const [notes, setNotes] = useState('');
   const [timer, setTimer] = useState();
 
   useEffect(() => {
-    if (boundActivity?.getRequestNumber()) {
-      setRequestId(boundActivity?.getRequestNumber());
+    if (activityStore?.getRequestNumber()) {
+      setRequestId(activityStore?.getRequestNumber());
     }
-  }, [boundActivity]);
+  }, [activityStore]);
 
   useEffect(() => {
     if (requestId !== '') {
@@ -119,94 +120,11 @@ function Screen() {
     }
   }, [requestId]);
 
-  const startScanning = () => {
-    setScanning(true);
-    if (rfidData.length !== 0) {
-      setRfidData([]);
-    } else {
-      setTimer(
-        setInterval(() => {
-          TransitApi.get()
-            .then(res => {
-              setRfidData(res.data);
-            })
-            .catch(error => {
-              Swal.fire({ text: error?.message, icon: 'error' });
-            });
-        }, 5000)
-      );
-    }
-
-    setIsScanned(false);
-  };
-
-  const stopScanning = () => {
-    setScanning(false);
-    setIsScanned(true);
-    clearInterval(timer);
-  };
-
-  const onReset = () => {
-    setLoadingRequest(true);
-    setLoadingRFID(true);
-    setIsScanned(false);
-    setRequestDetailData([]);
-    setRfidData([]);
-    setRequestId('');
-    setValue('activity_date', null);
-    setValue('request_number', '');
-    setTimeout(() => {
-      setLoadingRequest(false);
-      setLoadingRFID(false);
-    }, 500);
-  };
-
-  const onProcess = id => {
-    if (id) {
-      setRequestId(id);
-      setOnOverview(!onOverview);
-      setOnOpenTransit(!onOpenTransit);
-      setLoadingTransit(true);
-    }
-  };
-
-  const onSubmitRFID = () => {
-    let pass = onOpen;
-    if (totalRFID === totalRequest) {
-      pass = true;
-    } else {
-      setErrors(true);
-      swalButton
-        .fire({
-          html: '<b> NOTES </b> <br/> <p class="text-[15px]">The amount of data in Request Detail does not match the data in RFID Detected. Continue process?<p>',
-          showCancelButton: true,
-          confirmButtonColor: '#3085d6',
-          preConfirm: pre => {
-            if (!pre && pre.length === 0) {
-              Swal.showValidationMessage(`notes is a required field`);
-            } else if (pre.length <= 5) {
-              Swal.showValidationMessage(`notes length must be more than 5`);
-            }
-            return pre;
-          },
-        })
-        .then(result => {
-          if (result.isConfirmed) {
-            setNotes(result.value);
-
-            setOnOpen(!pass);
-            setErrors(false);
-          }
-        });
-    }
-    return pass;
-  };
-
   useEffect(() => {
     if (productId && onAllocate) {
       ProductInfoApi.find(productId)
         .then(res => {
-          setJourneyData(res.product);
+          setproductInfoData(res.product);
         })
         .catch(error => {
           Swal.fire({ text: error?.message, icon: 'error' });
@@ -248,6 +166,72 @@ function Screen() {
     }
   }, [allocateData]);
 
+  const getTransit = () => {
+    setTimer(
+      setInterval(() => {
+        TransitApi.get()
+          .then(res => {
+            setRfidData(res.data);
+            setTotalRFID(res.query.total || 0);
+          })
+          .catch(error => {
+            Swal.fire({ text: error?.data?.message, icon: 'error' });
+          });
+      }, 5000)
+    );
+  };
+
+  const startScanning = () => {
+    setScanning(true);
+
+    if (!scanning && rfidData.length > 0) {
+      setLoadingRFID(true);
+      setRfidData([]);
+      setTimeout(() => {
+        setLoadingRFID(false);
+      }, 500);
+
+      getTransit();
+    } else {
+      getTransit();
+    }
+
+    setIsScanned(false);
+  };
+
+  const stopScanning = () => {
+    setScanning(false);
+    setIsScanned(true);
+    clearInterval(timer);
+  };
+
+  const onProcess = id => {
+    if (id) {
+      setRequestId(id);
+      setOnOverview(!onOverview);
+      setOnOpenTransit(!onOpenTransit);
+      setLoadingTransit(true);
+    }
+  };
+
+  const onReset = () => {
+    setLoadingRequest(true);
+    setLoadingRFID(true);
+    setIsScanned(false);
+    setRequestDetailData([]);
+    setRfidData([]);
+    setIsAllocate([]);
+    setRequestId('');
+    setTotalRFID();
+    setTotalRequest('');
+    setValue('activity_date', null);
+    setValue('request_number', '');
+    setTimeout(() => {
+      setLoadingRequest(false);
+      setLoadingRFID(false);
+    }, 500);
+  };
+
   const onCancel = () => {
     Swal.fire({
       html: '<p class="font-semibold">Transit data may not be saved <br/> Are your sure to cancel ?</p>',
@@ -261,27 +245,117 @@ function Screen() {
     }).then(result => {
       if (result.isConfirmed) {
         setOnOpenTransit(!onOpenTransit);
+        setIsAllocate([]);
+        setValue('details', fields);
       }
     });
   };
 
-  const onFinalSubmit = data => {
-    const body = {
-      request_id: '',
-      notes,
-      warehouse_id: '',
-      details: data.details.map(i => {
-        i.allocate = allocated.filter(f => f.product_id === i.product_id && f.actual_qty !== undefined);
-        return i;
-      }),
-    };
+  const onSubmitTransit = data => {
+    setTransitData(data);
+    setOnOpenTransit(!onOpenTransit);
+  };
+
+  const onDisabled = () => {
+    let pass = false;
+
+    if (!isScanned && totalRFID > 0) {
+      pass = true;
+    } else if (!isScanned && !totalRFID) {
+      pass = true;
+    } else if (isScanned && !totalRFID) {
+      pass = true;
+    }
+    return pass;
+  };
+
+  const validateValue = () => {
+    let pass = true;
+
+    if (totalRequest === totalRFID) {
+      pass = true;
+      setErrors(false);
+      setErrMessage('');
+    } else {
+      pass = false;
+      setErrors(true);
+      setErrMessage('The amount of data in Request Detail does not match the data in RFID Detected.');
+    }
+    return pass;
+  };
+
+  const storeOutbound = body => {
     TransitApi.outbound(body)
       .then(() => {
-        Swal.fire({ text: 'Successfully Saved', icon: 'success' });
+        setIsAllocate([]);
+        setOnOpen(!onOpen);
+        setErrMessage('');
+        setErrors(false);
+        Swal.fire({ text: 'Succesfully Saved', icon: 'success' });
       })
       .catch(error => {
-        Swal.fire({ text: error?.message, icon: 'error' });
+        Swal.fire({ text: error?.data?.message, icon: 'error' });
       });
+  };
+
+  const onSubmitRFID = () => {
+    if (validateValue()) {
+      const body = {
+        request_id: requestId,
+        notes: '',
+        warehouse_id: store?.getWarehouseId(),
+        details: transitData.details.map(i => {
+          return {
+            product_id: i.product_id,
+            qty: i.qty,
+            allocate: allocated.filter(f => f.product_id === i.product_id && f.actual_qty !== undefined),
+          };
+        }),
+      };
+      storeOutbound(body);
+    } else {
+      swalButton
+        .fire({
+          html: '<b> NOTES </b> <br/> <p class="text-[15px]">The amount of data in Request Detail does not match the data in RFID Detected. Continue process?<p>',
+          input: 'text',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          preConfirm: pre => {
+            if (!pre && pre.length === 0) {
+              Swal.showValidationMessage(`notes is a required field`);
+            } else if (pre.length <= 5) {
+              Swal.showValidationMessage(`notes length must be more than 5`);
+            }
+            return pre;
+          },
+        })
+        .then(result => {
+          if (result.isConfirmed) {
+            const body = {
+              request_id: requestId,
+              notes: result.value,
+              warehouse_id: Number(store?.getWarehouseId()),
+              details: transitData.details.map(i => {
+                return {
+                  product_id: i.product_id,
+                  qty: i.qty,
+                  allocate: allocated
+                    .filter(f => f.product_id === i.product_id && f.actual_qty !== undefined)
+                    .map(item => {
+                      return {
+                        id: item.product_info_id,
+                        storage_id: item.storage_id,
+                        product_id: item.product_id,
+                        actual_qty: Number(item.actual_qty),
+                      };
+                    }),
+                };
+              }),
+            };
+            storeOutbound(body);
+          }
+        });
+    }
   };
 
   return (
@@ -352,8 +426,8 @@ function Screen() {
             <div>Total RFID Detected</div>
           </div>
           <div className="py-auto">
-            <div className="font-bold">{totalRequest}</div>
-            <div className="font-bold">{totalRFID}</div>
+            <div className="font-bold">{totalRequest || ''}</div>
+            <div className="font-bold">{totalRFID || ''}</div>
           </div>
           <div className="flex py-2">
             <Button
@@ -402,13 +476,14 @@ function Screen() {
               px={6}
               className="rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold"
               onClick={onSubmitRFID}
-              disabled={!isScanned}
+              disabled={onDisabled()}
             >
               Submit
             </Button>
           </div>
         </div>
       </div>
+      {error && <span className="pl-10 text-sm text-[#a2002d]">{errMessage || ''}</span>}
       {onOverview && (
         <Fade in={onOverview}>
           <div
@@ -462,7 +537,7 @@ function Screen() {
           style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
         >
           <div className="border shadow-lg modal-container bg-white w-[80%] mx-auto rounded z-50 h-84">
-            <form onSubmit={handleSubmit(onFinalSubmit)}>
+            <form onSubmit={handleSubmit(onSubmitTransit)}>
               <p className="text-md font-bold py-2 px-4">Dashboard Transit</p>
 
               <div className="overflow-y-auto h-60 px-6 py-2">
@@ -482,7 +557,7 @@ function Screen() {
                       </Tr>
                     </Thead>
 
-                    <Tbody>
+                    <Tbody className="overflow-y-auto">
                       {fields.length > 0 ? (
                         fields.map((item, index) => {
                           return (
@@ -547,18 +622,20 @@ function Screen() {
                               <Td className="w-24 px-2">
                                 <Controller
                                   render={({ field }) => {
-                                    if (item.actual_qty) {
-                                      return (
-                                        <Badge
-                                          name={`details.${index}.isAllocate`}
-                                          idx={index}
-                                          {...field}
-                                          control={control}
-                                          register={register}
-                                          label="allocated"
-                                          errors={errors}
-                                        />
-                                      );
+                                    if (isAllocate.length > 0) {
+                                      if (isAllocate?.find(f => f.product_id === item.product_id)?.isAllocate) {
+                                        return (
+                                          <Badge
+                                            name={`details.${index}.isAllocate`}
+                                            idx={index}
+                                            {...field}
+                                            control={control}
+                                            register={register}
+                                            label="allocated"
+                                            errors={errors}
+                                          />
+                                        );
+                                      }
                                     }
                                     return null;
                                   }}
@@ -650,10 +727,11 @@ function Screen() {
               productId={productId}
               onAllocate={onAllocate}
               setOnAllocate={setOnAllocate}
-              data={journeyData}
+              data={productInfoData}
               allocateData={allocateData}
               setAllocateData={setAllocateData}
               loadingTransit={loadingTransit}
+              setIsAllocate={setIsAllocate}
             />
           </div>
         </div>
