@@ -365,13 +365,12 @@ function DataTable(props) {
         }
       }
     }
-    setFilterData(prev => {
-      return {
-        ...prev,
-        limit: 10,
-        offset: 0,
-        ...data,
-      };
+
+    setFilterData({
+      limit: 10,
+      offset: 0,
+      ...defaultSort,
+      ...data,
     });
   };
   const opt = useCallback(getDebounce(onSubmit), []);
