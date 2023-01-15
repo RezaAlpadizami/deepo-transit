@@ -381,9 +381,8 @@ function DataTable(props) {
         }
       }
     }
-    setFilterData(prev => {
+    setFilterData(() => {
       return {
-        ...prev,
         limit: 10,
         offset: 0,
         ...data,
