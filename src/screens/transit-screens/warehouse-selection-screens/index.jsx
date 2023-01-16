@@ -17,7 +17,7 @@ function Screen() {
   const [isSelected, setIsSelected] = useState(-1);
   const [isSelectedWarehouse, setIsSelectedWarehouse] = useState(null);
   const [filterData, setFilterData] = useState({
-    limit: 10,
+    limit: 50,
     offset: 0,
   });
 
@@ -81,9 +81,6 @@ function Screen() {
       if (Object.hasOwnProperty.call(data, dt)) {
         if (!data[dt]) {
           delete data[dt];
-        }
-        if (data[dt] === '') {
-          delete data[dt];
         } else {
           // eslint-disable-next-line no-unused-expressions
           data[dt];
@@ -94,9 +91,9 @@ function Screen() {
     setFilterData(prev => {
       return {
         ...prev,
-        limit: 10,
+        limit: 50,
         offset: 0,
-        search: '',
+        search: ' ',
         ...data,
       };
     });
@@ -105,47 +102,54 @@ function Screen() {
   const opt = useCallback(getDebounce(onSubmit), []);
 
   return (
-    <div className="mt-6 max-[640px]:w-[280px]">
+    <div className="max-[640px]:w-[280px]">
       <div className="flex justify-center mb-6 max-[640px]:text-center">
         <h1 className="font-bold text-2xl">SELECT YOUR WORK AREA</h1>
       </div>
-      <form onChange={handleSubmit(opt)} className="max-[640px]:w-full">
-        <Input
-          name="search"
-          placeholder="Search Warehouse or Location"
-          addOnRight
-          register={register}
-          control={control}
-          icon={<img src={Search} alt="search" className="h-6" />}
-        />
-      </form>
-      {groupingByLocation.map(group => {
-        return (
-          <div>
-            <h2 className="font-bold mb-2 ml-1 my-6 text-lg">{group.location}</h2>
-            <div className="grid gap-x-5 gap-y-9 grid-cols-4 max-[640px]:grid-cols-1 text-center">
-              {group.data.map(d => {
-                return (
-                  <div
-                    className={`justify-items-center w-full ${
-                      isSelected === d.id ? 'border border-primarydeepo text-primarydeepo' : ''
-                    } bg-white py-8 px-8 rounded-full drop-shadow-md cursor-pointer`}
-                    onClick={() => clickAddressCard(d)}
-                  >
-                    <div className="text-[18px] max-[640px]:text-[12px]">
-                      <Text>{`${group.location} - ${d.name}`}</Text>
-                      <Text className="my-2">{`${d.address !== null ? d.address : '-'}`}</Text>
-                      <Text>{`${d.phone}`}</Text>
+      <div className=" bg-white pb-12 px-8 max-h-[600px] 2xl:max-h-[520px] rounded-[20px] overflow-y-scroll scrollbar drop-shadow-md">
+        <div
+          className="sticky top-0
+          pt-12 h-24 bg-white w-[100%] z-10 transition-all duration-500"
+        >
+          <form onChange={handleSubmit(opt)} className="max-[640px]:w-full">
+            <Input
+              name="search"
+              placeholder="Search Warehouse or Location"
+              addOnRight
+              register={register}
+              control={control}
+              icon={<img src={Search} alt="search" className="h-6" />}
+            />
+          </form>
+        </div>
+        {groupingByLocation.map(group => {
+          return (
+            <div className="mt-10 mx-1">
+              <h2 className="font-bold mb-2 ml-1 my-6 text-lg">{group.location}</h2>
+              <div className="grid gap-x-5 gap-y-9 grid-cols-4 max-[640px]:grid-cols-1 text-center">
+                {group.data.map(d => {
+                  return (
+                    <div
+                      className={`justify-items-center w-full ${
+                        isSelected === d.id ? 'border border-primarydeepo text-primarydeepo' : 'border border-gray-300'
+                      } bg-white py-4 px-4 rounded-[20px] drop-shadow-md cursor-pointer`}
+                      onClick={() => clickAddressCard(d)}
+                    >
+                      <div className="text-[14px] max-[640px]:text-[12px]">
+                        <Text>{`${group.location} - ${d.name}`}</Text>
+                        <Text className="my-2">{`${d.address !== null ? d.address : '-'}`}</Text>
+                        <Text>{`${d.phone}`}</Text>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        );
-      })}
-      <div className="flex justify-end mt-24 mx-12">
-        <div className="flex">
+          );
+        })}
+      </div>
+      <div className="flex justify-end mt-6 mx-12">
+        <div className="max-[640px]:fixed max-[640px]:bottom-0 max-[640px]:right-0 flex">
           <div>
             <Button
               onClick={() => handleContinue()}
