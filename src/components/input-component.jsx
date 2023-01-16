@@ -21,6 +21,7 @@ function InputComponent(props) {
     array,
     key,
     control,
+    idx,
   } = props;
 
   const ref = useRef(null);
@@ -114,7 +115,7 @@ function InputComponent(props) {
               width="auto"
               type={type}
               value={value}
-              isDisabled={disabled}
+              disabled={disabled}
               maxLength={maxLength}
               hidden={hidden}
               name={name}
@@ -157,6 +158,15 @@ function InputComponent(props) {
       {errors &&
         (Array.isArray(errors[name]?.message) ? (
           errors[name]?.message.map(m => <span className="error d-block">{m.toLowerCase()}</span>)
+        ) : errors?.allocate?.length ? (
+          <span className="text-red-700 ml-1">
+            {errors?.allocate?.map(i => {
+              return i[name.split('.')[2]]?.message.split('.')[1];
+            })[idx] ||
+              errors?.allocate?.map(i => {
+                return i[name.split('.')[2]]?.message;
+              })}
+          </span>
         ) : (
           <span className="text-red-700 ml-1">
             {errors[name]?.message.replace(name, label?.toLowerCase() || name.toLowerCase())}

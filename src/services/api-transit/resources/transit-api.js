@@ -19,6 +19,20 @@ class TransitApi extends RequestHandler {
         });
     });
   }
+
+  outbound(body) {
+    return new Promise((resolve, reject) => {
+      this.api
+        .post(`${this.url}/outbound`, body)
+        .then(response => {
+          if (response.ok) resolve(response);
+          else reject(response);
+        })
+        .catch(error => {
+          reject(error);
+        });
+    });
+  }
 }
 
 export default new TransitApi();

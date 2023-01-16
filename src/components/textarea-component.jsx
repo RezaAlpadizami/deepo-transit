@@ -28,7 +28,7 @@ function InputComponent(props) {
             size="sm"
             width="auto"
             type={type}
-            isDisabled={disabled}
+            disabled={disabled}
             maxLength={maxLength}
             hidden={hidden}
             value={value}

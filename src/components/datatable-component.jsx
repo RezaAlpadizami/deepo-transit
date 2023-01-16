@@ -47,7 +47,7 @@ function DataTable(props) {
     formState: { errors },
   } = useForm();
 
-  const { store } = useContext(Context);
+  const { activityStore } = useContext(Context);
   const [pages, setPages] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [datas, setDatas] = useState([]);
@@ -103,7 +103,7 @@ function DataTable(props) {
                 </div>
               );
             }
-            if (d.type === 'action-button' && row.original.request_number) {
+            if (d.type === 'action-button' && row.original.id) {
               return (
                 <Button
                   className="text-white bg-gradient-to-r from-processbtnfrom to-processbtnto hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2"
@@ -124,9 +124,9 @@ function DataTable(props) {
                   hidden={row.original.status !== 'PENDING'}
                   type="button"
                   onClick={() => {
-                    store.setRequestNumber(row.original.id);
+                    activityStore.setRequestNumber(row.original.id);
                   }}
-                  to="/inbound"
+                  to={`/${route(row.original.activity_name)}`}
                   px={8}
                   size="sm"
                   className="relative border-none font-bold text-[12px] text-[#fff] w-[6rem] h-[2rem] leading-[2rem] text-center from-processbtnfrom via-processbtnto to-processbtnfrom bg-gradient-to-r bg-300% rounded-[30px] z-[1] before:absolute before:-top-[5px] before:-right-[5px] before:-left-[5px] before:-bottom-[5px] before:-z-[1] before:bg-gradient-to-r hover:animate-ani hover:before:blur-[10px] before:from-processbtnfrom before:via-processbtnto before:to-processbtnfrom before:bg-400% before:rounded-[35px] before:duration-1000 active:bg-gradient-to-r active:from-processbtnfrom active:via-processbtnto active:to-processbtnfrom my-2"
@@ -409,6 +409,21 @@ function DataTable(props) {
     }
     return '';
   };
+  const route = name => {
+    let to;
+    switch (name.toLowerCase()) {
+      case 'inbound':
+        to = 'inbound';
+        break;
+      case 'outbound':
+        to = 'outbound';
+        break;
+      default:
+        break;
+    }
+    return to;
+  };
+
   return (
     <Fade in={filters.length > 0}>
       {download && (
