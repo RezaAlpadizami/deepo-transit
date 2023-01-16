@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Input, InputGroup, InputLeftElement, InputRightElement } from '@chakra-ui/react';
 import { Controller } from 'react-hook-form';
 
@@ -23,6 +23,12 @@ function InputComponent(props) {
     control,
     idx,
   } = props;
+
+  const ref = useRef(null);
+
+  const handleClick = () => {
+    ref.current.focus();
+  };
 
   return (
     <div className="flex-auto w-full">
@@ -76,6 +82,7 @@ function InputComponent(props) {
                       bg="white"
                       width="auto"
                       size="sm"
+                      ref={ref}
                       type={type}
                       disabled={disabled}
                       placeholder={placeholder}
@@ -96,7 +103,7 @@ function InputComponent(props) {
                 refs={register}
                 control={control}
               />
-              <InputRightElement fontSize="md" pointerEvents="none" className="mx-2">
+              <InputRightElement fontSize="md" className="mx-2 cursor-pointer" onClick={handleClick}>
                 {icon}
               </InputRightElement>
             </InputGroup>

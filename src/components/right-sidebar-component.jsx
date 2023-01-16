@@ -6,7 +6,7 @@ function SelectDrawer(props) {
     <div>
       <div
         className={`fixed h-full w-1/4 z-20 right-0 top-0 p-[30px] bg-white ${
-          isOpen ? 'translate-x-0 overflow-y-scroll' : 'translate-x-full  '
+          isOpen ? 'translate-x-0 overflow-y-hidden' : 'translate-x-full  '
         } transition-all ease-in-out delay-150 duration-300`}
       >
         <div className="relative mb-5">{children}</div>

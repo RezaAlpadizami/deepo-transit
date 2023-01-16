@@ -1,24 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useForm } from 'react-hook-form';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 
 import Swal from 'sweetalert2';
 import Moment from 'moment/moment';
-import { Text, Button } from '@chakra-ui/react';
+import { Text } from '@chakra-ui/react';
 import { ArrowNarrowLeftIcon } from '@heroicons/react/solid';
 
+import Context from '../../../context';
+import { thousandSeparator } from '../../../utils/helper';
 import { RequestApi } from '../../../services/api-transit';
 import TextArea from '../../../components/textarea-component';
 import InputDetail from '../../../components/input-detail-component';
-import LoadingHover from '../../../components/loading-hover-component';
-import { thousandSeparator } from '../../../utils/helper';
 
 function Screen() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { store } = useContext(Context);
+
   const [dataRequesById, setDataRequestById] = useState([]);
   const [dataRequesByIdDetail, setDataRequestByIdDetail] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const {
     register,
@@ -59,26 +60,6 @@ function Screen() {
         }, {})
       : []
   );
-
-  const onSubmitRequest = () => {
-    setLoading(true);
-    RequestApi.createRequestProcess(id)
-      .then(() => {
-        setLoading(false);
-        Swal.fire({
-          text: `Request ${dataRequesById.request_number} berhasil di process`,
-          icon: 'success',
-          buttonsStyling: false,
-          confirmButtonColor: 'primarydeepo',
-          confirmButtonText: `<p class="rounded bg-secondarydeepo text-[#fff] px-5 py-2 ml-5 font-bold">OK</p>`,
-        });
-        navigate('/request');
-      })
-      .catch(error => {
-        setLoading(false);
-        Swal.fire({ text: error?.message, icon: 'error' });
-      });
-  };
 
   const totalQty = Array.isArray([])
     ? updateDataRequesById.reduce((accumulator, object) => {
@@ -173,20 +154,23 @@ function Screen() {
         <div className="flex justify-end mt-6">
           <div className="flex">
             <div>
-              <Button
-                onClick={onSubmitRequest}
-                type="submit"
+              <Link
+                onClick={() => {
+                  store.setRequestNumber(dataRequesById?.id);
+                }}
+                hidden={dataRequesById?.status !== 'PENDING'}
+                type="button"
+                to="/inbound"
                 px={8}
                 size="sm"
                 className="mr-14 text-white bg-gradient-to-r from-secondarydeepo to-primarydeepo hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mb-2"
               >
                 Process
-              </Button>
+              </Link>
             </div>
           </div>
         </div>
       </div>
-      {loading && <LoadingHover visible={loading} />}
     </div>
   );
 }

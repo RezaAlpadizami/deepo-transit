@@ -74,6 +74,7 @@ function Screen(props) {
           { header: 'Date', value: 'activity_date', copy: true, type: 'date' },
           { header: 'Notes', value: 'notes', copy: true, type: 'scrollable' },
           { header: 'Status', value: 'status', copy: true },
+          { header: ' ', value: ' ', type: 'action-button-index' },
         ]}
         toolbar={{
           action: {
@@ -89,7 +90,6 @@ function Screen(props) {
         to={route}
         displayName={displayName}
         checkbox
-        hasButtonAction
       />
     </div>
   );

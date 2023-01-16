@@ -15,7 +15,7 @@ function MainNavigation() {
   return (
     <BrowserRouter basename={process.env.PUBLIC_URL}>
       {!CookieService.isSelectedWarehouse() ? (
-        <div className="p-20 min-h-screen bg-container">
+        <div className="py-8 px-20 min-h-screen bg-container">
           <PublicContent />
         </div>
       ) : (

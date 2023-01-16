@@ -127,6 +127,8 @@ function Screen() {
       request_by: 'testing',
       warehouse_id: Number(CookieService.getCookies('warehouse_id')),
       notes: data.notes,
+      activity_date: data.activity_date,
+      activity_name: data.activity_name,
       detail: updateDataUpdate.map(data => {
         return {
           qty: data.qty,

@@ -26,7 +26,7 @@ function ShowHide(props) {
                     disable={columns.filter(i => i.isVisible).length === 1 ? column.isVisible : false}
                   />
                   <label className="ml-2 uppercase" style={{ userSelect: 'none', paddingBottom: '2px' }}>
-                    {column.Header}
+                    {column.Header !== ' ' ? column.Header : 'Button Action'}
                   </label>
                 </span>
               </div>
