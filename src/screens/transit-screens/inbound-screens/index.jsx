@@ -774,6 +774,7 @@ function Screen() {
     setLoadingRFID(true);
     setIsScanned(false);
     setRequestDetailData([]);
+    activityStore.setRequestNumber(0);
     setRfidData([]);
     setTotalRequest(0);
     setTotalRFID(0);
@@ -974,7 +975,7 @@ function Screen() {
           className=" main-modal fixed w-full h-100 inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
           style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
         >
-          <div className="border shadow-lg modal-container bg-white w-[80%] mx-auto rounded z-50 bg-cyan-500 h-20">
+          <div className="border shadow-lg modal-container bg-white w-[80%] mx-auto rounded z-50 h-60">
             <form onSubmit={handleSubmit(onFinalSubmit)}>
               <p className="text-md font-bold py-2 px-4">Dashboard Transit</p>
 
