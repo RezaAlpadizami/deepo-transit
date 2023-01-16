@@ -1,45 +1,23 @@
 import React from 'react';
-import { Select } from '@chakra-ui/react';
+import { Badge } from '@chakra-ui/react';
 
 function SelectComponent(props) {
-  const {
-    name,
-    label,
-    disabled,
-    register,
-    errors,
-    placeholder,
-    options,
-    idx,
-    booleans,
-    onChangeValue = () => {},
-  } = props;
+  const { name, label, register, errors, idx, booleans } = props;
 
   return (
     <div className="flex-auto w-full">
       <div>
-        <label htmlFor={name} className="text-sm font-light text-gray-600 block ml-1">
-          {label}
-        </label>
         <div className="mt-1 flex  shadow-sm">
-          <Select
+          <Badge
+            className="rounded-[10px] px-2"
             {...register(name)}
-            bg="white"
             size="sm"
             name={name}
             id={name}
-            className="w-full text-sm rounded-full border-gray-400 px-5 py-2.5 h-full"
-            disabled={disabled}
-            focusBorderColor="#8335c3"
-            onChange={e => onChangeValue(e.target.value)}
-            placeholder={!placeholder ? `Select ${label}` : placeholder}
+            colorScheme="green"
           >
-            {options?.map((el, idx) => (
-              <option key={idx} value={el.value}>
-                {el.label}
-              </option>
-            )) || []}
-          </Select>
+            {label}
+          </Badge>
         </div>
       </div>
       {errors &&
@@ -49,7 +27,7 @@ function SelectComponent(props) {
           <span className="text-red-700 ml-1">
             {
               errors?.details?.map(i => {
-                return i[[name.split('.')[2]]]?.message;
+                return i[[name.split('.')[2]]]?.message.split('.')[1];
               })[idx]
             }
           </span>

@@ -165,7 +165,7 @@ function Screen() {
     resolver: yupResolver(schema),
   });
 
-  const { store } = useContext(Context);
+  const { activityStore, store } = useContext(Context);
 
   const { currentProductId } = watch();
   const { fields, append, remove, insert, update } = useFieldArray({
@@ -203,10 +203,10 @@ function Screen() {
     warehouse_id: store?.getWarehouseId(),
   });
   useEffect(() => {
-    if (store?.getRequestNumber()) {
-      setRequestId(store?.getRequestNumber());
+    if (activityStore?.getRequestNumber()) {
+      setRequestId(activityStore?.getRequestNumber());
     }
-  }, [store]);
+  }, [activityStore]);
 
   useEffect(() => {
     if (requestId !== '') {
