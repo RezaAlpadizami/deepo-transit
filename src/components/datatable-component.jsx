@@ -19,6 +19,7 @@ import DatePicker from './datepicker-component';
 import Toolbar from './action-toolbar-component';
 import LoadingHover from './loading-hover-component';
 import Context from '../context';
+import CookieService from '../services/cookies/cookie-service';
 
 function DataTable(props) {
   const {
@@ -66,6 +67,7 @@ function DataTable(props) {
   const [filterData, setFilterData] = useState({
     limit,
     offset: 0,
+    warehouse_id: CookieService.getCookies('warehouse_id'),
     ...defaultSort,
   });
   useEffect(() => {
@@ -647,6 +649,13 @@ function DataTable(props) {
                   <Skeleton height="20px" width="95%" />
                 </div>
               </Stack>
+            )}
+
+            {!loading && data.length <= 0 && (
+              <div className="grid place-content-center text-center h-[250px]">
+                <p className="font-bold text-xl">...Ooops, No Request yet</p>
+                <p className="font-medium">Please first add a Request</p>
+              </div>
             )}
 
             <nav className="flex justify-between items-center bg-white pl-4" aria-label="Table navigation">

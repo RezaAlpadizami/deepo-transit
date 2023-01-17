@@ -1,19 +1,38 @@
 import React, { useContext } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { UserCircleIcon, ChevronDownIcon, OfficeBuildingIcon } from '@heroicons/react/solid';
-import { Popover, PopoverArrow, PopoverBody, PopoverContent, PopoverTrigger, Button } from '@chakra-ui/react';
 
 import LocalStorage from 'local-storage';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { UserCircleIcon, ChevronDownIcon, OfficeBuildingIcon } from '@heroicons/react/solid';
+import {
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverContent,
+  PopoverFooter,
+  PopoverTrigger,
+  Button,
+} from '@chakra-ui/react';
+
 import Context from '../context';
-import menuItem from '../navigation/menu-item';
 import logo from '../assets/images/logo.svg';
+import menuItem from '../navigation/menu-item';
 import { findTree } from '../utils/navigation-utils';
+import CookieService from '../services/cookies/cookie-service';
 
 function Header() {
-  const { store } = useContext(Context);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { store } = useContext(Context);
 
   const getWarehouse = () => JSON.parse(LocalStorage.get('Warehouse'));
+
+  const handleChangeWarehouse = () => {
+    CookieService.removeCookies();
+    LocalStorage.remove('Warehouse');
+    navigate('/');
+    window.location.reload();
+  };
+
   return (
     <header className="flex p-5 border-b">
       <div className="mx-3 mt-0.5 cursor-pointer" onClick={() => store.toggleDrawer()}>
@@ -54,6 +73,15 @@ function Header() {
                 </div>
               </div>
             </PopoverBody>
+            <PopoverFooter className="py-1">
+              <button
+                onClick={handleChangeWarehouse}
+                type="button"
+                className="block w-full py-2 px-4 text-sm text-white bg-gray-300 rounded-md hover:bg-secondarydeepo"
+              >
+                Change Area
+              </button>
+            </PopoverFooter>
           </PopoverContent>
         </Popover>
       </div>

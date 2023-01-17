@@ -1,19 +1,16 @@
 import React, { useContext, useEffect, useState } from 'react';
 
-import LocalStorage from 'local-storage';
 import { observer } from 'mobx-react-lite';
 import { ChevronRightIcon } from '@heroicons/react/solid';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import Context from '../context';
 import menuItem from '../navigation/menu-item';
 import ArrowUpTray from '../assets/images/arrow-up-tray.svg';
-import CookieService from '../services/cookies/cookie-service';
 import { findParent, findTree } from '../utils/navigation-utils';
 
 function SidebarComponent() {
   const location = useLocation();
-  const navigate = useNavigate();
   const { store } = useContext(Context);
   const [menuParent, setMenuParent] = useState(null);
 
@@ -28,13 +25,6 @@ function SidebarComponent() {
       store.setIsDrawerOpen(true);
     }
   }, [JSON.stringify(menuParent)]);
-
-  const handleLogOut = () => {
-    CookieService.removeCookies();
-    LocalStorage.remove('Warehouse');
-    navigate('/');
-    window.location.reload();
-  };
 
   return (
     <aside
@@ -96,7 +86,7 @@ function SidebarComponent() {
         <button
           className="absolute inset-x-0 bottom-10 h-15 py-3 hover:bg-secondarydeepo"
           type="button"
-          onClick={handleLogOut}
+          onClick={() => {}}
         >
           <div className="flex pl-6">
             <img src={ArrowUpTray} alt="arrow up" className="h-7 rotate-90 text-black" />
