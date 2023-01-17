@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Input, Button, Fade } from '@chakra-ui/react';
+import { Table, Thead, Tbody, Tr, Th, Td, TableContainer, Input, Button, Fade } from '@chakra-ui/react';
 import { useFieldArray, useForm, Controller } from 'react-hook-form';
 import * as yup from 'yup';
 import Swal from 'sweetalert2';
@@ -92,7 +92,6 @@ function Screen() {
 
         const { details, onChangeBay, onChangeRack, onChangeLevel } = parentsData;
         const comparison = details.filter(i => i.rack !== '' && i.bay !== '' && i.level !== '');
-        // const currentProduct = details.filter(i => i.product_id === onChangeLevel.item.product_id);
 
         const failed = [];
         const success = [];
@@ -166,7 +165,7 @@ function Screen() {
     resolver: yupResolver(schema),
   });
 
-  const { activityStore } = useContext(Context);
+  const { activityStore, store } = useContext(Context);
 
   const { currentProductId } = watch();
   const { fields, append, remove, insert, update } = useFieldArray({
@@ -175,7 +174,6 @@ function Screen() {
   });
 
   const [requestDetailData, setRequestDetailData] = useState([]);
-  const [transitData, setTransitData] = useState([]);
   const [storageData, setStorageData] = useState([]);
   const [rfidData, setRfidData] = useState([]);
   const [newData, setNewData] = useState([]);
@@ -194,17 +192,16 @@ function Screen() {
   const [requestId, setRequestId] = useState('');
   const [notes, setNotes] = useState('');
   const [totalRequest, setTotalRequest] = useState(0);
+  const [totalRFID, setTotalRFID] = useState(0);
   const [counter, setCounter] = useState(2);
   const [timer, setTimer] = useState();
   const [splitValue, setSplitValue] = useState({});
   const [filterParams, setFilterParams] = useState({
-    warehouse_id: 2,
+    warehouse_id: store?.getWarehouseId(),
   });
   const [filterBay, setFilterBay] = useState({
-    warehouse_id: 2,
+    warehouse_id: store?.getWarehouseId(),
   });
-  const totalRFID = rfidData.length;
-
   useEffect(() => {
     if (activityStore?.getRequestNumber()) {
       setRequestId(activityStore?.getRequestNumber());
@@ -224,7 +221,7 @@ function Screen() {
           const quantity = [...new Map(res.detail?.map(i => [JSON.stringify(i.qty), i.qty])).values()];
           setValue('filters', filterByProductId);
           setValue('quantity', quantity);
-          setTransitData(res.detail);
+          // setTransitData(res.detail);
           setValue('activity_date_from', res?.activity_date ? Moment(res?.activity_date).toDate() : null);
           setValue('request_number', res?.request_number ? res?.request_number : '-');
           setTotalRequest(toCalculate(res.detail, 'qty'));
@@ -277,22 +274,35 @@ function Screen() {
     }
   }, [newData]);
 
+  const getTransit = () => {
+    setTimer(
+      setInterval(() => {
+        TransitApi.get({ warehouse_id: store?.getWarehouseId() })
+          .then(res => {
+            setRfidData(res.data);
+            setTotalRFID(res.query.total || 0);
+          })
+          .catch(error => {
+            Swal.fire({ text: error?.data?.message, icon: 'error' });
+          });
+      }, 5000)
+    );
+  };
+
   const startScanning = () => {
     setScanning(true);
-    if (rfidData.length !== 0) {
+
+    if (!scanning && rfidData.length > 0) {
+      setLoadingRFID(true);
       setRfidData([]);
+      setTotalRFID();
+      setTimeout(() => {
+        setLoadingRFID(false);
+      }, 500);
+
+      getTransit();
     } else {
-      setTimer(
-        setInterval(() => {
-          TransitApi.get()
-            .then(res => {
-              setRfidData(res.data);
-            })
-            .catch(error => {
-              Swal.fire({ text: error?.message, icon: 'error' });
-            });
-        }, 5000)
-      );
+      getTransit();
     }
 
     setIsScanned(false);
@@ -305,9 +315,9 @@ function Screen() {
 
   useEffect(() => {
     Promise.allSettled([
-      StorageApi.get({ warehouse_id: 2 }).then(res => res),
-      StorageApi.get(filterParams).then(res => res),
-      StorageApi.get(filterBay).then(res => res),
+      StorageApi.get({ warehouse_id: store?.getWarehouseId() }).then(res => res),
+      // StorageApi.get(filterParams).then(res => res),
+      // StorageApi.get(filterBay).then(res => res),
     ])
       .then(result => {
         setStorageData(result[0].value.data);
@@ -628,6 +638,9 @@ function Screen() {
   const onSubmitRFID = () => {
     let pass = onOpen;
     if (totalRFID === totalRequest) {
+      append(rfidData);
+      setOnOpen(!pass);
+      setErrors(false);
       pass = true;
     } else {
       setErrors(true);
@@ -649,7 +662,7 @@ function Screen() {
         .then(result => {
           if (result.isConfirmed) {
             setNotes(result.value);
-            append(transitData);
+            append(rfidData);
             setOnOpen(!pass);
             setErrors(false);
           }
@@ -657,11 +670,23 @@ function Screen() {
     }
     return pass;
   };
+
   const onProcess = id => {
     if (id) {
       setRequestId(id);
       setOnOverview(!onOverview);
     }
+  };
+  const onDisabled = () => {
+    let pass = false;
+    if (!isScanned && totalRFID > 0) {
+      pass = true;
+    } else if (!isScanned && !totalRFID) {
+      pass = true;
+    } else if (isScanned && !totalRFID) {
+      pass = true;
+    }
+    return pass;
   };
 
   const validateStorageId = data => {
@@ -720,7 +745,7 @@ function Screen() {
           detail: data.details.map(i => {
             return {
               product_id: i.product_id,
-              warehouse_id: 2,
+              warehouse_id: store?.getWarehouseId(),
               storage_id: storageData.find(f => f.rack_number === i.rack && f.bay === i.bay && f.level === i.level)?.id,
               qty: i.child_qty ? i.child_qty : i.qty,
             };
@@ -749,7 +774,10 @@ function Screen() {
     setLoadingRFID(true);
     setIsScanned(false);
     setRequestDetailData([]);
+    activityStore.setRequestNumber(0);
     setRfidData([]);
+    setTotalRequest(0);
+    setTotalRFID(0);
     setRequestId('');
     setValue('activity_date_from', null);
     setValue('request_number', '');
@@ -780,9 +808,7 @@ function Screen() {
           >
             <p className="text-lg text-[#fff] font-bold mb-2">Request</p>
             <CalculatorIcon
-              className={`${
-                scanning ? 'bg-[#ffc108]' : 'bg-processbtnfrom'
-              } h-10 w-15 bg-processbtnfrom stroke-[#fff] mx-auto`}
+              className={`${scanning ? 'bg-[#ffc108]' : 'bg-processbtnfrom'} h-10 w-15 stroke-[#fff] mx-auto`}
             />
           </button>
 
@@ -882,7 +908,7 @@ function Screen() {
               px={6}
               className="rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold"
               onClick={onSubmitRFID}
-              disabled={!isScanned}
+              disabled={onDisabled()}
             >
               Next
             </Button>
@@ -891,7 +917,9 @@ function Screen() {
       </div>
       {error && (
         <p className="text-[#a2002d] pl-10">
-          {totalRequest !== totalRFID ? 'The sum of request and rfid are not the same' : ''}
+          {totalRequest !== totalRFID
+            ? 'The amount of data in Request Detail does not match the data in RFID Detected.'
+            : ''}
         </p>
       )}
       {onOverview && (
@@ -909,6 +937,7 @@ function Screen() {
                   api={RequestApi}
                   filterParams={{ status: 'PENDING' }}
                   filterEnd
+                  limit={5}
                   filters={[
                     {
                       name: 'text',
@@ -943,36 +972,36 @@ function Screen() {
       )}
       {onOpen && (
         <div
-          className=" main-modal fixed w-full h-200 inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
+          className=" main-modal fixed w-full h-100 inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
           style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
         >
-          <div className="border shadow-lg modal-container bg-white w-[80%] mx-auto rounded z-50 h-84">
+          <div className="border shadow-lg modal-container bg-white w-[80%] mx-auto rounded z-50 h-60">
             <form onSubmit={handleSubmit(onFinalSubmit)}>
               <p className="text-md font-bold py-2 px-4">Dashboard Transit</p>
 
-              <div className="overflow-y-auto h-60 px-6 py-2">
-                <table>
-                  <thead>
-                    <tr className="bg-[#bbc9ff] text-bold text-[#000]">
-                      <th className="text-semibold text-[#000] text-center w-10 py-1.5 pl-2">NO</th>
-                      <th className="text-semibold text-[#000] text-center w-20">SKU</th>
-                      <th className="text-semibold text-[#000] text-center w-60">PRODUCT</th>
-                      <th className="text-semibold text-[#000] text-center w-20 ">QTY</th>
-                      <th aria-label="Mute volume" className="w-24" />
-                      <th aria-label="Mute volume" className="w-24" />
-                      <th aria-label="Mute volume" className="w-24" />
-                      <th aria-label="Mute volume" className="w-20" />
-                      <th aria-label="Mute volume" className="w-24" />
-                    </tr>
-                  </thead>
+              <TableContainer className="overflow-y-auto h-40 px-6 py-2">
+                <Table>
+                  <Thead>
+                    <Tr className="bg-[#bbc9ff] text-bold text-[#000]">
+                      <Th className="text-semibold text-[#000] text-center w-10 py-1.5 pl-2">NO</Th>
+                      <Th className="text-semibold text-[#000] text-center w-20">SKU</Th>
+                      <Th className="text-semibold text-[#000] text-center w-60">PRODUCT</Th>
+                      <Th className="text-semibold text-[#000] text-center w-20 ">QTY</Th>
+                      <Th aria-label="Mute volume" className="w-24" />
+                      <Th aria-label="Mute volume" className="w-24" />
+                      <Th aria-label="Mute volume" className="w-24" />
+                      <Th aria-label="Mute volume" className="w-20" />
+                      <Th aria-label="Mute volume" className="w-24" />
+                    </Tr>
+                  </Thead>
                   <LoadingComponent loading={loadingTransit} />
 
-                  <tbody>
+                  <Tbody>
                     {fields.length > 0 ? (
                       fields.map((item, index) => {
                         return (
-                          <tr key={item.id} className={`${index % 2 ? 'bg-gray-100' : ''} w-full`}>
-                            <td className="w-10 text-center px-2">
+                          <Tr key={item.id} className={`${index % 2 ? 'bg-gray-100' : ''} w-full`}>
+                            <Td className="w-10 text-center px-2">
                               {index + 1}
                               <Controller
                                 render={({ field }) => {
@@ -984,8 +1013,8 @@ function Screen() {
                                 className="hidden"
                                 control={control}
                               />
-                            </td>
-                            <td className="w-20 text-center px-2">
+                            </Td>
+                            <Td className="w-20 text-center px-2">
                               {item.product_sku}
                               <Controller
                                 render={({ field }) => {
@@ -995,9 +1024,9 @@ function Screen() {
                                 className="hidden"
                                 control={control}
                               />
-                            </td>
+                            </Td>
 
-                            <td className="w-60 px-2">
+                            <Td className="w-60 px-2">
                               {item.product_name}
                               <Controller
                                 render={({ field }) => {
@@ -1007,8 +1036,8 @@ function Screen() {
                                 className="hidden"
                                 control={control}
                               />
-                            </td>
-                            <td className="w-20 text-center px-2">
+                            </Td>
+                            <Td className="w-20 text-center px-2">
                               {item.qty}
                               <Controller
                                 render={({ field }) => {
@@ -1018,8 +1047,8 @@ function Screen() {
                                 className="hidden"
                                 control={control}
                               />
-                            </td>
-                            <td className="w-24 px-2">
+                            </Td>
+                            <Td className="w-24 px-2">
                               <Controller
                                 render={({ field }) => {
                                   return (
@@ -1050,8 +1079,8 @@ function Screen() {
                                 name={`details.${index}.rack`}
                                 control={control}
                               />
-                            </td>
-                            <td className="w-24 px-2">
+                            </Td>
+                            <Td className="w-24 px-2">
                               <Controller
                                 {...register(`details.${index}.bay`)}
                                 render={({ field }) => {
@@ -1083,8 +1112,8 @@ function Screen() {
                                 name={`details.${index}.bay`}
                                 control={control}
                               />
-                            </td>
-                            <td className="w-24 px-2">
+                            </Td>
+                            <Td className="w-24 px-2">
                               <Controller
                                 render={({ field }) => {
                                   return (
@@ -1115,8 +1144,8 @@ function Screen() {
                                 name={`details.${index}.level`}
                                 control={control}
                               />
-                            </td>
-                            <td className="w-20 px-4">
+                            </Td>
+                            <Td className="w-20 px-4">
                               <Controller
                                 render={({ field }) => {
                                   return <Input type="number" {...field} className="w-16" />;
@@ -1124,8 +1153,8 @@ function Screen() {
                                 name={`details.${index}.child_qty`}
                                 control={control}
                               />
-                            </td>
-                            <td className="w-20 px-4">
+                            </Td>
+                            <Td className="w-20 px-4">
                               {item.qty ? (
                                 <Button
                                   size="sm"
@@ -1181,8 +1210,8 @@ function Screen() {
                                   Delete
                                 </Button>
                               )}
-                            </td>
-                          </tr>
+                            </Td>
+                          </Tr>
                         );
                       })
                     ) : (
@@ -1190,9 +1219,9 @@ function Screen() {
                         <td className="w-10 text-center px-2  text-red-500 h-[170px]" colSpan={9} rowSpan={5} />
                       </tr>
                     )}
-                  </tbody>
-                </table>
-              </div>
+                  </Tbody>
+                </Table>
+              </TableContainer>
 
               <div className="flex justify-between">
                 {errors && (

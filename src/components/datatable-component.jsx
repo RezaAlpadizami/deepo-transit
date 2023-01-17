@@ -65,7 +65,7 @@ function DataTable(props) {
 
   const [filter, setFilter] = useState([]);
   const [filterData, setFilterData] = useState({
-    limit: 10,
+    limit,
     offset: 0,
     warehouse_id: CookieService.getCookies('warehouse_id'),
     ...defaultSort,
@@ -105,7 +105,7 @@ function DataTable(props) {
                 </div>
               );
             }
-            if (d.type === 'action-button' && row.original.id) {
+            if (d.type === 'action-button' && row.original.status.toLowerCase() === 'pending') {
               return (
                 <Button
                   className="text-white bg-gradient-to-r from-processbtnfrom to-processbtnto hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2"
@@ -324,8 +324,8 @@ function DataTable(props) {
     function s2ab(data) {
       const buf = new ArrayBuffer(data.length);
       const view = new Uint8Array(buf);
-
-      for (let i = 0; i < data.length; i += 1) view[i] = data.charCodeAt(i) && 0xff;
+      // eslint-disable-next-line no-bitwise
+      for (let i = 0; i < data.length; i += 1) view[i] = data.charCodeAt(i) & 0xff;
       return buf;
     }
     setTimeout(() => {
@@ -383,12 +383,12 @@ function DataTable(props) {
         }
       }
     }
-    setFilterData(() => {
-      return {
-        limit: 10,
-        offset: 0,
-        ...data,
-      };
+
+    setFilterData({
+      limit: 10,
+      offset: 0,
+      ...defaultSort,
+      ...data,
     });
   };
   const opt = useCallback(getDebounce(onSubmit), []);
@@ -453,21 +453,6 @@ function DataTable(props) {
                       return (
                         <div className={`${item.col ? `col-span-${item.col}` : ''}`} key={`component${idx}`}>
                           <p className="text-md font-bold">{item.text}</p>
-                          <Button
-                            _hover={{
-                              shadow: 'md',
-                              transform: 'translateY(-5px)',
-                              transitionDuration: '0.2s',
-                              transitionTimingFunction: 'ease-in-out',
-                            }}
-                            type="button"
-                            size="sm"
-                            px={8}
-                            className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold mt-2"
-                            onClick={() => onReset()}
-                          >
-                            Reset
-                          </Button>
                         </div>
                       );
                     }
