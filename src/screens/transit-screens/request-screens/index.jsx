@@ -44,14 +44,12 @@ function Screen(props) {
             name: 'date_from',
             label: 'Date From',
             type: 'date_picker',
-            placeholder: 'Select date',
             col: 2,
           },
           {
             name: 'date_to',
             label: 'Date To',
             type: 'date_picker',
-            placeholder: 'Select date',
             col: 2,
           },
           {

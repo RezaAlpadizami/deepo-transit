@@ -36,7 +36,7 @@ function InputElement(props) {
 }
 
 function SelectComponent(props) {
-  const { name, label, disabled, register, control, errors, placeholder } = props;
+  const { name, label, disabled, register, control, errors, placeholder = 'day / month / year' } = props;
   return (
     <div className="flex-auto w-full">
       <div>

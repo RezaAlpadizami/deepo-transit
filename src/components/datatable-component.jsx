@@ -108,13 +108,13 @@ function DataTable(props) {
             if (d.type === 'action-button' && row.original.status.toLowerCase() === 'pending') {
               return (
                 <Button
-                  className="text-white bg-gradient-to-r from-processbtnfrom to-processbtnto hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2"
+                  className="text-white bg-gradient-to-r from-processbtnfrom to-processbtnto hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-xs px-5 py-1.5 text-center mr-2 mb-2"
                   onClick={() => {
                     onActionButton(row.original.id, row.original);
                   }}
                   type="button"
-                  px={8}
-                  size="sm"
+                  px={6}
+                  size="xs"
                 >
                   Process
                 </Button>
@@ -447,7 +447,7 @@ function DataTable(props) {
           <div>
             <form className={`${onSearch ? 'mb-10' : ''}`} onChange={onSearch ? handleSubmit(opt) : ''}>
               <div className="px-4">
-                <div className={` ${filterEnd ? 'flex justify-between' : 'grid grid-cols-6'} gap-4  mt-4`}>
+                <div className={` ${filterEnd ? 'flex justify-between' : 'grid grid-cols-6 mt-4 gap-4'}`}>
                   {filter.map((item, idx) => {
                     if (item.type === 'addtext') {
                       return (
@@ -569,7 +569,7 @@ function DataTable(props) {
       {loadingHover && <LoadingHover text="Please Wait..." />}
       {filter.length !== 0 && (
         <div className="overflow-x-hidden relative px-6 pb-11 bg-white drop-shadow-md rounded-b-3xl">
-          <div className="scrollbar-x-auto">
+          <div className="overflow-x-auto">
             <table {...getTableProps()} className="table-auto w-full text-sm text-left text-gray-500 border-t">
               <thead className="text-xs text-black uppercase bg-thead">
                 {headerGroups.map((headerGroup, idxgroup) => (
@@ -629,143 +629,136 @@ function DataTable(props) {
                 </tbody>
               )}
             </table>
-
-            {loading && (
-              <Stack>
-                <div className="flex p-3 gap-2">
-                  <Skeleton height="20px" width="5%" />
-                  <Skeleton height="20px" width="95%" />
-                </div>
-                <div className="flex p-3 gap-2">
-                  <Skeleton height="20px" width="5%" />
-                  <Skeleton height="20px" width="95%" />
-                </div>
-                <div className="flex p-3 gap-2">
-                  <Skeleton height="20px" width="5%" />
-                  <Skeleton height="20px" width="95%" />
-                </div>
-                <div className="flex p-3 gap-2">
-                  <Skeleton height="20px" width="5%" />
-                  <Skeleton height="20px" width="95%" />
-                </div>
-              </Stack>
-            )}
-
-            {!loading && data.length <= 0 && (
-              <div className="grid place-content-center text-center h-[250px]">
-                <p className="font-bold text-xl">...Ooops, No Request yet</p>
-                <p className="font-medium">Please first add a Request</p>
-              </div>
-            )}
-
-            <nav className="flex justify-between items-center bg-white pl-4" aria-label="Table navigation">
-              <span className="text-sm font-normal text-gray-500 ">
-                {totalData <= 0 ? null : (
-                  <>
-                    Showing <span className="font-semibold text-gray-900 ">{`${limit * (pages - 1) + 1} - `}</span>
-                    <span className="font-semibold text-gray-900">
-                      {pages * limit > totalData ? totalData : pages * limit}
-                    </span>{' '}
-                    of <span className="font-semibold text-gray-900 ">{totalData}</span>
-                  </>
-                )}
-              </span>
-              <ul className="inline-flex items-center text-sm -space-x-px py-4 mr-8">
-                <li>
-                  <button
-                    type="button"
-                    disabled={pages === 1}
-                    onClick={() => (pages === 1 ? {} : changePage(pages - 1))}
-                    className="block py-2 px-3 ml-0 leading-tight text-gray-500 bg-white disabled:text-gray-300 disabled:hover:bg-white hover:bg-gray-100 hover:text-gray-700"
-                  >
-                    <span className="sr-only">Previous</span>
-                    <ChevronLeftIcon className="w-5 h-5" />
-                  </button>
-                </li>
-                {lastPage > 7 && pages >= 4 && (
-                  <>
-                    <li>
-                      <button
-                        type="button"
-                        onClick={() => changePage(1)}
-                        className="py-2 px-3 leading-tight text-black rounded-lg bg-gray-100 mr-1  hover:bg-gray-700 hover:text-white"
-                      >
-                        1
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        type="button"
-                        className="py-2 px-3 leading-tight text-black rounded-lg mr-0.5 bg-gray-100 hover:bg-gray-700 hover:text-white"
-                      >
-                        ...
-                      </button>
-                    </li>
-                  </>
-                )}
-                {Array(
-                  lastPage > 7 && lastPage - pages < 3
-                    ? 5
-                    : lastPage > 7 && pages >= 4
-                    ? 3
-                    : lastPage > 7
-                    ? 5
-                    : lastPage
-                )
-                  .fill('')
-                  .map((_, i) => {
-                    const p =
-                      lastPage > 7 && lastPage - pages < 3 ? lastPage - 4 : lastPage > 7 && pages >= 4 ? pages - 1 : 1;
-                    return (
-                      <li key={i}>
-                        <button
-                          type="button"
-                          disabled={pages === i + p}
-                          onClick={() => changePage(i + p)}
-                          className={`${
-                            pages === i + p ? 'bg-secondarydeepo text-white' : 'bg-thead'
-                          } py-2 px-3 mx-0.5 leading-tight text-black bg-secondarydeepo rounded-lg hover:bg-thead hover:text-white disabled:text-white`}
-                        >
-                          {i + p}
-                        </button>
-                      </li>
-                    );
-                  })}
-                {lastPage > 7 && lastPage - pages >= 3 && (
-                  <>
-                    <li>
-                      <button
-                        type="button"
-                        className="py-2 px-3 mr-1 ml-0.5 leading-tight text-black rounded-lg bg-gray-100 hover:bg-gray-700 hover:text-white"
-                      >
-                        ...
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        type="button"
-                        onClick={() => changePage(lastPage)}
-                        className="py-2 px-3 leading-tight text-black rounded-lg bg-gray-100 hover:bg-gray-700 hover:text-white"
-                      >
-                        {lastPage}
-                      </button>
-                    </li>
-                  </>
-                )}
-                <li>
-                  <button
-                    type="button"
-                    disabled={pages === lastPage}
-                    onClick={() => (pages === lastPage ? {} : changePage(pages + 1))}
-                    className="block py-2 px-3 leading-tight text-gray-500 bg-white disabled:text-gray-300 disabled:hover:bg-white hover:bg-gray-100 hover:text-gray-700"
-                  >
-                    <span className="sr-only">Next</span>
-                    {totalData <= 0 ? null : <ChevronRightIcon className="w-5 h-5" />}
-                  </button>
-                </li>
-              </ul>
-            </nav>
           </div>
+          {loading && (
+            <Stack>
+              <div className="flex p-3 gap-2">
+                <Skeleton height="20px" width="5%" />
+                <Skeleton height="20px" width="95%" />
+              </div>
+              <div className="flex p-3 gap-2">
+                <Skeleton height="20px" width="5%" />
+                <Skeleton height="20px" width="95%" />
+              </div>
+              <div className="flex p-3 gap-2">
+                <Skeleton height="20px" width="5%" />
+                <Skeleton height="20px" width="95%" />
+              </div>
+              <div className="flex p-3 gap-2">
+                <Skeleton height="20px" width="5%" />
+                <Skeleton height="20px" width="95%" />
+              </div>
+            </Stack>
+          )}
+
+          {!loading && data.length <= 0 && (
+            <div className="grid place-content-center text-center h-[250px]">
+              <p className="font-bold text-xl">...Ooops, No Request yet</p>
+              <p className="font-medium">Please first add a Request</p>
+            </div>
+          )}
+
+          <nav className="flex justify-between items-center bg-white pl-4" aria-label="Table navigation">
+            <span className="text-sm font-normal text-gray-500 ">
+              {totalData <= 0 ? null : (
+                <>
+                  Showing <span className="font-semibold text-gray-900 ">{`${limit * (pages - 1) + 1} - `}</span>
+                  <span className="font-semibold text-gray-900">
+                    {pages * limit > totalData ? totalData : pages * limit}
+                  </span>{' '}
+                  of <span className="font-semibold text-gray-900 ">{totalData}</span>
+                </>
+              )}
+            </span>
+            <ul className="inline-flex items-center text-sm -space-x-px py-4 mr-8">
+              <li>
+                <button
+                  type="button"
+                  disabled={pages === 1}
+                  onClick={() => (pages === 1 ? {} : changePage(pages - 1))}
+                  className="block py-2 px-3 ml-0 leading-tight text-gray-500 bg-white disabled:text-gray-300 disabled:hover:bg-white hover:bg-gray-100 hover:text-gray-700"
+                >
+                  <span className="sr-only">Previous</span>
+                  <ChevronLeftIcon className="w-5 h-5" />
+                </button>
+              </li>
+              {lastPage > 7 && pages >= 4 && (
+                <>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => changePage(1)}
+                      className="py-2 px-3 leading-tight text-black rounded-lg bg-gray-100 mr-1  hover:bg-gray-700 hover:text-white"
+                    >
+                      1
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      className="py-2 px-3 leading-tight text-black rounded-lg mr-0.5 bg-gray-100 hover:bg-gray-700 hover:text-white"
+                    >
+                      ...
+                    </button>
+                  </li>
+                </>
+              )}
+              {Array(
+                lastPage > 7 && lastPage - pages < 3 ? 5 : lastPage > 7 && pages >= 4 ? 3 : lastPage > 7 ? 5 : lastPage
+              )
+                .fill('')
+                .map((_, i) => {
+                  const p =
+                    lastPage > 7 && lastPage - pages < 3 ? lastPage - 4 : lastPage > 7 && pages >= 4 ? pages - 1 : 1;
+                  return (
+                    <li key={i}>
+                      <button
+                        type="button"
+                        disabled={pages === i + p}
+                        onClick={() => changePage(i + p)}
+                        className={`${
+                          pages === i + p ? 'bg-secondarydeepo text-white' : 'bg-thead'
+                        } py-2 px-3 mx-0.5 leading-tight text-black bg-secondarydeepo rounded-lg hover:bg-thead hover:text-white disabled:text-white`}
+                      >
+                        {i + p}
+                      </button>
+                    </li>
+                  );
+                })}
+              {lastPage > 7 && lastPage - pages >= 3 && (
+                <>
+                  <li>
+                    <button
+                      type="button"
+                      className="py-2 px-3 mr-1 ml-0.5 leading-tight text-black rounded-lg bg-gray-100 hover:bg-gray-700 hover:text-white"
+                    >
+                      ...
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => changePage(lastPage)}
+                      className="py-2 px-3 leading-tight text-black rounded-lg bg-gray-100 hover:bg-gray-700 hover:text-white"
+                    >
+                      {lastPage}
+                    </button>
+                  </li>
+                </>
+              )}
+              <li>
+                <button
+                  type="button"
+                  disabled={pages === lastPage}
+                  onClick={() => (pages === lastPage ? {} : changePage(pages + 1))}
+                  className="block py-2 px-3 leading-tight text-gray-500 bg-white disabled:text-gray-300 disabled:hover:bg-white hover:bg-gray-100 hover:text-gray-700"
+                >
+                  <span className="sr-only">Next</span>
+                  {totalData <= 0 ? null : <ChevronRightIcon className="w-5 h-5" />}
+                </button>
+              </li>
+            </ul>
+          </nav>
         </div>
       )}
     </Fade>
