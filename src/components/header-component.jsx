@@ -25,6 +25,8 @@ function Header() {
   const { store } = useContext(Context);
 
   const getWarehouse = () => JSON.parse(LocalStorage.get('Warehouse'));
+  const id = getWarehouse()?.id.toString() || '';
+  store.setWarehouseId(id);
 
   const handleChangeWarehouse = () => {
     CookieService.removeCookies();
