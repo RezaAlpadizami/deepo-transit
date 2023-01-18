@@ -275,27 +275,48 @@ function Screen() {
     }
   }, [newData]);
 
+  const getTransitData = () => {
+    TransitApi.get({ warehouse_id: store?.getWarehouseId() })
+      .then(res => {
+        setRfidData(res.data);
+        setTotalRFID(res.query.total || 0);
+        getTransit();
+        setTimeout(() => {
+          setLoadTable(false);
+        }, 500);
+      })
+      .catch(error => {
+        Swal.fire({ text: error?.data?.message, icon: 'error' });
+      });
+  };
+
+  const getTransitDatas = () => {
+    TransitApi.get({ warehouse_id: store?.getWarehouseId() })
+      .then(res => {
+        setRfidData(res.data);
+        setTotalRFID(res.query.total || 0);
+
+        setTimeout(() => {
+          setLoadTable(false);
+        }, 500);
+      })
+      .catch(error => {
+        Swal.fire({ text: error?.data?.message, icon: 'error' });
+      });
+  };
+
   const getTransit = () => {
     setTimer(
       setInterval(() => {
+        getTransitDatas();
         setLoadTable(true);
-        TransitApi.get({ warehouse_id: store?.getWarehouseId() })
-          .then(res => {
-            setRfidData(res.data);
-            setTotalRFID(res.query.total || 0);
-            setTimeout(() => {
-              setLoadTable(false);
-            }, 500);
-          })
-          .catch(error => {
-            Swal.fire({ text: error?.data?.message, icon: 'error' });
-          });
       }, 5000)
     );
   };
 
   const startScanning = () => {
     setScanning(true);
+
     if (!scanning && rfidData.length > 0) {
       setLoadingRFID(true);
       setRfidData([]);
@@ -303,14 +324,16 @@ function Screen() {
       setTimeout(() => {
         setLoadingRFID(false);
       }, 500);
-
-      getTransit();
+      getTransitData();
     } else {
-      getTransit();
+      setLoadTable(true);
+      setTimeout(() => {
+        getTransitData();
+      }, 500);
     }
-
     setIsScanned(false);
   };
+
   const stopScanning = () => {
     setScanning(false);
     setIsScanned(true);
@@ -361,6 +384,11 @@ function Screen() {
   };
 
   const onSplit = (id, qty, index) => {
+    console.log('id', id);
+    console.log('qty', qty);
+    console.log('index', index);
+    console.log('counter', counter);
+    console.log('fields', fields);
     setIsSplit(true);
     setLoadingTransit(true);
 
@@ -368,7 +396,7 @@ function Screen() {
     const fieldLength = fields.filter(i => i.product_id === id).length;
     const fieldLengthLess = fields.filter(i => i.product_id < id).length;
     const fieldLengthMore = fields.filter(i => i.product_id > id).length;
-
+    console.log('fieldlength', fieldLength);
     const value = {
       product_id: findData.product_id,
       child_qty: Math.floor(qty / counter),
@@ -376,13 +404,18 @@ function Screen() {
 
     const splitVal = { product_id: id, value: Math.floor(qty / counter) };
     if (Math.floor(qty / counter) > 1) {
+      console.log('emang ga masuk');
       if (index === 0) {
+        console.log('kesini');
         if (qty % counter === 0) {
+          console.log('aoaa');
           if (fieldLength === 1) {
+            console.log('asd1');
             insert(fieldLength, value);
 
             setSplitValue(splitVal);
           } else if (fields.findIndex(i => i.resividual_qty && i.product_id === id) !== -1 && id === currentProductId) {
+            console.log('asd2');
             remove(fields.findIndex(i => i.resividual_qty));
             insert(
               fields.findIndex(i => i.resividual_qty),
@@ -394,6 +427,7 @@ function Screen() {
             fields.findIndex(i => i.resividual_qty && i.product_id === currentProductId) !== -1 &&
             id !== currentProductId
           ) {
+            console.log('asd3');
             if (counter !== fields.filter(i => i.product_id === currentProductId && !i.resividual_qty).length) {
               setCounter(
                 fields.filter(i => i.product_id === currentProductId && !i.resividual_qty).length > 0
@@ -401,6 +435,7 @@ function Screen() {
                   : 2
               );
             } else if (fields.findIndex(i => i.product_id === currentProductId && i.resividual_qty === -1)) {
+              console.log('asd4');
               remove(fields.findIndex(i => i.resividual_qty));
               insert(
                 fields.findIndex(i => i.resividual_qty),
@@ -409,6 +444,7 @@ function Screen() {
               setSplitValue(splitVal);
             }
           } else {
+            console.log('4');
             insert(fieldLength, value);
 
             setSplitValue(splitVal);
@@ -442,7 +478,13 @@ function Screen() {
             }
 
             setSplitValue(splitVal);
+          } else if (fieldLength === 1) {
+            console.log('ga kesini');
+            insert(fieldLength, value);
+
+            setSplitValue(splitVal);
           } else {
+            console.log('kena else');
             setCounter(fieldLength > 1 ? fieldLength : 2);
           }
         }
@@ -1011,14 +1053,14 @@ function Screen() {
       )}
       {onOpen && (
         <div
-          className=" main-modal fixed w-full h-100 inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
+          className=" main-modal fixed w-full inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
           style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
         >
-          <div className="border shadow-lg modal-container bg-white w-[80%] mx-auto rounded z-50 h-60">
+          <div className="border shadow-lg modal-container bg-white w-[80%] h-1/2 mx-auto rounded z-50 overflow-y-auto">
             <form onSubmit={handleSubmit(onFinalSubmit)}>
               <p className="text-md font-bold py-2 px-4">Dashboard Transit</p>
 
-              <TableContainer className="overflow-y-auto h-40 px-6 py-2">
+              <TableContainer className="px-6 py-2">
                 <Table>
                   <Thead>
                     <Tr className="bg-[#bbc9ff] text-bold text-[#000]">
@@ -1187,7 +1229,13 @@ function Screen() {
                             <Td className="w-20 px-4">
                               <Controller
                                 render={({ field }) => {
-                                  return <Input type="number" {...field} className="w-16" />;
+                                  return (
+                                    <Input
+                                      type="number"
+                                      {...field}
+                                      className="w-16 border-2 border-gray-300 rounded-2xl"
+                                    />
+                                  );
                                 }}
                                 name={`details.${index}.child_qty`}
                                 control={control}
