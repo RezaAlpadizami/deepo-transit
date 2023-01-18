@@ -17,14 +17,13 @@ import DatePicker from '../../../components/datepicker-component';
 import InputComponent from '../../../components/input-component';
 import Datatable from '../../../components/datatable-component';
 import Select from '../../../components/select-component';
-import SimpleTable from './table';
+import SimpleTable from './component/table';
 import Context from '../../../context';
 
 const swalButton = Swal.mixin({
   customClass: {
-    confirmButton: 'rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold w-20',
-    cancelButton:
-      'ml-4 rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold w-20',
+    confirmButton: 'ml-4 rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold w-20',
+    cancelButton: 'rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold w-20',
   },
   buttonsStyling: false,
 });
@@ -184,6 +183,7 @@ function Screen() {
   const [loadingRFID, setLoadingRFID] = useState(false);
   const [onOverview, setOnOverview] = useState(false);
   const [isScanned, setIsScanned] = useState(false);
+  const [loadtable, setLoadTable] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [isSplit, setIsSplit] = useState(false);
   const [onOpen, setOnOpen] = useState(false);
@@ -278,10 +278,14 @@ function Screen() {
   const getTransit = () => {
     setTimer(
       setInterval(() => {
+        setLoadTable(true);
         TransitApi.get({ warehouse_id: store?.getWarehouseId() })
           .then(res => {
             setRfidData(res.data);
             setTotalRFID(res.query.total || 0);
+            setTimeout(() => {
+              setLoadTable(false);
+            }, 500);
           })
           .catch(error => {
             Swal.fire({ text: error?.data?.message, icon: 'error' });
@@ -292,7 +296,6 @@ function Screen() {
 
   const startScanning = () => {
     setScanning(true);
-
     if (!scanning && rfidData.length > 0) {
       setLoadingRFID(true);
       setRfidData([]);
@@ -650,6 +653,7 @@ function Screen() {
           html: '<b> NOTES </b> <br/> <p class="text-[15px]">The amount of data in Request Detail does not match the data in RFID Detected. Continue process?<p>',
           input: 'text',
           showCancelButton: true,
+          reverseButtons: true,
           confirmButtonColor: '#3085d6',
           preConfirm: pre => {
             if (!pre && pre.length === 0) {
@@ -853,6 +857,7 @@ function Screen() {
             <LoadingComponent visible={loadingRFID} />
             {!loadingRFID ? (
               <SimpleTable
+                loading={loadtable}
                 data={rfidData.map(i => {
                   return {
                     product_id: i.product_id,

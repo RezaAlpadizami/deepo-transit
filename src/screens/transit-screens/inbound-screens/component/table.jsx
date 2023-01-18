@@ -1,7 +1,8 @@
 import React from 'react';
+import Loading from './loading';
 
 function SimpleTable(props) {
-  const { data, isLarge } = props;
+  const { data, isLarge, loading } = props;
 
   const th = `${isLarge ? 'px-8 text-sm' : 'px-4 text-xs'} text-bold text-[#000] text-center py-1.5 tracking-wide`;
   const td = 'text-[#000] text-center py-1.5 break-words';
@@ -21,6 +22,7 @@ function SimpleTable(props) {
         </thead>
 
         <tbody>
+          <Loading visible={loading} isLarge={isLarge} />
           {data.length > 0 ? (
             data?.map((d, i) => {
               return (
