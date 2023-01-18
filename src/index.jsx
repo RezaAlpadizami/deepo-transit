@@ -32,7 +32,8 @@ const theme = extendTheme({ colors, components });
 const store = RootStore.create({ isLogin: false });
 const activityStore = BoundActivity.create();
 
-const c = document.cookie;
+const c = document.cookie.split(';')[2];
+
 store.setWarehouseId(c.split('=')[1]);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

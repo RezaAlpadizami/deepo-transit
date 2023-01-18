@@ -1,157 +1,155 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Table, Thead, Tbody, Tr, Th, Td, TableContainer, Input, Button, Fade } from '@chakra-ui/react';
-import { useFieldArray, useForm, Controller } from 'react-hook-form';
+import React, { useEffect, useState, useContext } from 'react';
+import { Table, Thead, Tbody, Tr, Th, Td, TableContainer, Input, Button, useMediaQuery } from '@chakra-ui/react';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import Moment from 'moment';
 import * as yup from 'yup';
 import Swal from 'sweetalert2';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { CalculatorIcon, XIcon } from '@heroicons/react/outline';
-import Moment from 'moment';
 import { StopIcon } from '@heroicons/react/solid';
-
 import { RequestApi, TransitApi } from '../../../services/api-transit';
-import InputComponent from '../../../components/input-component';
-import DatePicker from '../../../components/datepicker-component';
 import { StorageApi } from '../../../services/api-master';
-import MagnifyClass from '../../../assets/images/magnify-glass.svg';
-import Datatable from '../../../components/datatable-component';
-import LoadingComponent from '../../../components/loading-component';
 import { toCalculate } from '../../../utils/helper';
-import Select from '../../../components/select-component';
-import TableCh from './table';
-import Context from '../../../context';
+import MagnifyClass from '../../../assets/images/magnify-glass.svg';
 import LoadingHover from '../../../components/loading-hover-component';
+import LoadingComponent from '../../../components/loading-component';
+import DatePicker from '../../../components/datepicker-component';
+import InputComponent from '../../../components/input-component';
+import Datatable from '../../../components/datatable-component';
+import Select from '../../../components/select-component';
+import SimpleTable from './component/table';
+import Context from '../../../context';
 
 const swalButton = Swal.mixin({
   customClass: {
-    confirmButton: 'rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold w-20',
-    cancelButton:
-      'ml-4 rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold w-20',
+    confirmButton: 'ml-4 rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold w-20',
+    cancelButton: 'rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold w-20',
   },
   buttonsStyling: false,
 });
 
-function Screen() {
-  const storage = yup.object({
-    rack: yup.string().test('rack', 'rack is required', value => {
+const storage = yup.object({
+  rack: yup.string().test('rack', 'rack is required', value => {
+    if (value) {
+      return true;
+    }
+    return false;
+  }),
+
+  level: yup
+    .string()
+    .test('level', 'level is required', value => {
       if (value) {
         return true;
       }
       return false;
+    })
+    .test('level', 'cannot select the same level with the same bay in one rack', (value, context) => {
+      const parentsData = context.from[1].value;
+
+      const { details, onChangeRack, onChangeBay, onChangeLevel } = parentsData;
+      const comparison = details.filter(i => i.rack !== '' && i.bay !== '' && i.level !== '');
+
+      const failed = [];
+      const success = [];
+      comparison.map((i, idx) => {
+        if (i.product_id !== onChangeRack.item.product_id) {
+          if (i.rack === onChangeRack.rack) {
+            if (i.bay === onChangeBay.bay) {
+              if (i.rack === onChangeLevel.level) {
+                failed.push({ state: false, index: idx });
+              } else {
+                success.push({ state: true, index: idx });
+              }
+            }
+          }
+        }
+        return i;
+      });
+
+      if (failed.every(i => i.state === true)) {
+        return true;
+      }
+      if (success.every(i => i.state === false)) {
+        return false;
+      }
+      return false;
     }),
 
-    level: yup
-      .string()
-      .test('level', 'level is required', value => {
-        if (value) {
-          return true;
-        }
-        return false;
-      })
-      .test('level', 'cannot select the same level with the same bay in one rack', (value, context) => {
-        const parentsData = context.from[1].value;
+  bay: yup
+    .string()
+    .test('bay', 'bay is required', value => {
+      if (value) {
+        return true;
+      }
+      return false;
+    })
+    .test('bay', 'cannot select the same bay at the same level in one rack', (value, context) => {
+      const parentsData = context.from[1].value;
 
-        const { details, onChangeRack, onChangeBay, onChangeLevel } = parentsData;
-        const comparison = details.filter(i => i.rack !== '' && i.bay !== '' && i.level !== '');
+      const { details, onChangeBay, onChangeRack, onChangeLevel } = parentsData;
+      const comparison = details.filter(i => i.rack !== '' && i.bay !== '' && i.level !== '');
 
-        const failed = [];
-        const success = [];
-        comparison.map((i, idx) => {
-          if (i.product_id !== onChangeRack.item.product_id) {
-            if (i.rack === onChangeRack.rack) {
-              if (i.bay === onChangeBay.bay) {
-                if (i.rack === onChangeLevel.level) {
-                  failed.push({ state: false, index: idx });
-                } else {
-                  success.push({ state: true, index: idx });
-                }
+      const failed = [];
+      const success = [];
+      comparison.map((i, idx) => {
+        if (i.product_id !== onChangeRack.item.product_id) {
+          if (i.rack === onChangeRack.rack) {
+            if (i.bay === onChangeBay.bay) {
+              if (i.rack === onChangeLevel.level) {
+                failed.push({ state: false, index: idx });
+              } else {
+                success.push({ state: true, index: idx });
               }
             }
           }
-          return i;
-        });
+        }
+        return i;
+      });
 
-        if (failed.every(i => i.state === true)) {
-          return true;
-        }
-        if (success.every(i => i.state === false)) {
-          return false;
-        }
+      if (failed.every(i => i.state === true)) {
+        return true;
+      }
+      if (success.every(i => i.state === false)) {
         return false;
-      }),
+      }
+      return false;
+    }),
 
-    bay: yup
-      .string()
-      .test('bay', 'bay is required', value => {
-        if (value) {
-          return true;
-        }
-        return false;
-      })
-      .test('bay', 'cannot select the same bay at the same level in one rack', (value, context) => {
-        const parentsData = context.from[1].value;
+  child_qty: yup.string(),
+});
 
-        const { details, onChangeBay, onChangeRack, onChangeLevel } = parentsData;
-        const comparison = details.filter(i => i.rack !== '' && i.bay !== '' && i.level !== '');
+const schema = yup.object({
+  details: yup
+    .array()
+    .of(storage)
+    .min(1, 'must have at least one data')
+    .test('details', 'total of splitted quantity must be the same with the actual quantity', (value, context) => {
+      let pass = true;
 
-        const failed = [];
-        const success = [];
-        comparison.map((i, idx) => {
-          if (i.product_id !== onChangeRack.item.product_id) {
-            if (i.rack === onChangeRack.rack) {
-              if (i.bay === onChangeBay.bay) {
-                if (i.rack === onChangeLevel.level) {
-                  failed.push({ state: false, index: idx });
-                } else {
-                  success.push({ state: true, index: idx });
-                }
-              }
-            }
+      const { isSplitted, currentProductId } = context.parent;
+
+      if (isSplitted) {
+        if (value.length > 0) {
+          const val = toCalculate(
+            value.filter(i => i.product_id === currentProductId),
+            'child_qty'
+          );
+
+          if (value.filter(i => i.qty).find(i => i.product_id === currentProductId)?.qty === val) {
+            return pass;
           }
-          return i;
-        });
-
-        if (failed.every(i => i.state === true)) {
-          return true;
+          pass = false;
         }
-        if (success.every(i => i.state === false)) {
-          return false;
-        }
-        return false;
-      }),
+      } else {
+        pass = true;
+      }
 
-    child_qty: yup.string(),
-  });
+      return pass;
+    }),
+});
 
-  const schema = yup.object({
-    details: yup
-      .array()
-      .of(storage)
-      .min(1, 'must have at least one data')
-      .test('details', 'total of splitted quantity must be the same with the actual quantity', (value, context) => {
-        let pass = true;
-
-        const { isSplitted, currentProductId } = context.parent;
-
-        if (isSplitted) {
-          if (value.length > 0) {
-            const val = toCalculate(
-              value.filter(i => i.product_id === currentProductId),
-              'child_qty'
-            );
-
-            if (value.filter(i => i.qty).find(i => i.product_id === currentProductId)?.qty === val) {
-              return pass;
-            }
-            pass = false;
-          }
-        } else {
-          pass = true;
-        }
-
-        return pass;
-      }),
-  });
-
+function Screen() {
   const {
     register,
     control,
@@ -164,8 +162,9 @@ function Screen() {
   } = useForm({
     resolver: yupResolver(schema),
   });
-
   const { activityStore, store } = useContext(Context);
+  // // 1280px
+  const [isLarge] = useMediaQuery('(min-width: 1150px)');
 
   const { currentProductId } = watch();
   const { fields, append, remove, insert, update } = useFieldArray({
@@ -184,6 +183,7 @@ function Screen() {
   const [loadingRFID, setLoadingRFID] = useState(false);
   const [onOverview, setOnOverview] = useState(false);
   const [isScanned, setIsScanned] = useState(false);
+  const [loadtable, setLoadTable] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [isSplit, setIsSplit] = useState(false);
   const [onOpen, setOnOpen] = useState(false);
@@ -202,6 +202,7 @@ function Screen() {
   const [filterBay, setFilterBay] = useState({
     warehouse_id: store?.getWarehouseId(),
   });
+
   useEffect(() => {
     if (activityStore?.getRequestNumber()) {
       setRequestId(activityStore?.getRequestNumber());
@@ -277,10 +278,14 @@ function Screen() {
   const getTransit = () => {
     setTimer(
       setInterval(() => {
+        setLoadTable(true);
         TransitApi.get({ warehouse_id: store?.getWarehouseId() })
           .then(res => {
             setRfidData(res.data);
             setTotalRFID(res.query.total || 0);
+            setTimeout(() => {
+              setLoadTable(false);
+            }, 500);
           })
           .catch(error => {
             Swal.fire({ text: error?.data?.message, icon: 'error' });
@@ -291,7 +296,6 @@ function Screen() {
 
   const startScanning = () => {
     setScanning(true);
-
     if (!scanning && rfidData.length > 0) {
       setLoadingRFID(true);
       setRfidData([]);
@@ -649,6 +653,7 @@ function Screen() {
           html: '<b> NOTES </b> <br/> <p class="text-[15px]">The amount of data in Request Detail does not match the data in RFID Detected. Continue process?<p>',
           input: 'text',
           showCancelButton: true,
+          reverseButtons: true,
           confirmButtonColor: '#3085d6',
           preConfirm: pre => {
             if (!pre && pre.length === 0) {
@@ -787,7 +792,7 @@ function Screen() {
     }, 500);
   };
   return (
-    <div className="bg-white p-5 rounded-[55px] shadow px-6 pb-11">
+    <>
       <input type="hidden" {...register('filters')} />
       <input type="hidden" {...register('isSplitted')} value={isSplit} />
       <input type="hidden" {...register('currentProductId')} />
@@ -795,180 +800,214 @@ function Screen() {
       <input type="hidden" {...register('onChangeBay')} />
       <input type="hidden" {...register('onChangeLevel')} />
       {loadingHover && <LoadingHover left="[20%]" top="[9%]" />}
-      <fieldset className="border border-primarydeepo w-full h-full px-8 rounded-[30px] pb-6">
-        <legend className="px-2 text-[28px] text-primarydeepo font-semibold">Request</legend>
-        <div className="grid grid-cols-8 gap-6">
-          <button
-            type="submit"
-            onClick={() => setOnOverview(!onOverview)}
-            className={`${
-              scanning ? 'bg-[#ffc108]' : 'bg-processbtnfrom'
-            }  h-[100px] w-[110px] rounded-lg grid place-content-center ml-6 mt-2 col-span-2 mt-2`}
-            disabled={scanning}
-          >
-            <p className="text-lg text-[#fff] font-bold mb-2">Request</p>
-            <CalculatorIcon
-              className={`${scanning ? 'bg-[#ffc108]' : 'bg-processbtnfrom'} h-10 w-15 stroke-[#fff] mx-auto`}
-            />
-          </button>
+      <div className="grid grid-rows-4 bg-white px-5 py-1 rounded-3xl drop-shadow-xl w-full h-[98%]">
+        <div className="">
+          <fieldset className="border border-primarydeepo w-full h-full px-6 rounded-2xl">
+            <legend className="sm:text-xl xl:text-3xl text-primarydeepo font-semibold p-2">Request</legend>
 
-          <div className="col-span-3">
-            <InputComponent
-              name="request_number"
-              label="Request Number"
-              register={register}
-              control={control}
-              errors={errors}
-              disabled
-            />
-          </div>
-          <div className="col-span-3">
-            <DatePicker
-              name="activity_date_from"
-              label="Date"
-              register={register}
-              control={control}
-              errors={errors}
-              disabled
-            />
-          </div>
-        </div>
-      </fieldset>
-
-      <div className="grid-cols-2 gap-4 flex">
-        <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[30px]">
-          <legend className="px-2 text-[28px] text-primarydeepo font-semibold">Request Detail</legend>
-          <LoadingComponent visible={loadingRequest} />
-          {!loadingRequest ? <TableCh data={requestDetailData} /> : null}
-        </fieldset>
-        <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[30px]">
-          <legend className="px-2 text-[28px] text-primarydeepo font-semibold">RFID Detected</legend>
-          <LoadingComponent visible={loadingRFID} />
-          {!loadingRFID ? <TableCh data={rfidData} /> : null}
-        </fieldset>
-      </div>
-      <div
-        className={`border  ${
-          error ? 'border-[#a2002d]' : 'border-primarydeepo'
-        }  w-full h-full px-8 rounded-[30px] py-2 mt-10`}
-      >
-        <div className="grid grid-cols-3 gap-4">
-          <div className="py-auto">
-            <div>Total Request</div>
-            <div>Total RFID Detected</div>
-          </div>
-          <div className="py-auto">
-            <div className="font-bold">{totalRequest}</div>
-            <div className="font-bold">{totalRFID}</div>
-          </div>
-          <div className="flex py-2">
-            <Button
-              _hover={{
-                shadow: 'md',
-                transform: 'translateY(-5px)',
-                transitionDuration: '0.2s',
-                transitionTimingFunction: 'ease-in-out',
-              }}
-              type="button"
-              size="sm"
-              px={6}
-              className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
-              onClick={scanning ? stopScanning : startScanning}
-              disabled={requestDetailData.length === 0}
-            >
-              {scanning ? <StopIcon className="h-6 animate-pulse" /> : <p className="tracking-wide">Scan</p>}
-            </Button>
-
-            <Button
-              _hover={{
-                shadow: 'md',
-                transform: 'translateY(-5px)',
-                transitionDuration: '0.2s',
-                transitionTimingFunction: 'ease-in-out',
-              }}
-              type="button"
-              size="sm"
-              px={6}
-              className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold mx-4"
-              onClick={onReset}
-              disabled={scanning}
-            >
-              <p className="tracking-wide">Reset</p>
-            </Button>
-
-            <Button
-              _hover={{
-                shadow: 'md',
-                transform: 'translateY(-5px)',
-                transitionDuration: '0.2s',
-                transitionTimingFunction: 'ease-in-out',
-              }}
-              type="submit"
-              size="sm"
-              px={6}
-              className="rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold"
-              onClick={onSubmitRFID}
-              disabled={onDisabled()}
-            >
-              Next
-            </Button>
-          </div>
-        </div>
-      </div>
-      {error && (
-        <p className="text-[#a2002d] pl-10">
-          {totalRequest !== totalRFID
-            ? 'The amount of data in Request Detail does not match the data in RFID Detected.'
-            : ''}
-        </p>
-      )}
-      {onOverview && (
-        <Fade in={onOverview}>
-          <div
-            className=" main-modal fixed w-full h-200 inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
-            style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
-          >
-            <div className="rounded rounded-2xl border shadow-lg modal-container bg-white w-[80%] mx-auto z-50 overflow-y-auto ">
-              <div className="grid justify-items-end">
-                <XIcon className="h-6 stroke-2" onClick={() => setOnOverview(!onOverview)} />
-              </div>
-              <div className="modal-content py-4 text-left px-6">
-                <Datatable
-                  api={RequestApi}
-                  filterParams={{ status: 'PENDING' }}
-                  filterEnd
-                  limit={5}
-                  filters={[
-                    {
-                      name: 'text',
-                      type: 'addtext',
-                      text: 'Request Overview',
-                    },
-                    {
-                      name: 'request_number',
-                      placeholder: 'Request Number',
-                      icon: MagnifyClass,
-                      alt: 'magnify',
-                      type: 'input:addOn',
-                      col: 2,
-                    },
-                  ]}
-                  columns={[
-                    { header: 'Request Number', value: 'request_number', copy: true, type: 'link' },
-                    { header: 'User', value: 'request_by', copy: true },
-                    { header: 'Activity', value: 'activity_name', copy: true },
-                    { header: 'Date', value: 'activity_date', copy: true, type: 'date' },
-                    { header: 'Notes', value: 'notes', copy: true, type: 'scrollable' },
-                    { header: 'Status', value: 'status', copy: true },
-                    { header: ' ', value: ' ', type: 'action-button' },
-                  ]}
-                  onSearch
-                  onActionButton={(id, data) => onProcess(id, data)}
+            <div className="flex my-auto">
+              <button
+                type="submit"
+                onClick={() => setOnOverview(!onOverview)}
+                className={`${scanning ? 'bg-[#ffc108]' : 'bg-processbtnfrom'}  h-3/4 rounded-lg px-4 ${
+                  isLarge ? 'py-2' : 'my-auto pb-2'
+                } `}
+                disabled={scanning}
+              >
+                <p className="md:text-sm xl:text-lg text-[#fff] sm:font-semibold xl:font-semibold">Request</p>
+                <CalculatorIcon
+                  className={`${scanning ? 'bg-[#ffc108]' : 'bg-processbtnfrom'} h-12 w-15 stroke-[#fff] mx-auto`}
+                />
+              </button>
+              {/* w-full  */}
+              <div className={`${isLarge ? 'flex gap-6' : ''} w-3/4 pl-10 pb-4`}>
+                <InputComponent
+                  name="request_number"
+                  label="Request Number"
+                  register={register}
+                  control={control}
+                  errors={errors}
+                  disabled
+                />
+                <DatePicker
+                  name="activity_date_from"
+                  label="Date"
+                  register={register}
+                  control={control}
+                  errors={errors}
+                  disabled
                 />
               </div>
             </div>
+          </fieldset>
+        </div>
+
+        <div className={`${isLarge ? 'flex gap-4' : ''} h-full w-full row-span-2`}>
+          <fieldset
+            className={`${isLarge ? 'h-full py-8' : 'h-1/2 py-4'} border border-primarydeepo w-full rounded-3xl px-2`}
+          >
+            <legend className="px-2 sm:text-xl xl:text-3xl text-primarydeepo font-semibold">Request Detail</legend>
+            <LoadingComponent visible={loadingRequest} />
+            {!loadingRequest ? <SimpleTable data={requestDetailData} isLarge={isLarge} /> : null}
+          </fieldset>
+          <fieldset
+            className={`${isLarge ? 'h-full py-8' : 'h-1/2 py-4'} border border-primarydeepo w-full rounded-3xl px-2`}
+          >
+            <legend className="px-2 sm:text-xl xl:text-3xl text-primarydeepo font-semibold">RFID Detected</legend>
+            <LoadingComponent visible={loadingRFID} />
+            {!loadingRFID ? (
+              <SimpleTable
+                loading={loadtable}
+                data={rfidData.map(i => {
+                  return {
+                    product_id: i.product_id,
+                    product_name: i.product_name,
+                    product_sku: i.sku,
+                    qty: i.qty,
+                    warehouse_id: i.warehouse_id,
+                  };
+                })}
+                isLarge={isLarge}
+              />
+            ) : null}
+          </fieldset>
+        </div>
+
+        <div className="my-auto">
+          <div className={`border  ${error ? 'border-[#a2002d]' : 'border-primarydeepo'}  w-full px-4 rounded-3xl`}>
+            <div className="flex w-full py-2">
+              <div className="grid py-auto w-1/2">
+                <div className="flex">
+                  <div className="max-sm:text-xs xl:text-lg w-1/2">Total Request</div>
+                  <div className="font-bold">{totalRequest}</div>
+                </div>
+                <div className="flex">
+                  <div className="max-sm:text-xs xl:text-lg w-1/2">
+                    {isLarge ? 'Total RFID Detected' : 'Total RFID'}{' '}
+                  </div>
+                  <div className="font-bold">{totalRFID}</div>
+                </div>
+              </div>
+
+              <div className="grid w-1/2">
+                <div
+                  className={`${isLarge ? 'grid grid-cols-3 justify-place-end pl-8' : 'flex flex-wrap my-2 '} my-auto `}
+                >
+                  <Button
+                    _hover={{
+                      shadow: 'md',
+                      transform: 'translateY(-5px)',
+                      transitionDuration: '0.2s',
+                      transitionTimingFunction: 'ease-in-out',
+                    }}
+                    type="button"
+                    size={isLarge ? 'sm' : 'xs'}
+                    px={isLarge ? 5 : 2}
+                    className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
+                    onClick={scanning ? stopScanning : startScanning}
+                    disabled={requestDetailData.length === 0}
+                  >
+                    {scanning ? <StopIcon className="h-6 animate-pulse" /> : <p className="tracking-wide">Scan</p>}
+                  </Button>
+
+                  <Button
+                    _hover={{
+                      shadow: 'md',
+                      transform: 'translateY(-5px)',
+                      transitionDuration: '0.2s',
+                      transitionTimingFunction: 'ease-in-out',
+                    }}
+                    type="button"
+                    size={isLarge ? 'sm' : 'xs'}
+                    px={isLarge ? 6 : 2}
+                    className={`rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold ${
+                      isLarge ? 'mx-4' : 'mx-2'
+                    } `}
+                    onClick={onReset}
+                    disabled={scanning}
+                  >
+                    <p className="tracking-wide">Reset</p>
+                  </Button>
+
+                  <Button
+                    _hover={{
+                      shadow: 'md',
+                      transform: 'translateY(-5px)',
+                      transitionDuration: '0.2s',
+                      transitionTimingFunction: 'ease-in-out',
+                    }}
+                    type="submit"
+                    size={isLarge ? 'sm' : 'xs'}
+                    px={isLarge ? 6 : 3}
+                    className={`rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold ${
+                      isLarge ? '' : 'mt-2'
+                    } `}
+                    onClick={onSubmitRFID}
+                    disabled={onDisabled()}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
-        </Fade>
+          {error && (
+            <p className="text-[#a2002d] pl-10">
+              {totalRequest !== totalRFID
+                ? 'The amount of data in Request Detail does not match the data in RFID Detected.'
+                : ''}
+            </p>
+          )}
+        </div>
+      </div>
+      {onOverview && (
+        <div
+          className=" main-modal fixed w-full h-full inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+        >
+          <div className="rounded rounded-3xl border shadow-lg modal-container bg-white w-[80%] h-3/4 mx-auto z-50 overflow-y-auto ">
+            <div className="grid justify-items-end">
+              <XIcon
+                className="fixed h-6 stroke-2 mr-1 pointer-events-auto"
+                onClick={() => setOnOverview(!onOverview)}
+              />
+            </div>
+            <div className="modal-content py-4 text-left px-6">
+              <Datatable
+                api={RequestApi}
+                filterParams={{ status: 'PENDING' }}
+                filterEnd
+                limit={5}
+                filters={[
+                  {
+                    name: 'text',
+                    type: 'addtext',
+                    text: 'Request Overview',
+                  },
+                  {
+                    name: 'request_number',
+                    placeholder: 'Request Number',
+                    icon: MagnifyClass,
+                    alt: 'magnify',
+                    type: 'input:addOn',
+                    col: 2,
+                  },
+                ]}
+                columns={[
+                  { header: 'Request Number', value: 'request_number', copy: true, type: 'link' },
+                  { header: 'User', value: 'request_by', copy: true },
+                  { header: 'Activity', value: 'activity_name', copy: true },
+                  { header: 'Date', value: 'activity_date', copy: true, type: 'date' },
+                  { header: 'Notes', value: 'notes', copy: true, type: 'scrollable' },
+                  { header: 'Status', value: 'status', copy: true },
+                  { header: ' ', value: ' ', type: 'action-button' },
+                ]}
+                onSearch
+                onActionButton={(id, data) => onProcess(id, data)}
+              />
+            </div>
+          </div>
+        </div>
       )}
       {onOpen && (
         <div
@@ -1275,7 +1314,8 @@ function Screen() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
+
 export default Screen;

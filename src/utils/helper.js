@@ -21,3 +21,11 @@ export function toCalculate(data, type) {
   }
   return total;
 }
+
+export function calculateText(text) {
+  const canvas = calculateText.widht || (calculateText.canvas = document.createElement('canvas'));
+  const context = canvas.getContext('2d');
+  const metrics = context.measureText(text);
+
+  return [metrics.width, text];
+}
