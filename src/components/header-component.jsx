@@ -37,7 +37,7 @@ function Header() {
 
   return (
     <header className="flex p-5 border-b">
-      <div className="mx-3 mt-0.5 cursor-pointer" onClick={() => store.toggleDrawer()}>
+      <div className="mx-3 mt-0.5 cursor-pointer max-[640px]:block" onClick={() => store.toggleDrawer()}>
         <img src={logo} alt="logo" />
       </div>
       <ul className="flex ml-5 flex-auto">

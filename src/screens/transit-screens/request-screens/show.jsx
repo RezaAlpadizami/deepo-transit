@@ -76,8 +76,8 @@ function Screen() {
         >
           <ArrowNarrowLeftIcon className="w-6 h-6 text-secondarydeepo text-center" />
         </div>
-        <div className="grid-cols-2 gap-4 flex">
-          <fieldset className="border border-borders shadow-custom hover:shadow-hover transition-all duration-200  w-full h-full px-8 py-12 rounded-[55px] mx-4">
+        <div className="grid-cols-2 gap-4 flex max-[640px]:flex-col">
+          <fieldset className="border border-borders shadow-custom w-full h-full px-8 py-12 rounded-[55px] mx-4 max-[640px]:mx-0 max-[640px]:px-2 max-[640px]:mb-4">
             <legend className="px-2 text-[28px] text-primarydeepo">Request</legend>
             <div className="flex flex-col">
               <div className="w-full">
@@ -89,7 +89,7 @@ function Screen() {
                 />
               </div>
               <div>
-                <div className="flex gap-36">
+                <div className="flex gap-36 max-[640px]:flex-col max-[640px]:gap-2">
                   <div>
                     <InputDetail
                       value={dataRequesById.activity_name}
@@ -120,7 +120,7 @@ function Screen() {
               />
             </div>
           </fieldset>
-          <fieldset className="border border-borders shadow-custom hover:shadow-hover transition-all duration-200  w-full h-full px-8 py-12 rounded-[55px] mx-4">
+          <fieldset className="border border-borders shadow-custom w-full h-full px-8 py-12 rounded-[55px] mx-4 max-[640px]:mx-0 max-[640px]:px-2">
             <legend className="px-2 text-[28px] text-primarydeepo">Request Detail</legend>
             <div>
               <div className="flex justify-between">
@@ -136,7 +136,7 @@ function Screen() {
                       customStyleLabel="font-bold text-md mb-0"
                       customStyleSpan="text-md"
                     />
-                    <div className="flex gap-20 mt-6">
+                    <div className="flex gap-20 mt-6 max-[640px]:gap-6">
                       <span className="">X</span>
                       <Text>{thousandSeparator(qty)}</Text>
                     </div>
@@ -163,7 +163,7 @@ function Screen() {
                 to="/inbound"
                 px={8}
                 size="sm"
-                className="mr-14 text-white bg-gradient-to-r from-secondarydeepo to-primarydeepo hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mb-2"
+                className="mr-14 text-white bg-gradient-to-r from-secondarydeepo to-primarydeepo hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mb-2 max-[640px]:mr-2 max-[640px]:mt-4"
               >
                 Process
               </Link>
