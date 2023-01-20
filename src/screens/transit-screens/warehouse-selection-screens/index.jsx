@@ -2,14 +2,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 import Swal from 'sweetalert2';
 import Cookies from 'universal-cookie';
-import { useForm } from 'react-hook-form';
-import { Text, Button } from '@chakra-ui/react';
 import LocalStorage from 'local-storage';
+import { useForm } from 'react-hook-form';
+import { Text, Button, Spinner } from '@chakra-ui/react';
 
-import CookieService from '../../../services/cookies/cookie-service';
 import Input from '../../../components/input-component';
 import { WarehouseApi } from '../../../services/api-transit';
 import Search from '../../../assets/images/magnify-glass.svg';
+import CookieService from '../../../services/cookies/cookie-service';
 
 function Screen() {
   const { register, control, handleSubmit } = useForm();
@@ -20,15 +20,19 @@ function Screen() {
     limit: 50,
     offset: 0,
   });
+  const [loading, setLoading] = useState(false);
 
   const cookies = new Cookies();
 
   useEffect(() => {
+    setLoading(true);
     WarehouseApi.get({ ...filterData })
       .then(res => {
+        setLoading(false);
         setWarhouseData(res.data);
       })
       .catch(error => {
+        setLoading(false);
         Swal.fire({ text: error?.message || error?.originalError, icon: 'error' });
       });
   }, [filterData]);
@@ -122,6 +126,11 @@ function Screen() {
             />
           </form>
         </div>
+        {loading && (
+          <div className="flex justify-center my-12">
+            <Spinner color="#546ac2" size="lg" />
+          </div>
+        )}
         {groupingByLocation.map(group => {
           return (
             <div className="mt-10 mx-1">
