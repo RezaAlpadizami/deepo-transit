@@ -29,7 +29,7 @@ function InputElement(props) {
         focusBorderColor="#546ac2"
       />
       <InputRightElement className="rounded-r-full w-14 bg-primarydeepo h-full cursor-pointer" onClick={handleClick}>
-        <CalendarIcon color="white" className="w-5 h-5 mt-0.5" />
+        <CalendarIcon color="white" className="w-5 h-5 mt-0.5 mr-1" />
       </InputRightElement>
     </InputGroup>
   );

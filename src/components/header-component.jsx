@@ -29,9 +29,9 @@ function Header() {
   store.setWarehouseId(id);
 
   const handleChangeWarehouse = () => {
+    navigate('/');
     CookieService.removeCookies();
     LocalStorage.remove('Warehouse');
-    navigate('/');
     window.location.reload();
   };
 

@@ -160,10 +160,10 @@ function Screen() {
   return (
     <div>
       <div className="bg-white p-5 rounded-[55px] py-12 drop-shadow-md">
-        <div className="grid-cols-2 gap-4 flex max-[640px]:flex-col">
-          <fieldset className="border border-borders shadow-custom w-full h-full px-8 py-12 mx-4 rounded-[55px] max-[640px]:px-2 max-[640px]:mx-0">
+        <div className="grid-cols-2 gap-4 flex max-[640px]:flex-col sm:flex-col lg:flex-row">
+          <fieldset className="border border-borders shadow-custom w-full h-full py-12 rounded-[55px] max-[640px]:px-4 max-[640px]:mx-0 sm:px-6 sm:mx-0 lg:mx-4 lg:px-8">
             <legend className="px-2 text-[28px] text-primarydeepo">Request</legend>
-            <div className="flex gap-4 justify-center max-[640px]:flex-col">
+            <div className="flex gap-4 justify-center max-[640px]:flex-col sm:flex-col lg:flex-row">
               <div className="w-full">
                 <Select
                   name="activity_name"
@@ -194,10 +194,10 @@ function Screen() {
             </div>
           </fieldset>
 
-          <fieldset className="border border-borders shadow-custom w-full h-full px-8 py-12 mx-4 rounded-[55px] max-[640px]:px-2 max-[640px]:mx-0">
+          <fieldset className="border border-borders shadow-custom w-full h-full py-12 rounded-[55px] max-[640px]:px-4 max-[640px]:mx-0 sm:px-6 sm:mx-0 lg:mx-4 lg:px-8">
             <legend className="px-2 text-[28px] text-primarydeepo">Request Detail</legend>
             <form onSubmit={handleSubmitProd(onAddProdRequestDetail)}>
-              <div className="flex gap-4 justify-center max-[640px]:flex-col">
+              <div className="flex gap-4 justify-center max-[640px]:flex-col sm:flex-col lg:flex-row">
                 <div className="w-full col-span-2">
                   <Select
                     name="product_id"
@@ -229,7 +229,7 @@ function Screen() {
                 {updateDataUpdate.map((val, id) => {
                   return (
                     <div className="flex" key={id}>
-                      <div className="my-4 mr-4 max-[640px]:mr-0">
+                      <div className="my-4 mr-4 max-[640px]:mr-0 sm:mr-0 lg:mr-2 flex flex-col justify-center align-middle">
                         <Button
                           type="button"
                           size="sm"
@@ -245,8 +245,8 @@ function Screen() {
                       <InputDetail
                         value={`SKU: ${val.product_sku}`}
                         label={`${val.product_name}`}
-                        customStyleLabel="font-bold text-md mb-0 max-[640px]:text-xs max-[640px]:w-24"
-                        customStyleSpan="text-md max-[640px]:text-xs"
+                        customStyleLabel="font-bold text-md mb-0 max-[640px]:text-xs max-[640px]:w-24 sm:w-24 md:w-full lg:w-24 xl:w-48"
+                        customStyleSpan="text-md max-[640px]:text-xs sm:text-sm"
                       />
                       <div className="flex relative gap-20 mt-6">
                         <span className="absolute right-24 max-[640px]:right-12">X</span>
