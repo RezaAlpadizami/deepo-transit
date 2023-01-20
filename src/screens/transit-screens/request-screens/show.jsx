@@ -16,7 +16,7 @@ import InputDetail from '../../../components/input-detail-component';
 function Screen() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { store } = useContext(Context);
+  const { activityStore } = useContext(Context);
 
   const [dataRequesById, setDataRequestById] = useState([]);
   const [dataRequesByIdDetail, setDataRequestByIdDetail] = useState([]);
@@ -156,11 +156,11 @@ function Screen() {
             <div>
               <Link
                 onClick={() => {
-                  store.setRequestNumber(dataRequesById?.id);
+                  activityStore.setRequestNumber(dataRequesById?.id);
                 }}
                 hidden={dataRequesById?.status !== 'PENDING'}
                 type="button"
-                to="/inbound"
+                to={`/${dataRequesById?.activity_name}`}
                 px={8}
                 size="sm"
                 className="mr-14 text-white bg-gradient-to-r from-secondarydeepo to-primarydeepo hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mb-2 max-[640px]:mr-2 max-[640px]:mt-4"
