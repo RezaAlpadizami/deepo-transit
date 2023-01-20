@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Table, Thead, Tbody, Tr, Th, Td, TableContainer, Input, Button, useMediaQuery } from '@chakra-ui/react';
+import { Table, Thead, Tbody, Tr, Th, Td, TableContainer, Button, useMediaQuery, Input, Fade } from '@chakra-ui/react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import Moment from 'moment';
 import * as yup from 'yup';
@@ -116,7 +116,14 @@ const storage = yup.object({
       return false;
     }),
 
-  child_qty: yup.string(),
+  actual_qty: yup.string().test('actual_qty', 'quantity is required field', (value, context) => {
+    const { isSplitted } = context.from[1].value;
+    // console.log('isSplitted', isSplitted);
+    if (!isSplitted && value) {
+      return true;
+    }
+    return false;
+  }),
 });
 
 const schema = yup.object({
@@ -133,7 +140,7 @@ const schema = yup.object({
         if (value.length > 0) {
           const val = toCalculate(
             value.filter(i => i.product_id === currentProductId),
-            'child_qty'
+            'actual_qty'
           );
 
           if (value.filter(i => i.qty).find(i => i.product_id === currentProductId)?.qty === val) {
@@ -149,7 +156,7 @@ const schema = yup.object({
     }),
 });
 
-function Screen() {
+function Screen(props) {
   const {
     register,
     control,
@@ -245,13 +252,13 @@ function Screen() {
           if (splitValue.product_id === item.product_id) {
             item.index = index;
 
-            if (item.child_qty !== splitValue.value) {
-              item.child_qty = splitValue.value;
+            if (item.actual_qty !== splitValue.value) {
+              item.actual_qty = splitValue.value;
             }
             if (item.resividual_qty) {
-              item.child_qty = item.resividual_qty;
+              item.actual_qty = item.resividual_qty;
               update(index + 1, item);
-              setValue(`details.${index + 1}.child_qty`, item.child_qty);
+              setValue(`details.${index + 1}.actual_qty`, item.actual_qty);
             }
           }
           return item;
@@ -269,7 +276,7 @@ function Screen() {
     if (newData.length > 0) {
       setValue('details', newData);
     }
-    if (newData.filter(i => i.child_qty).length === 0) {
+    if (newData.every(i => !i.actual_qty)) {
       setIsSplit(false);
       setValue('isSplitted', false);
     }
@@ -279,7 +286,7 @@ function Screen() {
     TransitApi.get({ warehouse_id: store?.getWarehouseId() })
       .then(res => {
         setRfidData(res.data);
-        setTotalRFID(res.query.total || 0);
+        setTotalRFID(toCalculate(res.data, 'qty') || 0);
         getTransit();
         setTimeout(() => {
           setLoadTable(false);
@@ -384,11 +391,11 @@ function Screen() {
   };
 
   const onSplit = (id, qty, index) => {
-    console.log('id', id);
-    console.log('qty', qty);
-    console.log('index', index);
-    console.log('counter', counter);
-    console.log('fields', fields);
+    // console.log('id', id);
+    // console.log('qty', qty);
+    // console.log('index', index);
+    // console.log('counter', counter);
+    // console.log('fields', fields);
     setIsSplit(true);
     setLoadingTransit(true);
 
@@ -396,26 +403,26 @@ function Screen() {
     const fieldLength = fields.filter(i => i.product_id === id).length;
     const fieldLengthLess = fields.filter(i => i.product_id < id).length;
     const fieldLengthMore = fields.filter(i => i.product_id > id).length;
-    console.log('fieldlength', fieldLength);
+    // console.log('fieldlength', fieldLength);
     const value = {
       product_id: findData.product_id,
-      child_qty: Math.floor(qty / counter),
+      actual_qty: Math.floor(qty / counter),
     };
 
     const splitVal = { product_id: id, value: Math.floor(qty / counter) };
     if (Math.floor(qty / counter) > 1) {
-      console.log('emang ga masuk');
+      // console.log('emang ga masuk');
       if (index === 0) {
-        console.log('kesini');
+        // console.log('kesini');
         if (qty % counter === 0) {
-          console.log('aoaa');
+          // console.log('aoaa');
           if (fieldLength === 1) {
-            console.log('asd1');
+            // console.log('asd1');
             insert(fieldLength, value);
 
             setSplitValue(splitVal);
           } else if (fields.findIndex(i => i.resividual_qty && i.product_id === id) !== -1 && id === currentProductId) {
-            console.log('asd2');
+            // console.log('asd2');
             remove(fields.findIndex(i => i.resividual_qty));
             insert(
               fields.findIndex(i => i.resividual_qty),
@@ -427,7 +434,7 @@ function Screen() {
             fields.findIndex(i => i.resividual_qty && i.product_id === currentProductId) !== -1 &&
             id !== currentProductId
           ) {
-            console.log('asd3');
+            // console.log('asd3');
             if (counter !== fields.filter(i => i.product_id === currentProductId && !i.resividual_qty).length) {
               setCounter(
                 fields.filter(i => i.product_id === currentProductId && !i.resividual_qty).length > 0
@@ -435,7 +442,7 @@ function Screen() {
                   : 2
               );
             } else if (fields.findIndex(i => i.product_id === currentProductId && i.resividual_qty === -1)) {
-              console.log('asd4');
+              // console.log('asd4');
               remove(fields.findIndex(i => i.resividual_qty));
               insert(
                 fields.findIndex(i => i.resividual_qty),
@@ -444,7 +451,7 @@ function Screen() {
               setSplitValue(splitVal);
             }
           } else {
-            console.log('4');
+            // console.log('4');
             insert(fieldLength, value);
 
             setSplitValue(splitVal);
@@ -457,34 +464,34 @@ function Screen() {
                 fields.findIndex(i => i.resividual_qty),
                 {
                   product_id: findData.product_id,
-                  child_qty: qty - Math.floor(qty / counter) * counter,
+                  actual_qty: qty - Math.floor(qty / counter) * counter,
                 }
               );
               insert(fields.findIndex(i => i.resividual_qty) + 1, {
                 product_id: findData.product_id,
-                child_qty: qty - Math.floor(qty / counter) * counter,
+                actual_qty: qty - Math.floor(qty / counter) * counter,
                 resividual_qty: qty - Math.floor(qty / counter) * counter,
               });
             } else {
               insert(fieldLength, {
                 product_id: findData.product_id,
-                child_qty: qty - Math.floor(qty / counter) * counter,
+                actual_qty: qty - Math.floor(qty / counter) * counter,
               });
               insert(fieldLength + 1, {
                 product_id: findData.product_id,
-                child_qty: qty - Math.floor(qty / counter) * counter,
+                actual_qty: qty - Math.floor(qty / counter) * counter,
                 resividual_qty: qty - Math.floor(qty / counter) * counter,
               });
             }
 
             setSplitValue(splitVal);
           } else if (fieldLength === 1) {
-            console.log('ga kesini');
+            // console.log('ga kesini');
             insert(fieldLength, value);
 
             setSplitValue(splitVal);
           } else {
-            console.log('kena else');
+            // console.log('kena else');
             setCounter(fieldLength > 1 ? fieldLength : 2);
           }
         }
@@ -500,19 +507,19 @@ function Screen() {
                 );
                 insert(fields.findIndex(i => i.resividual_qty && i.product_id === id) + 1, {
                   product_id: findData.product_id,
-                  child_qty: qty - Math.floor(qty / counter) * counter,
+                  actual_qty: qty - Math.floor(qty / counter) * counter,
                   resividual_qty: qty - Math.floor(qty / counter) * counter,
                 });
                 setSplitValue(splitVal);
               } else {
                 insert(fields.findIndex(i => i.product_id === id) + fieldLength, {
                   product_id: findData.product_id,
-                  child_qty: qty - Math.floor(qty / counter) * counter,
+                  actual_qty: qty - Math.floor(qty / counter) * counter,
                 });
 
                 insert(fields.findIndex(i => i.product_id === id) + fieldLength + 1, {
                   product_id: findData.product_id,
-                  child_qty: qty - Math.floor(qty / counter) * counter,
+                  actual_qty: qty - Math.floor(qty / counter) * counter,
                   resividual_qty: qty - Math.floor(qty / counter) * counter,
                 });
               }
@@ -528,7 +535,7 @@ function Screen() {
             } else {
               update(
                 fields.findIndex(i => i.product_id === id),
-                { ...findData, child_qty: Math.floor(qty / counter) }
+                { ...findData, actual_qty: Math.floor(qty / counter) }
               );
               insert(fields.findIndex(i => i.product_id === id) + fieldLength, value);
 
@@ -555,18 +562,18 @@ function Screen() {
                 );
                 insert(fields.findIndex(i => i.resividual_qty && i.product_id === id) + 1, {
                   product_id: findData.product_id,
-                  child_qty: qty - Math.floor(qty / counter) * counter,
+                  actual_qty: qty - Math.floor(qty / counter) * counter,
                   resividual_qty: qty - Math.floor(qty / counter) * counter,
                 });
               } else {
                 insert(fields.findIndex(i => i.product_id === id) + fieldLength, {
                   product_id: findData.product_id,
-                  child_qty: qty - Math.floor(qty / counter) * counter,
+                  actual_qty: qty - Math.floor(qty / counter) * counter,
                 });
 
                 insert(fields.findIndex(i => i.product_id === id) + fieldLength + 1, {
                   product_id: findData.product_id,
-                  child_qty: qty - Math.floor(qty / counter) * counter,
+                  actual_qty: qty - Math.floor(qty / counter) * counter,
                   resividual_qty: qty - Math.floor(qty / counter) * counter,
                 });
               }
@@ -581,7 +588,7 @@ function Screen() {
                 );
                 insert(fields.findIndex(i => i.resividual_qty && i.product_id === id) + 1, {
                   product_id: findData.product_id,
-                  child_qty: qty - Math.floor(qty / counter) * counter,
+                  actual_qty: qty - Math.floor(qty / counter) * counter,
                   resividual_qty: qty - Math.floor(qty / counter) * counter,
                 });
               } else {
@@ -596,7 +603,7 @@ function Screen() {
             } else {
               update(
                 fields.findIndex(i => i.product_id === id),
-                { ...findData, child_qty: Math.floor(qty / counter) }
+                { ...findData, actual_qty: Math.floor(qty / counter) }
               );
               insert(fields.findIndex(i => i.product_id === id) + fieldLength, value);
 
@@ -634,25 +641,25 @@ function Screen() {
     };
 
     if (counter <= 3 && fieldLength === 2) {
-      delete findData.child_qty;
+      delete findData.actual_qty;
       setSplitValue(findData);
       remove(idx);
       setCounter(2);
-    } else if (findData.qty % findData.child_qty === 0) {
+    } else if (findData.qty % findData.actual_qty === 0) {
       if (findData.qty % value.value !== 0) {
         remove(idx);
         remove(idx - 1);
         setSplitValue(values);
       } else {
         if (dt.length === 0) {
-          delete findData.child_qty;
+          delete findData.actual_qty;
           setSplitValue(findData);
         } else {
           setSplitValue(value);
         }
         remove(idx);
       }
-    } else if (findData.qty % findData.child_qty !== 0) {
+    } else if (findData.qty % findData.actual_qty !== 0) {
       const resividualValue = {
         product_id: findData.product_id,
         value: Math.floor(findData.qty / dt.length),
@@ -794,7 +801,7 @@ function Screen() {
               product_id: i.product_id,
               warehouse_id: store?.getWarehouseId(),
               storage_id: storageData.find(f => f.rack_number === i.rack && f.bay === i.bay && f.level === i.level)?.id,
-              qty: i.child_qty ? i.child_qty : i.qty,
+              qty: i.actual_qty ? i.actual_qty : i.qty,
             };
           }),
         };
@@ -834,7 +841,7 @@ function Screen() {
     }, 500);
   };
   return (
-    <>
+    <Fade in={props}>
       <input type="hidden" {...register('filters')} />
       <input type="hidden" {...register('isSplitted')} value={isSplit} />
       <input type="hidden" {...register('currentProductId')} />
@@ -1230,14 +1237,19 @@ function Screen() {
                               <Controller
                                 render={({ field }) => {
                                   return (
-                                    <Input
+                                    <InputComponent
                                       type="number"
+                                      name={`details.${index}.actual_qty`}
+                                      idx={index}
                                       {...field}
-                                      className="w-16 border-2 border-gray-300 rounded-2xl"
+                                      errName="details"
+                                      control={control}
+                                      register={register}
+                                      errors={errors}
                                     />
                                   );
                                 }}
-                                name={`details.${index}.child_qty`}
+                                name={`details.${index}.actual_qty`}
                                 control={control}
                               />
                             </Td>
@@ -1264,7 +1276,7 @@ function Screen() {
                                       }
                                     }
 
-                                    onSplit(item.product_id, item.qty, index, item?.child_qty, item);
+                                    onSplit(item.product_id, item.qty, index, item?.actual_qty, item);
                                   }}
                                 >
                                   Split
@@ -1291,7 +1303,7 @@ function Screen() {
                                       });
                                     }
 
-                                    onRemove(index, item.product_id, item, item?.child_qty);
+                                    onRemove(index, item.product_id, item, item?.actual_qty);
                                   }}
                                 >
                                   Delete
@@ -1362,7 +1374,7 @@ function Screen() {
           </div>
         </div>
       )}
-    </>
+    </Fade>
   );
 }
 
