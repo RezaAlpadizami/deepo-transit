@@ -158,7 +158,7 @@ function Screen() {
         })}
       </div>
       <div className="flex justify-end mt-6 mx-12">
-        <div className="max-[640px]:fixed max-[640px]:bottom-0 max-[640px]:right-0 flex">
+        <div className="max-[640px]:fixed max-[640px]:right-0 flex">
           <div>
             <Button
               onClick={() => handleContinue()}
