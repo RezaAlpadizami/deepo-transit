@@ -1106,9 +1106,13 @@ function Screen(props) {
           className="fixed w-full inset-0 z-50 overflow-hidden flex justify-center items-center"
           style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
         >
-          <div className="border shadow-lg bg-white w-[80%] h-1/2 mx-auto rounded z-50 overflow-y-auto">
-            <form className="px-6 py-4" onSubmit={handleSubmit(onFinalSubmit)}>
-              <p className="text-md font-bold py-1 px-4">Dashboard Transit</p>
+          {/* <div className="border shadow-lg bg-white w-[80%] h-1/2 mx-auto rounded z-50 overflow-y-auto"> */}
+          <form
+            className="px-4 py-2 border shadow-lg bg-white w-[80%] mx-auto rounded z-50"
+            onSubmit={handleSubmit(onFinalSubmit)}
+          >
+            <p className="text-md font-bold py-1 px-4">Dashboard Transit</p>
+            <div className="overflow-y-auto h-60 px-6 py-2">
               <TableContainer className="px-4 py-1">
                 <Table>
                   <Thead>
@@ -1363,58 +1367,58 @@ function Screen(props) {
                   </Tbody>
                 </Table>
               </TableContainer>
-              {/* </div> */}
-              <div className="flex justify-between bg-yellow-200">
-                {errors && (
-                  <span className="pl-10 text-[#a2002d]">{`${
-                    Array.isArray(errors.details)
-                      ? errors?.details?.filter(i => i !== undefined).length > 0
-                        ? 'storage is required'
-                        : ''
-                      : errors?.details?.message || ' '
-                  }`}</span>
-                )}
+            </div>
+            <div className="flex justify-between">
+              {errors && (
+                <span className="pl-10 text-[#a2002d]">{`${
+                  Array.isArray(errors.details)
+                    ? errors?.details?.filter(i => i !== undefined).length > 0
+                      ? 'storage is required'
+                      : ''
+                    : errors?.details?.message || ' '
+                }`}</span>
+              )}
 
-                <div className="mr-4 mb-2 bg-red-200">
-                  <Button
-                    _hover={{
-                      shadow: 'md',
-                      transform: 'translateY(-5px)',
-                      transitionDuration: '0.2s',
-                      transitionTimingFunction: 'ease-in-out',
-                    }}
-                    type="button"
-                    size="sm"
-                    px={8}
-                    className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
-                    onClick={() => {
-                      setCounter(2);
-                      reset();
-                      setOnOpen(!onOpen);
-                      setNotes('');
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    _hover={{
-                      shadow: 'md',
-                      transform: 'translateY(-5px)',
-                      transitionDuration: '0.2s',
-                      transitionTimingFunction: 'ease-in-out',
-                    }}
-                    type="submit"
-                    size="sm"
-                    px={8}
-                    className="ml-4 rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold"
-                  >
-                    Submit
-                  </Button>
-                </div>
+              <div className="mr-4 mb-2">
+                <Button
+                  _hover={{
+                    shadow: 'md',
+                    transform: 'translateY(-5px)',
+                    transitionDuration: '0.2s',
+                    transitionTimingFunction: 'ease-in-out',
+                  }}
+                  type="button"
+                  size="sm"
+                  px={8}
+                  className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
+                  onClick={() => {
+                    setCounter(2);
+                    reset();
+                    setOnOpen(!onOpen);
+                    setNotes('');
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  _hover={{
+                    shadow: 'md',
+                    transform: 'translateY(-5px)',
+                    transitionDuration: '0.2s',
+                    transitionTimingFunction: 'ease-in-out',
+                  }}
+                  type="submit"
+                  size="sm"
+                  px={8}
+                  className="ml-4 rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold"
+                >
+                  Submit
+                </Button>
               </div>
-            </form>
-          </div>
+            </div>
+          </form>
         </div>
+        // </div>
       )}
     </Fade>
   );
