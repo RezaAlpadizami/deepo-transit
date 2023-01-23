@@ -36,94 +36,104 @@ const storage = yup.object({
     return false;
   }),
 
-  level: yup
-    .string()
-    .test('level', 'level is required', value => {
-      if (value) {
-        return true;
-      }
-      return false;
-    })
-    .test('level', 'cannot select the same level with the same bay in one rack', (value, context) => {
-      const parentsData = context.from[1].value;
-
-      const { details, onChangeRack, onChangeBay, onChangeLevel } = parentsData;
-      const comparison = details.filter(i => i.rack !== '' && i.bay !== '' && i.level !== '');
-
-      const failed = [];
-      const success = [];
-      comparison.map((i, idx) => {
-        if (i.product_id !== onChangeRack.item.product_id) {
-          if (i.rack === onChangeRack.rack) {
-            if (i.bay === onChangeBay.bay) {
-              if (i.rack === onChangeLevel.level) {
-                failed.push({ state: false, index: idx });
-              } else {
-                success.push({ state: true, index: idx });
-              }
-            }
-          }
-        }
-        return i;
-      });
-
-      if (failed.every(i => i.state === true)) {
-        return true;
-      }
-      if (success.every(i => i.state === false)) {
-        return false;
-      }
-      return false;
-    }),
-
-  bay: yup
-    .string()
-    .test('bay', 'bay is required', value => {
-      if (value) {
-        return true;
-      }
-      return false;
-    })
-    .test('bay', 'cannot select the same bay at the same level in one rack', (value, context) => {
-      const parentsData = context.from[1].value;
-
-      const { details, onChangeBay, onChangeRack, onChangeLevel } = parentsData;
-      const comparison = details.filter(i => i.rack !== '' && i.bay !== '' && i.level !== '');
-
-      const failed = [];
-      const success = [];
-      comparison.map((i, idx) => {
-        if (i.product_id !== onChangeRack.item.product_id) {
-          if (i.rack === onChangeRack.rack) {
-            if (i.bay === onChangeBay.bay) {
-              if (i.rack === onChangeLevel.level) {
-                failed.push({ state: false, index: idx });
-              } else {
-                success.push({ state: true, index: idx });
-              }
-            }
-          }
-        }
-        return i;
-      });
-
-      if (failed.every(i => i.state === true)) {
-        return true;
-      }
-      if (success.every(i => i.state === false)) {
-        return false;
-      }
-      return false;
-    }),
-
-  actual_qty: yup.string().test('actual_qty', 'quantity is required field', (value, context) => {
-    const { isSplitted } = context.from[1].value;
-    // console.log('isSplitted', isSplitted);
-    if (!isSplitted && value) {
+  level: yup.string().test('level', 'level is required', value => {
+    if (value) {
       return true;
     }
     return false;
   }),
+  // .test('level', 'cannot select the same level with the same bay in one rack', (value, context) => {
+  //   const parentsData = context.from[1].value;
+
+  //   const { details, onChangeRack, onChangeBay, onChangeLevel } = parentsData;
+  //   const comparison = details.filter(i => i.rack !== '' && i.bay !== '' && i.level !== '');
+
+  //   const failed = [];
+  //   const success = [];
+  //   comparison.map((i, idx) => {
+  //     if (i.product_id !== onChangeRack.item.product_id) {
+  //       if (i.rack === onChangeRack.rack) {
+  //         if (i.bay === onChangeBay.bay) {
+  //           if (i.rack === onChangeLevel.level) {
+  //             failed.push({ state: false, index: idx });
+  //           } else {
+  //             success.push({ state: true, index: idx });
+  //           }
+  //         }
+  //       }
+  //     }
+  //     return i;
+  //   });
+
+  //   if (failed.every(i => i.state === true)) {
+  //     return true;
+  //   }
+  //   if (success.every(i => i.state === false)) {
+  //     return false;
+  //   }
+  //   return false;
+  // }),
+
+  bay: yup.string().test('bay', 'bay is required', value => {
+    if (value) {
+      return true;
+    }
+    return false;
+  }),
+  // .test('bay', 'cannot select the same bay at the same level in one rack', (value, context) => {
+  //   const parentsData = context.from[1].value;
+
+  //   const { details, onChangeBay, onChangeRack, onChangeLevel } = parentsData;
+  //   const comparison = details.filter(i => i.rack !== '' && i.bay !== '' && i.level !== '');
+
+  //   const failed = [];
+  //   const success = [];
+  //   comparison.map((i, idx) => {
+  //     if (i.product_id !== onChangeRack.item.product_id) {
+  //       if (i.rack === onChangeRack.rack) {
+  //         if (i.bay === onChangeBay.bay) {
+  //           if (i.rack === onChangeLevel.level) {
+  //             failed.push({ state: false, index: idx });
+  //           } else {
+  //             success.push({ state: true, index: idx });
+  //           }
+  //         }
+  //       }
+  //     }
+  //     return i;
+  //   });
+
+  //   if (failed.every(i => i.state === true)) {
+  //     return true;
+  //   }
+  //   if (success.every(i => i.state === false)) {
+  //     return false;
+  //   }
+  //   return false;
+  // }),
+
+  actual_qty: yup
+    .string()
+    .test('actual_qty', 'quantity is required field', (value, context) => {
+      const { isSplitted } = context.from[1].value;
+      // console.log('value', value);
+      // console.log('isSplitted', isSplitted);
+      if (!isSplitted && value) {
+        return true;
+      }
+      return false;
+    })
+    .test('actual_qty', 'quantity not equal with the actual quantity', (value, context) => {
+      const { isSplitted, details } = context.from[1].value;
+      if (!isSplitted) {
+        return details
+          .map(i => {
+            return i.qty === Number(i.actual_qty);
+          })
+          .every(i => i === true);
+      }
+      return true;
+    }),
 });
 
 const schema = yup.object({
@@ -131,6 +141,30 @@ const schema = yup.object({
     .array()
     .of(storage)
     .min(1, 'must have at least one data')
+    // .test('details', 'quantity not equal with the actual quantity', (value, context) => {
+    //   let pass = true;
+
+    //   const { currentProductId } = context.parent;
+    //   console.log('context parent', context.parent);
+    //   if (value.length > 0) {
+    //     const val = toCalculate(
+    //       value.filter(i => i.product_id === currentProductId),
+    //       'actual_qty'
+    //     );
+    //     console.log('val', val);
+    //     console.log('value', value);
+    //     console.log(
+    //       'value.filter(i => i.qty).find(i => i.product_id === currentProductId)?.qty',
+    //       value.filter(i => i.qty).find(i => i.product_id === currentProductId)?.qty
+    //     );
+    //     if (value.filter(i => i.qty).find(i => i.product_id === currentProductId)?.qty !== val) {
+    //       pass = false;
+    //     } else {
+    //       pass = true;
+    //     }
+    //   }
+    //   return pass;
+    // })
     .test('details', 'total of splitted quantity must be the same with the actual quantity', (value, context) => {
       let pass = true;
 
@@ -229,8 +263,7 @@ function Screen(props) {
           const quantity = [...new Map(res.detail?.map(i => [JSON.stringify(i.qty), i.qty])).values()];
           setValue('filters', filterByProductId);
           setValue('quantity', quantity);
-          // setTransitData(res.detail);
-          setValue('activity_date_from', res?.activity_date ? Moment(res?.activity_date).toDate() : null);
+          setValue('activity_date', res?.activity_date ? Moment(res?.activity_date).toDate() : null);
           setValue('request_number', res?.request_number ? res?.request_number : '-');
           setTotalRequest(toCalculate(res.detail, 'qty'));
           setRequestDetailData(res.detail);
@@ -301,7 +334,7 @@ function Screen(props) {
     TransitApi.get({ warehouse_id: store?.getWarehouseId() })
       .then(res => {
         setRfidData(res.data);
-        setTotalRFID(res.query.total || 0);
+        setTotalRFID(toCalculate(res.data, 'qty') || 0);
 
         setTimeout(() => {
           setLoadTable(false);
@@ -755,13 +788,13 @@ function Screen(props) {
 
         setError('details', {
           type: 'error',
-          message: `this storage combination cannot be done in ${data.details
+          message: `this storage combination cannot be done in sku ${data.details
             .find(
               i =>
                 i.product_id ===
                 data.details.find((i, idx) => idx === datas.findIndex(i => i === undefined))?.product_id
             )
-            ?.product_sku.toUpperCase()} `,
+            ?.sku.toUpperCase()} `,
         });
       }
     } else {
@@ -810,6 +843,16 @@ function Screen(props) {
           .then(() => {
             Swal.fire({ text: 'Sucessfully Saved', icon: 'success' });
             setOnOpen(!onOpen);
+            reset();
+            setTotalRFID('');
+            setTotalRequest('');
+            setValue('details', []);
+            setValue('request_number', '');
+            setValue('activity_date', null);
+            setStorageData([]);
+            setRequestDetailData([]);
+            setRfidData([]);
+            activityStore.setRequestNumber(0);
           })
           .catch(error => {
             Swal.fire({ text: error?.message || error?.data?.message, icon: 'error' });
@@ -833,7 +876,7 @@ function Screen(props) {
     setTotalRequest(0);
     setTotalRFID(0);
     setRequestId('');
-    setValue('activity_date_from', null);
+    setValue('activity_date', null);
     setValue('request_number', '');
     setTimeout(() => {
       setLoadingRequest(false);
@@ -879,7 +922,7 @@ function Screen(props) {
                   disabled
                 />
                 <DatePicker
-                  name="activity_date_from"
+                  name="activity_date"
                   label="Date"
                   register={register}
                   control={control}
@@ -1024,7 +1067,7 @@ function Screen(props) {
             <div className="modal-content py-4 text-left px-6">
               <Datatable
                 api={RequestApi}
-                filterParams={{ status: 'PENDING' }}
+                filterParams={{ status: 'PENDING', warehouse_id: store?.getWarehouseId() }}
                 filterEnd
                 limit={5}
                 filters={[
@@ -1060,14 +1103,13 @@ function Screen(props) {
       )}
       {onOpen && (
         <div
-          className=" main-modal fixed w-full inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
+          className="fixed w-full inset-0 z-50 overflow-hidden flex justify-center items-center"
           style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
         >
-          <div className="border shadow-lg modal-container bg-white w-[80%] h-1/2 mx-auto rounded z-50 overflow-y-auto">
-            <form onSubmit={handleSubmit(onFinalSubmit)}>
-              <p className="text-md font-bold py-2 px-4">Dashboard Transit</p>
-
-              <TableContainer className="px-6 py-2">
+          <div className="border shadow-lg bg-white w-[80%] h-1/2 mx-auto rounded z-50 overflow-y-auto">
+            <form className="px-6 py-4" onSubmit={handleSubmit(onFinalSubmit)}>
+              <p className="text-md font-bold py-1 px-4">Dashboard Transit</p>
+              <TableContainer className="px-4 py-1">
                 <Table>
                   <Thead>
                     <Tr className="bg-[#bbc9ff] text-bold text-[#000]">
@@ -1103,12 +1145,12 @@ function Screen(props) {
                               />
                             </Td>
                             <Td className="w-20 text-center px-2">
-                              {item.product_sku}
+                              {item.sku}
                               <Controller
                                 render={({ field }) => {
                                   return <Input variant="unstyled" {...field} disabled className="hidden" />;
                                 }}
-                                name={`details.${index}.product_sku`}
+                                name={`details.${index}.sku`}
                                 className="hidden"
                                 control={control}
                               />
@@ -1321,8 +1363,8 @@ function Screen(props) {
                   </Tbody>
                 </Table>
               </TableContainer>
-
-              <div className="flex justify-between">
+              {/* </div> */}
+              <div className="flex justify-between bg-yellow-200">
                 {errors && (
                   <span className="pl-10 text-[#a2002d]">{`${
                     Array.isArray(errors.details)
@@ -1333,7 +1375,7 @@ function Screen(props) {
                   }`}</span>
                 )}
 
-                <div className="mr-4 mb-2">
+                <div className="mr-4 mb-2 bg-red-200">
                   <Button
                     _hover={{
                       shadow: 'md',
