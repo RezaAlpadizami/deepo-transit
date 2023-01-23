@@ -324,14 +324,28 @@ function Screen(props) {
   const storeOutbound = body => {
     TransitApi.outbound(body)
       .then(() => {
-        Swal.fire({ text: 'Succesfully Saved', icon: 'success' });
         setOnOpen(!onOpen);
         setErrMessage('');
         setErrors(false);
+        setRfidData([]);
+        setTransitData([]);
+        if (allocated.length > 0) {
+          allocated.length = 0;
+        }
+        if (activityStore.getRequestNumber()) {
+          activityStore.setRequestNumber('');
+        }
+
+        setRequestId('');
+        setTotalRFID();
+        setTotalRequest('');
+        setValue('activity_date', null);
+        setValue('request_number', '');
         allocated.length = 0;
         if (activityStore.getRequestNumber()) {
           activityStore.setRequestNumber(0);
         }
+        Swal.fire({ text: 'Succesfully Saved', icon: 'success' });
       })
       .catch(error => {
         Swal.fire({ text: error?.data?.message, icon: 'error' });
