@@ -94,8 +94,10 @@ function Screen(props) {
 
   useEffect(() => {
     if (activityStore?.getRequestNumber()) {
-      setRequestId(activityStore?.getRequestNumber());
-      setOnOpenTransit(!onOpenTransit);
+      setTimeout(() => {
+        setRequestId(activityStore?.getRequestNumber());
+        setOnOpenTransit(!onOpenTransit);
+      }, 500);
     }
   }, [activityStore]);
 
