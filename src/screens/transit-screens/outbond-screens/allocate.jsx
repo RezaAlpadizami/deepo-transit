@@ -1,30 +1,15 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { Table, Thead, Tbody, Tr, Th, Td, TableContainer, Input, Button } from '@chakra-ui/react';
 import * as yup from 'yup';
 import Moment from 'moment';
-import { observer } from 'mobx-react-lite';
-import LoadingComponent from '../../../components/loading-component';
 import InputComponent from '../../../components/input-component';
 import NoContent from './component/no-content';
-import Context from '../../../context';
-import { toCalculate } from '../../../utils/helper';
 
-const state = [];
+// const state = [];
 const product = yup.object({
-  actual_qty: yup
-    .string()
-    .test('actual_qty', ' actual quantity must be less or equal than qty it self', (value, context) => {
-      const { qty } = context.parent;
-      if (value) {
-        if (Number(value) <= qty) {
-          return true;
-        }
-        return false;
-      }
-      return true;
-    }),
+  actual_qty: yup.string(),
 });
 
 const schema = yup.object({
@@ -36,16 +21,34 @@ const schema = yup.object({
       return value.some(i => i.actual_qty);
     })
     .test('allocate', 'cannot process the value less than zero ', value => {
-      if (value.some(i => i.actual_qty <= 0)) {
+      if (value) {
+        if (value.some(i => i.actual_qty < 0)) {
+          return false;
+        }
+      }
+
+      return true;
+    })
+    .test('allocate', 'actual quantity cannot be more than original quantity', value => {
+      if (
+        value
+          .map(f => {
+            if (f.actual_qty) {
+              return Number(f.actual_qty) > f.qty;
+            }
+            return f;
+          })
+          .some(i => i === true)
+      ) {
         return false;
       }
+
       return true;
     }),
 });
+
 function Allocate(props) {
-  const { onAllocate, setOnAllocate, data, setAllocateData, productId, allocateData, loadingTransit, setIsAllocate } =
-    props;
-  const { activityStore } = useContext(Context);
+  const { onAllocate, setOnAllocate, data, setAllocateData, productId, allocated } = props;
   const {
     register,
     control,
@@ -61,25 +64,16 @@ function Allocate(props) {
     control,
     name: 'allocate',
   });
-  const filter = allocateData.filter(i => i.product_id === productId && i.actual_qty !== undefined);
-
+  const filter = allocated.filter(i => i.product_id === productId && i.actual_qty !== undefined);
   useEffect(() => {
-    setValue(
-      'allocate',
-      data?.product_info?.map((item, idx) => {
-        if (allocateData.filter(i => i.product_id === productId && i.actual_qty !== undefined).length > 0) {
-          const actual = [];
-
-          filter.map(i => {
-            actual.push(i.actual_qty);
-            return i;
-          });
-
-          item.actual_qty = actual[idx];
-        }
-        return item;
-      })
-    );
+    if (filter.length === 0) {
+      setValue('allocate', data?.product_info);
+    } else {
+      setValue(
+        'allocate',
+        allocated.filter(i => i.product_id === productId)
+      );
+    }
   }, [data]);
 
   const onSubmit = dt => {
@@ -90,19 +84,23 @@ function Allocate(props) {
           storage_id: item.storage_id,
           product_id: item.product_id,
           actual_qty: item.actual_qty,
+          qty: item.qty,
+          rack: item.rack,
+          bay: item.bay,
+          level: item.level,
         };
       }),
     };
 
     if (body.allocate.filter(i => i.actual_qty !== undefined).length !== 0) {
-      state.push({
-        isAllocate: true,
-        product_id: productId,
-        actual_qty: toCalculate(body, 'actual_qty'),
-        source: filter.length,
-      });
-      setIsAllocate(Array.from(new Set(state.map(JSON.stringify))).map(JSON.parse));
-      activityStore.setIsAllocate(Array.from(new Set(state.map(JSON.stringify))).map(JSON.parse));
+      // state.push({
+      //   isAllocate: true,
+      //   product_id: productId,
+      //   actual_qty: toCalculate(body, 'actual_qty'),
+      //   source: filter.length,
+      // });
+      // setIsAllocate(Array.from(new Set(state.map(JSON.stringify))).map(JSON.parse));
+      // activityStore.setIsAllocate(Array.from(new Set(state.map(JSON.stringify))).map(JSON.parse));
       setOnAllocate(!onAllocate);
       setAllocateData(
         body.allocate.map(i => {
@@ -123,7 +121,6 @@ function Allocate(props) {
     <form onSubmit={handleSubmit(onSubmit)}>
       <p className="text-md font-bold py-2 px-4">Dashboard Transit</p>
       <div className="max-h-80 overflow-y-auto overflow-x-hidden p-5">
-        <LoadingComponent loading={loadingTransit} />
         <TableContainer>
           <Table>
             <Thead>
@@ -137,7 +134,6 @@ function Allocate(props) {
                 <Th aria-label="Mute volume" className="w-20" />
               </Tr>
             </Thead>
-            {/* <LoadingComponent loading={loadingTransit} /> */}
 
             <Tbody>
               {fields.length > 0 ? (
@@ -245,7 +241,7 @@ function Allocate(props) {
 
       <div className="  flex justify-between">
         {errors && (
-          <span className="pl-10 text-[#a2002d]">{`${errors?.allocate ? errors?.allocate?.message : ''}`}</span>
+          <span className="pl-10 text-[#a2002d]">{`${errors?.allocate ? errors?.allocate.message : ''}`}</span>
         )}
         <div className="mr-4 mb-2">
           <Button
@@ -285,4 +281,4 @@ function Allocate(props) {
   );
 }
 
-export default observer(Allocate);
+export default Allocate;
