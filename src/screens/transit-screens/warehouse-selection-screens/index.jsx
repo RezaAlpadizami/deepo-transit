@@ -163,6 +163,7 @@ function Screen() {
             <Button
               onClick={() => handleContinue()}
               type="submit"
+              disabled={isSelected === -1}
               px={8}
               size="md"
               className="text-white bg-gradient-to-r from-secondarydeepo to-primarydeepo hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mb-2"
