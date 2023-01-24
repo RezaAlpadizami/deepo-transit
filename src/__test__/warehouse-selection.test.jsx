@@ -13,7 +13,7 @@ test('search input should be empty', () => {
   expect(userSearchInputEl.value).toBe('');
 });
 
-test('button should not be disable when warehouse isselected', () => {
+test('button should be disabled', () => {
   render(<WarehouseSelection />);
   const errorEl = screen.getByRole('button');
   expect(errorEl).toBeDisabled();
