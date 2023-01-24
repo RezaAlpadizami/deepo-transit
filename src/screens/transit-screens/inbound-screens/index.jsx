@@ -245,7 +245,7 @@ function Screen(props) {
   });
 
   useEffect(() => {
-    if (activityStore?.getRequestNumber()) {
+    if (activityStore?.getRequestNumber() && activityStore?.getActivityName()?.toLowerCase() === 'inbound') {
       setRequestId(activityStore?.getRequestNumber());
     }
   }, [activityStore]);
@@ -852,7 +852,10 @@ function Screen(props) {
             setStorageData([]);
             setRequestDetailData([]);
             setRfidData([]);
-            activityStore.setRequestNumber(0);
+            if (activityStore.getRequestNumber() && activityStore.getActivityName()) {
+              activityStore.setRequestNumber(0);
+              activityStore?.setActivityName('');
+            }
           })
           .catch(error => {
             Swal.fire({ text: error?.message || error?.data?.message, icon: 'error' });
@@ -871,7 +874,10 @@ function Screen(props) {
     setLoadingRFID(true);
     setIsScanned(false);
     setRequestDetailData([]);
-    activityStore.setRequestNumber(0);
+    if (activityStore.getRequestNumber() && activityStore.getActivityName()) {
+      activityStore.setRequestNumber(0);
+      activityStore?.setActivityName('');
+    }
     setRfidData([]);
     setTotalRequest(0);
     setTotalRFID(0);

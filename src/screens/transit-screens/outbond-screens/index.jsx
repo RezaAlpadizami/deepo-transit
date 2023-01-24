@@ -66,7 +66,6 @@ function Screen(props) {
 
   const { activityStore, store } = useContext(Context);
   const [isLarge] = useMediaQuery('(min-width: 1150px)');
-  // const [requestDetailData, setRequestDetailData] = useState([]);
   const [transitData, setTransitData] = useState();
   const [allocateData, setAllocateData] = useState([]);
   const [productInfoData, setproductInfoData] = useState([]);
@@ -82,7 +81,6 @@ function Screen(props) {
   const [loadtable, setLoadTable] = useState(false);
   const [isScanned, setIsScanned] = useState(false);
   const [scanning, setScanning] = useState(false);
-  const [onOpen, setOnOpen] = useState(false);
   const [error, setErrors] = useState(false);
 
   const [totalRequest, setTotalRequest] = useState(0);
@@ -93,7 +91,7 @@ function Screen(props) {
   const [timer, setTimer] = useState();
 
   useEffect(() => {
-    if (activityStore?.getRequestNumber()) {
+    if (activityStore?.getRequestNumber() && activityStore?.getActivityName()?.toLowerCase() === 'outbound') {
       setTimeout(() => {
         setRequestId(activityStore?.getRequestNumber());
         setOnOpenTransit(!onOpenTransit);
@@ -113,10 +111,8 @@ function Screen(props) {
       RequestApi.find(requestId)
         .then(res => {
           setValue('details', res.detail);
-          // setRequestDetailData(res.detail);
           setValue('activity_date', res?.activity_date ? Moment(res?.activity_date).toDate() : null);
           setValue('request_number', res?.request_number ? res?.request_number : '-');
-          // setTotalRequest(toCalculate(res.detail, 'qty'));
           setLoadingRFID(false);
           setLoadingRequest(false);
           setLoadingHover(false);
@@ -253,16 +249,20 @@ function Screen(props) {
     setIsScanned(false);
     setRfidData([]);
     setTransitData([]);
+    setAllocateData([]);
+    setproductInfoData([]);
     if (allocated.length > 0) {
       allocated.length = 0;
     }
-    if (activityStore.getRequestNumber()) {
-      activityStore.setRequestNumber('');
+    if (activityStore.getRequestNumber() && activityStore?.getActivityName()) {
+      activityStore.setRequestNumber(0);
+      activityStore?.setActivityName('');
     }
 
     setRequestId('');
     setTotalRFID();
     setTotalRequest('');
+    setValue('details', []);
     setValue('activity_date', null);
     setValue('request_number', '');
     setTimeout(() => {
@@ -283,7 +283,7 @@ function Screen(props) {
       cancelButtonText: 'No',
     }).then(result => {
       if (result.isConfirmed) {
-        setOnOpenTransit(!onOpenTransit);
+        setOnOpenTransit(false);
         setValue('details', fields);
       }
     });
@@ -326,27 +326,31 @@ function Screen(props) {
   const storeOutbound = body => {
     TransitApi.outbound(body)
       .then(() => {
-        setOnOpen(!onOpen);
+        setOnOpenTransit(false);
         setErrMessage('');
         setErrors(false);
         setRfidData([]);
         setTransitData([]);
+        setAllocateData([]);
+        setproductInfoData([]);
         if (allocated.length > 0) {
           allocated.length = 0;
         }
-        if (activityStore.getRequestNumber()) {
-          activityStore.setRequestNumber('');
+        if (activityStore.getRequestNumber() && activityStore?.getActivityName()) {
+          activityStore.setRequestNumber(0);
+          activityStore?.setActivityName('');
         }
-
         setRequestId('');
         setTotalRFID();
         setTotalRequest('');
+        setValue('details', []);
         setValue('activity_date', null);
         setValue('request_number', '');
-        allocated.length = 0;
-        if (activityStore.getRequestNumber()) {
-          activityStore.setRequestNumber(0);
-        }
+        setTimeout(() => {
+          setLoadingRequest(false);
+          setLoadingRFID(false);
+        }, 500);
+
         Swal.fire({ text: 'Succesfully Saved', icon: 'success' });
       })
       .catch(error => {

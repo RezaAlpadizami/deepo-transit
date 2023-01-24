@@ -7,7 +7,6 @@ import Moment from 'moment';
 import InputComponent from '../../../components/input-component';
 import NoContent from './component/no-content';
 
-// const state = [];
 const product = yup.object({
   actual_qty: yup.string(),
 });
@@ -93,14 +92,6 @@ function Allocate(props) {
     };
 
     if (body.allocate.filter(i => i.actual_qty !== undefined).length !== 0) {
-      // state.push({
-      //   isAllocate: true,
-      //   product_id: productId,
-      //   actual_qty: toCalculate(body, 'actual_qty'),
-      //   source: filter.length,
-      // });
-      // setIsAllocate(Array.from(new Set(state.map(JSON.stringify))).map(JSON.parse));
-      // activityStore.setIsAllocate(Array.from(new Set(state.map(JSON.stringify))).map(JSON.parse));
       setOnAllocate(!onAllocate);
       setAllocateData(
         body.allocate.map(i => {

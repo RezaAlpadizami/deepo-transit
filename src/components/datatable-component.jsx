@@ -127,6 +127,7 @@ function DataTable(props) {
                   type="button"
                   onClick={() => {
                     activityStore.setRequestNumber(row.original.id);
+                    activityStore.setActivityName(row.original.activity_name);
                   }}
                   to={`/${route(row.original.activity_name)}`}
                   px={8}
