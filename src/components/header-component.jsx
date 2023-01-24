@@ -11,6 +11,7 @@ import {
   PopoverFooter,
   PopoverTrigger,
   Button,
+  useMediaQuery,
 } from '@chakra-ui/react';
 
 import Context from '../context';
@@ -18,11 +19,13 @@ import logo from '../assets/images/logo.svg';
 import menuItem from '../navigation/menu-item';
 import { findTree } from '../utils/navigation-utils';
 import CookieService from '../services/cookies/cookie-service';
+import HamburgerMenu from '../assets/images/hamburger-icon.svg';
 
 function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const { store } = useContext(Context);
+  const [isLarge] = useMediaQuery('(min-width: 1224px)');
 
   const getWarehouse = () => JSON.parse(LocalStorage.get('Warehouse'));
   const id = getWarehouse()?.id.toString() || '';
@@ -37,9 +40,15 @@ function Header() {
 
   return (
     <header className="flex p-5 border-b">
-      <div className="mx-3 mt-0.5 cursor-pointer" onClick={() => store.toggleDrawer()}>
-        <img src={logo} alt="logo" />
-      </div>
+      {isLarge ? (
+        <div className="mx-3 mt-0.5 cursor-pointer" onClick={() => store.toggleDrawer()}>
+          <img src={logo} alt="logo" />
+        </div>
+      ) : (
+        <div className="mx-1 h-8 cursor-pointer" onClick={() => store.toggleDrawer()}>
+          <img src={HamburgerMenu} alt="hamburger-icon" className="h-8" />
+        </div>
+      )}
       <ul className="flex ml-5 flex-auto">
         {menuItem
           .filter(item => item.showmenu)

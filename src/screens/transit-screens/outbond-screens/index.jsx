@@ -50,7 +50,6 @@ const schema = yup.object({
 });
 
 function Screen(props) {
-  console.log('props', props);
   const {
     register,
     control,
@@ -67,15 +66,14 @@ function Screen(props) {
 
   const { activityStore, store } = useContext(Context);
   const [isLarge] = useMediaQuery('(min-width: 1150px)');
-  const [requestDetailData, setRequestDetailData] = useState([]);
+  // const [requestDetailData, setRequestDetailData] = useState([]);
   const [transitData, setTransitData] = useState();
   const [allocateData, setAllocateData] = useState([]);
   const [productInfoData, setproductInfoData] = useState([]);
   const [rfidData, setRfidData] = useState([]);
-  const [isAllocate, setIsAllocate] = useState([]);
 
+  const [loadingAllocate, setLoadingAllocate] = useState(false);
   const [loadingRequest, setLoadingRequest] = useState(false);
-  const [loadingTransit, setLoadingTransit] = useState(false);
   const [onOpenTransit, setOnOpenTransit] = useState(false);
   const [loadingHover, setLoadingHover] = useState(false);
   const [loadingRFID, setLoadingRFID] = useState(false);
@@ -94,10 +92,12 @@ function Screen(props) {
   const [productId, setProductId] = useState('');
   const [timer, setTimer] = useState();
 
-  console.log('error', errors);
   useEffect(() => {
     if (activityStore?.getRequestNumber()) {
-      setRequestId(activityStore?.getRequestNumber());
+      setTimeout(() => {
+        setRequestId(activityStore?.getRequestNumber());
+        setOnOpenTransit(!onOpenTransit);
+      }, 500);
     }
   }, [activityStore]);
 
@@ -113,10 +113,10 @@ function Screen(props) {
       RequestApi.find(requestId)
         .then(res => {
           setValue('details', res.detail);
-          setRequestDetailData(res.detail);
+          // setRequestDetailData(res.detail);
           setValue('activity_date', res?.activity_date ? Moment(res?.activity_date).toDate() : null);
           setValue('request_number', res?.request_number ? res?.request_number : '-');
-          setTotalRequest(toCalculate(res.detail, 'qty'));
+          // setTotalRequest(toCalculate(res.detail, 'qty'));
           setLoadingRFID(false);
           setLoadingRequest(false);
           setLoadingHover(false);
@@ -244,7 +244,6 @@ function Screen(props) {
       setRequestId(id);
       setOnOverview(!onOverview);
       setOnOpenTransit(!onOpenTransit);
-      setLoadingTransit(true);
     }
   };
 
@@ -252,9 +251,15 @@ function Screen(props) {
     setLoadingRequest(true);
     setLoadingRFID(true);
     setIsScanned(false);
-    setRequestDetailData([]);
     setRfidData([]);
-    setIsAllocate([]);
+    setTransitData([]);
+    if (allocated.length > 0) {
+      allocated.length = 0;
+    }
+    if (activityStore.getRequestNumber()) {
+      activityStore.setRequestNumber('');
+    }
+
     setRequestId('');
     setTotalRFID();
     setTotalRequest('');
@@ -279,7 +284,6 @@ function Screen(props) {
     }).then(result => {
       if (result.isConfirmed) {
         setOnOpenTransit(!onOpenTransit);
-        setIsAllocate([]);
         setValue('details', fields);
       }
     });
@@ -287,6 +291,7 @@ function Screen(props) {
 
   const onSubmitTransit = data => {
     setTransitData(data);
+    setTotalRequest(toCalculate(data.details, 'actual_qty'));
     setOnOpenTransit(!onOpenTransit);
   };
 
@@ -321,10 +326,27 @@ function Screen(props) {
   const storeOutbound = body => {
     TransitApi.outbound(body)
       .then(() => {
-        setIsAllocate([]);
         setOnOpen(!onOpen);
         setErrMessage('');
         setErrors(false);
+        setRfidData([]);
+        setTransitData([]);
+        if (allocated.length > 0) {
+          allocated.length = 0;
+        }
+        if (activityStore.getRequestNumber()) {
+          activityStore.setRequestNumber('');
+        }
+
+        setRequestId('');
+        setTotalRFID();
+        setTotalRequest('');
+        setValue('activity_date', null);
+        setValue('request_number', '');
+        allocated.length = 0;
+        if (activityStore.getRequestNumber()) {
+          activityStore.setRequestNumber(0);
+        }
         Swal.fire({ text: 'Succesfully Saved', icon: 'success' });
       })
       .catch(error => {
@@ -342,7 +364,16 @@ function Screen(props) {
           return {
             product_id: i.product_id,
             qty: i.qty,
-            allocate: allocated.filter(f => f.product_id === i.product_id && f.actual_qty !== undefined),
+            allocate: allocated
+              .filter(f => f.product_id === i.product_id && f.actual_qty !== undefined)
+              .map(item => {
+                return {
+                  id: item.product_info_id,
+                  storage_id: item.storage_id,
+                  product_id: item.product_id,
+                  actual_qty: Number(item.actual_qty),
+                };
+              }),
           };
         }),
       };
@@ -392,6 +423,7 @@ function Screen(props) {
         });
     }
   };
+
   return (
     <Fade in={props}>
       {loadingHover && <LoadingHover left="[20%]" top="[9%]" />}
@@ -444,7 +476,21 @@ function Screen(props) {
           >
             <legend className="px-2 sm:text-xl xl:text-3xl text-primarydeepo font-semibold">Request Detail</legend>
             <LoadingComponent visible={loadingRequest} />
-            {!loadingRequest ? <SimpleTable data={requestDetailData} isLarge={isLarge} /> : null}
+            {!loadingRequest ? (
+              <SimpleTable
+                data={
+                  transitData?.details?.map(d => {
+                    return {
+                      product_id: d.product_id,
+                      product_name: d.product_name,
+                      product_sku: d.product_sku,
+                      qty: d.actual_qty,
+                    };
+                  }) || []
+                }
+                isLarge={isLarge}
+              />
+            ) : null}
           </fieldset>
           <fieldset
             className={`${isLarge ? 'h-full py-8' : 'h-1/2 py-4'} border border-primarydeepo w-full rounded-3xl px-2`}
@@ -501,7 +547,7 @@ function Screen(props) {
                     px={isLarge ? 5 : 2}
                     className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
                     onClick={scanning ? stopScanning : startScanning}
-                    disabled={requestDetailData.length === 0}
+                    disabled={transitData ? transitData?.details?.length === 0 || transitData?.length === 0 : true}
                   >
                     {scanning ? <StopIcon className="h-6 animate-pulse" /> : <p className="tracking-wide">Scan</p>}
                   </Button>
@@ -610,92 +656,92 @@ function Screen(props) {
           className=" main-modal fixed w-full inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
           style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
         >
-          <div className="border shadow-lg modal-container bg-white w-[80%] h-1/2 mx-auto rounded z-50 overflow-y-auto">
+          <div className="border shadow-lg modal-container bg-white w-[80%] max-h-80 mx-auto rounded z-50">
             <form onSubmit={handleSubmit(onSubmitTransit)}>
-              <p className="text-md font-bold py-2 px-4">Dashboard Transit</p>
+              <p className="text-md font-bold py-1 px-2">Dashboard Transit</p>
+              <div className="max-h-80 overflow-y-auto overflow-x-hidden p-5">
+                <TableContainer className="px-4 py-1">
+                  <Table>
+                    <Thead>
+                      <Tr className="bg-[#bbc9ff] text-bold text-[#000] w-full">
+                        <Th className="text-semibold text-[#000] text-center w-10 py-1.5 pl-2">NO</Th>
+                        <Th className="text-semibold text-[#000] text-center w-20">SKU</Th>
+                        <Th className="text-bold text-[#000] text-cente w-60">PRODUCT</Th>
+                        <Th className="text-semibold text-[#000] text-center w-20 ">Qty</Th>
+                        <Th className="text-semibold text-[#000] text-center w-20 ">Actual Qty</Th>
+                        <Th className="text-semibold text-[#000] text-center w-20 ">SOURCE</Th>
+                        <Th aria-label="Mute volume" className="w-10" />
+                        <Th aria-label="Mute volume" className="w-10" />
+                      </Tr>
+                    </Thead>
 
-              <TableContainer className="px-6 py-2">
-                <Table>
-                  <Thead>
-                    <Tr className="bg-[#bbc9ff] text-bold text-[#000] w-full">
-                      <Th className="text-semibold text-[#000] text-center w-10 py-1.5 pl-2">NO</Th>
-                      <Th className="text-semibold text-[#000] text-center w-20">SKU</Th>
-                      <Th className="text-bold text-[#000] text-cente w-60">PRODUCT</Th>
-                      <Th className="text-semibold text-[#000] text-center w-20 ">Qty</Th>
-                      <Th className="text-semibold text-[#000] text-center w-20 ">Actual Qty</Th>
-                      <Th className="text-semibold text-[#000] text-center w-20 ">SOURCE</Th>
-                      <Th aria-label="Mute volume" className="w-10" />
-                      <Th aria-label="Mute volume" className="w-10" />
-                    </Tr>
-                  </Thead>
+                    <Tbody className="overflow-y-auto">
+                      {fields.length > 0 ? (
+                        fields.map((item, index) => {
+                          return (
+                            <Tr key={item.id} className={`${index % 2 ? 'bg-gray-100' : ''} w-full`}>
+                              <Td className="w-10 text-center px-2">{index + 1}</Td>
+                              <Td className="w-20 text-center px-2">
+                                {item.product_sku}
+                                <Controller
+                                  render={({ field }) => {
+                                    return <Input variant="unstyled" {...field} disabled className="hidden" />;
+                                  }}
+                                  name={`details.${index}.product_sku`}
+                                  className="hidden"
+                                  control={control}
+                                />
+                              </Td>
 
-                  <Tbody className="overflow-y-auto">
-                    {fields.length > 0 ? (
-                      fields.map((item, index) => {
-                        return (
-                          <Tr key={item.id} className={`${index % 2 ? 'bg-gray-100' : ''} w-full`}>
-                            <Td className="w-10 text-center px-2">{index + 1}</Td>
-                            <Td className="w-20 text-center px-2">
-                              {item.product_sku}
-                              <Controller
-                                render={({ field }) => {
-                                  return <Input variant="unstyled" {...field} disabled className="hidden" />;
-                                }}
-                                name={`details.${index}.product_sku`}
-                                className="hidden"
-                                control={control}
-                              />
-                            </Td>
-
-                            <Td className="w-60 px-2">
-                              {item.product_name}
-                              <Controller
-                                render={({ field }) => {
-                                  return <Input variant="unstyled" {...field} disabled className="hidden" />;
-                                }}
-                                name={`details.${index}.product_name`}
-                                className="hidden"
-                                control={control}
-                              />
-                            </Td>
-                            <Td className="w-20 text-center px-2">
-                              {item.qty}
-                              <Controller
-                                render={({ field }) => {
-                                  return <Input variant="unstyled" {...field} disabled className="hidden" />;
-                                }}
-                                name={`details.${index}.qty`}
-                                className="hidden"
-                                control={control}
-                              />
-                            </Td>
-                            <Td className="w-20 text-center px-2">
-                              {item.actual_qty}
-                              <Controller
-                                render={({ field }) => {
-                                  return <Input variant="unstyled" {...field} disabled className="hidden" />;
-                                }}
-                                name={`details.${index}.actual_qty`}
-                                className="hidden"
-                                control={control}
-                              />
-                            </Td>
-                            <Td className="w-20 text-center px-2">
-                              {item.source ? `${item.source} Rack` : ''}
-                              <Controller
-                                render={({ field }) => {
-                                  return <Input variant="unstyled" {...field} disabled className="hidden" />;
-                                }}
-                                name={`details.${index}.source`}
-                                className="hidden"
-                                control={control}
-                              />
-                            </Td>
-                            <Td className="w-24 px-2">
-                              <Controller
-                                render={({ field }) => {
-                                  if (isAllocate.length > 0) {
-                                    if (isAllocate?.find(f => f.product_id === item.product_id)?.isAllocate) {
+                              <Td className="w-60 px-2">
+                                {item.product_name}
+                                <Controller
+                                  render={({ field }) => {
+                                    return <Input variant="unstyled" {...field} disabled className="hidden" />;
+                                  }}
+                                  name={`details.${index}.product_name`}
+                                  className="hidden"
+                                  control={control}
+                                />
+                              </Td>
+                              <Td className="w-20 text-center px-2">
+                                {item.qty}
+                                <Controller
+                                  render={({ field }) => {
+                                    return <Input variant="unstyled" {...field} disabled className="hidden" />;
+                                  }}
+                                  name={`details.${index}.qty`}
+                                  className="hidden"
+                                  control={control}
+                                />
+                              </Td>
+                              <Td className="w-20 text-center px-2">
+                                {item.actual_qty}
+                                <Controller
+                                  render={({ field }) => {
+                                    return <Input variant="unstyled" {...field} disabled className="hidden" />;
+                                  }}
+                                  name={`details.${index}.actual_qty`}
+                                  className="hidden"
+                                  control={control}
+                                />
+                              </Td>
+                              <Td className="w-20 text-center px-2">
+                                {item.source ? `${item.source} Rack` : ''}
+                                <Controller
+                                  render={({ field }) => {
+                                    return <Input variant="unstyled" {...field} disabled className="hidden" />;
+                                  }}
+                                  name={`details.${index}.source`}
+                                  className="hidden"
+                                  control={control}
+                                />
+                              </Td>
+                              <Td className="w-24 px-2">
+                                <Controller
+                                  render={({ field }) => {
+                                    if (item.actual_qty) {
+                                      // if (isAllocate?.find(f => f.product_id === item.product_id)?.isAllocate) {
                                       return (
                                         <Badge
                                           name={`details.${index}.isAllocate`}
@@ -708,39 +754,44 @@ function Screen(props) {
                                           errors={errors}
                                         />
                                       );
+                                      // }
                                     }
-                                  }
-                                  return null;
-                                }}
-                                name={`details.${index}.isAllocate`}
-                                className="hidden"
-                                control={control}
-                              />
-                            </Td>
-                            <Td className="w-10 px-4">
-                              <Button
-                                size="sm"
-                                type="button"
-                                px={6}
-                                className="rounded-full border-2 border-[#9bd0b4] bg-[#fff] hover:bg-[#E4E4E4] text-[#5dc08b] font-bold"
-                                key={index}
-                                onClick={() => {
-                                  setProductId(item.product_id);
-                                  setOnAllocate(!onAllocate);
-                                }}
-                              >
-                                Allocate
-                              </Button>
-                            </Td>
-                          </Tr>
-                        );
-                      })
-                    ) : (
-                      <NoContent />
-                    )}
-                  </Tbody>
-                </Table>
-              </TableContainer>
+                                    return null;
+                                  }}
+                                  name={`details.${index}.isAllocate`}
+                                  className="hidden"
+                                  control={control}
+                                />
+                              </Td>
+                              <Td className="w-10 px-4">
+                                <Button
+                                  size="sm"
+                                  type="button"
+                                  px={6}
+                                  className="rounded-full border-2 border-[#9bd0b4] bg-[#fff] hover:bg-[#E4E4E4] text-[#5dc08b] font-bold"
+                                  key={index}
+                                  onClick={() => {
+                                    setProductId(item.product_id);
+                                    setOnAllocate(!onAllocate);
+                                    setLoadingAllocate(true);
+                                    setTimeout(() => {
+                                      setLoadingAllocate(false);
+                                    }, 500);
+                                  }}
+                                >
+                                  Allocate
+                                </Button>
+                              </Td>
+                            </Tr>
+                          );
+                        })
+                      ) : (
+                        <NoContent />
+                      )}
+                    </Tbody>
+                  </Table>
+                </TableContainer>
+              </div>
 
               <div className="flex justify-between">
                 {Object.entries(errors).length > 0 ? (
@@ -797,6 +848,7 @@ function Screen(props) {
           style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
         >
           <div className="border shadow-lg modal-container bg-white w-[80%] mx-auto rounded z-50 h-84">
+            <LoadingComponent loading={loadingAllocate} />
             <Allocate
               productId={productId}
               onAllocate={onAllocate}
@@ -804,8 +856,7 @@ function Screen(props) {
               data={productInfoData}
               allocateData={allocateData}
               setAllocateData={setAllocateData}
-              loadingTransit={loadingTransit}
-              setIsAllocate={setIsAllocate}
+              allocated={allocated}
             />
           </div>
         </div>
