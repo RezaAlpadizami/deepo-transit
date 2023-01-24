@@ -303,10 +303,10 @@ function DataTable(props) {
         }
       });
 
-      if (success.length > 0) {
+      if (failed.length > 0) {
+        Swal.fire({ text: 'There is some problem occured', icon: 'error' });
+      } else {
         Swal.fire({ text: 'Data Deleted Successfully', icon: 'success' });
-      } else if (failed.length > 0) {
-        Swal.fire({ text: 'Something Went Wrong', icon: 'error' });
       }
       setFilterData(prev => ({
         ...prev,
@@ -653,7 +653,7 @@ function DataTable(props) {
 
           {!loading && data.length <= 0 && (
             <div className="grid place-content-center text-center h-[250px]">
-              <p className="font-bold text-xl">...Ooops, No Request yet</p>
+              <p className="font-bold text-xl">No data request</p>
               <p className="font-medium">Please first add a Request</p>
             </div>
           )}

@@ -2,14 +2,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 import Swal from 'sweetalert2';
 import Cookies from 'universal-cookie';
-import { useForm } from 'react-hook-form';
-import { Text, Button } from '@chakra-ui/react';
 import LocalStorage from 'local-storage';
+import { useForm } from 'react-hook-form';
+import { Text, Button, Spinner } from '@chakra-ui/react';
 
-import CookieService from '../../../services/cookies/cookie-service';
 import Input from '../../../components/input-component';
 import { WarehouseApi } from '../../../services/api-transit';
 import Search from '../../../assets/images/magnify-glass.svg';
+import CookieService from '../../../services/cookies/cookie-service';
 
 function Screen() {
   const { register, control, handleSubmit } = useForm();
@@ -20,15 +20,19 @@ function Screen() {
     limit: 50,
     offset: 0,
   });
+  const [loading, setLoading] = useState(false);
 
   const cookies = new Cookies();
 
   useEffect(() => {
+    setLoading(true);
     WarehouseApi.get({ ...filterData })
       .then(res => {
+        setLoading(false);
         setWarhouseData(res.data);
       })
       .catch(error => {
+        setLoading(false);
         Swal.fire({ text: error?.message || error?.originalError, icon: 'error' });
       });
   }, [filterData]);
@@ -106,7 +110,7 @@ function Screen() {
       <div className="flex justify-center mb-6 max-[640px]:text-center">
         <h1 className="font-bold text-2xl">SELECT YOUR WORK AREA</h1>
       </div>
-      <div className=" bg-white pb-12 px-8 max-h-[600px] 2xl:max-h-[520px] rounded-[20px] overflow-y-scroll scrollbar drop-shadow-md">
+      <div className=" bg-white pb-12 px-8 max-h-[600px] rounded-[20px] overflow-y-scroll scrollbar drop-shadow-md 2xl:max-h-[520px] min-[1607px]:max-h-[600px]">
         <div
           className="sticky top-0
           pt-12 h-24 bg-white w-[100%] z-10 transition-all duration-500"
@@ -122,11 +126,16 @@ function Screen() {
             />
           </form>
         </div>
+        {loading && (
+          <div className="flex justify-center my-12">
+            <Spinner color="#546ac2" size="lg" />
+          </div>
+        )}
         {groupingByLocation.map(group => {
           return (
             <div className="mt-10 mx-1">
               <h2 className="font-bold mb-2 ml-1 my-6 text-lg">{group.location}</h2>
-              <div className="grid gap-x-5 gap-y-9 grid-cols-4 max-[640px]:grid-cols-1 text-center">
+              <div className="grid gap-x-5 gap-y-9 grid-cols-4 max-[640px]:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 text-center">
                 {group.data.map(d => {
                   return (
                     <div
@@ -149,14 +158,15 @@ function Screen() {
         })}
       </div>
       <div className="flex justify-end mt-6 mx-12">
-        <div className="max-[640px]:fixed max-[640px]:bottom-0 max-[640px]:right-0 flex">
+        <div className="flex">
           <div>
             <Button
               onClick={() => handleContinue()}
               type="submit"
+              disabled={isSelected === -1}
               px={8}
               size="md"
-              className="mr-14 text-white bg-gradient-to-r from-secondarydeepo to-primarydeepo hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mb-2"
+              className="text-white bg-gradient-to-r from-secondarydeepo to-primarydeepo hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mb-2"
             >
               Continue
             </Button>

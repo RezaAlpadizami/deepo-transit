@@ -272,10 +272,10 @@ function Screen() {
   return (
     <div>
       <div className="bg-white p-5 rounded-[55px] py-12 drop-shadow-md">
-        <div className="grid-cols-2 gap-4 flex">
-          <fieldset className="border border-borders shadow-custom hover:shadow-hover transition-all duration-200  w-full h-full px-8 py-12 rounded-[55px] mx-4">
+        <div className="grid-cols-2 gap-4 flex max-[640px]:flex-col sm:flex-col lg:flex-row">
+          <fieldset className="border border-borders shadow-custom w-full h-full px-8 py-12 rounded-[55px] mx-4 max-[640px]:px-4 max-[640px]:mx-0 sm:px-6 sm:mx-0 lg:mx-4 lg:px-8">
             <legend className="px-2 text-[28px] text-primarydeepo">Edit Request </legend>
-            <div className="flex gap-4 justify-center">
+            <div className="flex gap-4 justify-center max-[640px]:flex-col sm:flex-col lg:flex-row">
               <div className="w-full">
                 <Select
                   name="activity_name"
@@ -306,10 +306,10 @@ function Screen() {
             </div>
           </fieldset>
 
-          <fieldset className="border border-borders shadow-custom hover:shadow-hover transition-all duration-200  w-full h-full px-8 py-12 rounded-[55px] mx-4">
-            <legend className="px-2 text-[28px] text-primarydeepo">Edit Request Detail</legend>
+          <fieldset className="border border-borders shadow-custom w-full h-full px-8 py-12 rounded-[55px] mx-4 max-[640px]:px-4 max-[640px]:mx-0 sm:px-6 sm:mx-0 lg:mx-4 lg:px-8">
+            <legend className="px-2 text-[28px] text-primarydeepo max-[640px]:text-[20px]">Edit Request Detail</legend>
             <form onSubmit={handleSubmitProd(onAddProdRequestDetail)}>
-              <div className="flex gap-4 justify-center">
+              <div className="flex gap-4 justify-center max-[640px]:flex-col sm:flex-col lg:flex-row">
                 <div className="w-full col-span-2">
                   <Select
                     name="product_id"
@@ -339,7 +339,7 @@ function Screen() {
             {updateDataRequesById?.map(({ qty, product_id, product_name, product_sku }) => {
               return (
                 <div className="flex" key={product_id}>
-                  <div className="my-4 mr-4">
+                  <div className="my-4 mr-4 max-[640px]:mr-0 flex flex-col justify-center align-middle">
                     <Button
                       type="button"
                       size="sm"
@@ -349,16 +349,20 @@ function Screen() {
                       }}
                       onClick={() => handleRemove(product_id)}
                     >
-                      <img src={deleteIcon} alt="delete Icon" />
+                      <img
+                        src={deleteIcon}
+                        alt="delete Icon"
+                        className="max-[640px]:w-8 max-[640px]:h-8 md:w-12 md:-12"
+                      />
                     </Button>
                   </div>
                   <InputDetail
                     value={`SKU: ${product_sku}`}
                     label={product_name}
-                    customStyleLabel="font-bold text-md mb-0"
-                    customStyleSpan="text-md"
+                    customStyleLabel="font-bold text-md mb-0 max-[640px]:text-xs max-[640px]:w-24 sm:w-24 md:w-full lg:w-24 xl:w-48"
+                    customStyleSpan="text-md max-[640px]:text-xs sm:text-sm"
                   />
-                  <div className="flex gap-20 mt-6">
+                  <div className="flex gap-20 mt-6 max-[640px]:gap-8">
                     <span className="">X</span>
                     <Text>{thousandSeparator(qty)}</Text>
                   </div>
@@ -373,7 +377,7 @@ function Screen() {
             </div>
           </fieldset>
         </div>
-        <div className="flex justify-end mt-6">
+        <div className="flex justify-end mt-6 max-[640px]:justify-start max-[640px]:mt-12 max-[640px]:ml-4">
           <div className="flex">
             <div>
               <Button
