@@ -13,9 +13,18 @@ import { toCalculate } from '../../../utils/helper';
 
 const state = [];
 const product = yup.object({
-  actual_qty: yup.string().test('actual_qty', ' actual quantity must be less or equal than qty it self', () => {
-    return true;
-  }),
+  actual_qty: yup
+    .string()
+    .test('actual_qty', ' actual quantity must be less or equal than qty it self', (value, context) => {
+      const { qty } = context.parent;
+      if (value) {
+        if (Number(value) <= qty) {
+          return true;
+        }
+        return false;
+      }
+      return true;
+    }),
 });
 
 const schema = yup.object({
@@ -236,7 +245,7 @@ function Allocate(props) {
 
       <div className="  flex justify-between">
         {errors && (
-          <span className="pl-10 text-[#a2002d]">{`${errors?.allocate ? errors?.allocate.message : ''}`}</span>
+          <span className="pl-10 text-[#a2002d]">{`${errors?.allocate ? errors?.allocate?.message : ''}`}</span>
         )}
         <div className="mr-4 mb-2">
           <Button

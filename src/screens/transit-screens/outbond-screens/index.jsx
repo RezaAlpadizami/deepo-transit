@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { Button, Fade, Input, Table, Thead, Tbody, Tr, Th, Td, TableContainer } from '@chakra-ui/react';
+import { Button, Input, Table, Thead, Tbody, Tr, Th, Td, TableContainer, useMediaQuery, Fade } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import * as yup from 'yup';
@@ -17,7 +17,7 @@ import MagnifyClass from '../../../assets/images/magnify-glass.svg';
 import DatePicker from '../../../components/datepicker-component';
 import Datatable from '../../../components/datatable-component';
 import InputComponent from '../../../components/input-component';
-import TableCh from './table';
+import SimpleTable from './component/table';
 import Allocate from './allocate';
 import Badge from './component/badge-component';
 import NoContent from './component/no-content';
@@ -25,9 +25,8 @@ import Context from '../../../context';
 
 const swalButton = Swal.mixin({
   customClass: {
-    confirmButton: 'rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold w-20',
-    cancelButton:
-      'ml-4 rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold w-20',
+    confirmButton: 'rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold w-20 ml-4 ',
+    cancelButton: 'rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold w-20',
   },
   buttonsStyling: false,
 });
@@ -50,7 +49,8 @@ const schema = yup.object({
     }),
 });
 
-function Screen() {
+function Screen(props) {
+  console.log('props', props);
   const {
     register,
     control,
@@ -66,6 +66,7 @@ function Screen() {
   });
 
   const { activityStore, store } = useContext(Context);
+  const [isLarge] = useMediaQuery('(min-width: 1150px)');
   const [requestDetailData, setRequestDetailData] = useState([]);
   const [transitData, setTransitData] = useState();
   const [allocateData, setAllocateData] = useState([]);
@@ -80,6 +81,7 @@ function Screen() {
   const [loadingRFID, setLoadingRFID] = useState(false);
   const [onAllocate, setOnAllocate] = useState(false);
   const [onOverview, setOnOverview] = useState(false);
+  const [loadtable, setLoadTable] = useState(false);
   const [isScanned, setIsScanned] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [onOpen, setOnOpen] = useState(false);
@@ -92,11 +94,16 @@ function Screen() {
   const [productId, setProductId] = useState('');
   const [timer, setTimer] = useState();
 
+  console.log('error', errors);
   useEffect(() => {
     if (activityStore?.getRequestNumber()) {
       setRequestId(activityStore?.getRequestNumber());
     }
   }, [activityStore]);
+
+  useEffect(() => {
+    store.setIsDrawerOpen(isLarge);
+  }, [isLarge]);
 
   useEffect(() => {
     if (requestId !== '') {
@@ -166,34 +173,61 @@ function Screen() {
     }
   }, [allocateData]);
 
+  const getTransitData = () => {
+    TransitApi.get({ warehouse_id: store?.getWarehouseId() })
+      .then(res => {
+        setRfidData(res.data);
+        setTotalRFID(toCalculate(res.data, 'qty') || 0);
+        getTransit();
+        setTimeout(() => {
+          setLoadTable(false);
+        }, 500);
+      })
+      .catch(error => {
+        Swal.fire({ text: error?.data?.message, icon: 'error' });
+      });
+  };
+
+  const getTransitDatas = () => {
+    TransitApi.get({ warehouse_id: store?.getWarehouseId() })
+      .then(res => {
+        setRfidData(res.data);
+        setTotalRFID(res.query.total || 0);
+
+        setTimeout(() => {
+          setLoadTable(false);
+        }, 500);
+      })
+      .catch(error => {
+        Swal.fire({ text: error?.data?.message, icon: 'error' });
+      });
+  };
+
   const getTransit = () => {
     setTimer(
       setInterval(() => {
-        TransitApi.get()
-          .then(res => {
-            setRfidData(res.data);
-            setTotalRFID(res.query.total || 0);
-          })
-          .catch(error => {
-            Swal.fire({ text: error?.data?.message, icon: 'error' });
-          });
+        getTransitDatas();
+        setLoadTable(true);
       }, 5000)
     );
   };
-
   const startScanning = () => {
     setScanning(true);
 
     if (!scanning && rfidData.length > 0) {
       setLoadingRFID(true);
       setRfidData([]);
+      setTotalRFID();
       setTimeout(() => {
         setLoadingRFID(false);
       }, 500);
 
-      getTransit();
+      getTransitData();
     } else {
-      getTransit();
+      setLoadTable(true);
+      setTimeout(() => {
+        getTransitData();
+      }, 500);
     }
 
     setIsScanned(false);
@@ -319,6 +353,7 @@ function Screen() {
           html: '<b> NOTES </b> <br/> <p class="text-[15px]">The amount of data in Request Detail does not match the data in RFID Detected. Continue process?<p>',
           input: 'text',
           showCancelButton: true,
+          reverseButtons: true,
           confirmButtonColor: '#3085d6',
           preConfirm: pre => {
             if (!pre && pre.length === 0) {
@@ -357,321 +392,358 @@ function Screen() {
         });
     }
   };
-
   return (
-    <div className="bg-white p-5 rounded-[55px] shadow px-6 pb-11">
+    <Fade in={props}>
       {loadingHover && <LoadingHover left="[20%]" top="[9%]" />}
-      <fieldset className="border border-primarydeepo w-full h-full px-8 rounded-[30px] pb-6">
-        <legend className="px-2 text-[28px] text-primarydeepo font-semibold">Request</legend>
-        <div className="grid grid-cols-8 gap-6">
-          <button
-            type="submit"
-            onClick={() => setOnOverview(!onOverview)}
-            className={`${
-              scanning ? 'bg-[#ffc108]' : 'bg-processbtnfrom'
-            }  h-[100px] w-[110px] rounded-lg grid place-content-center ml-6 mt-2 col-span-2 mt-2`}
-            disabled={scanning}
-          >
-            <p className="text-lg text-[#fff] font-bold mb-2">Request</p>
-            <CalculatorIcon
-              className={`${
-                scanning ? 'bg-[#ffc108]' : 'bg-processbtnfrom'
-              } h-10 w-15 bg-processbtnfrom stroke-[#fff] mx-auto`}
-            />
-          </button>
+      <div className="grid grid-rows-4 bg-white px-5 py-1 rounded-3xl drop-shadow-xl w-full h-[98%]">
+        <div className="">
+          <fieldset className="border border-primarydeepo w-full h-full px-6 rounded-2xl">
+            <legend className="sm:text-xl xl:text-3xl text-primarydeepo font-semibold p-2">Request</legend>
 
-          <div className="col-span-3">
-            <InputComponent
-              name="request_number"
-              label="Request Number"
-              register={register}
-              control={control}
-              errors={errors}
-              disabled
-            />
-          </div>
-          <div className="col-span-3">
-            <DatePicker
-              name="activity_date"
-              label="Date"
-              register={register}
-              control={control}
-              errors={errors}
-              disabled
-            />
-          </div>
-        </div>
-      </fieldset>
+            <div className="flex my-auto">
+              <button
+                type="submit"
+                onClick={() => setOnOverview(!onOverview)}
+                className={`${scanning ? 'bg-[#ffc108]' : 'bg-processbtnfrom'}  h-3/4 rounded-lg px-4 ${
+                  isLarge ? 'py-2' : 'my-auto pb-2'
+                } `}
+                disabled={scanning}
+              >
+                <p className="md:text-sm xl:text-lg text-[#fff] sm:font-semibold xl:font-semibold">Request</p>
+                <CalculatorIcon
+                  className={`${scanning ? 'bg-[#ffc108]' : 'bg-processbtnfrom'} h-12 w-15 stroke-[#fff] mx-auto`}
+                />
+              </button>
 
-      <div className="grid-cols-2 gap-4 flex">
-        <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[30px]">
-          <legend className="px-2 text-[28px] text-primarydeepo font-semibold">Request Detail</legend>
-          <LoadingComponent visible={loadingRequest} />
-          {!loadingRequest ? <TableCh data={requestDetailData} /> : null}
-        </fieldset>
-        <fieldset className="border border-primarydeepo w-full h-full px-8 py-12 rounded-[30px]">
-          <legend className="px-2 text-[28px] text-primarydeepo font-semibold">RFID Detected</legend>
-          <LoadingComponent visible={loadingRFID} />
-          {!loadingRFID ? <TableCh data={rfidData} /> : null}
-        </fieldset>
-      </div>
-      <div
-        className={`border  ${
-          error ? 'border-[#a2002d]' : 'border-primarydeepo'
-        }  w-full h-full px-8 rounded-[30px] py-2 mt-10`}
-      >
-        <div className="grid grid-cols-3 gap-4">
-          <div className="py-auto">
-            <div>Total Request</div>
-            <div>Total RFID Detected</div>
-          </div>
-          <div className="py-auto">
-            <div className="font-bold">{totalRequest || ''}</div>
-            <div className="font-bold">{totalRFID || ''}</div>
-          </div>
-          <div className="flex py-2">
-            <Button
-              _hover={{
-                shadow: 'md',
-                transform: 'translateY(-5px)',
-                transitionDuration: '0.2s',
-                transitionTimingFunction: 'ease-in-out',
-              }}
-              type="button"
-              size="sm"
-              px={6}
-              className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
-              onClick={scanning ? stopScanning : startScanning}
-              disabled={requestDetailData.length === 0}
-            >
-              {scanning ? <StopIcon className="h-6 animate-pulse" /> : <p className="tracking-wide">Scan</p>}
-            </Button>
-
-            <Button
-              _hover={{
-                shadow: 'md',
-                transform: 'translateY(-5px)',
-                transitionDuration: '0.2s',
-                transitionTimingFunction: 'ease-in-out',
-              }}
-              type="button"
-              size="sm"
-              px={6}
-              className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold mx-4"
-              onClick={onReset}
-              disabled={scanning}
-            >
-              <p className="tracking-wide">Reset</p>
-            </Button>
-
-            <Button
-              _hover={{
-                shadow: 'md',
-                transform: 'translateY(-5px)',
-                transitionDuration: '0.2s',
-                transitionTimingFunction: 'ease-in-out',
-              }}
-              type="submit"
-              size="sm"
-              px={6}
-              className="rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold"
-              onClick={onSubmitRFID}
-              disabled={onDisabled()}
-            >
-              Submit
-            </Button>
-          </div>
-        </div>
-      </div>
-      {error && <span className="pl-10 text-sm text-[#a2002d]">{errMessage || ''}</span>}
-      {onOverview && (
-        <Fade in={onOverview}>
-          <div
-            className=" main-modal fixed w-full h-200 inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
-            style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
-          >
-            <div className="rounded rounded-2xl border shadow-lg modal-container bg-white w-[80%] mx-auto z-50 overflow-y-auto ">
-              <div className="grid justify-items-end">
-                <XIcon className="h-6 stroke-2" onClick={() => setOnOverview(!onOverview)} />
-              </div>
-              <div className="modal-content py-4 text-left px-6">
-                <Datatable
-                  api={RequestApi}
-                  filterParams={{ status: 'PENDING' }}
-                  filterEnd
-                  filters={[
-                    {
-                      name: 'text',
-                      type: 'addtext',
-                      text: 'Request Overview',
-                    },
-                    {
-                      name: 'request_number',
-                      placeholder: 'Request Number',
-                      icon: MagnifyClass,
-                      alt: 'magnify',
-                      type: 'input:addOn',
-                      col: 2,
-                    },
-                  ]}
-                  columns={[
-                    { header: 'Request Number', value: 'request_number', copy: true, type: 'link' },
-                    { header: 'User', value: 'request_by', copy: true },
-                    { header: 'Activity', value: 'activity_name', copy: true },
-                    { header: 'Date', value: 'activity_date', copy: true, type: 'date' },
-                    { header: 'Notes', value: 'notes', copy: true, type: 'scrollable' },
-                    { header: 'Status', value: 'status', copy: true },
-                    { header: ' ', value: ' ', type: 'action-button' },
-                  ]}
-                  onSearch
-                  onActionButton={(id, data) => onProcess(id, data)}
+              <div className={`${isLarge ? 'flex gap-6' : ''} w-3/4 pl-10 pb-4`}>
+                <InputComponent
+                  name="request_number"
+                  label="Request Number"
+                  register={register}
+                  control={control}
+                  errors={errors}
+                  disabled
+                />
+                <DatePicker
+                  name="activity_date"
+                  label="Date"
+                  register={register}
+                  control={control}
+                  errors={errors}
+                  isLarge={isLarge}
+                  disabled
                 />
               </div>
             </div>
+          </fieldset>
+        </div>
+
+        <div className={`${isLarge ? 'flex gap-4' : ''} h-full w-full row-span-2`}>
+          <fieldset
+            className={`${isLarge ? 'h-full py-8' : 'h-1/2 py-4'} border border-primarydeepo w-full rounded-3xl px-2`}
+          >
+            <legend className="px-2 sm:text-xl xl:text-3xl text-primarydeepo font-semibold">Request Detail</legend>
+            <LoadingComponent visible={loadingRequest} />
+            {!loadingRequest ? <SimpleTable data={requestDetailData} isLarge={isLarge} /> : null}
+          </fieldset>
+          <fieldset
+            className={`${isLarge ? 'h-full py-8' : 'h-1/2 py-4'} border border-primarydeepo w-full rounded-3xl px-2`}
+          >
+            <legend className="px-2 sm:text-xl xl:text-3xl text-primarydeepo font-semibold">RFID Detected</legend>
+            <LoadingComponent visible={loadingRFID} />
+            {!loadingRFID ? (
+              <SimpleTable
+                loading={loadtable}
+                data={rfidData.map(i => {
+                  return {
+                    product_id: i.product_id,
+                    product_name: i.product_name,
+                    product_sku: i.sku,
+                    qty: i.qty,
+                    warehouse_id: i.warehouse_id,
+                  };
+                })}
+                isLarge={isLarge}
+              />
+            ) : null}
+          </fieldset>
+        </div>
+
+        <div className="my-auto">
+          <div className={`border  ${error ? 'border-[#a2002d]' : 'border-primarydeepo'}  w-full px-4 rounded-3xl`}>
+            <div className="flex w-full py-2">
+              <div className="grid py-auto w-1/2">
+                <div className="flex">
+                  <div className="max-sm:text-xs xl:text-lg w-1/2">Total Request</div>
+                  <div className="font-bold">{totalRequest}</div>
+                </div>
+                <div className="flex">
+                  <div className="max-sm:text-xs xl:text-lg w-1/2">
+                    {isLarge ? 'Total RFID Detected' : 'Total RFID'}{' '}
+                  </div>
+                  <div className="font-bold">{totalRFID}</div>
+                </div>
+              </div>
+
+              <div className="grid w-1/2">
+                <div
+                  className={`${isLarge ? 'grid grid-cols-3 justify-place-end pl-8' : 'flex flex-wrap my-2 '} my-auto `}
+                >
+                  <Button
+                    _hover={{
+                      shadow: 'md',
+                      transform: 'translateY(-5px)',
+                      transitionDuration: '0.2s',
+                      transitionTimingFunction: 'ease-in-out',
+                    }}
+                    type="button"
+                    size={isLarge ? 'sm' : 'xs'}
+                    px={isLarge ? 5 : 2}
+                    className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
+                    onClick={scanning ? stopScanning : startScanning}
+                    disabled={requestDetailData.length === 0}
+                  >
+                    {scanning ? <StopIcon className="h-6 animate-pulse" /> : <p className="tracking-wide">Scan</p>}
+                  </Button>
+
+                  <Button
+                    _hover={{
+                      shadow: 'md',
+                      transform: 'translateY(-5px)',
+                      transitionDuration: '0.2s',
+                      transitionTimingFunction: 'ease-in-out',
+                    }}
+                    type="button"
+                    size={isLarge ? 'sm' : 'xs'}
+                    px={isLarge ? 6 : 2}
+                    className={`rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold ${
+                      isLarge ? 'mx-4' : 'mx-2'
+                    } `}
+                    onClick={onReset}
+                    disabled={scanning}
+                  >
+                    <p className="tracking-wide">Reset</p>
+                  </Button>
+
+                  <Button
+                    _hover={{
+                      shadow: 'md',
+                      transform: 'translateY(-5px)',
+                      transitionDuration: '0.2s',
+                      transitionTimingFunction: 'ease-in-out',
+                    }}
+                    type="submit"
+                    size={isLarge ? 'sm' : 'xs'}
+                    px={isLarge ? 6 : 3}
+                    className={`rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold ${
+                      isLarge ? '' : 'mt-2'
+                    } `}
+                    onClick={onSubmitRFID}
+                    disabled={onDisabled()}
+                  >
+                    Submit
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
-        </Fade>
+          {error && (
+            <p className="text-[#a2002d] pl-10">
+              {totalRequest !== totalRFID
+                ? 'The amount of data in Request Detail does not match the data in RFID Detected.'
+                : errMessage}
+            </p>
+          )}
+        </div>
+      </div>
+      {onOverview && (
+        <div
+          className=" main-modal fixed w-full h-full inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+        >
+          <div className="rounded rounded-3xl border shadow-lg modal-container bg-white w-[80%] h-3/4 mx-auto z-50 overflow-y-auto ">
+            <div className="grid justify-items-end">
+              <XIcon
+                className="fixed h-6 stroke-2 mr-1 pointer-events-auto"
+                onClick={() => setOnOverview(!onOverview)}
+              />
+            </div>
+            <div className="modal-content py-4 text-left px-6">
+              <Datatable
+                api={RequestApi}
+                filterParams={{ status: 'PENDING' }}
+                filterEnd
+                limit={5}
+                filters={[
+                  {
+                    name: 'text',
+                    type: 'addtext',
+                    text: 'Request Overview',
+                  },
+                  {
+                    name: 'request_number',
+                    placeholder: 'Request Number',
+                    icon: MagnifyClass,
+                    alt: 'magnify',
+                    type: 'input:addOn',
+                    col: 2,
+                  },
+                ]}
+                columns={[
+                  { header: 'Request Number', value: 'request_number', copy: true, type: 'link' },
+                  { header: 'User', value: 'request_by', copy: true },
+                  { header: 'Activity', value: 'activity_name', copy: true },
+                  { header: 'Date', value: 'activity_date', copy: true, type: 'date' },
+                  { header: 'Notes', value: 'notes', copy: true, type: 'scrollable' },
+                  { header: 'Status', value: 'status', copy: true },
+                  { header: ' ', value: ' ', type: 'action-button' },
+                ]}
+                onSearch
+                onActionButton={(id, data) => onProcess(id, data)}
+              />
+            </div>
+          </div>
+        </div>
       )}
       {onOpenTransit && (
         <div
-          className=" main-modal fixed w-full h-200 inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
+          className=" main-modal fixed w-full inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
           style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
         >
-          <div className="border shadow-lg modal-container bg-white w-[80%] mx-auto rounded z-50 h-84">
+          <div className="border shadow-lg modal-container bg-white w-[80%] h-1/2 mx-auto rounded z-50 overflow-y-auto">
             <form onSubmit={handleSubmit(onSubmitTransit)}>
               <p className="text-md font-bold py-2 px-4">Dashboard Transit</p>
 
-              <div className="overflow-y-auto h-60 px-6 py-2">
-                <LoadingComponent loading={loadingTransit} />
-                <TableContainer>
-                  <Table>
-                    <Thead>
-                      <Tr className="bg-[#bbc9ff] text-bold text-[#000] w-full">
-                        <Th className="text-semibold text-[#000] text-center w-10 py-1.5 pl-2">NO</Th>
-                        <Th className="text-semibold text-[#000] text-center w-20">SKU</Th>
-                        <Th className="text-bold text-[#000] text-cente w-60">PRODUCT</Th>
-                        <Th className="text-semibold text-[#000] text-center w-20 ">Qty</Th>
-                        <Th className="text-semibold text-[#000] text-center w-20 ">Actual Qty</Th>
-                        <Th className="text-semibold text-[#000] text-center w-20 ">SOURCE</Th>
-                        <Th aria-label="Mute volume" className="w-10" />
-                        <Th aria-label="Mute volume" className="w-10" />
-                      </Tr>
-                    </Thead>
+              <TableContainer className="px-6 py-2">
+                <Table>
+                  <Thead>
+                    <Tr className="bg-[#bbc9ff] text-bold text-[#000] w-full">
+                      <Th className="text-semibold text-[#000] text-center w-10 py-1.5 pl-2">NO</Th>
+                      <Th className="text-semibold text-[#000] text-center w-20">SKU</Th>
+                      <Th className="text-bold text-[#000] text-cente w-60">PRODUCT</Th>
+                      <Th className="text-semibold text-[#000] text-center w-20 ">Qty</Th>
+                      <Th className="text-semibold text-[#000] text-center w-20 ">Actual Qty</Th>
+                      <Th className="text-semibold text-[#000] text-center w-20 ">SOURCE</Th>
+                      <Th aria-label="Mute volume" className="w-10" />
+                      <Th aria-label="Mute volume" className="w-10" />
+                    </Tr>
+                  </Thead>
 
-                    <Tbody className="overflow-y-auto">
-                      {fields.length > 0 ? (
-                        fields.map((item, index) => {
-                          return (
-                            <Tr key={item.id} className={`${index % 2 ? 'bg-gray-100' : ''} w-full`}>
-                              <Td className="w-10 text-center px-2">{index + 1}</Td>
-                              <Td className="w-20 text-center px-2">
-                                {item.product_sku}
-                                <Controller
-                                  render={({ field }) => {
-                                    return <Input variant="unstyled" {...field} disabled className="hidden" />;
-                                  }}
-                                  name={`details.${index}.product_sku`}
-                                  className="hidden"
-                                  control={control}
-                                />
-                              </Td>
+                  <Tbody className="overflow-y-auto">
+                    {fields.length > 0 ? (
+                      fields.map((item, index) => {
+                        return (
+                          <Tr key={item.id} className={`${index % 2 ? 'bg-gray-100' : ''} w-full`}>
+                            <Td className="w-10 text-center px-2">{index + 1}</Td>
+                            <Td className="w-20 text-center px-2">
+                              {item.product_sku}
+                              <Controller
+                                render={({ field }) => {
+                                  return <Input variant="unstyled" {...field} disabled className="hidden" />;
+                                }}
+                                name={`details.${index}.product_sku`}
+                                className="hidden"
+                                control={control}
+                              />
+                            </Td>
 
-                              <Td className="w-60 px-2">
-                                {item.product_name}
-                                <Controller
-                                  render={({ field }) => {
-                                    return <Input variant="unstyled" {...field} disabled className="hidden" />;
-                                  }}
-                                  name={`details.${index}.product_name`}
-                                  className="hidden"
-                                  control={control}
-                                />
-                              </Td>
-                              <Td className="w-20 text-center px-2">
-                                {item.qty}
-                                <Controller
-                                  render={({ field }) => {
-                                    return <Input variant="unstyled" {...field} disabled className="hidden" />;
-                                  }}
-                                  name={`details.${index}.qty`}
-                                  className="hidden"
-                                  control={control}
-                                />
-                              </Td>
-                              <Td className="w-20 text-center px-2">
-                                {item.actual_qty}
-                                <Controller
-                                  render={({ field }) => {
-                                    return <Input variant="unstyled" {...field} disabled className="hidden" />;
-                                  }}
-                                  name={`details.${index}.actual_qty`}
-                                  className="hidden"
-                                  control={control}
-                                />
-                              </Td>
-                              <Td className="w-20 text-center px-2">
-                                {item.source ? `${item.source} Rack` : ''}
-                                <Controller
-                                  render={({ field }) => {
-                                    return <Input variant="unstyled" {...field} disabled className="hidden" />;
-                                  }}
-                                  name={`details.${index}.source`}
-                                  className="hidden"
-                                  control={control}
-                                />
-                              </Td>
-                              <Td className="w-24 px-2">
-                                <Controller
-                                  render={({ field }) => {
-                                    if (isAllocate.length > 0) {
-                                      if (isAllocate?.find(f => f.product_id === item.product_id)?.isAllocate) {
-                                        return (
-                                          <Badge
-                                            name={`details.${index}.isAllocate`}
-                                            idx={index}
-                                            {...field}
-                                            control={control}
-                                            register={register}
-                                            label="allocated"
-                                            errors={errors}
-                                          />
-                                        );
-                                      }
+                            <Td className="w-60 px-2">
+                              {item.product_name}
+                              <Controller
+                                render={({ field }) => {
+                                  return <Input variant="unstyled" {...field} disabled className="hidden" />;
+                                }}
+                                name={`details.${index}.product_name`}
+                                className="hidden"
+                                control={control}
+                              />
+                            </Td>
+                            <Td className="w-20 text-center px-2">
+                              {item.qty}
+                              <Controller
+                                render={({ field }) => {
+                                  return <Input variant="unstyled" {...field} disabled className="hidden" />;
+                                }}
+                                name={`details.${index}.qty`}
+                                className="hidden"
+                                control={control}
+                              />
+                            </Td>
+                            <Td className="w-20 text-center px-2">
+                              {item.actual_qty}
+                              <Controller
+                                render={({ field }) => {
+                                  return <Input variant="unstyled" {...field} disabled className="hidden" />;
+                                }}
+                                name={`details.${index}.actual_qty`}
+                                className="hidden"
+                                control={control}
+                              />
+                            </Td>
+                            <Td className="w-20 text-center px-2">
+                              {item.source ? `${item.source} Rack` : ''}
+                              <Controller
+                                render={({ field }) => {
+                                  return <Input variant="unstyled" {...field} disabled className="hidden" />;
+                                }}
+                                name={`details.${index}.source`}
+                                className="hidden"
+                                control={control}
+                              />
+                            </Td>
+                            <Td className="w-24 px-2">
+                              <Controller
+                                render={({ field }) => {
+                                  if (isAllocate.length > 0) {
+                                    if (isAllocate?.find(f => f.product_id === item.product_id)?.isAllocate) {
+                                      return (
+                                        <Badge
+                                          name={`details.${index}.isAllocate`}
+                                          idx={index}
+                                          {...field}
+                                          errName="allocate"
+                                          control={control}
+                                          register={register}
+                                          label="allocated"
+                                          errors={errors}
+                                        />
+                                      );
                                     }
-                                    return null;
-                                  }}
-                                  name={`details.${index}.isAllocate`}
-                                  className="hidden"
-                                  control={control}
-                                />
-                              </Td>
-                              <Td className="w-10 px-4">
-                                <Button
-                                  size="sm"
-                                  type="button"
-                                  px={6}
-                                  className="rounded-full border-2 border-[#9bd0b4] bg-[#fff] hover:bg-[#E4E4E4] text-[#5dc08b] font-bold"
-                                  key={index}
-                                  onClick={() => {
-                                    setProductId(item.product_id);
-                                    setOnAllocate(!onAllocate);
-                                  }}
-                                >
-                                  Allocate
-                                </Button>
-                              </Td>
-                            </Tr>
-                          );
-                        })
-                      ) : (
-                        <NoContent />
-                      )}
-                    </Tbody>
-                  </Table>
-                </TableContainer>
-              </div>
+                                  }
+                                  return null;
+                                }}
+                                name={`details.${index}.isAllocate`}
+                                className="hidden"
+                                control={control}
+                              />
+                            </Td>
+                            <Td className="w-10 px-4">
+                              <Button
+                                size="sm"
+                                type="button"
+                                px={6}
+                                className="rounded-full border-2 border-[#9bd0b4] bg-[#fff] hover:bg-[#E4E4E4] text-[#5dc08b] font-bold"
+                                key={index}
+                                onClick={() => {
+                                  setProductId(item.product_id);
+                                  setOnAllocate(!onAllocate);
+                                }}
+                              >
+                                Allocate
+                              </Button>
+                            </Td>
+                          </Tr>
+                        );
+                      })
+                    ) : (
+                      <NoContent />
+                    )}
+                  </Tbody>
+                </Table>
+              </TableContainer>
 
               <div className="flex justify-between">
-                {errors && (
+                {Object.entries(errors).length > 0 ? (
                   <span className="pl-10 text-[#a2002d]">{`${
                     Array.isArray(errors.details)
                       ? errors?.details?.filter(i => i !== undefined).length > 0
@@ -679,6 +751,8 @@ function Screen() {
                         : ''
                       : errors?.details?.message || ' '
                   }`}</span>
+                ) : (
+                  <span />
                 )}
 
                 <div className="mr-4 mb-2">
@@ -736,7 +810,7 @@ function Screen() {
           </div>
         </div>
       )}
-    </div>
+    </Fade>
   );
 }
 
