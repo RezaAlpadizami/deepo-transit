@@ -20,11 +20,5 @@ const BoundActivity = types
     getRequestNumber() {
       return self.request_number;
     },
-    setIsAllocate(data) {
-      self.allocates = data;
-    },
-    getIsAllocate() {
-      return self.allocates;
-    },
   }));
 export default BoundActivity;

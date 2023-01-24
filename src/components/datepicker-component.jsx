@@ -7,7 +7,7 @@ import { CalendarIcon } from '@heroicons/react/outline';
 import 'react-datepicker/dist/react-datepicker.css';
 
 function InputElement(props) {
-  const { errors, name, disabled } = props;
+  const { errors, name, disabled, isLarge } = props;
 
   const ref = useRef(null);
 
@@ -28,15 +28,18 @@ function InputElement(props) {
         className={` ${disabled ? 'bg-gray-200' : ''} w-full text-sm border-gray-400 py-5 rounded-full px-8`}
         focusBorderColor="#546ac2"
       />
-      <InputRightElement className="rounded-r-full w-14 bg-primarydeepo h-full cursor-pointer" onClick={handleClick}>
-        <CalendarIcon color="white" className="w-5 h-5 mt-0.5 mr-1" />
+      <InputRightElement
+        className={`rounded-r-full ${isLarge ? 'w-14' : ' w-10'} w-14 bg-primarydeepo h-full cursor-pointer`}
+        onClick={handleClick}
+      >
+        <CalendarIcon color="white" className="w-5 h-5 mt-0.5" />
       </InputRightElement>
     </InputGroup>
   );
 }
 
 function SelectComponent(props) {
-  const { name, label, disabled, register, control, errors, placeholder = 'day / month / year' } = props;
+  const { name, label, disabled, register, control, errors, placeholder = 'day / month / year', isLarge } = props;
   return (
     <div className="flex-auto w-full">
       <div>
@@ -57,7 +60,7 @@ function SelectComponent(props) {
                   autoComplete="off"
                   onChange={onChange}
                   id={name}
-                  customInput={<InputElement disabled errors={errors} />}
+                  customInput={<InputElement disabled errors={errors} isLarge={isLarge} />}
                   className="py-6"
                 />
               );

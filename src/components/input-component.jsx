@@ -23,7 +23,6 @@ function InputComponent(props) {
     control,
     idx,
   } = props;
-
   const ref = useRef(null);
 
   const handleClick = () => {
@@ -166,6 +165,17 @@ function InputComponent(props) {
               errors?.allocate?.map(i => {
                 return i[name.split('.')[2]]?.message;
               })}
+          </span>
+        ) : errors?.details?.length ? (
+          <span className="text-red-700 ml-1">
+            {
+              errors?.details?.map(i => {
+                if (i) {
+                  return i[[name.split('.')[2]]]?.message;
+                }
+                return i;
+              })[idx]
+            }
           </span>
         ) : (
           <span className="text-red-700 ml-1">
