@@ -50,7 +50,7 @@ function Content() {
         {MenuItem.map(item => {
           const comp = [];
           if (item.route && item.component) {
-            if (store.user.hasRole(item.role) || item.role === '') {
+            if (store.user.hasRole(item.role) || item.role === 'home') {
               comp.push(<Route exact={item.exact} path={item.route} element={<Navigate to="/request" replace />} />);
             } else {
               comp.push(<Route exact path={item.route} element={<NoAccessScreen />} />);
@@ -117,11 +117,6 @@ function PublicContent() {
           const comp = [];
           if (item.route && item.component) {
             comp.push(<Route exact={item.exact} path={item.route} element={<item.component />} />);
-            /* if (AuthService.hasRole('mofids_pds', `${item.data.role}${item.data.exactRole ? '' : '_access'}`)) {
-              comp.push(<Route exact path={item.data.route} render={() => <item.data.component info={item} />} />);
-            } else {
-              comp.push(<Route exact path={item.data.route} render={() => <NoAccessScreen />} />);
-            } */
           }
           if (item.routes && item.routes.length > 0) {
             item.routes.forEach(routes => {
