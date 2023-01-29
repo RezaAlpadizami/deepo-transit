@@ -187,7 +187,6 @@ function Screen() {
   const onSubmitRequest = data => {
     setLoading(true);
     RequestApi.update(id, {
-      activity_name: data.activity_name,
       request_by: 'testing',
       notes: data.notes,
       new_detail: updateNewDetail.map(data => {
