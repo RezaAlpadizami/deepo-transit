@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -8,8 +9,8 @@ import Swal from 'sweetalert2';
 import { Button, Text } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 
-import { thousandSeparator } from '../../../utils/helper';
 import Input from '../../../components/input-component';
+import { thousandSeparator } from '../../../utils/helper';
 import Select from '../../../components/select-component';
 import { ProductApi } from '../../../services/api-master';
 import { RequestApi } from '../../../services/api-transit';
@@ -133,71 +134,33 @@ function Screen() {
     reset();
   };
 
-  const updateDataDetail = Object.values(
-    Array.isArray([])
-      ? dataDetail.reduce((accu, { product_id, ...item }) => {
-          if (!accu[product_id])
+  const groupByProductId = data => {
+    return Array.isArray(data)
+      ? Object.values(
+          data.reduce((accu, { product_id, ...item }) => {
+            if (!accu[product_id])
+              accu[product_id] = {
+                qty: 0,
+              };
+
             accu[product_id] = {
-              qty: 0,
+              product_id,
+              ...accu[product_id],
+              ...item,
+              qty: accu[product_id].qty + item.qty,
             };
 
-          accu[product_id] = {
-            product_id,
-            ...accu[product_id],
-            ...item,
-            qty: accu[product_id].qty + item.qty,
-          };
+            return accu;
+          }, {})
+        )
+      : [];
+  };
 
-          return accu;
-        }, {})
-      : []
-  );
+  const updateDataDetail = groupByProductId(dataDetail);
+  const updateNewDetail = groupByProductId(dataNewDetail);
+  const updateDataRequesById = groupByProductId(dataRequesById);
 
-  const updateNewDetail = Object.values(
-    Array.isArray([])
-      ? dataNewDetail.reduce((accu, { product_id, ...item }) => {
-          if (!accu[product_id])
-            accu[product_id] = {
-              qty: 0,
-            };
-
-          accu[product_id] = {
-            product_id,
-            ...accu[product_id],
-            ...item,
-            qty: accu[product_id].qty + item.qty,
-          };
-
-          return accu;
-        }, {})
-      : []
-  );
-
-  const getTotalQty = Array.isArray([])
-    ? dataRequesById.reduce((accumulator, object) => {
-        return accumulator + object.qty;
-      }, 0)
-    : '-';
-
-  const updateDataRequesById = Object.values(
-    Array.isArray([])
-      ? dataRequesById.reduce((accu, { product_id, ...item }) => {
-          if (!accu[product_id])
-            accu[product_id] = {
-              qty: 0,
-            };
-
-          accu[product_id] = {
-            product_id,
-            ...accu[product_id],
-            ...item,
-            qty: accu[product_id].qty + item.qty,
-          };
-
-          return accu;
-        }, {})
-      : []
-  );
+  const getTotalQty = Array.isArray(dataRequesById) ? dataRequesById.reduce((acc, item) => acc + item.qty, 0) : null;
 
   const handleRemove = product_id => {
     if (updateDataRequesById.filter(item => item.product_id !== product_id).length < 1) {
@@ -217,23 +180,14 @@ function Screen() {
           return { ...data, is_deleted: false };
         })
       );
-      setDataNewDetail(
-        updateNewDetail.map(data => {
-          if (data.product_id === product_id) {
-            return {
-              product_id: data.product_id,
-              qty: 0,
-            };
-          }
-          return { product_id: data.product_id, qty: data.qty };
-        })
-      );
+      setDataNewDetail(updateNewDetail.filter(item => item.product_id !== product_id));
     }
   };
 
   const onSubmitRequest = data => {
     setLoading(true);
     RequestApi.update(id, {
+      activity_name: data.activity_name,
       request_by: 'testing',
       notes: data.notes,
       new_detail: updateNewDetail.map(data => {
@@ -339,7 +293,7 @@ function Screen() {
             {updateDataRequesById?.map(({ qty, product_id, product_name, product_sku }) => {
               return (
                 <div className="flex" key={product_id}>
-                  <div className="my-4 mr-4 max-[640px]:mr-0 flex flex-col justify-center align-middle">
+                  <div className="my-4 mr-4 max-[640px]:mr-0 sm:mr-0 lg:mr-2 flex flex-col justify-center align-middle">
                     <Button
                       type="button"
                       size="sm"
@@ -349,11 +303,7 @@ function Screen() {
                       }}
                       onClick={() => handleRemove(product_id)}
                     >
-                      <img
-                        src={deleteIcon}
-                        alt="delete Icon"
-                        className="max-[640px]:w-8 max-[640px]:h-8 md:w-12 md:-12"
-                      />
+                      <img src={deleteIcon} alt="delete Icon" className="max-[640px]:w-8 max-[640px]:h-8" />
                     </Button>
                   </div>
                   <InputDetail
@@ -362,8 +312,8 @@ function Screen() {
                     customStyleLabel="font-bold text-md mb-0 max-[640px]:text-xs max-[640px]:w-24 sm:w-24 md:w-full lg:w-24 xl:w-48"
                     customStyleSpan="text-md max-[640px]:text-xs sm:text-sm"
                   />
-                  <div className="flex gap-20 mt-6 max-[640px]:gap-8">
-                    <span className="">X</span>
+                  <div className="flex gap-20 mt-6 relative max-[640px]:gap-8">
+                    <span className="absolute right-24 max-[640px]:right-12">X</span>
                     <Text>{thousandSeparator(qty)}</Text>
                   </div>
                 </div>

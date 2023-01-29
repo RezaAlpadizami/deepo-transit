@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+
 import { useForm } from 'react-hook-form';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 
@@ -42,7 +43,7 @@ function Screen() {
   };
 
   const updateDataRequesById = Object.values(
-    Array.isArray([])
+    Array.isArray(dataRequesByIdDetail)
       ? dataRequesByIdDetail.reduce((accu, { product_id, ...item }) => {
           if (!accu[product_id])
             accu[product_id] = {
@@ -61,11 +62,9 @@ function Screen() {
       : []
   );
 
-  const totalQty = Array.isArray([])
-    ? updateDataRequesById.reduce((accumulator, object) => {
-        return accumulator + object.qty;
-      }, 0)
-    : '-';
+  const totalQty = Array.isArray(updateDataRequesById)
+    ? updateDataRequesById.reduce((acc, item) => acc + item.qty, 0)
+    : null;
 
   return (
     <div>
@@ -136,8 +135,8 @@ function Screen() {
                       customStyleLabel="font-bold text-md mb-0"
                       customStyleSpan="text-md"
                     />
-                    <div className="flex gap-20 mt-6 max-[640px]:gap-6">
-                      <span className="">X</span>
+                    <div className="flex relative gap-20 mt-6 max-[640px]:gap-6">
+                      <span className="absolute right-24 max-[640px]:right-12">X</span>
                       <Text>{thousandSeparator(qty)}</Text>
                     </div>
                   </div>

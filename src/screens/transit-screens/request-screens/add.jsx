@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
@@ -7,17 +8,17 @@ import Swal from 'sweetalert2';
 import { Button, Text } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 
-import deleteIcon from '../../../assets/images/deleteItem.svg';
-import CookieService from '../../../services/cookies/cookie-service';
-import { ProductApi } from '../../../services/api-master';
-import { RequestApi } from '../../../services/api-transit';
 import Input from '../../../components/input-component';
+import { ProductApi } from '../../../services/api-master';
+import { thousandSeparator } from '../../../utils/helper';
 import Select from '../../../components/select-component';
+import { RequestApi } from '../../../services/api-transit';
 import TextArea from '../../../components/textarea-component';
+import deleteIcon from '../../../assets/images/deleteItem.svg';
 import DatePicker from '../../../components/datepicker-component';
 import InputDetail from '../../../components/input-detail-component';
+import CookieService from '../../../services/cookies/cookie-service';
 import LoadingHover from '../../../components/loading-hover-component';
-import { thousandSeparator } from '../../../utils/helper';
 
 function Screen() {
   const navigate = useNavigate();
@@ -95,8 +96,8 @@ function Screen() {
     setDataAdd(dataAdd.filter(item => item.product_id !== product_id));
   };
 
-  const updateDataUpdate = Object.values(
-    Array.isArray([])
+  const updateDataAdd = Object.values(
+    Array.isArray(dataAdd)
       ? dataAdd.reduce((accu, { product_id, ...item }) => {
           if (!accu[product_id])
             accu[product_id] = {
@@ -115,11 +116,7 @@ function Screen() {
       : []
   );
 
-  const getTotalQty = Array.isArray([])
-    ? updateDataUpdate.reduce((accumulator, object) => {
-        return accumulator + object.qty;
-      }, 0)
-    : '-';
+  const getTotalQty = Array.isArray(updateDataAdd) ? updateDataAdd.reduce((acc, item) => acc + item.qty, 0) : null;
 
   const onSubmitRequest = data => {
     setLoading(true);
@@ -129,7 +126,7 @@ function Screen() {
       notes: data.notes,
       activity_date: data.activity_date,
       activity_name: data.activity_name,
-      detail: updateDataUpdate.map(data => {
+      detail: updateDataAdd.map(data => {
         return {
           qty: data.qty,
           product_id: data.product_id,
@@ -224,9 +221,9 @@ function Screen() {
               </div>
             </form>
             <div className="border-b border-primarydeepo my-6"> </div>
-            {updateDataUpdate?.length > 0 && (
+            {updateDataAdd?.length > 0 && (
               <div>
-                {updateDataUpdate.map((val, id) => {
+                {updateDataAdd.map((val, id) => {
                   return (
                     <div className="flex" key={id}>
                       <div className="my-4 mr-4 max-[640px]:mr-0 sm:mr-0 lg:mr-2 flex flex-col justify-center align-middle">
