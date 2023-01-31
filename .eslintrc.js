@@ -35,7 +35,7 @@ module.exports = {
     semi: [2, 'always'],
     'prefer-const': 2,
     'react/prefer-es6-class': 2,
-    'react/jsx-filename-extension': 2,
+    'react/jsx-filename-extension': [1, { extensions: ['.js', '.jsx'] }],
     'react/jsx-indent': [2, 2],
     'react/prop-types': [0],
     'react/no-array-index-key': [0],
