@@ -1073,7 +1073,7 @@ function Screen(props) {
             <div className="modal-content py-4 text-left px-6">
               <Datatable
                 api={RequestApi}
-                filterParams={{ status: 'PENDING', warehouse_id: store?.getWarehouseId() }}
+                filterParams={{ status: 'PENDING', warehouse_id: store?.getWarehouseId(), activity_name: 'INBOUND' }}
                 filterEnd
                 limit={5}
                 filters={[
