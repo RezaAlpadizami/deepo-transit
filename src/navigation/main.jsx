@@ -14,7 +14,7 @@ import CookieService from '../services/cookies/cookie-service';
 function MainNavigation() {
   return (
     <BrowserRouter basename={process.env.PUBLIC_URL}>
-      {CookieService.isSelectedWarehouse() ? (
+      {!CookieService.isSelectedWarehouse() ? (
         <div className="py-8 px-20 min-h-screen bg-[#f8f9fa] font-inter">
           <PublicContent />
         </div>
