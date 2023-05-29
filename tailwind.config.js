@@ -10,8 +10,12 @@ module.exports = {
       '400%': '400%',
     },
     extend: {
+      backgroundImage: {
+        'hero': "url('/src/assets/images/bg-wave.svg')",
+        'hero-content': "url('/src/assets/images/bg-content-wave-4.svg')",
+      },
       boxShadow: {
-        custom: '12px 12px 2px 1px rgba(0, 0, 255, .2)',
+        custom: '4px 4px 2px 1px rgba(0, 0, 255, .2)',
         hover: '-12px 12px 2px -1px rgba(0, 0, 255, .2)',
       },
       animation: {
@@ -25,8 +29,8 @@ module.exports = {
         },
       },
       colors: {
-        primarydeepo: '#3f44c2',
-        secondarydeepo: '#546ac2',
+        primarydeepo: '#57cc99',
+        secondarydeepo: '#57cc99',
         container: '#edefff',
         processbtnfrom: '#ffa108',
         processbtnto: '#f67c08',
@@ -42,6 +46,9 @@ module.exports = {
         display: 'display',
         spacing: 'margin, padding',
       },
+      fontFamily: {
+        'inter': ['Inter', 'sans-serif']
+      }
     },
   },
   plugins: [

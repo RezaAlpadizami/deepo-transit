@@ -1,25 +1,21 @@
 import React, { useState } from 'react';
 
 import Moment from 'moment';
-import { useToast, Button, useMediaQuery } from '@chakra-ui/react';
 import copy from 'copy-to-clipboard';
-
+import { BiEdit } from 'react-icons/bi';
 import { useNavigate } from 'react-router-dom';
-import {
-  addIcon,
-  editIcon,
-  deleteIcon,
-  saveExcelIcon,
-  copyClipboardIcon,
-  showHideTableIcon,
-} from '../assets/images/index';
+import { HiArrowDownOnSquare } from 'react-icons/hi2';
+import { IoIosAddCircle, IoIosCopy } from 'react-icons/io';
+import { MdDelete, MdDisabledVisible } from 'react-icons/md';
+import { useToast, Button, useMediaQuery } from '@chakra-ui/react';
+
 import ShowHide from './show-hide-component';
 import DeletedList from './delete-list-component';
 import { getNestedObject } from '../utils/helper';
 
-const button = `hover:bg-secondarydeepo hover:outline-none text-black outline outline-offset-0 outline-[#A6A9B6] bg-[#fff] text-xs rounded-xl px-3 hover:text-white ml-3`;
+const button = `hover:bg-[#d4a373] border-none hover:outline-none text-black  bg-[#faf3dd] text-xs rounded-xl px-3 hover:text-white ml-3`;
 const disableButton =
-  'text-black outline outline-offset-0 outline-[#A6A9B6] bg-[#fff] text-sm rounded-xl px-2 text-black ml-3';
+  'text-black bg-[#faf3dd] opacity-[50%] text-sm rounded-xl px-2 text-black ml-3 cursor-not-allowed';
 
 function ActionToolbar(props) {
   const {
@@ -87,24 +83,17 @@ function ActionToolbar(props) {
   return (
     <div className={`flex bg-white ${isLarge ? 'py-6 px-6 rounded-t-3xl' : 'py-2 px-2 rounded-t-xl overflow-y-auto'} `}>
       {onAdd && (
-        <Button
-          type="button"
-          size="sm"
-          onClick={() => navigate(`${navTo?.path}/add`)}
-          className="hover:bg-secondarydeepo hover:outline-none outline outline-offset-0 outline-[#aaa] bg-[#fff] text-xs rounded-xl px-2 text-black hover:text-white"
-        >
-          {isLarge && (
-            <div className="hover:text-red-200 h-4 w-4 mr-2">
-              <img src={addIcon} alt="add icon" className="mr-2 drop-shadow-md" />
-            </div>
-          )}
-          {isLarge ? `Add ${displayName}` : 'Add'}
+        <Button type="button" size="sm" onClick={() => navigate(`${navTo?.path}/add`)} className={button}>
+          <div className={`${isLarge ? 'h-4 w-4 mr-2' : ''}hover:text-white`}>
+            <IoIosAddCircle className="w-4 h-4" />
+          </div>
+          {isLarge ? `Add ${displayName}` : ''}
         </Button>
       )}
       {onDownload && (
         <Button size="sm" className={button} onClick={onDownload}>
-          <div className={`${isLarge ? 'h-3.5 w-3.5 mr-2' : ''} hover:text-red-200 `}>
-            <img src={saveExcelIcon} alt="add icon" className={`${isLarge ? '' : 'h-4 pl-1'} mr-2 drop-shadow-md`} />
+          <div className={`${isLarge ? 'h-4 w-4 mr-1' : ''} hover:text-white`}>
+            <HiArrowDownOnSquare className="w-4 h-4" />
           </div>
           {isLarge ? 'Save to Excel' : ''}
         </Button>
@@ -112,12 +101,16 @@ function ActionToolbar(props) {
       {onEdit && (
         <Button
           size="sm"
-          className={`${selectedData.length !== 1 ? disableButton : button}`}
+          className={`${selectedData.length !== 1 ? disableButton : button} text-xs`}
           onClick={() => navigate(`${navTo?.path}/${selectedData?.find(i => i).original.id}/edit`)}
-          disabled={selectedData.length !== 1}
+          isDisabled={selectedData.length !== 1}
         >
-          <div className={`${isLarge ? 'h-5 w-5 mr-2' : ''} hover:text-red-200`}>
-            <img src={editIcon} alt="add icon" className={`${isLarge ? '' : 'h-4 pl-1'} mr-2 drop-shadow-md`} />
+          <div
+            className={`${isLarge ? 'h-4 w-4 mr-1' : ''} ${
+              selectedData.length !== 1 ? 'hover:text-black' : 'hover:text-white'
+            }`}
+          >
+            <BiEdit className="w-4 h-4" />
           </div>
           {isLarge ? 'Update' : ''}
         </Button>
@@ -125,12 +118,16 @@ function ActionToolbar(props) {
       {onDelete && (
         <Button
           size="sm"
-          className={`${selectedData.length === 0 ? disableButton : button}`}
+          className={`${selectedData.length === 0 ? disableButton : button} text-xs`}
           onClick={() => setOnOpen(!onOpen)}
-          disabled={selectedData.length === 0}
+          isDisabled={selectedData.length === 0}
         >
-          <div className={`${isLarge ? 'h-5 w-5 mr-2' : ''} hover:text-red-200`}>
-            <img src={deleteIcon} alt="add icon" className={`${isLarge ? '' : 'h-4 pl-1'} mr-2 drop-shadow-md`} />
+          <div
+            className={`${isLarge ? 'h-4 w-4 mr-1' : ''} ${
+              selectedData.length === 0 ? 'hover:text-black' : 'hover:text-white'
+            }`}
+          >
+            <MdDelete className="h-4 w-4" />
           </div>
           {isLarge ? 'Delete' : ''}
         </Button>
@@ -139,16 +136,16 @@ function ActionToolbar(props) {
       {copyClipboard && (
         <Button
           size="sm"
-          className={`${selectedData.length === 0 ? disableButton : button}`}
+          className={`${selectedData.length === 0 ? disableButton : button} text-xs`}
           onClick={onCopy}
-          disabled={selectedData.length === 0}
+          isDisabled={selectedData.length === 0}
         >
-          <div className={`${isLarge ? 'h-5 w-5 mr-2' : ''} hover:text-red-200`}>
-            <img
-              src={copyClipboardIcon}
-              alt="add icon"
-              className={`${isLarge ? '' : 'h-4 pl-1'} mr-2 drop-shadow-md`}
-            />
+          <div
+            className={`${isLarge ? 'h-3 w-3 mr-1' : ''} ${
+              selectedData.length === 0 ? 'hover:text-black' : 'hover:text-white'
+            }`}
+          >
+            <IoIosCopy className="w-3 h-3" />
           </div>
           {isLarge ? 'Copy to Clipboard' : ''}
         </Button>
@@ -156,12 +153,8 @@ function ActionToolbar(props) {
       {onShowHideColumn && (
         <>
           <Button size="sm" className={button} onClick={() => setShowHide(!showHide)}>
-            <div className={`${isLarge ? 'h-5 w-5 mr-2' : ''} hover:text-red-200`}>
-              <img
-                src={showHideTableIcon}
-                alt="add icon"
-                className={`${isLarge ? '' : 'h-4 pl-1'} mr-2 drop-shadow-md`}
-              />
+            <div className={`${isLarge ? 'h-4 w-4 mr-1' : ''} hover:text-white`}>
+              <MdDisabledVisible className="w-4 h-4" />
             </div>
             {isLarge ? 'Show / Hide Column(s)' : ''}
           </Button>

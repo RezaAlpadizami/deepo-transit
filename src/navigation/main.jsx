@@ -14,16 +14,18 @@ import CookieService from '../services/cookies/cookie-service';
 function MainNavigation() {
   return (
     <BrowserRouter basename={process.env.PUBLIC_URL}>
-      {!CookieService.isSelectedWarehouse() ? (
-        <div className="py-8 px-20 min-h-screen bg-container">
+      {CookieService.isSelectedWarehouse() ? (
+        <div className="py-8 px-20 min-h-screen bg-[#f8f9fa] font-inter">
           <PublicContent />
         </div>
       ) : (
-        <div>
-          <Header />
+        <div className="font-inter">
+          <div className="bg-[#dad7cd] bg-opacity-20 drop-shadow-md relative z-10">
+            <Header />
+          </div>
           <div className="flex">
             <Sidebar />
-            <div className="p-6 bg-container min-h-screen flex-auto transition-width ease-in-out delay-150 duration-300 w-5/6 max-[640px]:w-full">
+            <div className="px-6 py-10  bg-hero-content bg-cover  bg-no-repeat min-h-screen flex-auto transition-width ease-in-out delay-150 duration-300 w-5/6 max-[640px]:w-full">
               <Content />
             </div>
           </div>

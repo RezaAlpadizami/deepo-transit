@@ -1,5 +1,7 @@
 import React from 'react';
 import { HomeIcon } from '@heroicons/react/solid';
+import { GiHandTruck } from 'react-icons/gi';
+import { FaTruckLoading, FaRegListAlt } from 'react-icons/fa';
 
 const NotFound = React.lazy(() => import('../screens/home-screens/404'));
 const Home = React.lazy(() => import('../screens/home-screens/index'));
@@ -23,16 +25,15 @@ export default [
   },
   {
     displayName: 'Transit',
-    icon: HomeIcon,
     name: 'transit',
     role: 'transit',
-    showmenu: true,
+    showmenu: false,
     exact: true,
     route: '/request',
     routes: [
       {
         displayName: 'Request',
-        icon: HomeIcon,
+        icon: FaRegListAlt,
         name: 'transit-request',
         role: 'transit-request',
         showmenu: true,
@@ -83,7 +84,7 @@ export default [
       },
       {
         displayName: 'Inbound',
-        icon: HomeIcon,
+        icon: GiHandTruck,
         name: 'inbound',
         role: 'inbound',
         showmenu: true,
@@ -105,7 +106,7 @@ export default [
       },
       {
         displayName: 'Outbound',
-        icon: HomeIcon,
+        icon: FaTruckLoading,
         name: 'outbound',
         role: 'outbound',
         showmenu: true,

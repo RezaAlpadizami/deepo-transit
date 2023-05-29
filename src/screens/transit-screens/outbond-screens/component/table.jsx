@@ -1,5 +1,7 @@
 import React from 'react';
-import Loading from './loading';
+// import Loading from './loading';
+import LottiesAnimation from '../../../../components/lotties-animation-component';
+import Loading from '../../../../assets/lotties/Loading.json';
 
 function SimpleTable(props) {
   const { data, isLarge, loading } = props;
@@ -11,7 +13,7 @@ function SimpleTable(props) {
     <div className="w-full h-full max-h-60 overflow-y-auto overflow-x-hidden">
       <table className="w-full">
         <thead>
-          <tr className="bg-[#bbc9ff] text-bold mx-auto">
+          <tr className="bg-[#aed9e0] text-bold mx-auto">
             <th className={`text-bold text-[#000] text-center w-[5%] ${isLarge ? 'px-9 text-sm' : 'px-4 text-xs'}`}>
               NO
             </th>
@@ -21,8 +23,16 @@ function SimpleTable(props) {
           </tr>
         </thead>
 
-        <tbody>
-          <Loading visible={loading} isLarge={isLarge} />
+        <tbody className="h-16">
+          {/* <Loading visible={loading} isLarge={isLarge} /> */}
+          <LottiesAnimation
+            animationsData={Loading}
+            isLarge={isLarge}
+            visible={loading}
+            classCustom={`absolute bg-white z-[999] ${
+              isLarge ? 'right-7 left-[52%]' : 'right-8 left-8'
+            } opacity-100 flex flex-col items-center justify-center`}
+          />
           {data.length > 0 ? (
             data?.map((d, i) => {
               return (
@@ -36,7 +46,7 @@ function SimpleTable(props) {
             })
           ) : (
             <tr>
-              <td colSpan={4} className="text-center bg-[#f3f4f6] py-1.5 text-[#868689] tracking-wide">
+              <td colSpan={4} className="text-center py-1.5 text-[#868689] tracking-wide">
                 No data available
               </td>
             </tr>

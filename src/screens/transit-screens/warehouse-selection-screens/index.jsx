@@ -110,10 +110,10 @@ function Screen() {
       <div className="flex justify-center mb-6 max-[640px]:text-center">
         <h1 className="font-bold text-2xl">SELECT YOUR WORK AREA</h1>
       </div>
-      <div className=" bg-white pb-12 px-8 max-h-[600px] rounded-[20px] overflow-y-scroll scrollbar drop-shadow-md 2xl:max-h-[520px] min-[1607px]:max-h-[600px]">
+      <div className="pb-12 px-8 max-h-[600px] overflow-y-scroll scrollbar drop-shadow-md 2xl:max-h-[520px] min-[1607px]:max-h-[600px]">
         <div
           className="sticky top-0
-          pt-12 h-24 bg-white w-[100%] z-10 transition-all duration-500"
+          pt-12 h-24 w-[100%] z-10 transition-all duration-500"
         >
           <form onChange={handleSubmit(opt)} className="max-[640px]:w-full">
             <Input
@@ -141,7 +141,7 @@ function Screen() {
                     <div
                       className={`justify-items-center w-full ${
                         isSelected === d.id ? 'border border-primarydeepo text-primarydeepo' : 'border border-gray-300'
-                      } bg-white py-4 px-4 rounded-[20px] drop-shadow-md cursor-pointer`}
+                      } bg-white py-4 px-4 rounded-[20px] drop-shadow-md hover:bg-gray-100 cursor-pointer`}
                       onClick={() => clickAddressCard(d)}
                     >
                       <div className="text-[14px] max-[640px]:text-[12px]">
@@ -163,7 +163,7 @@ function Screen() {
             <Button
               onClick={() => handleContinue()}
               type="submit"
-              disabled={isSelected === -1}
+              isDisabled={isSelected === -1}
               px={8}
               size="md"
               className="text-white bg-gradient-to-r from-secondarydeepo to-primarydeepo hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mb-2"

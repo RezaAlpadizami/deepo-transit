@@ -71,7 +71,7 @@ function Screen(props) {
           { header: 'Activity', value: 'activity_name', copy: true },
           { header: 'Date', value: 'activity_date', copy: true, type: 'date' },
           { header: 'Notes', value: 'notes', copy: true, type: 'scrollable' },
-          { header: 'Status', value: 'status', copy: true },
+          { header: 'Status', value: 'status', copy: true, type: 'status' },
           { header: ' ', value: ' ', type: 'action-button-index' },
         ]}
         toolbar={{

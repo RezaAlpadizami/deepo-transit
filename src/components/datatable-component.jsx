@@ -105,10 +105,26 @@ function DataTable(props) {
                 </div>
               );
             }
+            if (d.type === 'status') {
+              return (
+                <div className="flex">
+                  <div className="h-4 flex flex-col justify-center items-center">
+                    <span
+                      className={` rounded-full ${
+                        value !== 'PENDING'
+                          ? 'h-2 w-2 mx-0.5 mt-1 bg-green-600'
+                          : 'animate-ping h-1 w-1 mx-1 mt-1 bg-yellow-500'
+                      } opacity-75`}
+                    />
+                  </div>
+                  <span className="relative">{value}</span>
+                </div>
+              );
+            }
             if (d.type === 'action-button' && row.original.status.toLowerCase() === 'pending') {
               return (
                 <Button
-                  className="text-white bg-gradient-to-r from-processbtnfrom to-processbtnto hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-xs px-5 py-1.5 text-center mr-2 mb-2"
+                  className="text-white bg-gradient-to-r from-secondarydeepo to-secondarydeepo hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-xs px-5 py-1.5 text-center mr-2 mb-2"
                   onClick={() => {
                     onActionButton(row.original.id, row.original);
                   }}
@@ -132,7 +148,7 @@ function DataTable(props) {
                   to={`/${route(row.original.activity_name)}`}
                   px={8}
                   size="sm"
-                  className="relative border-none font-bold text-[12px] text-[#fff] w-[6rem] h-[2rem] leading-[2rem] text-center from-processbtnfrom via-processbtnto to-processbtnfrom bg-gradient-to-r bg-300% rounded-[30px] z-[1] before:absolute before:-top-[5px] before:-right-[5px] before:-left-[5px] before:-bottom-[5px] before:-z-[1] before:bg-gradient-to-r hover:animate-ani hover:before:blur-[10px] before:from-processbtnfrom before:via-processbtnto before:to-processbtnfrom before:bg-400% before:rounded-[35px] before:duration-1000 active:bg-gradient-to-r active:from-processbtnfrom active:via-processbtnto active:to-processbtnfrom my-2"
+                  className="relative border-none font-bold text-[12px] text-[#fff] w-[6rem] h-[1.5rem] leading-[1.5rem] text-center from-secondarydeepo via-secondarydeepo to-secondarydeepo bg-gradient-to-r bg-300% rounded-[30px] z-[1] before:absolute before:-top-[5px] before:-right-[5px] before:-left-[5px] before:-bottom-[5px] before:-z-[1] before:bg-gradient-to-r hover:animate-ani hover:before:blur-[10px] before:from-secondarydeepo before:via-secondarydeepo before:to-secondarydeepo before:bg-400% before:rounded-[35px] before:duration-1000 active:bg-gradient-to-r active:from-secondarydeepo active:via-secondarydeepo active:to-secondarydeepo my-2"
                 >
                   PROCESS
                 </Link>
@@ -521,7 +537,7 @@ function DataTable(props) {
                       type="button"
                       size="sm"
                       px={8}
-                      className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
+                      className="rounded-full border border-gray-300 bg-[#fff] hover:bg-[#E4E4E4] text-primarydeepo font-bold"
                       onClick={() => onReset()}
                     >
                       Reset
@@ -570,9 +586,9 @@ function DataTable(props) {
       {loadingHover && <LoadingHover text="Please Wait..." />}
       {filter.length !== 0 && (
         <div className="overflow-x-hidden relative px-6 pb-11 bg-white drop-shadow-md rounded-b-3xl">
-          <div className="overflow-x-auto">
-            <table {...getTableProps()} className="table-auto w-full text-sm text-left text-gray-500 border-t">
-              <thead className="text-xs text-black uppercase bg-thead">
+          <div className="overflow-x-auto rounded-lg border">
+            <table {...getTableProps()} className="table-auto w-full text-sm text-left text-gray-500">
+              <thead className="text-xs text-black uppercase bg-[#aed9e0]">
                 {headerGroups.map((headerGroup, idxgroup) => (
                   <tr key={idxgroup} {...headerGroup.getHeaderGroupProps()}>
                     {headerGroup.headers.map((column, columnidx) => (
@@ -718,8 +734,8 @@ function DataTable(props) {
                         disabled={pages === i + p}
                         onClick={() => changePage(i + p)}
                         className={`${
-                          pages === i + p ? 'bg-secondarydeepo text-white' : 'bg-thead'
-                        } py-2 px-3 mx-0.5 leading-tight text-black bg-secondarydeepo rounded-lg hover:bg-thead hover:text-white disabled:text-white`}
+                          pages === i + p ? 'bg-gray-300 text-white' : 'bg-thead'
+                        } py-2 px-3 mx-0.5 leading-tight text-black bg-gray-300 rounded-lg hover:bg-thead hover:text-white disabled:text-white`}
                       >
                         {i + p}
                       </button>

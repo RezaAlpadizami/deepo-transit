@@ -3,10 +3,11 @@ import React, { useContext, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { ChevronRightIcon } from '@heroicons/react/solid';
 import { Link, useLocation } from 'react-router-dom';
+import { FiLogOut } from 'react-icons/fi';
 
 import Context from '../context';
 import menuItem from '../navigation/menu-item';
-import ArrowUpTray from '../assets/images/arrow-up-tray.svg';
+// import ArrowUpTray from '../assets/images/arrow-up-tray.svg';
 import { findParent, findTree } from '../utils/navigation-utils';
 
 function SidebarComponent() {
@@ -30,10 +31,10 @@ function SidebarComponent() {
     <aside
       className={`${
         store.isDrawerOpen ? 'w-80' : '-translate-x-80 w-0'
-      } bg-primarydeepo transition-all ease-in-out delay-150 duration-300`}
+      } bg-[#22577a] transition-all ease-in-out delay-150 duration-300`}
     >
       <div className="relative h-full">
-        <ul className="text-white">
+        <ul className="">
           {menuParent?.routes?.map(
             (d, idx) =>
               d.showmenu &&
@@ -42,12 +43,14 @@ function SidebarComponent() {
                   <li
                     className={`${
                       findTree([d], location).length > 0
-                        ? 'bg-secondarydeepo hover:font-bold active:text-secondarydeepo]'
-                        : 'hover:bg-secondarydeepo'
+                        ? 'bg-[#22577a] border-l-4 border-solid border-[#eff6e0] text-[#eff6e0] ml-2'
+                        : 'hover:font-bold hover:bg-[#22577a]'
                     } flex px-5 py-3 items-center`}
                   >
-                    <d.icon className="w-5 h-5" />
-                    <span className="ml-2 flex-auto">{d.displayName}</span>
+                    <d.icon
+                      className={`w-4 h-4 ${findTree([d], location).length > 0 ? 'text-[#eff6e0]' : 'text-[#eff6e0]'}`}
+                    />
+                    <span className="ml-2 flex-auto text-[#eff6e0]">{d.displayName}</span>
                     {d.routes && findTree([d.routes], location).length > 0 && (
                       <ChevronRightIcon
                         className={`w-5 h-5 transition-transform ease-out duration-300 ${
@@ -70,7 +73,7 @@ function SidebarComponent() {
                               <li
                                 className={`${
                                   findTree([r], location).length > 0 ? 'font-bold' : ''
-                                } pl-12 pr-5 py-3 hover:bg-secondarydeepo`}
+                                } pl-12 pr-5 py-3 bg-[#22577a]`}
                               >
                                 {r.displayName}
                               </li>
@@ -84,13 +87,13 @@ function SidebarComponent() {
           )}
         </ul>
         <button
-          className="absolute inset-x-0 bottom-10 h-15 py-3 hover:bg-secondarydeepo"
+          className="absolute inset-x-0 bottom-10 h-15 py-3 transition-all ease-in-out duration-300 hover:bg-[#22577a] hover:text-[#eff6e0] hover:font-bold"
           type="button"
           onClick={() => {}}
         >
           <div className="flex pl-6">
-            <img src={ArrowUpTray} alt="arrow up" className="h-7 rotate-90 text-black" />
-            <h3 className="pt-0 pl-6 transition-all ease-in-out duration-300 font-bold text-md text-[#fff]">Log out</h3>
+            <FiLogOut className="w-4 h-4 mt-1 text-[#eff6e0]" />
+            <h3 className="pt-0 pl-4 text-md text-[#eff6e0]">Log out</h3>
           </div>
         </button>
       </div>

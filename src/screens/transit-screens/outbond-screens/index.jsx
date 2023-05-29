@@ -1,32 +1,36 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { Button, Input, Table, Thead, Tbody, Tr, Th, Td, TableContainer, useMediaQuery, Fade } from '@chakra-ui/react';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm, useFieldArray, Controller } from 'react-hook-form';
+
 import * as yup from 'yup';
 import Moment from 'moment';
-
 import Swal from 'sweetalert2';
-import { CalculatorIcon, XIcon } from '@heroicons/react/outline';
 import { StopIcon } from '@heroicons/react/solid';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { CalculatorIcon, XIcon } from '@heroicons/react/outline';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { Button, Input, Table, Thead, Tbody, Tr, Th, Td, TableContainer, useMediaQuery, Fade } from '@chakra-ui/react';
+
+import Allocate from './allocate';
+import Context from '../../../context';
+import SimpleTable from './component/table';
+import NoContent from './component/no-content';
+import Badge from './component/badge-component';
 import { toCalculate } from '../../../utils/helper';
-import { RequestApi, TransitApi } from '../../../services/api-transit';
+import Loading from '../../../assets/lotties/Loading.json';
 import { ProductInfoApi } from '../../../services/api-master';
-import LoadingHover from '../../../components/loading-hover-component';
-import LoadingComponent from '../../../components/loading-component';
-import MagnifyClass from '../../../assets/images/magnify-glass.svg';
-import DatePicker from '../../../components/datepicker-component';
 import Datatable from '../../../components/datatable-component';
 import InputComponent from '../../../components/input-component';
-import SimpleTable from './component/table';
-import Allocate from './allocate';
-import Badge from './component/badge-component';
-import NoContent from './component/no-content';
-import Context from '../../../context';
+import DatePicker from '../../../components/datepicker-component';
+import MagnifyClass from '../../../assets/images/magnify-glass.svg';
+// import LoadingComponent from '../../../components/loading-component';
+import { RequestApi, TransitApi } from '../../../services/api-transit';
+// import LoadingHover from '../../../components/loading-hover-component';
+import LottiesLoading from '../../../components/lotties-animation-component';
 
 const swalButton = Swal.mixin({
   customClass: {
-    confirmButton: 'rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold w-20 ml-4 ',
-    cancelButton: 'rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold w-20',
+    confirmButton:
+      'rounded-full bg-primarydeepo px-6 py-1 drop-shadow-md text-[#fff] font-bold ml-4 hover:-translate-y-[5px] hover:ease-in-out hover:duration-200',
+    cancelButton: 'rounded-full border border-gray-300 px-6 py-1 bg-[#fff] hover:bg-gray-100 text-[#57cc99] font-bold',
   },
   buttonsStyling: false,
 });
@@ -272,21 +276,21 @@ function Screen(props) {
   };
 
   const onCancel = () => {
-    Swal.fire({
-      html: '<p class="font-semibold">Transit data may not be saved <br/> Are your sure to cancel ?</p>',
-      width: '30%',
-      showCancelButton: true,
-      confirmButtonColor: '#ee5e68',
-      cancelButtonColor: '#8388a5',
-      confirmButtonText: 'Yes',
-      reverseButtons: true,
-      cancelButtonText: 'No',
-    }).then(result => {
-      if (result.isConfirmed) {
-        setOnOpenTransit(false);
-        setValue('details', fields);
-      }
-    });
+    swalButton
+      .fire({
+        html: '<p class="font-semibold">Transit data may not be saved <br/> Are your sure to cancel ?</p>',
+        width: '30%',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        reverseButtons: true,
+        cancelButtonText: 'No',
+      })
+      .then(result => {
+        if (result.isConfirmed) {
+          setOnOpenTransit(false);
+          setValue('details', fields);
+        }
+      });
   };
 
   const onSubmitTransit = data => {
@@ -430,28 +434,33 @@ function Screen(props) {
 
   return (
     <Fade in={props}>
-      {loadingHover && <LoadingHover left="[20%]" top="[9%]" />}
-      <div className="grid grid-rows-4 bg-white px-5 py-1 rounded-3xl drop-shadow-xl w-full h-[98%]">
-        <div className="">
-          <fieldset className="border border-primarydeepo w-full h-full px-6 rounded-2xl">
-            <legend className="sm:text-xl xl:text-3xl text-primarydeepo font-semibold p-2">Request</legend>
+      {loadingHover && (
+        <LottiesLoading
+          animationsData={Loading}
+          classCustom="z-[999] right-0 left-[20%] top-[9%] absolute bottom-0 overflow-hidden bg-[#f2f2f2] opacity-75 flex flex-col items-center justify-center"
+        />
+      )}
+      <div className="grid grid-rows-4 px-5 py-1 rounded-3xl drop-shadow-md w-full h-full">
+        <div className="mb-6">
+          <fieldset className="bg-white w-full h-full px-8 py-6 rounded-3xl">
+            {/* <legend className="sm:text-xl xl:text-3xl text-primarydeepo font-semibold p-2">Request</legend> */}
 
             <div className="flex my-auto">
               <button
                 type="submit"
                 onClick={() => setOnOverview(!onOverview)}
-                className={`${scanning ? 'bg-[#ffc108]' : 'bg-processbtnfrom'}  h-3/4 rounded-lg px-4 ${
+                className={`${scanning ? 'bg-[#ffc108]' : 'bg-secondarydeepo'}  h-3/4 rounded-lg px-4 ${
                   isLarge ? 'py-2' : 'my-auto pb-2'
                 } `}
                 disabled={scanning}
               >
-                <p className="md:text-sm xl:text-lg text-[#fff] sm:font-semibold xl:font-semibold">Request</p>
+                <p className="md:text-sm xl:text-md text-xs text-[#fff] sm:font-semibold xl:font-semibold">Request</p>
                 <CalculatorIcon
-                  className={`${scanning ? 'bg-[#ffc108]' : 'bg-processbtnfrom'} h-12 w-15 stroke-[#fff] mx-auto`}
+                  className={`${scanning ? 'bg-[#ffc108]' : 'bg-secondarydeepo'} h-12 w-15 stroke-[#fff] mx-auto`}
                 />
               </button>
 
-              <div className={`${isLarge ? 'flex gap-6' : ''} w-3/4 pl-10 pb-4`}>
+              <div className={`${isLarge ? 'flex gap-6' : ''} w-full pl-10 pb-2`}>
                 <InputComponent
                   name="request_number"
                   label="Request Number"
@@ -474,61 +483,77 @@ function Screen(props) {
           </fieldset>
         </div>
 
-        <div className={`${isLarge ? 'flex gap-4' : ''} h-full w-full row-span-2`}>
-          <fieldset
-            className={`${isLarge ? 'h-full py-8' : 'h-1/2 py-4'} border border-primarydeepo w-full rounded-3xl px-2`}
-          >
-            <legend className="px-2 sm:text-xl xl:text-3xl text-primarydeepo font-semibold">Request Detail</legend>
-            <LoadingComponent visible={loadingRequest} />
-            {!loadingRequest ? (
-              <SimpleTable
-                data={
-                  transitData?.details?.map(d => {
+        <div className={`${isLarge ? 'flex gap-6' : ''} h-full w-full row-span-2 justify-center`}>
+          <div className="w-full mb-6">
+            <h1 className="px-3 text-gray-400">Request Detail</h1>
+            <fieldset className={`${isLarge ? 'h-full py-8' : 'h-1/2 py-4'} bg-white w-full rounded-3xl px-2`}>
+              {/* <legend className="px-2 sm:text-xl xl:text-3xl text-primarydeepo font-semibold">Request Detail</legend> */}
+              {/* <LoadingComponent visible={loadingRequest} /> */}
+              <LottiesLoading
+                animationsData={Loading}
+                visible={loadingRequest}
+                classCustom="h-full z-[999] opacity-100 flex flex-col items-center justify-center"
+              />
+              {!loadingRequest ? (
+                <SimpleTable
+                  data={
+                    transitData?.details?.map(d => {
+                      return {
+                        product_id: d.product_id,
+                        product_name: d.product_name,
+                        product_sku: d.product_sku,
+                        qty: d.actual_qty,
+                      };
+                    }) || []
+                  }
+                  isLarge={isLarge}
+                />
+              ) : null}
+            </fieldset>
+          </div>
+          <div className="w-full mb-6">
+            <h2 className="px-3 text-gray-400">RFID Detected</h2>
+            <fieldset className={`${isLarge ? 'h-full py-8' : 'h-1/2 py-4'} bg-white w-full rounded-3xl px-2`}>
+              {/* <legend className="px-2 sm:text-xl xl:text-3xl text-primarydeepo font-semibold">RFID Detected</legend> */}
+              {/* <LoadingComponent visible={loadingRFID} /> */}
+              <LottiesLoading
+                visible={loadingRFID}
+                animationsData={Loading}
+                classCustom="h-full z-[999] opacity-100 flex flex-col items-center justify-center"
+              />
+              {!loadingRFID ? (
+                <SimpleTable
+                  loading={loadtable}
+                  data={rfidData.map(i => {
                     return {
-                      product_id: d.product_id,
-                      product_name: d.product_name,
-                      product_sku: d.product_sku,
-                      qty: d.actual_qty,
+                      product_id: i.product_id,
+                      product_name: i.product_name,
+                      product_sku: i.sku,
+                      qty: i.qty,
+                      warehouse_id: i.warehouse_id,
                     };
-                  }) || []
-                }
-                isLarge={isLarge}
-              />
-            ) : null}
-          </fieldset>
-          <fieldset
-            className={`${isLarge ? 'h-full py-8' : 'h-1/2 py-4'} border border-primarydeepo w-full rounded-3xl px-2`}
-          >
-            <legend className="px-2 sm:text-xl xl:text-3xl text-primarydeepo font-semibold">RFID Detected</legend>
-            <LoadingComponent visible={loadingRFID} />
-            {!loadingRFID ? (
-              <SimpleTable
-                loading={loadtable}
-                data={rfidData.map(i => {
-                  return {
-                    product_id: i.product_id,
-                    product_name: i.product_name,
-                    product_sku: i.sku,
-                    qty: i.qty,
-                    warehouse_id: i.warehouse_id,
-                  };
-                })}
-                isLarge={isLarge}
-              />
-            ) : null}
-          </fieldset>
+                  })}
+                  isLarge={isLarge}
+                />
+              ) : null}
+            </fieldset>
+          </div>
         </div>
 
         <div className="my-auto">
-          <div className={`border  ${error ? 'border-[#a2002d]' : 'border-primarydeepo'}  w-full px-4 rounded-3xl`}>
+          <div className="w-full px-4 rounded-3xl">
             <div className="flex w-full py-2">
-              <div className="grid py-auto w-1/2">
+              <div
+                className={`grid py-auto w-[40%] mr-16 bg-white px-4 py-2 rounded-3xl ${
+                  error ? 'border-[#a2002d]' : 'border-none'
+                } `}
+              >
                 <div className="flex">
-                  <div className="max-sm:text-xs xl:text-lg w-1/2">Total Request</div>
+                  <div className="max-sm:text-xs xl:text-lg w-1/2 flex-1">Total Request</div>
                   <div className="font-bold">{totalRequest}</div>
                 </div>
                 <div className="flex">
-                  <div className="max-sm:text-xs xl:text-lg w-1/2">
+                  <div className="max-sm:text-xs xl:text-lg w-1/2 flex-1">
                     {isLarge ? 'Total RFID Detected' : 'Total RFID'}{' '}
                   </div>
                   <div className="font-bold">{totalRFID}</div>
@@ -549,9 +574,9 @@ function Screen(props) {
                     type="button"
                     size={isLarge ? 'sm' : 'xs'}
                     px={isLarge ? 5 : 2}
-                    className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
+                    className="rounded-full border border-gray-300 bg-[#fff] hover:bg-[#E4E4E4] text-primarydeepo font-bold"
                     onClick={scanning ? stopScanning : startScanning}
-                    disabled={transitData ? transitData?.details?.length === 0 || transitData?.length === 0 : true}
+                    isDisabled={transitData ? transitData?.details?.length === 0 || transitData?.length === 0 : true}
                   >
                     {scanning ? <StopIcon className="h-6 animate-pulse" /> : <p className="tracking-wide">Scan</p>}
                   </Button>
@@ -566,11 +591,11 @@ function Screen(props) {
                     type="button"
                     size={isLarge ? 'sm' : 'xs'}
                     px={isLarge ? 6 : 2}
-                    className={`rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold ${
+                    className={`rounded-full border border-gray-300 bg-[#fff] hover:bg-[#E4E4E4] text-[#2f3e46] font-bold ${
                       isLarge ? 'mx-4' : 'mx-2'
                     } `}
                     onClick={onReset}
-                    disabled={scanning}
+                    isDisabled={scanning}
                   >
                     <p className="tracking-wide">Reset</p>
                   </Button>
@@ -589,7 +614,7 @@ function Screen(props) {
                       isLarge ? '' : 'mt-2'
                     } `}
                     onClick={onSubmitRFID}
-                    disabled={onDisabled()}
+                    isDisabled={onDisabled()}
                   >
                     Submit
                   </Button>
@@ -611,7 +636,7 @@ function Screen(props) {
           className=" main-modal fixed w-full h-full inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
           style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
         >
-          <div className="rounded rounded-3xl border shadow-lg modal-container bg-white w-[80%] h-3/4 mx-auto z-50 overflow-y-auto ">
+          <div className="rounded-3xl border shadow-lg modal-container bg-white w-[80%] h-3/4 mx-auto z-50 overflow-y-auto ">
             <div className="grid justify-items-end">
               <XIcon
                 className="fixed h-6 stroke-2 mr-1 pointer-events-auto"
@@ -667,7 +692,7 @@ function Screen(props) {
                 <TableContainer className="px-4 py-1">
                   <Table>
                     <Thead>
-                      <Tr className="bg-[#bbc9ff] text-bold text-[#000] w-full">
+                      <Tr className="bg-[#aed9e0] text-bold text-[#000] w-full">
                         <Th className="text-semibold text-[#000] text-center w-10 py-1.5 pl-2">NO</Th>
                         <Th className="text-semibold text-[#000] text-center w-20">SKU</Th>
                         <Th className="text-bold text-[#000] text-cente w-60">PRODUCT</Th>
@@ -821,7 +846,7 @@ function Screen(props) {
                     type="button"
                     size="sm"
                     px={8}
-                    className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
+                    className="rounded-full border border-gray-300 bg-[#fff] hover:bg-[#E4E4E4] text-primarydeepo font-bold"
                     onClick={onCancel}
                   >
                     Cancel
@@ -851,17 +876,25 @@ function Screen(props) {
           className=" main-modal fixed w-full h-200 inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
           style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
         >
-          <div className="border shadow-lg modal-container bg-white w-[80%] mx-auto rounded z-50 h-84">
-            <LoadingComponent loading={loadingAllocate} />
-            <Allocate
-              productId={productId}
-              onAllocate={onAllocate}
-              setOnAllocate={setOnAllocate}
-              data={productInfoData}
-              allocateData={allocateData}
-              setAllocateData={setAllocateData}
-              allocated={allocated}
-            />
+          <div className="border shadow-lg modal-container bg-white w-3/4 mx-auto rounded z-50 h-84">
+            {/* <LoadingComponent loading={loadingAllocate} /> */}
+            {loadingAllocate ? (
+              <LottiesLoading
+                visible={loadingAllocate}
+                animationsData={Loading}
+                classCustom="h-full z-[999] py-16 opacity-100 flex flex-col items-center justify-center"
+              />
+            ) : (
+              <Allocate
+                productId={productId}
+                onAllocate={onAllocate}
+                setOnAllocate={setOnAllocate}
+                data={productInfoData}
+                allocateData={allocateData}
+                setAllocateData={setAllocateData}
+                allocated={allocated}
+              />
+            )}
           </div>
         </div>
       )}

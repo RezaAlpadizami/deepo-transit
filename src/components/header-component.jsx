@@ -39,13 +39,13 @@ function Header() {
   };
 
   return (
-    <header className="flex p-5 border-b">
+    <header className="relative flex p-5">
       {isLarge ? (
-        <div className="mx-3 mt-0.5 cursor-pointer" onClick={() => store.toggleDrawer()}>
+        <div className="mx-3 mt-0.5 cursor-pointer z-10" onClick={() => store.toggleDrawer()}>
           <img src={logo} alt="logo" />
         </div>
       ) : (
-        <div className="mx-1 h-8 cursor-pointer" onClick={() => store.toggleDrawer()}>
+        <div className="mx-1 h-8 cursor-pointer z-20" onClick={() => store.toggleDrawer()}>
           <img src={HamburgerMenu} alt="hamburger-icon" className="h-8" />
         </div>
       )}
@@ -53,10 +53,18 @@ function Header() {
         {menuItem
           .filter(item => item.showmenu)
           .map((v, i) => {
+            console.log('vvvv', v);
             if (v.routes && !isShouldDisplay(v.routes)) return null;
             return (
               <li className="px-2" key={i}>
-                <Link to={v.route} className={findTree([v], location).length > 0 ? 'font-bold' : ''}>
+                <Link
+                  to={v.route}
+                  className={
+                    findTree([v], location).length > 0
+                      ? 'font-bold text-secondarydeepo border-b-2 border-secondarydeepo'
+                      : ''
+                  }
+                >
                   {v.displayName}
                 </Link>
               </li>
@@ -65,9 +73,9 @@ function Header() {
       </ul>
       <div className="flex mr-4">
         <UserCircleIcon className="w-6 h-6 m-auto" />
-        <Popover>
+        <Popover colorScheme="#caf0f8">
           <PopoverTrigger>
-            <Button rightIcon={<ChevronDownIcon className="w-[15px]" />} type="button" size="sm">
+            <Button rightIcon={<ChevronDownIcon className="w-[15px] bg-red" />} type="button" size="sm">
               Administrator
             </Button>
           </PopoverTrigger>

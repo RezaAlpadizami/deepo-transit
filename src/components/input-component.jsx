@@ -58,6 +58,7 @@ function InputComponent(props) {
                       onChange={onChange}
                       maxLength={maxLength}
                       id={name}
+                      focusBorderColor="#c7f9cc"
                       readOnly={readOnly}
                       variant={disabled ? 'filled' : 'outline'}
                       className={`${
@@ -86,6 +87,7 @@ function InputComponent(props) {
                       disabled={disabled}
                       placeholder={placeholder}
                       selected={value}
+                      focusBorderColor="#c7f9cc"
                       autoComplete="off"
                       value={value}
                       onChange={onChange}
@@ -119,6 +121,7 @@ function InputComponent(props) {
               hidden={hidden}
               name={name}
               id={name}
+              focusBorderColor="#c7f9cc"
               variant={disabled ? 'filled' : 'outline'}
               className={`${disabled ? 'bg-gray-200' : ''} w-full text-sm rounded-full border-gray-400 px-5 py-5`}
               placeholder={placeholder}
@@ -142,6 +145,7 @@ function InputComponent(props) {
                     onChange={onChange}
                     maxLength={maxLength}
                     id={name}
+                    focusBorderColor="#c7f9cc"
                     readOnly={readOnly}
                     variant={disabled ? 'filled' : 'outline'}
                     className={`${disabled ? 'bg-gray-200' : ''} w-full text-sm rounded-full border-gray-400 px-5 py-5`}

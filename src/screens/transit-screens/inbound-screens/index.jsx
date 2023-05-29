@@ -1,33 +1,38 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Table, Thead, Tbody, Tr, Th, Td, TableContainer, Button, useMediaQuery, Input, Fade } from '@chakra-ui/react';
-import { useForm, useFieldArray, Controller } from 'react-hook-form';
-import Moment from 'moment';
+
 import * as yup from 'yup';
+import Moment from 'moment';
 import Swal from 'sweetalert2';
+import { StopIcon } from '@heroicons/react/solid';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { CalculatorIcon, XIcon } from '@heroicons/react/outline';
-import { StopIcon } from '@heroicons/react/solid';
-import { RequestApi, TransitApi } from '../../../services/api-transit';
-import { StorageApi } from '../../../services/api-master';
-import { toCalculate } from '../../../utils/helper';
-import MagnifyClass from '../../../assets/images/magnify-glass.svg';
-import LoadingHover from '../../../components/loading-hover-component';
-import LoadingComponent from '../../../components/loading-component';
-import DatePicker from '../../../components/datepicker-component';
-import InputComponent from '../../../components/input-component';
-import Datatable from '../../../components/datatable-component';
-import Select from '../../../components/select-component';
-import SimpleTable from './component/table';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { Table, Thead, Tbody, Tr, Th, Td, TableContainer, Button, useMediaQuery, Input, Fade } from '@chakra-ui/react';
+
 import Context from '../../../context';
+import SimpleTable from './component/table';
+import { toCalculate } from '../../../utils/helper';
+import { StorageApi } from '../../../services/api-master';
+import Select from '../../../components/select-component';
+import Loading from '../../../assets/lotties/Loading.json';
+import Datatable from '../../../components/datatable-component';
+import InputComponent from '../../../components/input-component';
+import DatePicker from '../../../components/datepicker-component';
+import MagnifyClass from '../../../assets/images/magnify-glass.svg';
+// import LoadingComponent from '../../../components/loading-component';
+import { RequestApi, TransitApi } from '../../../services/api-transit';
+// import LoadingHover from '../../../components/loading-hover-component';
+import LottiesAnimation from '../../../components/lotties-animation-component';
 
 const swalButton = Swal.mixin({
   customClass: {
-    confirmButton: 'ml-4 rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold w-20',
-    cancelButton: 'rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold w-20',
+    confirmButton:
+      'ml-4 rounded-full px-6 py-1 bg-primarydeepo drop-shadow-md text-xs text-[#fff] font-bold hover:-translate-y-0.5 hover:ease-in-out hover:duration-200',
+    cancelButton:
+      'rounded-full px-6 py-1 border border-gray-300 bg-[#fff] text-xs hover:bg-gray-100 hover:text-red-400 text-[#57cc99] font-bold',
   },
   buttonsStyling: false,
 });
-
 const storage = yup.object({
   rack: yup.string().test('rack', 'rack is required', value => {
     if (value) {
@@ -897,28 +902,34 @@ function Screen(props) {
       <input type="hidden" {...register('onChangeRack')} />
       <input type="hidden" {...register('onChangeBay')} />
       <input type="hidden" {...register('onChangeLevel')} />
-      {loadingHover && <LoadingHover left="[20%]" top="[9%]" />}
-      <div className="grid grid-rows-4 bg-white px-5 py-1 rounded-3xl drop-shadow-xl w-full h-[98%]">
-        <div className="">
-          <fieldset className="border border-primarydeepo w-full h-full px-6 rounded-2xl">
-            <legend className="sm:text-xl xl:text-3xl text-primarydeepo font-semibold p-2">Request</legend>
+      {/* {loadingHover && <LoadingHover left="[20%]" top="[9%]" />} */}
+      {loadingHover && (
+        <LottiesAnimation
+          animationsData={Loading}
+          classCustom="z-[999] right-0 left-[20%] top-[9%] absolute bottom-0 overflow-hidden bg-[#f2f2f2] opacity-75 flex flex-col items-center justify-center"
+        />
+      )}
+      <div className="grid grid-rows-4 px-5 py-1 rounded-3xl drop-shadow-md w-full h-full">
+        <div className="mb-6">
+          <fieldset className="w-full bg-white h-full px-8 py-6 rounded-3xl">
+            {/* <legend className="sm:text-xl xl:text-3xl text-primarydeepo font-semibold p-2">Request</legend> */}
 
             <div className="flex my-auto">
               <button
                 type="submit"
                 onClick={() => setOnOverview(!onOverview)}
-                className={`${scanning ? 'bg-[#ffc108]' : 'bg-processbtnfrom'}  h-3/4 rounded-lg px-4 ${
+                className={`${scanning ? 'bg-[#ffc108]' : 'bg-secondarydeepo'}  h-3/4 rounded-lg px-4 ${
                   isLarge ? 'py-2' : 'my-auto pb-2'
                 } `}
                 disabled={scanning}
               >
-                <p className="md:text-sm xl:text-lg text-[#fff] sm:font-semibold xl:font-semibold">Request</p>
+                <p className="md:text-sm xl:text-md text-xs text-[#fff] sm:font-semibold xl:font-semibold">Request</p>
                 <CalculatorIcon
-                  className={`${scanning ? 'bg-[#ffc108]' : 'bg-processbtnfrom'} h-12 w-15 stroke-[#fff] mx-auto`}
+                  className={`${scanning ? 'bg-[#ffc108]' : 'bg-secondarydeepo'} h-12 w-15 stroke-[#fff] mx-auto`}
                 />
               </button>
               {/* w-full  */}
-              <div className={`${isLarge ? 'flex gap-6' : ''} w-3/4 pl-10 pb-4`}>
+              <div className={`${isLarge ? 'flex gap-6' : ''} w-full pl-10 pb-2`}>
                 <InputComponent
                   name="request_number"
                   label="Request Number"
@@ -940,47 +951,63 @@ function Screen(props) {
           </fieldset>
         </div>
 
-        <div className={`${isLarge ? 'flex gap-4' : ''} h-full w-full row-span-2`}>
-          <fieldset
-            className={`${isLarge ? 'h-full py-8' : 'h-1/2 py-4'} border border-primarydeepo w-full rounded-3xl px-2`}
-          >
-            <legend className="px-2 sm:text-xl xl:text-3xl text-primarydeepo font-semibold">Request Detail</legend>
-            <LoadingComponent visible={loadingRequest} />
-            {!loadingRequest ? <SimpleTable data={requestDetailData} isLarge={isLarge} /> : null}
-          </fieldset>
-          <fieldset
-            className={`${isLarge ? 'h-full py-8' : 'h-1/2 py-4'} border border-primarydeepo w-full rounded-3xl px-2`}
-          >
-            <legend className="px-2 sm:text-xl xl:text-3xl text-primarydeepo font-semibold">RFID Detected</legend>
-            <LoadingComponent visible={loadingRFID} />
-            {!loadingRFID ? (
-              <SimpleTable
-                loading={loadtable}
-                data={rfidData.map(i => {
-                  return {
-                    product_id: i.product_id,
-                    product_name: i.product_name,
-                    product_sku: i.sku,
-                    qty: i.qty,
-                    warehouse_id: i.warehouse_id,
-                  };
-                })}
-                isLarge={isLarge}
+        <div className={`${isLarge ? 'flex gap-6' : ''} h-full w-full row-span-2 justify-center`}>
+          <div className="w-full mb-6">
+            <h1 className="px-3 text-gray-400">Request Detail</h1>
+            <fieldset className={`${isLarge ? 'h-full py-8' : 'h-1/2 py-4'} bg-white w-full rounded-3xl px-2`}>
+              {/* <legend className="px-2 sm:text-xl xl:text-2xl text-primarydeepo font-semibold">Request Detail</legend> */}
+              {/* <LoadingComponent visible={loadingRequest} /> */}
+              <LottiesAnimation
+                animationsData={Loading}
+                visible={loadingRequest}
+                classCustom="h-full z-[999] opacity-100 flex flex-col items-center justify-center"
               />
-            ) : null}
-          </fieldset>
+              {!loadingRequest ? <SimpleTable data={requestDetailData} isLarge={isLarge} /> : null}
+            </fieldset>
+          </div>
+          <div className="w-full mb-6">
+            <h2 className="px-3 text-gray-400">RFID Detected</h2>
+            <fieldset className={`${isLarge ? 'h-full py-8' : 'h-1/2 py-4'} bg-white w-full rounded-3xl px-2`}>
+              {/* <legend className="px-2 sm:text-xl xl:text-3xl text-primarydeepo font-semibold">RFID Detected</legend> */}
+              {/* <LoadingComponent visible={loadingRFID} /> */}
+              <LottiesAnimation
+                visible={loadingRFID}
+                animationsData={Loading}
+                classCustom="h-full z-[999] opacity-100 flex flex-col items-center justify-center"
+              />
+              {!loadingRFID ? (
+                <SimpleTable
+                  loading={loadtable}
+                  data={rfidData.map(i => {
+                    return {
+                      product_id: i.product_id,
+                      product_name: i.product_name,
+                      product_sku: i.sku,
+                      qty: i.qty,
+                      warehouse_id: i.warehouse_id,
+                    };
+                  })}
+                  isLarge={isLarge}
+                />
+              ) : null}
+            </fieldset>
+          </div>
         </div>
 
         <div className="my-auto">
-          <div className={`border  ${error ? 'border-[#a2002d]' : 'border-primarydeepo'}  w-full px-4 rounded-3xl`}>
+          <div className="w-full px-4 rounded-3xl">
             <div className="flex w-full py-2">
-              <div className="grid py-auto w-1/2">
+              <div
+                className={`grid w-[40%] mr-16 bg-white px-4 py-2 rounded-3xl border ${
+                  error ? 'border-red-500' : 'border-none'
+                }`}
+              >
                 <div className="flex">
-                  <div className="max-sm:text-xs xl:text-lg w-1/2">Total Request</div>
+                  <div className="max-sm:text-xs xl:text-lg w-1/2 flex-1">Total Request</div>
                   <div className="font-bold">{totalRequest}</div>
                 </div>
                 <div className="flex">
-                  <div className="max-sm:text-xs xl:text-lg w-1/2">
+                  <div className="max-sm:text-xs xl:text-lg w-1/2 flex-1 text-xs">
                     {isLarge ? 'Total RFID Detected' : 'Total RFID'}{' '}
                   </div>
                   <div className="font-bold">{totalRFID}</div>
@@ -1001,9 +1028,9 @@ function Screen(props) {
                     type="button"
                     size={isLarge ? 'sm' : 'xs'}
                     px={isLarge ? 5 : 2}
-                    className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
+                    className="rounded-full border border-gray-300 bg-[#fff] hover:bg-[#E4E4E4] text-primarydeepo font-bold"
                     onClick={scanning ? stopScanning : startScanning}
-                    disabled={requestDetailData.length === 0}
+                    isDisabled={requestDetailData.length === 0}
                   >
                     {scanning ? <StopIcon className="h-6 animate-pulse" /> : <p className="tracking-wide">Scan</p>}
                   </Button>
@@ -1018,11 +1045,11 @@ function Screen(props) {
                     type="button"
                     size={isLarge ? 'sm' : 'xs'}
                     px={isLarge ? 6 : 2}
-                    className={`rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold ${
+                    className={`rounded-full border border-gray-300 bg-[#fff] hover:bg-[#E4E4E4] text-[#2f3e46] font-bold ${
                       isLarge ? 'mx-4' : 'mx-2'
                     } `}
                     onClick={onReset}
-                    disabled={scanning}
+                    isDisabled={scanning}
                   >
                     <p className="tracking-wide">Reset</p>
                   </Button>
@@ -1041,7 +1068,7 @@ function Screen(props) {
                       isLarge ? '' : 'mt-2'
                     } `}
                     onClick={onSubmitRFID}
-                    disabled={onDisabled()}
+                    isDisabled={onDisabled()}
                   >
                     Next
                   </Button>
@@ -1050,7 +1077,7 @@ function Screen(props) {
             </div>
           </div>
           {error && (
-            <p className="text-[#a2002d] pl-10">
+            <p className="text-[#a2002d] text-xs w-full pl-4">
               {totalRequest !== totalRFID
                 ? 'The amount of data in Request Detail does not match the data in RFID Detected.'
                 : ''}
@@ -1060,13 +1087,13 @@ function Screen(props) {
       </div>
       {onOverview && (
         <div
-          className=" main-modal fixed w-full h-full inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
+          className="main-modal fixed w-full h-full inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
           style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
         >
-          <div className="rounded rounded-3xl border shadow-lg modal-container bg-white w-[80%] h-3/4 mx-auto z-50 overflow-y-auto ">
-            <div className="grid justify-items-end">
+          <div className="rounded-3xl border shadow-lg modal-container bg-white w-[80%] h-3/5 mx-auto z-50 overflow-y-auto ">
+            <div className="grid justify-items-end mb-8">
               <XIcon
-                className="fixed h-6 stroke-2 mr-1 pointer-events-auto"
+                className="fixed h-6 stroke-2 mx-2 my-2 pointer-events-auto cursor-pointer"
                 onClick={() => setOnOverview(!onOverview)}
               />
             </div>
@@ -1121,8 +1148,8 @@ function Screen(props) {
             <div className="overflow-y-auto h-60 px-6 py-2">
               <TableContainer className="px-4 py-1">
                 <Table>
-                  <Thead>
-                    <Tr className="bg-[#bbc9ff] text-bold text-[#000]">
+                  <Thead className="bg-[#aed9e0]">
+                    <Tr className="text-bold text-[#000]">
                       <Th className="text-semibold text-[#000] text-center w-10 py-1.5 pl-2">NO</Th>
                       <Th className="text-semibold text-[#000] text-center w-20">SKU</Th>
                       <Th className="text-semibold text-[#000] text-center w-60">PRODUCT</Th>
@@ -1134,7 +1161,12 @@ function Screen(props) {
                       <Th aria-label="Mute volume" className="w-24" />
                     </Tr>
                   </Thead>
-                  <LoadingComponent loading={loadingTransit} />
+                  {/* <LoadingComponent loading={loadingTransit} /> */}
+                  <LottiesAnimation
+                    animationsData={Loading}
+                    visible={loadingTransit}
+                    classCustom="h-full z-[999] opacity-75 flex flex-col items-center justify-center"
+                  />
 
                   <Tbody>
                     {fields.length > 0 ? (
@@ -1285,7 +1317,7 @@ function Screen(props) {
                                 control={control}
                               />
                             </Td>
-                            <Td className="w-20 px-4">
+                            <Td className="w-24 px-2">
                               <Controller
                                 render={({ field }) => {
                                   return (
@@ -1311,7 +1343,7 @@ function Screen(props) {
                                   size="sm"
                                   type="button"
                                   px={8}
-                                  className="rounded-full text-center text-white font-bold bg-gradient-to-r from-processbtnfrom to-processbtnto hover:bg-gradient-to-br focus:ring-1 focus:outline-none focus:ring-secondarydeepo"
+                                  className="rounded-full text-center text-white font-bold bg-gradient-to-r from-secondarydeepo to-blue-500 hover:bg-gradient-to-br focus:ring-1 focus:outline-none focus:ring-secondarydeepo mb-4"
                                   key={index}
                                   onClick={() => {
                                     if (index === 0) {
@@ -1396,7 +1428,7 @@ function Screen(props) {
                   type="button"
                   size="sm"
                   px={8}
-                  className="rounded-full border border-primarydeepo bg-[#fff] hover:bg-[#E4E4E4] text-[#8335c3] font-bold"
+                  className="rounded-full border border-gray-300 bg-[#fff] hover:bg-[#E4E4E4] text-primarydeepo font-bold"
                   onClick={() => {
                     setCounter(2);
                     reset();

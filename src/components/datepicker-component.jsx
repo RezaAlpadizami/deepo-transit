@@ -26,7 +26,7 @@ function InputElement(props) {
         isInvalid={errors[name]}
         variant={disabled ? 'filled' : 'outline'}
         className={` ${disabled ? 'bg-gray-200' : ''} w-full text-sm border-gray-400 py-5 rounded-full px-8`}
-        focusBorderColor="#546ac2"
+        focusBorderColor="#c7f9cc"
       />
       <InputRightElement
         className={`rounded-r-full ${isLarge ? 'w-14' : ' w-10'} w-14 bg-primarydeepo h-full cursor-pointer`}
