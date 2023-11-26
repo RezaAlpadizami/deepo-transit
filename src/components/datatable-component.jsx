@@ -414,7 +414,7 @@ function DataTable(props) {
   };
   const route = name => {
     let to;
-    switch (name.toLowerCase()) {
+    switch (name?.toLowerCase()) {
       case 'inbound':
         to = 'inbound';
         break;
