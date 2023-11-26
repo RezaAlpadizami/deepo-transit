@@ -121,7 +121,7 @@ function DataTable(props) {
                 </div>
               );
             }
-            if (d.type === 'action-button' && row.original.status.toLowerCase() === 'pending') {
+            if (d.type === 'action-button' && row?.original?.status.toLowerCase() === 'pending') {
               return (
                 <Button
                   className="text-white bg-gradient-to-r from-secondarydeepo to-secondarydeepo hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-xs px-5 py-1.5 text-center mr-2 mb-2"
@@ -430,7 +430,7 @@ function DataTable(props) {
   };
   const route = name => {
     let to;
-    switch (name.toLowerCase()) {
+    switch (name?.toLowerCase()) {
       case 'inbound':
         to = 'inbound';
         break;
