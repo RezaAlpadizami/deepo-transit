@@ -10,10 +10,10 @@ function SimpleTable(props) {
   const td = 'text-[#000] text-center py-1.5 break-words';
 
   return (
-    <div className="w-full h-full max-h-60 overflow-y-auto overflow-x-hidden">
+    <div className="w-full px-8 h-full max-h-60 overflow-y-auto overflow-x-hidden">
       <table className="w-full">
         <thead>
-          <tr className="bg-[#aed9e0] text-bold mx-auto">
+          <tr className="bg-[#F5F5F5] text-bold mx-auto">
             <th className={`text-bold text-[#000] text-center w-[5%] ${isLarge ? 'px-9 text-sm' : 'px-4 text-xs'}`}>
               NO
             </th>

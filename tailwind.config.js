@@ -11,7 +11,7 @@ module.exports = {
     },
     extend: {
       backgroundImage: {
-        'hero': "url('/src/assets/images/bg-wave.svg')",
+        hero: "url('/src/assets/images/bg-wave.svg')",
         'hero-content': "url('/src/assets/images/bg-content-wave-4.svg')",
       },
       boxShadow: {
@@ -35,7 +35,7 @@ module.exports = {
         processbtnfrom: '#ffa108',
         processbtnto: '#f67c08',
         borders: 'rgba(0, 0, 255, .2)',
-        thead: '#bbc9ff',
+        thead: '#F3F4F5',
         slate: {
           850: '#172030',
         },
@@ -47,8 +47,8 @@ module.exports = {
         spacing: 'margin, padding',
       },
       fontFamily: {
-        'inter': ['Inter', 'sans-serif']
-      }
+        inter: ['Inter', 'sans-serif'],
+      },
     },
   },
   plugins: [

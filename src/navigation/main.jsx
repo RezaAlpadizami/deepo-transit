@@ -20,12 +20,12 @@ function MainNavigation() {
         </div>
       ) : (
         <div className="font-inter">
-          <div className="bg-[#dad7cd] bg-opacity-20 drop-shadow-md relative z-10">
+          <div className="bg-[#F3F3F3]">
             <Header />
           </div>
           <div className="flex">
             <Sidebar />
-            <div className="px-6 py-10  bg-hero-content bg-cover  bg-no-repeat min-h-screen flex-auto transition-width ease-in-out delay-150 duration-300 w-5/6 max-[640px]:w-full">
+            <div className="p-6 bg-[#FFFFFF] min-h-screen flex-auto transition-width ease-in-out delay-150 duration-300 w-5/6 max-[640px]:w-full">
               <Content />
             </div>
           </div>
@@ -53,7 +53,9 @@ function Content() {
           const comp = [];
           if (item.route && item.component) {
             if (store.user.hasRole(item.role) || item.role === 'home') {
-              comp.push(<Route exact={item.exact} path={item.route} element={<Navigate to="/request" replace />} />);
+              comp.push(
+                <Route exact={item.exact} path={item.route} element={<Navigate to="/label-registration" replace />} />
+              );
             } else {
               comp.push(<Route exact path={item.route} element={<NoAccessScreen />} />);
             }

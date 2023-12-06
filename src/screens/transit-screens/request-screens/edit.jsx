@@ -7,7 +7,7 @@ import * as yup from 'yup';
 import Moment from 'moment';
 import Swal from 'sweetalert2';
 import { Button, Text } from '@chakra-ui/react';
-import { SiExpertsexchange } from 'react-icons/si';
+// import { SiExpertsexchange } from 'react-icons/si';
 import { yupResolver } from '@hookform/resolvers/yup';
 
 import Input from '../../../components/input-component';
@@ -16,10 +16,11 @@ import Select from '../../../components/select-component';
 import { ProductApi } from '../../../services/api-master';
 import { RequestApi } from '../../../services/api-transit';
 import TextArea from '../../../components/textarea-component';
-import deleteIcon from '../../../assets/images/deleteItem.svg';
+// import deleteIcon from '../../../assets/images/deleteItem.svg';
 import DatePicker from '../../../components/datepicker-component';
-import InputDetail from '../../../components/input-detail-component';
+// import InputDetail from '../../../components/input-detail-component';
 import LoadingHover from '../../../components/loading-hover-component';
+import Table from '../inbound-screens/component/table';
 
 function Screen() {
   const { id } = useParams();
@@ -108,6 +109,8 @@ function Screen() {
       });
   };
 
+  console.log('datarequest', dataRequesById);
+
   const onAddProdRequestDetail = dataInput => {
     setIsDelete(false);
     const dataNewItem = [];
@@ -135,20 +138,20 @@ function Screen() {
     reset();
   };
 
-  const groupByProductId = data => {
+  const groupByProductsId = data => {
     return Array.isArray(data)
       ? Object.values(
-          data.reduce((accu, { product_id, ...item }) => {
-            if (!accu[product_id])
-              accu[product_id] = {
+          data.reduce((accu, { productId, ...item }) => {
+            if (!accu[productId])
+              accu[productId] = {
                 qty: 0,
               };
 
-            accu[product_id] = {
-              product_id,
-              ...accu[product_id],
+            accu[productId] = {
+              productId,
+              ...accu[productId],
               ...item,
-              qty: accu[product_id].qty + item.qty,
+              qty: accu[productId].qty + item.qty,
             };
 
             return accu;
@@ -157,17 +160,36 @@ function Screen() {
       : [];
   };
 
-  const updateDataDetail = groupByProductId(dataDetail);
-  const updateNewDetail = groupByProductId(dataNewDetail);
-  const updateDataRequesById = groupByProductId(dataRequesById);
+  const groupByProductId = Object.values(
+    Array.isArray(dataRequesById)
+      ? dataRequesById.reduce((accu, { product_id, ...item }) => {
+          if (!accu[product_id])
+            accu[product_id] = {
+              qty: 0,
+            };
+
+          accu[product_id] = {
+            product_id,
+            ...accu[product_id],
+            ...item,
+            qty: accu[product_id].qty + item.qty,
+          };
+
+          return accu;
+        }, {})
+      : []
+  );
+
+  const updateDataDetail = groupByProductsId(dataDetail);
+  const updateNewDetail = groupByProductsId(dataNewDetail);
 
   const getTotalQty = Array.isArray(dataRequesById) ? dataRequesById.reduce((acc, item) => acc + item.qty, 0) : null;
 
   const handleRemove = product_id => {
-    if (updateDataRequesById.filter(item => item.product_id !== product_id).length < 1) {
+    if (groupByProductId.filter(item => item.product_id !== product_id).length < 1) {
       Swal.fire({ text: 'product cannot be empty', icon: 'error' });
     } else {
-      setDataRequestById(updateDataRequesById.filter(item => item.product_id !== product_id));
+      setDataRequestById(groupByProductId.filter(item => item.product_id !== product_id));
       setDataDetail(
         updateDataDetail.map(data => {
           if (data.product_id === product_id) {
@@ -224,12 +246,12 @@ function Screen() {
 
   return (
     <div>
-      <div className="p-5 py-12 drop-shadow-md">
+      <div className="p-5 py-12">
         <div className="grid-cols-2 gap-4 flex max-[640px]:flex-col sm:flex-col lg:flex-row">
           <div className="w-full h-full">
-            <h6 className="text-gray-400 px-8 mb-1">Edit Request</h6>
-            <fieldset className="bg-white border-borders w-full h-full px-8 py-12 rounded-3xl mx-4 max-[640px]:px-4 max-[640px]:mx-0 sm:px-6 sm:mx-0 lg:mx-4 lg:px-8">
-              {/* <legend className="px-2 text-[28px] text-primarydeepo">Edit Request </legend> */}
+            {/* <h6 className="text-gray-400 px-8 mb-1">Edit Request</h6> */}
+            <fieldset className="bg-white border border-[#C2C2C2] w-full min-h-[507px] px-8 py-12 rounded-3xl mx-4 max-[640px]:px-4 max-[640px]:mx-0 sm:px-6 sm:mx-0 lg:mx-4 lg:px-8">
+              <legend className="px-2 text-lg text-gray-400">Edit Request </legend>
               <div className="flex gap-4 justify-center max-[640px]:flex-col sm:flex-col lg:flex-row">
                 <div className="w-full">
                   <Select
@@ -263,9 +285,9 @@ function Screen() {
             </fieldset>
           </div>
           <div className="w-full h-full">
-            <h6 className="text-gray-400 px-8 mb-1">Edit Request Detail</h6>
-            <fieldset className="bg-white border-borders w-full h-full px-8 py-12 rounded-3xl mx-4 max-[640px]:px-4 max-[640px]:mx-0 sm:px-6 sm:mx-0 lg:mx-4 lg:px-8">
-              {/* <legend className="px-2 text-[28px] text-primarydeepo max-[640px]:text-[20px]">Edit Request Detail</legend> */}
+            {/* <h6 className="text-gray-400 px-8 mb-1">Edit Request Detail</h6> */}
+            <fieldset className="bg-white border border-[#C2C2C2]  w-full min-h-[507px] px-8 py-12 rounded-3xl mx-4 max-[640px]:px-4 max-[640px]:mx-0 sm:px-6 sm:mx-0 lg:mx-4 lg:px-8">
+              <legend className="px-2 text-lg text-gray-400 max-[640px]:text-[20px]">Edit Request Detail</legend>
               <form onSubmit={handleSubmitProd(onAddProdRequestDetail)}>
                 <div className="flex gap-4 justify-center max-[640px]:flex-col sm:flex-col lg:flex-row">
                   <div className="w-full col-span-2">
@@ -288,13 +310,14 @@ function Screen() {
                   </div>
                 </div>
                 <div className="flex justify-end">
-                  <Button px={8} type="submit" size="sm" className="rounded-full bg-primarydeepo text-[#fff] mr-6">
+                  <Button px={8} type="submit" size="sm" className="rounded-md bg-[#50B8C1] text-[#fff] mr-6">
                     + Add
                   </Button>
                 </div>
               </form>
               <div className="border-b border-gray-300 my-6"> </div>
-              {updateDataRequesById?.map(({ qty, product_id, product_name, product_sku }) => {
+
+              {/* {groupByProductId?.map(({ qty, product_id, product_name, product_sku }) => {
                 return (
                   <div className="flex" key={product_id}>
                     <div className="my-4 mr-4 max-[640px]:mr-0 sm:mr-0 lg:mr-2 flex flex-col justify-center align-middle">
@@ -324,7 +347,21 @@ function Screen() {
                     </div>
                   </div>
                 );
-              })}
+              })} */}
+              <Table
+                // loading={loadtable}
+                data={groupByProductId?.map(i => {
+                  return {
+                    product_id: i.product_id,
+                    product_name: i.product_name,
+                    product_sku: i.product_sku,
+                    qty: i.qty,
+                  };
+                })}
+                register
+                handleRemove={handleRemove}
+                // isLarge={isLarge}
+              />
 
               <div className="border-b border-gray-300 my-6"> </div>
               <div className="flex justify-between font-bold">
@@ -341,7 +378,7 @@ function Screen() {
                 onClick={() => navigate(-1)}
                 px={8}
                 size="sm"
-                className="rounded-full border border-gray-200 bg-[#fff] hover:bg-[#E4E4E4] text-primarydeepo font-bold"
+                className="rounded-md border border-[#50B8C1] bg-[#fff] hover:bg-[#E4E4E4] text-[#50B8C1] font-bold"
               >
                 Cancel
               </Button>
@@ -352,7 +389,7 @@ function Screen() {
                 onClick={handleSubmit(onSubmitRequest)}
                 px={8}
                 size="sm"
-                className="ml-4 rounded-full bg-gradient-to-r from-secondarydeepo to-primarydeepo hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo drop-shadow-md text-[#fff] font-bold mr-14"
+                className="ml-4 rounded-md bg-gradient-to-r from-[#50B8C1] to-[#50B8C1] hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-[#50B8C1] drop-shadow-md text-[#fff] font-bold mr-14"
               >
                 Update
               </Button>

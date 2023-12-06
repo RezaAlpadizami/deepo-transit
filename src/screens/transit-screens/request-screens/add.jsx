@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 import Swal from 'sweetalert2';
 import { Button, Text } from '@chakra-ui/react';
-import { SiExpertsexchange } from 'react-icons/si';
+// import { SiExpertsexchange } from 'react-icons/si';
 import { yupResolver } from '@hookform/resolvers/yup';
 
 import Input from '../../../components/input-component';
@@ -15,11 +15,12 @@ import { thousandSeparator } from '../../../utils/helper';
 import Select from '../../../components/select-component';
 import { RequestApi } from '../../../services/api-transit';
 import TextArea from '../../../components/textarea-component';
-import deleteIcon from '../../../assets/images/deleteItem.svg';
+// import deleteIcon from '../../../assets/images/deleteItem.svg';
 import DatePicker from '../../../components/datepicker-component';
-import InputDetail from '../../../components/input-detail-component';
+// import InputDetail from '../../../components/input-detail-component';
 import CookieService from '../../../services/cookies/cookie-service';
 import LoadingHover from '../../../components/loading-hover-component';
+import Table from '../inbound-screens/component/table';
 
 function Screen() {
   const navigate = useNavigate();
@@ -157,12 +158,12 @@ function Screen() {
 
   return (
     <div>
-      <div className="px-5 rounded-[55px] py-4 drop-shadow-md">
+      <div className="px-5 py-4">
         <div className="grid-cols-2 gap-4 flex max-[640px]:flex-col sm:flex-col lg:flex-row">
           <div className="w-full h-full">
-            <h5 className="text-gray-400 px-8 mb-1">Request</h5>
-            <fieldset className="bg-white border-borders w-full h-full py-12 rounded-3xl max-[640px]:px-4 max-[640px]:mx-0 sm:px-6 sm:mx-0 lg:mx-4 lg:px-8">
-              {/* <legend className="px-2 text-[28px] text-primarydeepo">Request</legend> */}
+            {/* <h5 className="text-gray-400 px-8 mb-1">Request</h5> */}
+            <fieldset className="bg-white border border-[#C2C2C2] w-full min-h-[507px] py-12 rounded-md max-[640px]:px-4 max-[640px]:mx-0 sm:px-6 sm:mx-0 lg:mx-4 lg:px-8">
+              <legend className="px-2 text-lg text-gray-400">Request</legend>
               <div className="flex gap-4 justify-center max-[640px]:flex-col sm:flex-col lg:flex-row">
                 <div className="w-full">
                   <Select
@@ -195,9 +196,9 @@ function Screen() {
             </fieldset>
           </div>
           <div className="w-full h-full">
-            <h6 className="text-gray-400 px-8 mb-1">Request Detail</h6>
-            <fieldset className="bg-white border-borders w-full h-full py-12 rounded-3xl max-[640px]:px-4 max-[640px]:mx-0 sm:px-6 sm:mx-0 lg:mx-4 lg:px-8">
-              {/* <legend className="px-2 text-[28px] text-primarydeepo">Request Detail</legend> */}
+            {/* <h6 className="text-gray-400 px-8 mb-1">Request Detail</h6> */}
+            <fieldset className="bg-white border border-[#C2C2C2] w-full min-h-[507px] py-12 rounded-md max-[640px]:px-4 max-[640px]:mx-0 sm:px-6 sm:mx-0 lg:mx-4 lg:px-8">
+              <legend className="px-2 text-lg text-gray-400">Request Detail</legend>
               <form onSubmit={handleSubmitProd(onAddProdRequestDetail)}>
                 <div className="flex gap-4 justify-center max-[640px]:flex-col sm:flex-col lg:flex-row">
                   <div className="w-full col-span-2">
@@ -220,46 +221,60 @@ function Screen() {
                   </div>
                 </div>
                 <div className="flex justify-end">
-                  <Button px={8} type="submit" size="sm" className="rounded-full bg-primarydeepo text-[#fff] mr-6">
+                  <Button px={8} type="submit" size="sm" className="rounded-md bg-[#50B8C1] text-[#fff] mr-6">
                     + Add
                   </Button>
                 </div>
               </form>
               <div className="border-b border-gray-400 my-6"> </div>
               {updateDataAdd?.length > 0 && (
-                <div>
-                  {updateDataAdd.map((val, id) => {
-                    return (
-                      <div className="flex" key={id}>
-                        <div className="my-4 mr-4 max-[640px]:mr-0 sm:mr-0 lg:mr-2 flex flex-col justify-center align-middle">
-                          <Button
-                            type="button"
-                            size="sm"
-                            bgColor="transparent"
-                            _hover={{
-                              bgColor: '#EBECF1',
-                            }}
-                            onClick={() => handleRemove(val.product_id)}
-                          >
-                            <img src={deleteIcon} alt="delete Icon" className="max-[640px]:w-8 max-[640px]:h-8" />
-                          </Button>
-                        </div>
-                        <InputDetail
-                          value={`SKU: ${val.product_sku}`}
-                          label={`${val.product_name}`}
-                          customStyleLabel="font-bold text-md mb-0 max-[640px]:text-xs max-[640px]:w-24 sm:w-24 md:w-full lg:w-24 xl:w-48"
-                          customStyleSpan="text-md max-[640px]:text-xs sm:text-sm"
-                        />
-                        <div className="flex relative gap-20 mt-6">
-                          <span className="absolute right-24 max-[640px]:right-12">
-                            <SiExpertsexchange className="w-4 h-4 text-red-200" />
-                          </span>
-                          <Text>{thousandSeparator(val.qty)}</Text>
-                        </div>
-                      </div>
-                    );
+                <Table
+                  // loading={loadtable}
+                  data={updateDataAdd.map(data => {
+                    return {
+                      product_id: data.product_id,
+                      product_name: data.product_name,
+                      product_sku: data.product_sku,
+                      qty: data.qty,
+                    };
                   })}
-                </div>
+                  register
+                  handleRemove={handleRemove}
+                  // isLarge={isLarge}
+                />
+                // <div>
+                //   {updateDataAdd.map((val, id) => {
+                //     return (
+                //       <div className="flex" key={id}>
+                //         <div className="my-4 mr-4 max-[640px]:mr-0 sm:mr-0 lg:mr-2 flex flex-col justify-center align-middle">
+                //           <Button
+                //             type="button"
+                //             size="sm"
+                //             bgColor="transparent"
+                //             _hover={{
+                //               bgColor: '#EBECF1',
+                //             }}
+                //             onClick={() => handleRemove(val.product_id)}
+                //           >
+                //             <img src={deleteIcon} alt="delete Icon" className="max-[640px]:w-8 max-[640px]:h-8" />
+                //           </Button>
+                //         </div>
+                //         <InputDetail
+                //           value={`SKU: ${val.product_sku}`}
+                //           label={`${val.product_name}`}
+                //           customStyleLabel="font-bold text-md mb-0 max-[640px]:text-xs max-[640px]:w-24 sm:w-24 md:w-full lg:w-24 xl:w-48"
+                //           customStyleSpan="text-md max-[640px]:text-xs sm:text-sm"
+                //         />
+                //         <div className="flex relative gap-20 mt-6">
+                //           <span className="absolute right-24 max-[640px]:right-12">
+                //             <SiExpertsexchange className="w-4 h-4 text-red-200" />
+                //           </span>
+                //           <Text>{thousandSeparator(val.qty)}</Text>
+                //         </div>
+                //       </div>
+                //     );
+                //   })}
+                // </div>
               )}
 
               <div className="border-b border-gray-400 my-6"> </div>
@@ -277,7 +292,7 @@ function Screen() {
                 onClick={() => navigate(-1)}
                 px={8}
                 size="sm"
-                className="rounded-full border border-gray-200 bg-[#fff] hover:bg-[#E4E4E4] text-primarydeepo font-bold"
+                className="rounded-md border border-[#50B8C1] bg-[#fff] hover:bg-[#E4E4E4] text-[#50B8C1] font-bold"
               >
                 Cancel
               </Button>
@@ -288,7 +303,7 @@ function Screen() {
                 onClick={handleSubmit(onSubmitRequest)}
                 px={8}
                 size="sm"
-                className="ml-4 rounded-full bg-gradient-to-r from-secondarydeepo to-primarydeepo hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo drop-shadow-md text-[#fff] font-bold  mr-14"
+                className="ml-4 rounded-md bg-gradient-to-r from-[#50B8C1] to-[#50B8C1] hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-[#50B8C1] drop-shadow-md text-[#fff] font-bold  mr-14"
               >
                 Submit
               </Button>

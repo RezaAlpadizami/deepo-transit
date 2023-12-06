@@ -1,48 +1,42 @@
 import React, { useContext } from 'react';
 
 import LocalStorage from 'local-storage';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { UserCircleIcon, ChevronDownIcon, OfficeBuildingIcon } from '@heroicons/react/solid';
-import {
-  Popover,
-  PopoverArrow,
-  PopoverBody,
-  PopoverContent,
-  PopoverFooter,
-  PopoverTrigger,
-  Button,
-  useMediaQuery,
-} from '@chakra-ui/react';
+import { Link, useLocation } from 'react-router-dom';
+// import { ChevronDownIcon } from '@heroicons/react/solid';
+import { ChevronDownIcon, BellIcon, UserIcon } from '@heroicons/react/outline';
+import { useMediaQuery } from '@chakra-ui/react';
 
 import Context from '../context';
-import logo from '../assets/images/logo.svg';
 import menuItem from '../navigation/menu-item';
+import { logoApp } from '../assets/images';
 import { findTree } from '../utils/navigation-utils';
-import CookieService from '../services/cookies/cookie-service';
+// import CookieService from '../services/cookies/cookie-service';
 import HamburgerMenu from '../assets/images/hamburger-icon.svg';
 
 function Header() {
   const location = useLocation();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const { store } = useContext(Context);
+  console.log('store', store);
   const [isLarge] = useMediaQuery('(min-width: 1224px)');
 
   const getWarehouse = () => JSON.parse(LocalStorage.get('Warehouse'));
   const id = getWarehouse()?.id.toString() || '';
   store.setWarehouseId(id);
+  console.log('store', store.setWarehouseId(id));
 
-  const handleChangeWarehouse = () => {
-    CookieService.removeCookies();
-    LocalStorage.remove('Warehouse');
-    navigate('/');
-    window.location.reload();
-  };
+  // const handleChangeWarehouse = () => {
+  //   CookieService.removeCookies();
+  //   LocalStorage.remove('Warehouse');
+  //   navigate('/');
+  //   window.location.reload();
+  // };
 
   return (
-    <header className="relative flex p-5">
+    <header className="relative flex p-5 bg-[#fff] drop-shadow-sm">
       {isLarge ? (
         <div className="mx-3 mt-0.5 cursor-pointer z-10" onClick={() => store.toggleDrawer()}>
-          <img src={logo} alt="logo" />
+          <img src={logoApp} alt="logo" width={200} />
         </div>
       ) : (
         <div className="mx-1 h-8 cursor-pointer z-20" onClick={() => store.toggleDrawer()}>
@@ -71,7 +65,7 @@ function Header() {
             );
           })}
       </ul>
-      <div className="flex mr-4">
+      {/* <div className="flex mr-4">
         <UserCircleIcon className="w-6 h-6 m-auto" />
         <Popover colorScheme="#caf0f8">
           <PopoverTrigger>
@@ -103,6 +97,13 @@ function Header() {
             </PopoverFooter>
           </PopoverContent>
         </Popover>
+      </div> */}
+      <div className="flex">
+        <div className="flex items-center justify-center mx-4">
+          <BellIcon className="w-5 h-5 mx-4 text-[#757575]" />
+          <UserIcon className="w-5 h-5 text-[#757575]" />
+          <ChevronDownIcon className="w-4 h-4 text-[#757575]" />
+        </div>
       </div>
     </header>
   );

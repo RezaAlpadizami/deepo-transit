@@ -16,7 +16,7 @@ function LottiesAnimation(props) {
       // } bg-white z-[999] flex flex-col items-center justify-center`}
       className={classCustom}
     >
-      <Lottie options={defaultOptions} width={400} height={200} />
+      <Lottie options={defaultOptions} width={150} height={150} />
     </div>
   ) : null;
 }

@@ -28,9 +28,9 @@ function SelectComponent(props) {
             size="sm"
             name={name}
             id={name}
-            className="w-full text-sm rounded-full border-gray-400 px-5 py-2.5 h-full"
+            className="w-full text-sm rounded-md border-gray-400 px-5 py-1.5 h-full"
             disabled={disabled}
-            focusBorderColor="#c7f9cc"
+            focusBorderColor="#184D47"
             onChange={e => onChangeValue(e.target.value)}
             placeholder={!placeholder ? `Select ${label}` : placeholder}
           >

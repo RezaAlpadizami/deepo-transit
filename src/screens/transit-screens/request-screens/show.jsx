@@ -7,13 +7,14 @@ import Swal from 'sweetalert2';
 import Moment from 'moment/moment';
 import { Text } from '@chakra-ui/react';
 import { ArrowNarrowLeftIcon } from '@heroicons/react/solid';
-import { SiExpertsexchange } from 'react-icons/si';
+// import { SiExpertsexchange } from 'react-icons/si';
 
 import Context from '../../../context';
 import { thousandSeparator } from '../../../utils/helper';
 import { RequestApi } from '../../../services/api-transit';
 import TextArea from '../../../components/textarea-component';
 import InputDetail from '../../../components/input-detail-component';
+import Table from '../inbound-screens/component/table';
 
 function Screen() {
   const { id } = useParams();
@@ -67,21 +68,20 @@ function Screen() {
     ? updateDataRequesById.reduce((acc, item) => acc + item.qty, 0)
     : null;
 
-  console.log('dataRequestbyId', dataRequesById);
   return (
     <div>
-      <div className="px-5 pb-8 drop-shadow-md">
+      <div className="px-5 pb-8">
         <div
           className="cursor-pointer p-2 w-12 flex justify-center hover:bg-gray-200 hover:rounded-lg mb-4"
           onClick={() => navigate(-1)}
         >
-          <ArrowNarrowLeftIcon className="w-6 h-6 text-secondarydeepo text-center" />
+          <ArrowNarrowLeftIcon className="w-6 h-6 text-[#50B8C1] text-center" />
         </div>
         <div className="grid-cols-2 gap-6 flex max-[640px]:flex-col sm:flex-col lg:flex-row">
           <div className="w-full h-full">
-            <h3 className="mx-6 px-4 mb-1 text-gray-400">Request</h3>
-            <fieldset className="bg-white border-borders w-full h-full px-8 py-12 rounded-3xl mx-4 max-[640px]:mx-0 max-[640px]:px-4 max-[640px]:mb-4 sm:px-6 sm:mx-0 lg:mx-4 lg:px-8">
-              {/* <legend className="px-2 text-[28px] text-primarydeepo">Request</legend> */}
+            {/* <h3 className="mx-6 px-4 mb-1 text-gray-400">Request</h3> */}
+            <fieldset className="bg-white border border-[#C2C2C2] w-full min-h-[507px] px-8 py-12 rounded-md mx-4 max-[640px]:mx-0 max-[640px]:px-4 max-[640px]:mb-4 sm:px-6 sm:mx-0 lg:mx-4 lg:px-8">
+              <legend className="px-2 text-lg text-gray-400">Request</legend>
               <div className="flex flex-col">
                 <div className="w-full">
                   <InputDetail
@@ -125,15 +125,15 @@ function Screen() {
             </fieldset>
           </div>
           <div className="w-full h-full">
-            <h4 className="mx-6 px-4 mb-1 text-gray-400">Request Detail</h4>
-            <fieldset className="bg-white border-borders w-full h-full px-8 py-12 rounded-3xl mx-4 max-[640px]:mx-0 max-[640px]:px-4 sm:px-6 sm:mx-0 lg:mx-4 lg:px-8">
-              {/* <legend className="px-2 text-[18px] text-primarydeepo">Request Detail</legend> */}
+            {/* <h4 className="mx-6 px-4 mb-1 text-gray-400">Request Detail</h4> */}
+            <fieldset className="bg-white border border-[#C2C2C2] w-full min-h-[507px] px-8 py-12 rounded-md mx-4 max-[640px]:mx-0 max-[640px]:px-4 sm:px-6 sm:mx-0 lg:mx-4 lg:px-8">
+              <legend className="px-2 text-lg text-gray-400">Request Detail</legend>
               <div>
-                <div className="flex justify-between">
+                {/* <div className="flex justify-between">
                   <Text className="text-gray-400">Product</Text>
                   <Text className="text-gray-400">Qty</Text>
-                </div>
-                {updateDataRequesById.map(({ qty, product_id, product_name, product_sku }) => {
+                </div> */}
+                {/* {updateDataRequesById.map(({ qty, product_id, product_name, product_sku }) => {
                   return (
                     <div className="flex" key={product_id}>
                       <InputDetail
@@ -150,7 +150,20 @@ function Screen() {
                       </div>
                     </div>
                   );
-                })}
+                })} */}
+                <Table
+                  // loading={loadtable}
+                  data={updateDataRequesById.map(data => {
+                    return {
+                      product_id: data.product_id,
+                      product_name: data.product_name,
+                      product_sku: data.product_sku,
+                      qty: data.qty,
+                    };
+                  })}
+                  register
+                  // isLarge={isLarge}
+                />
               </div>
               <div className="border-b border-gray-400 my-6"> </div>
               <div className="flex justify-between font-bold">
@@ -173,7 +186,7 @@ function Screen() {
                 to={`/${dataRequesById?.activity_name}`}
                 px={8}
                 size="sm"
-                className="relative border-none font-bold text-[12px] mr-12 text-[#fff] w-[6rem] h-[1.5rem] leading-[1.5rem] text-center from-secondarydeepo via-secondarydeepo to-secondarydeepo bg-gradient-to-r bg-300% rounded-[30px] z-[1] before:absolute before:-top-[5px] before:-right-[5px] before:-left-[5px] before:-bottom-[5px] before:-z-[1] before:bg-gradient-to-r hover:animate-ani hover:before:blur-[10px] before:from-secondarydeepo before:via-secondarydeepo before:to-secondarydeepo before:bg-400% before:rounded-[35px] before:duration-1000 active:bg-gradient-to-r active:from-processbtnfrom active:via-processbtnto active:to-processbtnfrom my-2"
+                className="relative border-none font-bold text-[12px] mr-12 text-[#fff] w-[6rem] h-[1.5rem] leading-[1.5rem] text-center from-[#50B8C1] via-[#50B8C1] to-[#50B8C1] bg-gradient-to-r bg-300% rounded-md z-[1] before:absolute before:-top-[5px] before:-right-[5px] before:-left-[5px] before:-bottom-[5px] before:-z-[1] before:bg-gradient-to-r hover:animate-ani hover:before:blur-[10px] before:from-[#50B8C1] before:via-[#50B8C1] before:to-[#50B8C1] before:bg-400% before:rounded-md before:duration-1000 active:bg-gradient-to-r active:from-[#50B8C1] active:via-[#50B8C1] active:to-[#50B8C1] my-2"
               >
                 Process
               </Link>

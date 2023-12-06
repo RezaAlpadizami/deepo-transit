@@ -5,7 +5,7 @@ import Moment from 'moment';
 import Swal from 'sweetalert2';
 import { StopIcon } from '@heroicons/react/solid';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { CalculatorIcon, XIcon } from '@heroicons/react/outline';
+import { XIcon } from '@heroicons/react/outline';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { Button, Input, Table, Thead, Tbody, Tr, Th, Td, TableContainer, useMediaQuery, Fade } from '@chakra-ui/react';
 
@@ -25,6 +25,8 @@ import MagnifyClass from '../../../assets/images/magnify-glass.svg';
 import { RequestApi, TransitApi } from '../../../services/api-transit';
 // import LoadingHover from '../../../components/loading-hover-component';
 import LottiesLoading from '../../../components/lotties-animation-component';
+import { clipboardRequest } from '../../../assets/images';
+import TextArea from '../../../components/textarea-component';
 
 const swalButton = Swal.mixin({
   customClass: {
@@ -440,8 +442,8 @@ function Screen(props) {
           classCustom="z-[999] right-0 left-[20%] top-[9%] absolute bottom-0 overflow-hidden bg-[#f2f2f2] opacity-75 flex flex-col items-center justify-center"
         />
       )}
-      <div className="grid grid-rows-4 px-5 py-1 rounded-3xl drop-shadow-md w-full h-full">
-        <div className="mb-6">
+      <div className="grid grid-rows-7 px-8 py-1 rounded-md w-full h-full">
+        <div className="mb-2">
           <fieldset className="bg-white w-full h-full px-8 py-6 rounded-3xl">
             {/* <legend className="sm:text-xl xl:text-3xl text-primarydeepo font-semibold p-2">Request</legend> */}
 
@@ -449,45 +451,53 @@ function Screen(props) {
               <button
                 type="submit"
                 onClick={() => setOnOverview(!onOverview)}
-                className={`${scanning ? 'bg-[#ffc108]' : 'bg-secondarydeepo'}  h-3/4 rounded-lg px-4 ${
+                className={`${scanning ? 'bg-[#ffc108]' : 'bg-white'}  h-3/4 rounded-md border border-[#C2C2C2] px-3 ${
                   isLarge ? 'py-2' : 'my-auto pb-2'
                 } `}
                 disabled={scanning}
               >
-                <p className="md:text-sm xl:text-md text-xs text-[#fff] sm:font-semibold xl:font-semibold">Request</p>
-                <CalculatorIcon
-                  className={`${scanning ? 'bg-[#ffc108]' : 'bg-secondarydeepo'} h-12 w-15 stroke-[#fff] mx-auto`}
-                />
+                <p className="md:text-sm xl:text-md text-xs text-[#50B8C1] sm:font-semibold xl:font-semibold">
+                  Request
+                </p>
+                {/* <CalculatorIcon className={`${scanning ? 'bg-[#ffc108]' : 'bg-white'} w-28 stroke-[#50B8C1] mx-auto`} /> */}
+                <img src={clipboardRequest} alt="icon-request" width={120} />
               </button>
-
-              <div className={`${isLarge ? 'flex gap-6' : ''} w-full pl-10 pb-2`}>
-                <InputComponent
-                  name="request_number"
-                  label="Request Number"
-                  register={register}
-                  control={control}
-                  errors={errors}
-                  disabled
-                />
-                <DatePicker
-                  name="activity_date"
-                  label="Date"
-                  register={register}
-                  control={control}
-                  errors={errors}
-                  isLarge={isLarge}
-                  disabled
-                />
+              <div className={`${isLarge ? 'flex gap-8' : ''} w-full pl-8 pb-2`}>
+                <div className="flex-col w-[70%]">
+                  <InputComponent
+                    name="request_number"
+                    label="Request Number"
+                    register={register}
+                    control={control}
+                    errors={errors}
+                    disabled
+                  />
+                  <DatePicker
+                    name="activity_date"
+                    label="Date"
+                    register={register}
+                    control={control}
+                    errors={errors}
+                    disabled
+                  />
+                </div>
+                <div className="w-full">
+                  <TextArea name="notes" label="Notes" register={register} errors={errors} />
+                </div>
               </div>
             </div>
           </fieldset>
         </div>
 
-        <div className={`${isLarge ? 'flex gap-6' : ''} h-full w-full row-span-2 justify-center`}>
+        <div className={`${isLarge ? 'flex gap-6 px-8' : ''} h-full w-full row-span-2 justify-center`}>
           <div className="w-full mb-6">
-            <h1 className="px-3 text-gray-400">Request Detail</h1>
-            <fieldset className={`${isLarge ? 'h-full py-8' : 'h-1/2 py-4'} bg-white w-full rounded-3xl px-2`}>
-              {/* <legend className="px-2 sm:text-xl xl:text-3xl text-primarydeepo font-semibold">Request Detail</legend> */}
+            {/* <h1 className="px-3 text-gray-400">Request Detail</h1> */}
+            <fieldset
+              className={`${
+                isLarge ? 'min-h-[507px] py-8' : 'h-1/2 py-4'
+              } bg-white w-full border border-[#C2C2C2] rounded-md px-2`}
+            >
+              <legend className="px-2 text-lg text-gray-400">Request Detail</legend>
               {/* <LoadingComponent visible={loadingRequest} /> */}
               <LottiesLoading
                 animationsData={Loading}
@@ -512,9 +522,13 @@ function Screen(props) {
             </fieldset>
           </div>
           <div className="w-full mb-6">
-            <h2 className="px-3 text-gray-400">RFID Detected</h2>
-            <fieldset className={`${isLarge ? 'h-full py-8' : 'h-1/2 py-4'} bg-white w-full rounded-3xl px-2`}>
-              {/* <legend className="px-2 sm:text-xl xl:text-3xl text-primarydeepo font-semibold">RFID Detected</legend> */}
+            {/* <h2 className="px-3 text-gray-400">RFID Detected</h2> */}
+            <fieldset
+              className={`${
+                isLarge ? 'min-h-[507px] py-8' : 'h-1/2 py-4'
+              } bg-white border border-[#C2C2C2] w-full rounded-md px-2`}
+            >
+              <legend className="px-2 text-lg text-gray-400">RFID Detected</legend>
               {/* <LoadingComponent visible={loadingRFID} /> */}
               <LottiesLoading
                 visible={loadingRFID}
@@ -540,30 +554,28 @@ function Screen(props) {
           </div>
         </div>
 
-        <div className="my-auto">
-          <div className="w-full px-4 rounded-3xl">
-            <div className="flex w-full py-2">
+        <div className="my-auto px-8">
+          <div className="rounded-md border border-[#C2C2C2] py-2">
+            <div className="flex py-2 w-full">
               <div
-                className={`grid py-auto w-[40%] mr-16 bg-white px-4 py-2 rounded-3xl ${
-                  error ? 'border-[#a2002d]' : 'border-none'
-                } `}
+                className={`grid w-full mr-16 bg-white px-4 py-2 rounded-3xl border ${
+                  error ? 'border-red-500' : 'border-none'
+                }`}
               >
                 <div className="flex">
-                  <div className="max-sm:text-xs xl:text-lg w-1/2 flex-1">Total Request</div>
+                  <div className="max-sm:text-xs xl:text-md w-1/2 flex-1">Total Request</div>
                   <div className="font-bold">{totalRequest}</div>
                 </div>
                 <div className="flex">
-                  <div className="max-sm:text-xs xl:text-lg w-1/2 flex-1">
+                  <div className="max-sm:text-xs xl:text-md w-1/2 flex-1">
                     {isLarge ? 'Total RFID Detected' : 'Total RFID'}{' '}
                   </div>
                   <div className="font-bold">{totalRFID}</div>
                 </div>
               </div>
 
-              <div className="grid w-1/2">
-                <div
-                  className={`${isLarge ? 'grid grid-cols-3 justify-place-end pl-8' : 'flex flex-wrap my-2 '} my-auto `}
-                >
+              <div className="flex justify-end w-full sm:space-x-[20%] md:space-x-[60%] xl:space-x-[70%]">
+                <div className={`${isLarge ? 'flex flex-col gap-2 mx-8 w-[30%]' : 'flex flex-col gap-2 my-2 '}`}>
                   <Button
                     _hover={{
                       shadow: 'md',
@@ -574,7 +586,7 @@ function Screen(props) {
                     type="button"
                     size={isLarge ? 'sm' : 'xs'}
                     px={isLarge ? 5 : 2}
-                    className="rounded-full border border-gray-300 bg-[#fff] hover:bg-[#E4E4E4] text-primarydeepo font-bold"
+                    className="rounded-md border border-[#50B8C1] bg-[#fff] hover:bg-[#E4E4E4] text-[#50B8C1] font-semibold"
                     onClick={scanning ? stopScanning : startScanning}
                     isDisabled={transitData ? transitData?.details?.length === 0 || transitData?.length === 0 : true}
                   >
@@ -590,10 +602,8 @@ function Screen(props) {
                     }}
                     type="button"
                     size={isLarge ? 'sm' : 'xs'}
-                    px={isLarge ? 6 : 2}
-                    className={`rounded-full border border-gray-300 bg-[#fff] hover:bg-[#E4E4E4] text-[#2f3e46] font-bold ${
-                      isLarge ? 'mx-4' : 'mx-2'
-                    } `}
+                    px={isLarge ? 5 : 2}
+                    className="rounded-md border border-[#757575] bg-[#fff] hover:bg-[#E4E4E4] text-[#757575] font-semibold"
                     onClick={onReset}
                     isDisabled={scanning}
                   >
@@ -610,13 +620,13 @@ function Screen(props) {
                     type="submit"
                     size={isLarge ? 'sm' : 'xs'}
                     px={isLarge ? 6 : 3}
-                    className={`rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold ${
+                    className={`rounded-md bg-[#50B8C1] drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-semibold ${
                       isLarge ? '' : 'mt-2'
                     } `}
                     onClick={onSubmitRFID}
                     isDisabled={onDisabled()}
                   >
-                    Submit
+                    Next
                   </Button>
                 </div>
               </div>
@@ -633,13 +643,13 @@ function Screen(props) {
       </div>
       {onOverview && (
         <div
-          className=" main-modal fixed w-full h-full inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
+          className="main-modal fixed w-full h-full inset-0 z-50 overflow-hidden flex justify-center items-center animated fadeIn faster "
           style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
         >
-          <div className="rounded-3xl border shadow-lg modal-container bg-white w-[80%] h-3/4 mx-auto z-50 overflow-y-auto ">
-            <div className="grid justify-items-end">
+          <div className="rounded-md border shadow-lg modal-container bg-white w-[80%] h-3/5 mx-auto z-50 overflow-y-hidden ">
+            <div className="grid justify-items-end mb-8">
               <XIcon
-                className="fixed h-6 stroke-2 mr-1 pointer-events-auto"
+                className="fixed h-6 stroke-2 my-2 px-2 pointer-events-auto cursor-pointer"
                 onClick={() => setOnOverview(!onOverview)}
               />
             </div>
@@ -675,6 +685,7 @@ function Screen(props) {
                 ]}
                 onSearch
                 onActionButton={(id, data) => onProcess(id, data)}
+                isInOut
               />
             </div>
           </div>

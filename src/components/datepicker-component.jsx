@@ -25,14 +25,14 @@ function InputElement(props) {
         type="text"
         isInvalid={errors[name]}
         variant={disabled ? 'filled' : 'outline'}
-        className={` ${disabled ? 'bg-gray-200' : ''} w-full text-sm border-gray-400 py-5 rounded-full px-8`}
-        focusBorderColor="#c7f9cc"
+        className={` ${disabled ? 'bg-gray-200' : ''} w-full text-sm border-gray-400 py-4 rounded-md px-4`}
+        focusBorderColor="#184D47"
       />
       <InputRightElement
-        className={`rounded-r-full ${isLarge ? 'w-14' : ' w-10'} w-14 bg-primarydeepo h-full cursor-pointer`}
+        className={`rounded-r-full ${isLarge ? 'w-14' : ' w-10'} w-14 h-full cursor-pointer`}
         onClick={handleClick}
       >
-        <CalendarIcon color="white" className="w-5 h-5 mt-0.5" />
+        <CalendarIcon color="gray" className="w-5 h-5 mt-0.5" />
       </InputRightElement>
     </InputGroup>
   );

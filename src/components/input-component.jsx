@@ -58,12 +58,10 @@ function InputComponent(props) {
                       onChange={onChange}
                       maxLength={maxLength}
                       id={name}
-                      focusBorderColor="#c7f9cc"
+                      focusBorderColor="#184D47"
                       readOnly={readOnly}
                       variant={disabled ? 'filled' : 'outline'}
-                      className={`${
-                        disabled ? 'bg-gray-200' : ''
-                      } w-full text-sm rounded-full border-gray-400 pl-12 py-5`}
+                      className={`${disabled ? 'bg-gray-200' : ''} w-full text-sm rounded-md border-gray-400 px-4 py-4`}
                     />
                   );
                 }}
@@ -87,7 +85,7 @@ function InputComponent(props) {
                       disabled={disabled}
                       placeholder={placeholder}
                       selected={value}
-                      focusBorderColor="#c7f9cc"
+                      focusBorderColor="#184D47"
                       autoComplete="off"
                       value={value}
                       onChange={onChange}
@@ -95,9 +93,7 @@ function InputComponent(props) {
                       id={name}
                       readOnly={readOnly}
                       variant={disabled ? 'filled' : 'outline'}
-                      className={`${
-                        disabled ? 'bg-gray-200' : ''
-                      } w-full text-sm rounded-full border-gray-400 pl-6 py-5`}
+                      className={`${disabled ? 'bg-gray-200' : ''} w-full text-sm rounded-md border-gray-400 px-4 py-4`}
                     />
                   );
                 }}
@@ -121,9 +117,9 @@ function InputComponent(props) {
               hidden={hidden}
               name={name}
               id={name}
-              focusBorderColor="#c7f9cc"
+              focusBorderColor="#184D47"
               variant={disabled ? 'filled' : 'outline'}
-              className={`${disabled ? 'bg-gray-200' : ''} w-full text-sm rounded-full border-gray-400 px-5 py-5`}
+              className={`${disabled ? 'bg-gray-200' : ''} w-full text-sm rounded-md border-gray-400 px-4 py-4`}
               placeholder={placeholder}
               readOnly={readOnly}
             />
@@ -145,10 +141,10 @@ function InputComponent(props) {
                     onChange={onChange}
                     maxLength={maxLength}
                     id={name}
-                    focusBorderColor="#c7f9cc"
+                    focusBorderColor="#184D47"
                     readOnly={readOnly}
                     variant={disabled ? 'filled' : 'outline'}
-                    className={`${disabled ? 'bg-gray-200' : ''} w-full text-sm rounded-full border-gray-400 px-5 py-5`}
+                    className={`${disabled ? 'bg-gray-200' : ''} w-full text-sm rounded-md border-gray-400 px-4 py-4`}
                   />
                 );
               }}
