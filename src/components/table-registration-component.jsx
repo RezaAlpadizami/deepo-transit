@@ -1,3 +1,4 @@
+// TableRegistration.js
 import React from 'react';
 import LottiesAnimation from './lotties-animation-component';
 import Loading from '../assets/lotties/Loading.json';
@@ -7,6 +8,20 @@ function TableRegistration(props) {
 
   const th = `${isLarge ? 'px-8 text-sm' : 'px-4 text-xs'} text-bold text-[#000] text-center py-1.5 tracking-wide`;
   const td = 'text-[#000] text-center py-1.5 break-words';
+
+  if (loading) {
+    return (
+      <div className="w-full h-full max-h-[453px] overflow-y-auto overflow-x-hidden">
+        <LottiesAnimation
+          animationsData={Loading}
+          visible={loading}
+          classCustom={`absolute z-[999] ${
+            isLarge ? 'right-7 left-[60%] top-[42%]' : 'right-8 left-8'
+          } opacity-100 flex flex-col items-center justify-center`}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-full max-h-[453px] overflow-y-auto overflow-x-hidden">
@@ -21,14 +36,6 @@ function TableRegistration(props) {
         </thead>
 
         <tbody className="h-16">
-          {/* <Loading visible={loading} isLarge={isLarge} /> */}
-          <LottiesAnimation
-            animationsData={Loading}
-            visible={loading}
-            classCustom={`absolute z-[999] ${
-              isLarge ? 'right-7 left-[60%] top-[42%]' : 'right-8 left-8'
-            } opacity-100 flex flex-col items-center justify-center`}
-          />
           {data.length > 0 && data[0]?.rfid_number !== '' ? (
             data?.map((d, i) => {
               return (
@@ -39,7 +46,7 @@ function TableRegistration(props) {
                   } [&>*]:text-xs`}
                 >
                   <td className={`${td} w-[5%]`}>{i + 1}</td>
-                  <td className={`${td} w-[15%]`}>{rfidTable ? d.rfid_number : d.product_sku}</td>
+                  <td className={`${td} w-[15%]`}>{rfidTable ? d.rfid_number : d.sku}</td>
                   <td className={`${td} w-[60%]`}>
                     {d.product_name === undefined ? '--Not Registered--' : d.product_name}
                   </td>

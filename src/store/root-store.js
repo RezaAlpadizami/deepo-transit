@@ -1,6 +1,7 @@
 import { types } from 'mobx-state-tree';
 import UserStore from './user-store';
 import BoundActivity from './bound-activity-store';
+import RegistrationStore from './registration-store';
 
 const RootStore = types
   .model({
@@ -11,6 +12,7 @@ const RootStore = types
     warehouseId: types.optional(types.string, ''),
     activity: types.optional(BoundActivity, {}),
     user: types.optional(UserStore, {}),
+    registration: types.optional(RegistrationStore, {}),
   })
   .actions(self => ({
     setLogin(isLogin) {

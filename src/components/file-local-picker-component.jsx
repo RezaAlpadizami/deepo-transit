@@ -3,50 +3,37 @@ import { Button } from '@chakra-ui/react';
 import LottiesAnimation from './lotties-animation-component';
 import StopScanAnimation from '../assets/lotties/Stop-scan.json';
 
-function FilePicker({ onFileSelect }) {
-  const [pollRate] = useState(1);
-  const [intervalId, setIntervalId] = useState(null);
-  const [isScanning, setIsScanning] = useState(() => {
-    return localStorage.getItem('isScanning') === 'true' || false;
-  });
-  const [fileContent, setFileContent] = useState(null);
+function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath }) {
+  const [watchingFile, setWatchingFile] = useState(false);
+  const [rfidDetected, setRfidDetected] = useState('');
+
+  const fetchData = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_UI_URL_PATH}${dynamicPath}`);
+      const text = await response.text();
+      setRfidDetected(text);
+      await onFileChange(text);
+    } catch (error) {
+      console.error('Error fetching file:', error);
+    } finally {
+      if (watchingFile) {
+        setTimeout(fetchData, 1000);
+      }
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(`${process.env.REACT_APP_UI_PATH}dummy-data.txt`);
-        const text = await response.text();
-
-        if (text !== fileContent) {
-          setFileContent(text);
-          onFileSelect(text);
-          localStorage.setItem('fileContent', text);
-        }
-      } catch (error) {
-        console.error('Error fetching file:', error);
-      }
-    };
-
     if (isScanning) {
-      const newIntervalId = setInterval(fetchData, pollRate * 1000);
-      setIntervalId(newIntervalId);
-
+      setWatchingFile(true);
       fetchData();
     } else {
-      clearInterval(intervalId);
-      setIntervalId(null);
+      setWatchingFile(false);
     }
 
     return () => {
-      clearInterval(intervalId);
+      clearTimeout();
     };
-  }, [isScanning, pollRate]);
-
-  const toggleScan = () => {
-    const newIsScanning = !isScanning;
-    setIsScanning(newIsScanning);
-    localStorage.setItem('isScanning', newIsScanning.toString());
-  };
+  }, [isScanning, dynamicPath, rfidDetected]);
 
   return (
     <div className="flex flex-col gap-2">

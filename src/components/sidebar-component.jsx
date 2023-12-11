@@ -7,7 +7,6 @@ import { FiLogOut } from 'react-icons/fi';
 
 import Context from '../context';
 import menuItem from '../navigation/menu-item';
-// import ArrowUpTray from '../assets/images/arrow-up-tray.svg';
 import { findParent, findTree } from '../utils/navigation-utils';
 
 function SidebarComponent() {
