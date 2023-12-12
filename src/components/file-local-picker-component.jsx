@@ -5,35 +5,37 @@ import StopScanAnimation from '../assets/lotties/Stop-scan.json';
 
 function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath }) {
   const [watchingFile, setWatchingFile] = useState(false);
-  const [rfidDetected, setRfidDetected] = useState('');
+  const [timeoutId, setTimeoutId] = useState(null);
 
   const fetchData = async () => {
     try {
       const response = await fetch(`${process.env.REACT_APP_UI_URL_PATH}${dynamicPath}`);
       const text = await response.text();
-      setRfidDetected(text);
       await onFileChange(text);
     } catch (error) {
       console.error('Error fetching file:', error);
     } finally {
       if (watchingFile) {
-        setTimeout(fetchData, 1000);
+        setTimeoutId(setTimeout(fetchData, 1000));
       }
     }
   };
 
   useEffect(() => {
-    if (isScanning) {
+    const cleanup = () => {
+      setWatchingFile(false);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+
+    if (!isScanning) {
+      cleanup();
+    } else {
       setWatchingFile(true);
       fetchData();
-    } else {
-      setWatchingFile(false);
     }
-
-    return () => {
-      clearTimeout();
-    };
-  }, [isScanning, dynamicPath, rfidDetected]);
+  }, [isScanning, dynamicPath, watchingFile]);
 
   return (
     <div className="flex flex-col gap-2">
