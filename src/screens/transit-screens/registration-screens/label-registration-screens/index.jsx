@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { useMediaQuery, Button } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
@@ -12,6 +12,7 @@ import TableRegistration from '../../../../components/table-registration-compone
 import FilePicker from '../../../../components/file-local-picker-component';
 import LabelRegistrationApi from '../../../../services/api-label-registration';
 import LoadingHover from '../../../../components/loading-hover-component';
+import Context from '../../../../context';
 
 const schemaSubmitRegistration = yup.object().shape({
   product_id: yup.string().nullable().required(),
@@ -26,12 +27,28 @@ function Screen() {
     return localStorage.getItem('isScanning') === 'true' || false;
   });
 
-  const [dataLabelRegistered, setDataLabelRegistered] = useState([]);
+  // const [dataLabelRegistered, setDataLabelRegistered] = useState([]);
   const [loadingFile, setLoadingFile] = useState(false);
   const [loading, setLoading] = useState(false);
   const [jsonArray, setJsonArray] = useState([]);
+  const { registrationStore } = useContext(Context);
 
   const dynamicPath = localStorage.getItem('dynamicPath');
+  const idQuantityMap = {};
+
+  const productRegistered = [...registrationStore.getProductRegistered()];
+
+  productRegistered?.forEach(item => {
+    const { id } = item;
+    idQuantityMap[id] = (idQuantityMap[id] || 0) + 1;
+  });
+
+  const transformedData = productRegistered?.map(item => ({
+    id: item.id,
+    sku: '1232ABDAMC',
+    product_name: item.product_name,
+    qty: idQuantityMap[item.id],
+  }));
 
   const {
     handleSubmit,
@@ -82,15 +99,15 @@ function Screen() {
     });
   }, [jsonArray]);
 
-  const getDataLabelRegistered = () => {
-    LabelRegistrationApi.get()
-      .then(res => {
-        setDataLabelRegistered(res.data);
-      })
-      .catch(error => {
-        Swal.fire({ text: error?.message || error?.originalError, icon: 'error' });
-      });
-  };
+  // const getDataLabelRegistered = () => {
+  //   LabelRegistrationApi.get()
+  //     .then(res => {
+  //       setDataLabelRegistered(res.data);
+  //     })
+  //     .catch(error => {
+  //       Swal.fire({ text: error?.message || error?.originalError, icon: 'error' });
+  //     });
+  // };
 
   const onSubmitRegistration = data => {
     const { notes, product_id } = data;
@@ -112,7 +129,7 @@ function Screen() {
           confirmButtonColor: '#50B8C1',
           confirmButtonText: `<p class="rounded bg-[#50B8C1] text-[#fff] px-5 py-2 ml-5 font-bold">OK</p>`,
         });
-        getDataLabelRegistered();
+        // getDataLabelRegistered();
         setJsonArray([]);
         setValue('notes', '');
         setValue('product_id', '');
@@ -127,7 +144,7 @@ function Screen() {
       });
   };
 
-  const getTotalProductRegistered = dataLabelRegistered.reduce((acc, item) => acc + item.qty, 0);
+  const getTotalProductRegistered = transformedData.reduce((acc, item) => acc + item.qty, 0);
 
   return (
     <div>
@@ -163,7 +180,7 @@ function Screen() {
               } bg-white w-full rounded-md border border-[#C2C2C2] px-8`}
             >
               <legend className="px-2 sm:text- xl:text-xl text-[#1F2937] font-semibold">Product Registered</legend>
-              <TableRegistration data={dataLabelRegistered} isLarge={isLarge} productRegistered />
+              <TableRegistration data={transformedData} isLarge={isLarge} productRegistered />
             </fieldset>
           </div>
           <div className="w-full mb-6">
@@ -204,6 +221,7 @@ function Screen() {
                     isScanning={isScanning}
                     toggleScan={toggleScan}
                     dynamicPath={dynamicPath}
+                    dataRfid={memoizedData}
                   />
                   <Button
                     _hover={{

@@ -1,11 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Button } from '@chakra-ui/react';
+import labelRegistrationApi from '../services/api-label-registration';
 import LottiesAnimation from './lotties-animation-component';
 import StopScanAnimation from '../assets/lotties/Stop-scan.json';
+import Context from '../context';
 
-function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath }) {
+function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath, dataRfid }) {
   const [watchingFile, setWatchingFile] = useState(false);
   const [timeoutId, setTimeoutId] = useState(null);
+  const [timeoutCheck, setTimeoutCheck] = useState(null);
+  const { registrationStore } = useContext(Context);
+
+  const rfidNumberToCheck = {
+    rfid_number: dataRfid?.map(item => item.rfid_number),
+  };
 
   const fetchData = async () => {
     try {
@@ -21,11 +29,28 @@ function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath }) {
     }
   };
 
+  const checkLabelAlreadyRegistered = () => {
+    labelRegistrationApi
+      .validationRegister(rfidNumberToCheck)
+      .then(res => {
+        registrationStore.setLabelRegistered(res?.data?.data);
+      })
+      .catch(error => {
+        console.log('error', error);
+      })
+      .finally(() => {
+        if (watchingFile) {
+          setTimeoutCheck(setTimeout(checkLabelAlreadyRegistered, 2000));
+        }
+      });
+  };
+
   useEffect(() => {
     const cleanup = () => {
       setWatchingFile(false);
-      if (timeoutId) {
+      if (timeoutId || timeoutCheck) {
         clearTimeout(timeoutId);
+        clearTimeout(timeoutCheck);
       }
     };
 
@@ -34,6 +59,7 @@ function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath }) {
     } else {
       setWatchingFile(true);
       fetchData();
+      checkLabelAlreadyRegistered();
     }
   }, [isScanning, dynamicPath, watchingFile]);
 
