@@ -19,7 +19,7 @@ function SidebarComponent() {
   }, [location.pathname]);
 
   useEffect(() => {
-    if (!menuParent || !menuParent.routes || menuParent?.routes.length <= 0) {
+    if (location.pathname === '/panel-notif' || !menuParent || !menuParent.routes || menuParent?.routes.length <= 0) {
       store.setIsDrawerOpen(false);
     } else {
       store.setIsDrawerOpen(true);

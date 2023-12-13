@@ -6,6 +6,8 @@ import showHideTableIcon from './show-hide-chip-icon.svg';
 import copyClipboardIcon from './copy-clipboard-chip-icon.svg';
 import logoApp from './logo-app.png';
 import clipboardRequest from './clipboard-request.svg';
+import alertCircle from './alert-circle.svg';
+import checkSquare from './check-square.svg';
 
 export {
   clipboardRequest,
@@ -16,4 +18,6 @@ export {
   showHideTableIcon,
   addIcon,
   logoApp,
+  alertCircle,
+  checkSquare,
 };

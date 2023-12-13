@@ -32,23 +32,26 @@ function Screen() {
   const [loading, setLoading] = useState(false);
   const [jsonArray, setJsonArray] = useState([]);
   const { registrationStore } = useContext(Context);
+  console.log('jsonArray', jsonArray);
 
   const dynamicPath = localStorage.getItem('dynamicPath');
-  const idQuantityMap = {};
 
   const productRegistered = [...registrationStore.getProductRegistered()];
 
-  productRegistered?.forEach(item => {
-    const { id } = item;
-    idQuantityMap[id] = (idQuantityMap[id] || 0) + 1;
+  const productNameQuantityMap = {};
+
+  productRegistered.forEach(item => {
+    const { product_name } = item;
+    productNameQuantityMap[product_name] = (productNameQuantityMap[product_name] || 0) + 1;
   });
 
-  const transformedData = productRegistered?.map(item => ({
-    id: item.id,
+  const transformedData = Object.keys(productNameQuantityMap).map(product_name => ({
     sku: '1232ABDAMC',
-    product_name: item.product_name,
-    qty: idQuantityMap[item.id],
+    product_name,
+    qty: productNameQuantityMap[product_name],
   }));
+
+  console.log('transformData', transformedData);
 
   const {
     handleSubmit,
