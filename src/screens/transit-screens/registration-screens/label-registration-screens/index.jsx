@@ -13,6 +13,7 @@ import FilePicker from '../../../../components/file-local-picker-component';
 import LabelRegistrationApi from '../../../../services/api-label-registration';
 import LoadingHover from '../../../../components/loading-hover-component';
 import Context from '../../../../context';
+import ModalConfirmation from '../../../../components/modal-confirmation';
 
 const schemaSubmitRegistration = yup.object().shape({
   product_id: yup.string().nullable().required(),
@@ -27,31 +28,32 @@ function Screen() {
     return localStorage.getItem('isScanning') === 'true' || false;
   });
 
-  // const [dataLabelRegistered, setDataLabelRegistered] = useState([]);
+  const [dataLabelRegistered, setDataLabelRegistered] = useState([]);
   const [loadingFile, setLoadingFile] = useState(false);
   const [loading, setLoading] = useState(false);
   const [jsonArray, setJsonArray] = useState([]);
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+
   const { registrationStore } = useContext(Context);
-  console.log('jsonArray', jsonArray);
 
   const dynamicPath = localStorage.getItem('dynamicPath');
 
   const productRegistered = [...registrationStore.getProductRegistered()];
 
-  const productNameQuantityMap = {};
+  // const productNameQuantityMap = {};
 
-  productRegistered.forEach(item => {
-    const { product_name } = item;
-    productNameQuantityMap[product_name] = (productNameQuantityMap[product_name] || 0) + 1;
-  });
+  // productRegistered.forEach(item => {
+  //   const { product_name } = item;
+  //   productNameQuantityMap[product_name] = (productNameQuantityMap[product_name] || 0) + 1;
+  // });
 
-  const transformedData = Object.keys(productNameQuantityMap).map(product_name => ({
-    sku: '1232ABDAMC',
-    product_name,
-    qty: productNameQuantityMap[product_name],
-  }));
-
-  console.log('transformData', transformedData);
+  // const transformedData = Object.keys(productNameQuantityMap)
+  //   .filter(product_name => productNameQuantityMap[product_name] !== null)
+  //   .map(product_name => ({
+  //     sku: '1232ABDAMC',
+  //     product_name,
+  //     qty: productNameQuantityMap[product_name],
+  //   }));
 
   const {
     handleSubmit,
@@ -63,6 +65,10 @@ function Screen() {
   } = useForm({
     resolver: yupResolver(schemaSubmitRegistration),
   });
+
+  const rfidNumberToCheck = {
+    rfid_number: jsonArray?.map(item => item.rfid_number),
+  };
 
   const toggleScan = () => {
     const newIsScanning = !isScanning;
@@ -102,15 +108,31 @@ function Screen() {
     });
   }, [jsonArray]);
 
-  // const getDataLabelRegistered = () => {
-  //   LabelRegistrationApi.get()
-  //     .then(res => {
-  //       setDataLabelRegistered(res.data);
-  //     })
-  //     .catch(error => {
-  //       Swal.fire({ text: error?.message || error?.originalError, icon: 'error' });
-  //     });
-  // };
+  const getDataLabelRegistered = () => {
+    LabelRegistrationApi.get({ rfid_number: rfidNumberToCheck.rfid_number })
+      .then(res => {
+        setDataLabelRegistered(res.data);
+      })
+      .catch(error => {
+        Swal.fire({ text: error?.message || error?.originalError, icon: 'error' });
+      });
+  };
+
+  useEffect(() => {
+    getDataLabelRegistered();
+  }, [rfidNumberToCheck.rfid_number]);
+
+  const openConfirmationModal = () => {
+    // setConfirmationData(data);
+    if (productRegistered.length >= 0) {
+      setIsConfirmationModalOpen(true);
+    }
+  };
+
+  const closeConfirmationModal = () => {
+    // setConfirmationData(data);
+    setIsConfirmationModalOpen(false);
+  };
 
   const onSubmitRegistration = data => {
     const { notes, product_id } = data;
@@ -147,7 +169,7 @@ function Screen() {
       });
   };
 
-  const getTotalProductRegistered = transformedData.reduce((acc, item) => acc + item.qty, 0);
+  const getTotalProductRegistered = dataLabelRegistered.reduce((acc, item) => acc + item.qty, 0);
 
   return (
     <div>
@@ -183,7 +205,7 @@ function Screen() {
               } bg-white w-full rounded-md border border-[#C2C2C2] px-8`}
             >
               <legend className="px-2 sm:text- xl:text-xl text-[#1F2937] font-semibold">Product Registered</legend>
-              <TableRegistration data={transformedData} isLarge={isLarge} productRegistered />
+              <TableRegistration data={dataLabelRegistered} isLarge={isLarge} productRegistered />
             </fieldset>
           </div>
           <div className="w-full mb-6">
@@ -225,6 +247,8 @@ function Screen() {
                     toggleScan={toggleScan}
                     dynamicPath={dynamicPath}
                     dataRfid={memoizedData}
+                    getDataLabelRegistered={getDataLabelRegistered}
+                    dataLabelRegistered={dataLabelRegistered}
                   />
                   <Button
                     _hover={{
@@ -237,7 +261,7 @@ function Screen() {
                     size="sm"
                     px={12}
                     className="rounded-md bg-[#50B8C1] drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-semibold"
-                    onClick={handleSubmit(onSubmitRegistration)}
+                    onClick={openConfirmationModal}
                   >
                     Submit
                   </Button>
@@ -248,6 +272,14 @@ function Screen() {
         </div>
       </div>
       {loading && <LoadingHover visible={loading} />}
+      <ModalConfirmation
+        isOpen={isConfirmationModalOpen}
+        onClose={closeConfirmationModal}
+        onSubmit={onSubmitRegistration}
+        handleSubmit={handleSubmit}
+        productRegistered={dataLabelRegistered}
+        memoizedData={memoizedData}
+      />
     </div>
   );
 }

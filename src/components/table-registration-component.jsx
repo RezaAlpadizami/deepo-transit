@@ -17,7 +17,12 @@ function TableRegistration(props) {
   useEffect(() => {
     const newArray = data.map(d => {
       const matchedRegisteredData = registeredData.find(regData => regData.rfid_number === d.rfid_number);
-      return matchedRegisteredData || null;
+
+      if (matchedRegisteredData && matchedRegisteredData.product_name !== null) {
+        return matchedRegisteredData;
+      }
+
+      return null;
     });
 
     const filteredArray = newArray.filter(item => item !== null);
@@ -61,7 +66,7 @@ function TableRegistration(props) {
                 <tr
                   key={i}
                   className={`${i % 2 ? 'bg-[#f3f4f6]' : 'bg-[#ffff]'} ${
-                    matchedRegisteredData && matchedRegisteredData.product_name !== undefined
+                    matchedRegisteredData && matchedRegisteredData.product_name !== null
                       ? null
                       : productRegistered
                       ? '[&>*]:text-black-600'
@@ -81,9 +86,9 @@ function TableRegistration(props) {
                       : d.sku}
                   </td>
                   <td className={`${td} w-[60%]`}>
-                    {matchedRegisteredData && matchedRegisteredData.product_name !== ''
+                    {matchedRegisteredData && matchedRegisteredData.product_name !== null
                       ? matchedRegisteredData.product_name
-                      : d.product_name === undefined
+                      : d.product_name === undefined || d.product_name === ''
                       ? '--Not Registered--'
                       : d.product_name}
                   </td>

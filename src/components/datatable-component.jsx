@@ -679,8 +679,8 @@ function DataTable(props) {
 
             {!loading && data.length <= 0 && (
               <div className="grid place-content-center text-center h-[250px]">
-                <p className="font-bold text-xl">No data request</p>
-                <p className="font-medium">Please first add a Request</p>
+                <p className="font-bold text-xl">No data {displayName}</p>
+                <p className="font-medium">Please first add a {displayName}</p>
               </div>
             )}
 

@@ -5,7 +5,7 @@ const RegistrationStore = types
     dynamic_path: types.optional(types.string, 'dummy-data.txt'),
     labelRegistered: types.optional(types.array(types.frozen()), []),
     productRegistered: types.optional(types.array(types.frozen()), []),
-    panelData: types.optional(types.array(types.frozen()), []),
+    dataRfid: types.optional(types.array(types.frozen()), []),
   })
   .actions(self => ({
     setDynamicPath(data) {
@@ -26,11 +26,11 @@ const RegistrationStore = types
     getProductRegistered() {
       return self.productRegistered;
     },
-    setPanelData(data) {
-      self.panelData = data;
+    setDataRfid(data) {
+      self.dataRfid = data;
     },
-    getPanelData() {
-      return self.panelData;
+    getDataRfid() {
+      return self.dataRfid;
     },
   }));
 

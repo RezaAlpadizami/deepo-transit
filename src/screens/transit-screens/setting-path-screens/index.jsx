@@ -15,6 +15,12 @@ function Screen() {
   });
   const { registrationStore } = useContext(Context);
 
+  // const [isInputEnabled, setIsInputEnabled] = useState(false);
+
+  // const toggleInput = () => {
+  //   setIsInputEnabled(!isInputEnabled);
+  // };
+
   const handleSettingPathChange = e => {
     const newPath = e.target.value;
     registrationStore.setDynamicPath(newPath);
@@ -33,6 +39,12 @@ function Screen() {
   return (
     <form onChange={handleSettingPathChange}>
       <Input name="setting" label="Setting Path" control={control} register={register} />
+      {/* <div>
+        <input type="checkbox" id="enableInput" checked={isInputEnabled} onChange={toggleInput} />
+        <label htmlFor="enableInput" className="text-xs">
+          Enable Input
+        </label>
+      </div> */}
     </form>
   );
 }

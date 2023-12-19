@@ -16,7 +16,7 @@ const LabelRegistrationScreen = React.lazy(() =>
 );
 const SettingPathScreen = React.lazy(() => import('../screens/transit-screens/setting-path-screens/index'));
 
-const PanelNotifScreen = React.lazy(() => import('../screens/transit-screens/panel-notif-screens/index'));
+// const PanelNotifScreen = React.lazy(() => import('../screens/transit-screens/panel-notif-screens/index'));
 
 const InboundScreens = React.lazy(() => import('../screens/transit-screens/inbound-screens/index'));
 const OutboundSCreens = React.lazy(() => import('../screens/transit-screens/outbond-screens/index'));
@@ -38,15 +38,15 @@ export default [
     exact: true,
     route: '/request',
     routes: [
-      {
-        displayName: 'Panel Notif',
-        name: 'panel',
-        role: 'panel',
-        showmenu: false,
-        exact: false,
-        route: '/panel-notif',
-        component: PanelNotifScreen,
-      },
+      // {
+      //   displayName: 'Panel Notif',
+      //   name: 'panel',
+      //   role: 'panel',
+      //   showmenu: false,
+      //   exact: false,
+      //   route: '/panel-notif',
+      //   component: PanelNotifScreen,
+      // },
       {
         displayName: 'Label Registration',
         name: 'registration',

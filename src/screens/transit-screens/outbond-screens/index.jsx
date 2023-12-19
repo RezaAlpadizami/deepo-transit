@@ -1,9 +1,9 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useMemo } from 'react';
 
 import * as yup from 'yup';
 import Moment from 'moment';
 import Swal from 'sweetalert2';
-import { StopIcon } from '@heroicons/react/solid';
+// import { StopIcon } from '@heroicons/react/solid';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { XIcon } from '@heroicons/react/outline';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
@@ -27,6 +27,8 @@ import { RequestApi, TransitApi } from '../../../services/api-transit';
 import LottiesLoading from '../../../components/lotties-animation-component';
 import { clipboardRequest } from '../../../assets/images';
 import TextArea from '../../../components/textarea-component';
+import TableRegistration from '../../../components/table-registration-component';
+import FilePicker from '../../../components/file-local-picker-component';
 
 const swalButton = Swal.mixin({
   customClass: {
@@ -75,7 +77,7 @@ function Screen(props) {
   const [transitData, setTransitData] = useState();
   const [allocateData, setAllocateData] = useState([]);
   const [productInfoData, setproductInfoData] = useState([]);
-  const [rfidData, setRfidData] = useState([]);
+  // const [rfidData, setRfidData] = useState([]);
 
   const [loadingAllocate, setLoadingAllocate] = useState(false);
   const [loadingRequest, setLoadingRequest] = useState(false);
@@ -84,9 +86,12 @@ function Screen(props) {
   const [loadingRFID, setLoadingRFID] = useState(false);
   const [onAllocate, setOnAllocate] = useState(false);
   const [onOverview, setOnOverview] = useState(false);
-  const [loadtable, setLoadTable] = useState(false);
+  // const [loadtable, setLoadTable] = useState(false);
   const [isScanned, setIsScanned] = useState(false);
-  const [scanning, setScanning] = useState(false);
+  // const [scanning, setScanning] = useState(false);
+  const [isScanning, setIsScanning] = useState(() => {
+    return localStorage.getItem('isScanning') === 'true' || false;
+  });
   const [error, setErrors] = useState(false);
 
   const [totalRequest, setTotalRequest] = useState(0);
@@ -94,7 +99,9 @@ function Screen(props) {
   const [totalRFID, setTotalRFID] = useState(0);
   const [requestId, setRequestId] = useState('');
   const [productId, setProductId] = useState('');
-  const [timer, setTimer] = useState();
+  const [loadingFile, setLoadingFile] = useState(false);
+  const [jsonArray, setJsonArray] = useState([]);
+  // const [timer, setTimer] = useState();
 
   useEffect(() => {
     if (activityStore?.getRequestNumber() && activityStore?.getActivityName()?.toLowerCase() === 'outbound') {
@@ -175,71 +182,102 @@ function Screen(props) {
     }
   }, [allocateData]);
 
-  const getTransitData = () => {
-    TransitApi.get({ warehouse_id: store?.getWarehouseId() })
-      .then(res => {
-        setRfidData(res.data);
-        setTotalRFID(toCalculate(res.data, 'qty') || 0);
-        getTransit();
-        setTimeout(() => {
-          setLoadTable(false);
-        }, 500);
-      })
-      .catch(error => {
-        Swal.fire({ text: error?.data?.message, icon: 'error' });
-      });
+  const dynamicPath = localStorage.getItem('dynamicPath');
+  console.log('dynamicPath', dynamicPath);
+
+  const memoizedData = useMemo(() => {
+    return jsonArray.map(i => {
+      return {
+        key: i.product_id,
+        rfid_number: i.rfid_number,
+        product_id: i.product_id,
+        product_name: i.product_name,
+        product_sku: i.sku,
+        in_stock: i.in_stock,
+      };
+    });
+  }, [jsonArray]);
+
+  const toggleScan = () => {
+    const newIsScanning = !isScanning;
+    setIsScanning(newIsScanning);
+    localStorage.setItem('isScanning', newIsScanning.toString());
   };
 
-  const getTransitDatas = () => {
-    TransitApi.get({ warehouse_id: store?.getWarehouseId() })
-      .then(res => {
-        setRfidData(res.data);
-        setTotalRFID(res.query.total || 0);
+  const onFileChange = newFileContent => {
+    setLoadingFile(true);
 
-        setTimeout(() => {
-          setLoadTable(false);
-        }, 500);
-      })
-      .catch(error => {
-        Swal.fire({ text: error?.data?.message, icon: 'error' });
-      });
+    const lines = newFileContent.split('\n');
+    const newJsonArray = lines.filter(line => line.trim() !== '').map(line => ({ rfid_number: line.trim() }));
+    setJsonArray(newJsonArray);
+    setLoadingFile(false);
   };
 
-  const getTransit = () => {
-    setTimer(
-      setInterval(() => {
-        getTransitDatas();
-        setLoadTable(true);
-      }, 5000)
-    );
-  };
-  const startScanning = () => {
-    setScanning(true);
+  // const getTransitData = () => {
+  //   TransitApi.get({ warehouse_id: store?.getWarehouseId() })
+  //     .then(res => {
+  //       setRfidData(res.data);
+  //       setTotalRFID(toCalculate(res.data, 'qty') || 0);
+  //       getTransit();
+  //       setTimeout(() => {
+  //         setLoadTable(false);
+  //       }, 500);
+  //     })
+  //     .catch(error => {
+  //       Swal.fire({ text: error?.data?.message, icon: 'error' });
+  //     });
+  // };
 
-    if (!scanning && rfidData.length > 0) {
-      setLoadingRFID(true);
-      setRfidData([]);
-      setTotalRFID();
-      setTimeout(() => {
-        setLoadingRFID(false);
-      }, 500);
+  // const getTransitDatas = () => {
+  //   TransitApi.get({ warehouse_id: store?.getWarehouseId() })
+  //     .then(res => {
+  //       setRfidData(res.data);
+  //       setTotalRFID(res.query.total || 0);
 
-      getTransitData();
-    } else {
-      setLoadTable(true);
-      setTimeout(() => {
-        getTransitData();
-      }, 500);
-    }
+  //       setTimeout(() => {
+  //         setLoadTable(false);
+  //       }, 500);
+  //     })
+  //     .catch(error => {
+  //       Swal.fire({ text: error?.data?.message, icon: 'error' });
+  //     });
+  // };
 
-    setIsScanned(false);
-  };
+  // const getTransit = () => {
+  //   setTimer(
+  //     setInterval(() => {
+  //       getTransitDatas();
+  //       setLoadTable(true);
+  //     }, 5000)
+  //   );
+  // };
+  // const startScanning = () => {
+  //   setScanning(true);
 
-  const stopScanning = () => {
-    setScanning(false);
-    setIsScanned(true);
-    clearInterval(timer);
-  };
+  //   if (!scanning && rfidData.length > 0) {
+  //     setLoadingRFID(true);
+  //     setRfidData([]);
+  //     setTotalRFID();
+  //     setTimeout(() => {
+  //       setLoadingRFID(false);
+  //     }, 500);
+
+  //     getTransitData();
+  //   } else {
+  //     setLoadTable(true);
+  //     setTimeout(() => {
+  //       getTransitData();
+  //     }, 500);
+  //   }
+
+  //   setIsScanned(false);
+  // };
+
+  // const stopScanning = () => {
+  //   setScanning(false);
+  //   setIsScanned(true);
+  //   clearInterval(timer);
+  // };
 
   const onProcess = id => {
     if (id) {
@@ -253,7 +291,7 @@ function Screen(props) {
     setLoadingRequest(true);
     setLoadingRFID(true);
     setIsScanned(false);
-    setRfidData([]);
+    // setRfidData([]);
     setTransitData([]);
     setAllocateData([]);
     setproductInfoData([]);
@@ -335,7 +373,7 @@ function Screen(props) {
         setOnOpenTransit(false);
         setErrMessage('');
         setErrors(false);
-        setRfidData([]);
+        // setRfidData([]);
         setTransitData([]);
         setAllocateData([]);
         setproductInfoData([]);
@@ -451,10 +489,10 @@ function Screen(props) {
               <button
                 type="submit"
                 onClick={() => setOnOverview(!onOverview)}
-                className={`${scanning ? 'bg-[#ffc108]' : 'bg-white'}  h-3/4 rounded-md border border-[#C2C2C2] px-3 ${
-                  isLarge ? 'py-2' : 'my-auto pb-2'
-                } `}
-                disabled={scanning}
+                className={`${
+                  isScanning ? 'bg-[#ffc108]' : 'bg-white'
+                }  h-3/4 rounded-md border border-[#C2C2C2] px-3 ${isLarge ? 'py-2' : 'my-auto pb-2'} `}
+                disabled={isScanning}
               >
                 <p className="md:text-sm xl:text-md text-xs text-[#50B8C1] sm:font-semibold xl:font-semibold">
                   Request
@@ -535,7 +573,7 @@ function Screen(props) {
                 animationsData={Loading}
                 classCustom="h-full z-[999] opacity-100 flex flex-col items-center justify-center"
               />
-              {!loadingRFID ? (
+              {/* {!loadingRFID ? (
                 <SimpleTable
                   loading={loadtable}
                   data={rfidData.map(i => {
@@ -549,7 +587,12 @@ function Screen(props) {
                   })}
                   isLarge={isLarge}
                 />
-              ) : null}
+              ) : null} */}
+              {loadingFile ? (
+                <div>Loading...</div>
+              ) : (
+                <TableRegistration data={memoizedData} isLarge={isLarge} rfidTable />
+              )}
             </fieldset>
           </div>
         </div>
@@ -570,13 +613,13 @@ function Screen(props) {
                   <div className="max-sm:text-xs xl:text-md w-1/2 flex-1">
                     {isLarge ? 'Total RFID Detected' : 'Total RFID'}{' '}
                   </div>
-                  <div className="font-bold">{totalRFID}</div>
+                  <div className="font-bold">{jsonArray.length}</div>
                 </div>
               </div>
 
               <div className="flex justify-end w-full sm:space-x-[20%] md:space-x-[60%] xl:space-x-[70%]">
                 <div className={`${isLarge ? 'flex flex-col gap-2 mx-8 w-[30%]' : 'flex flex-col gap-2 my-2 '}`}>
-                  <Button
+                  {/* <Button
                     _hover={{
                       shadow: 'md',
                       transform: 'translateY(-5px)',
@@ -591,7 +634,14 @@ function Screen(props) {
                     isDisabled={transitData ? transitData?.details?.length === 0 || transitData?.length === 0 : true}
                   >
                     {scanning ? <StopIcon className="h-6 animate-pulse" /> : <p className="tracking-wide">Scan</p>}
-                  </Button>
+                  </Button> */}
+                  <FilePicker
+                    onFileChange={onFileChange}
+                    isScanning={isScanning}
+                    toggleScan={toggleScan}
+                    dynamicPath={dynamicPath}
+                    dataRfid={memoizedData}
+                  />
 
                   <Button
                     _hover={{
@@ -605,7 +655,7 @@ function Screen(props) {
                     px={isLarge ? 5 : 2}
                     className="rounded-md border border-[#757575] bg-[#fff] hover:bg-[#E4E4E4] text-[#757575] font-semibold"
                     onClick={onReset}
-                    isDisabled={scanning}
+                    isDisabled={isScanning}
                   >
                     <p className="tracking-wide">Reset</p>
                   </Button>

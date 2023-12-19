@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useMemo } from 'react';
 
 import * as yup from 'yup';
 import Moment from 'moment';
 import Swal from 'sweetalert2';
-import { StopIcon } from '@heroicons/react/solid';
+// import { StopIcon } from '@heroicons/react/solid';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { XIcon } from '@heroicons/react/outline';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
@@ -25,6 +25,8 @@ import { RequestApi, TransitApi } from '../../../services/api-transit';
 import LottiesAnimation from '../../../components/lotties-animation-component';
 import { clipboardRequest } from '../../../assets/images';
 import TextArea from '../../../components/textarea-component';
+import FilePicker from '../../../components/file-local-picker-component';
+import TableRegistration from '../../../components/table-registration-component';
 
 const swalButton = Swal.mixin({
   customClass: {
@@ -231,8 +233,7 @@ function Screen(props) {
   const [loadingRFID, setLoadingRFID] = useState(false);
   const [onOverview, setOnOverview] = useState(false);
   const [isScanned, setIsScanned] = useState(false);
-  const [loadtable, setLoadTable] = useState(false);
-  const [scanning, setScanning] = useState(false);
+  const [scanning] = useState(false);
   const [isSplit, setIsSplit] = useState(false);
   const [onOpen, setOnOpen] = useState(false);
   const [error, setErrors] = useState(false);
@@ -242,13 +243,18 @@ function Screen(props) {
   const [totalRequest, setTotalRequest] = useState(0);
   const [totalRFID, setTotalRFID] = useState(0);
   const [counter, setCounter] = useState(2);
-  const [timer, setTimer] = useState();
+  // const [setTimer] = useState();
   const [splitValue, setSplitValue] = useState({});
+  const [loadingFile, setLoadingFile] = useState(false);
+  const [jsonArray, setJsonArray] = useState([]);
   const [filterParams, setFilterParams] = useState({
     warehouse_id: store?.getWarehouseId(),
   });
   const [filterBay, setFilterBay] = useState({
     warehouse_id: store?.getWarehouseId(),
+  });
+  const [isScanning, setIsScanning] = useState(() => {
+    return localStorage.getItem('isScanning') === 'true' || false;
   });
 
   useEffect(() => {
@@ -322,70 +328,101 @@ function Screen(props) {
     }
   }, [newData]);
 
-  const getTransitData = () => {
-    TransitApi.get({ warehouse_id: store?.getWarehouseId() })
-      .then(res => {
-        setRfidData(res.data);
-        setTotalRFID(toCalculate(res.data, 'qty') || 0);
-        getTransit();
-        setTimeout(() => {
-          setLoadTable(false);
-        }, 500);
-      })
-      .catch(error => {
-        Swal.fire({ text: error?.data?.message, icon: 'error' });
-      });
+  const dynamicPath = localStorage.getItem('dynamicPath');
+  console.log('dynamicPath', dynamicPath);
+
+  const memoizedData = useMemo(() => {
+    return jsonArray.map(i => {
+      return {
+        key: i.product_id,
+        rfid_number: i.rfid_number,
+        product_id: i.product_id,
+        product_name: i.product_name,
+        product_sku: i.sku,
+        in_stock: i.in_stock,
+      };
+    });
+  }, [jsonArray]);
+
+  const toggleScan = () => {
+    const newIsScanning = !isScanning;
+    setIsScanning(newIsScanning);
+    localStorage.setItem('isScanning', newIsScanning.toString());
   };
 
-  const getTransitDatas = () => {
-    TransitApi.get({ warehouse_id: store?.getWarehouseId() })
-      .then(res => {
-        setRfidData(res.data);
-        setTotalRFID(toCalculate(res.data, 'qty') || 0);
+  const onFileChange = newFileContent => {
+    setLoadingFile(true);
 
-        setTimeout(() => {
-          setLoadTable(false);
-        }, 500);
-      })
-      .catch(error => {
-        Swal.fire({ text: error?.data?.message, icon: 'error' });
-      });
+    const lines = newFileContent.split('\n');
+    const newJsonArray = lines.filter(line => line.trim() !== '').map(line => ({ rfid_number: line.trim() }));
+    setJsonArray(newJsonArray);
+    setLoadingFile(false);
   };
 
-  const getTransit = () => {
-    setTimer(
-      setInterval(() => {
-        getTransitDatas();
-        setLoadTable(true);
-      }, 5000)
-    );
-  };
+  // const getTransitData = () => {
+  //   TransitApi.get({ warehouse_id: store?.getWarehouseId() })
+  //     .then(res => {
+  //       setRfidData(res.data);
+  //       setTotalRFID(toCalculate(res.data, 'qty') || 0);
+  //       getTransit();
+  //       setTimeout(() => {
+  //         setLoadTable(false);
+  //       }, 500);
+  //     })
+  //     .catch(error => {
+  //       Swal.fire({ text: error?.data?.message, icon: 'error' });
+  //     });
+  // };
 
-  const startScanning = () => {
-    setScanning(true);
+  // const getTransitDatas = () => {
+  //   TransitApi.get({ warehouse_id: store?.getWarehouseId() })
+  //     .then(res => {
+  //       setRfidData(res.data);
+  //       setTotalRFID(toCalculate(res.data, 'qty') || 0);
 
-    if (!scanning && rfidData.length > 0) {
-      setLoadingRFID(true);
-      setRfidData([]);
-      setTotalRFID();
-      setTimeout(() => {
-        setLoadingRFID(false);
-      }, 500);
-      getTransitData();
-    } else {
-      setLoadTable(true);
-      setTimeout(() => {
-        getTransitData();
-      }, 500);
-    }
-    setIsScanned(false);
-  };
+  //       setTimeout(() => {
+  //         setLoadTable(false);
+  //       }, 500);
+  //     })
+  //     .catch(error => {
+  //       Swal.fire({ text: error?.data?.message, icon: 'error' });
+  //     });
+  // };
 
-  const stopScanning = () => {
-    setScanning(false);
-    setIsScanned(true);
-    clearInterval(timer);
-  };
+  // const getTransit = () => {
+  //   setTimer(
+  //     setInterval(() => {
+  //       getTransitDatas();
+  //       setLoadTable(true);
+  //     }, 5000)
+  //   );
+  // };
+
+  // const startScanning = () => {
+  //   setScanning(true);
+
+  //   if (!scanning && rfidData.length > 0) {
+  //     setLoadingRFID(true);
+  //     setRfidData([]);
+  //     setTotalRFID();
+  //     setTimeout(() => {
+  //       setLoadingRFID(false);
+  //     }, 500);
+  //     getTransitData();
+  //   } else {
+  //     setLoadTable(true);
+  //     setTimeout(() => {
+  //       getTransitData();
+  //     }, 500);
+  //   }
+  //   setIsScanned(false);
+  // };
+
+  // const stopScanning = () => {
+  //   setScanning(false);
+  //   setIsScanned(true);
+  //   clearInterval(timer);
+  // };
 
   useEffect(() => {
     Promise.allSettled([
@@ -991,7 +1028,7 @@ function Screen(props) {
                 animationsData={Loading}
                 classCustom="h-full z-[999] opacity-100 flex flex-col items-center justify-center"
               />
-              {!loadingRFID ? (
+              {/* {!loadingRFID ? (
                 <SimpleTable
                   loading={loadtable}
                   data={rfidData.map(i => {
@@ -1005,7 +1042,12 @@ function Screen(props) {
                   })}
                   isLarge={isLarge}
                 />
-              ) : null}
+              ) : null} */}
+              {loadingFile ? (
+                <div>Loading...</div>
+              ) : (
+                <TableRegistration data={memoizedData} isLarge={isLarge} rfidTable />
+              )}
             </fieldset>
           </div>
         </div>
@@ -1026,13 +1068,13 @@ function Screen(props) {
                   <div className="max-sm:text-xs xl:text-md w-1/2 flex-1">
                     {isLarge ? 'Total RFID Detected' : 'Total RFID'}{' '}
                   </div>
-                  <div className="font-bold">{totalRFID}</div>
+                  <div className="font-bold">{jsonArray.length}</div>
                 </div>
               </div>
 
               <div className="flex justify-end w-full sm:space-x-[20%] md:space-x-[60%] xl:space-x-[70%]">
                 <div className={`${isLarge ? 'flex flex-col gap-2 mx-8 w-[30%]' : 'flex flex-col gap-2 my-2 '}`}>
-                  <Button
+                  {/* <Button
                     _hover={{
                       shadow: 'md',
                       transform: 'translateY(-5px)',
@@ -1047,7 +1089,14 @@ function Screen(props) {
                     isDisabled={requestDetailData.length === 0}
                   >
                     {scanning ? <StopIcon className="h-6 animate-pulse" /> : <p className="tracking-wide">Scan</p>}
-                  </Button>
+                  </Button> */}
+                  <FilePicker
+                    onFileChange={onFileChange}
+                    isScanning={isScanning}
+                    toggleScan={toggleScan}
+                    dynamicPath={dynamicPath}
+                    dataRfid={memoizedData}
+                  />
 
                   <Button
                     _hover={{
@@ -1411,7 +1460,7 @@ function Screen(props) {
                         );
                       })
                     ) : (
-                      <tr className="bg-gray-100 w-full border-2 border-solid border-[#f3f4f6] border-red-500">
+                      <tr className="bg-gray-100 w-full border-2 border-solid border-red-500">
                         <td className="w-10 text-center px-2  text-red-500 h-[170px]" colSpan={9} rowSpan={5} />
                       </tr>
                     )}

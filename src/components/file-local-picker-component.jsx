@@ -5,7 +5,7 @@ import LottiesAnimation from './lotties-animation-component';
 import StopScanAnimation from '../assets/lotties/Stop-scan.json';
 import Context from '../context';
 
-function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath, dataRfid }) {
+function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath, dataRfid, getDataLabelRegistered }) {
   const [watchingFile, setWatchingFile] = useState(false);
   const [timeoutId, setTimeoutId] = useState(null);
   const [timeoutCheck, setTimeoutCheck] = useState(null);
@@ -60,6 +60,7 @@ function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath, dataRfi
       setWatchingFile(true);
       fetchData();
       checkLabelAlreadyRegistered();
+      getDataLabelRegistered();
     }
   }, [isScanning, dynamicPath, watchingFile]);
 
