@@ -186,32 +186,32 @@ function Screen(props) {
     setIsScanning(newIsScanning);
     localStorage.setItem('isScanning', newIsScanning.toString());
 
-    // if (location.pathname === '/inbound' && isScanning) {
-    //   handleAmqpScan();
-    // } else if (location.pathname === '/inbound' && !isScanning) {
-    //   handleAmqpScan();
-    // }
-  };
-
-  useEffect(() => {
-    if (location.pathname === '/outbound' && isScanning) {
+    if (location.pathname === '/inbound' && isScanning) {
       handleAmqpScan();
-    } else if (location.pathname === '/outbound' && !isScanning) {
+    } else if (location.pathname === '/inbound' && !isScanning) {
       handleAmqpScan();
     }
-  }, [isScanning]);
+  };
+
+  // useEffect(() => {
+  //   if (location.pathname === '/outbound' && isScanning) {
+  //     handleAmqpScan();
+  //   } else if (location.pathname === '/outbound' && !isScanning) {
+  //     handleAmqpScan();
+  //   }
+  // }, [isScanning]);
 
   const handleAmqpScan = () => {
     const body = {
       type: location.pathname === '/inbound' ? 'INBOUND' : location.pathname === '/outbound' ? 'OUTBOUND' : 'REGIS',
       logInfo: 'info',
       message: {
-        scanType: !isScanning ? 'STOP' : 'RUNNING',
+        scanType: !isScanning ? 'RUNNING' : 'STOP',
       },
     };
     AmqpScanApi.amqpScan(body)
       .then(res => {
-        registrationStore.setLabelRegistered(res?.data?.data);
+        console.log('res', res);
       })
       .catch(error => {
         console.log('error', error);
