@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Button } from '@chakra-ui/react';
-import labelRegistrationApi from '../services/api-label-registration';
+import Swal from 'sweetalert2';
 import LottiesAnimation from './lotties-animation-component';
 import StopScanAnimation from '../assets/lotties/Stop-scan.json';
 import Context from '../context';
+import LabelRegistrationApi from '../services/api-label-registration';
 
-function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath, dataRfid, getDataLabelRegistered }) {
+function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath, dataRfid }) {
   const [watchingFile, setWatchingFile] = useState(false);
   const [timeoutId, setTimeoutId] = useState(null);
   const [timeoutCheck, setTimeoutCheck] = useState(null);
@@ -13,6 +14,24 @@ function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath, dataRfi
 
   const rfidNumberToCheck = {
     rfid_number: dataRfid?.map(item => item.rfid_number),
+  };
+
+  useEffect(() => {
+    getDataLabelRegistered();
+  }, [rfidNumberToCheck]);
+
+  const getDataLabelRegistered = () => {
+    const rfidNumber = {
+      rfid_number:
+        (dataRfid?.map(item => item.rfid_number) || []).length > 0 ? dataRfid.map(item => item.rfid_number) : [''],
+    };
+    LabelRegistrationApi.get({ rfid_number: rfidNumber.rfid_number })
+      .then(res => {
+        registrationStore.setDataListRegistered(res?.data);
+      })
+      .catch(error => {
+        Swal.fire({ text: error?.message || error?.originalError, icon: 'error' });
+      });
   };
 
   const fetchData = async () => {
@@ -30,9 +49,9 @@ function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath, dataRfi
   };
 
   const checkLabelAlreadyRegistered = () => {
-    labelRegistrationApi
-      .validationRegister(rfidNumberToCheck)
+    LabelRegistrationApi.validationRegister(rfidNumberToCheck)
       .then(res => {
+        console.log('res check', res);
         registrationStore.setLabelRegistered(res?.data?.data);
       })
       .catch(error => {
@@ -60,7 +79,6 @@ function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath, dataRfi
       setWatchingFile(true);
       fetchData();
       checkLabelAlreadyRegistered();
-      getDataLabelRegistered();
     }
   }, [isScanning, dynamicPath, watchingFile]);
 

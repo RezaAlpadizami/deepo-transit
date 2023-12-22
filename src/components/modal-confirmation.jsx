@@ -11,9 +11,9 @@ import {
   Button,
 } from '@chakra-ui/react';
 
-function ModalConfirmation({ isOpen, onClose, confirmationData, onSubmit, memoizedData, productRegistered }) {
+function ModalConfirmation({ isOpen, onClose, memoizedData, productRegistered, setIsTriggerHandleSubmit }) {
   const handleConfirmation = () => {
-    onSubmit(confirmationData);
+    setIsTriggerHandleSubmit(true);
 
     onClose();
   };
@@ -24,8 +24,8 @@ function ModalConfirmation({ isOpen, onClose, confirmationData, onSubmit, memoiz
         <ModalHeader>Confirm Replace RFID Label</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          {productRegistered.length} of {memoizedData.length} RFID Label already registered. Are you sure want to
-          replace those RFID Label?
+          {productRegistered} of {memoizedData.length} RFID Label already registered. Are you sure want to replace those
+          RFID Label?
         </ModalBody>
 
         <ModalFooter>

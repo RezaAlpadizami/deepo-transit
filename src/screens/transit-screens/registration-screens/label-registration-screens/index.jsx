@@ -28,32 +28,16 @@ function Screen() {
     return localStorage.getItem('isScanning') === 'true' || false;
   });
 
-  const [dataLabelRegistered, setDataLabelRegistered] = useState([]);
   const [loadingFile, setLoadingFile] = useState(false);
   const [loading, setLoading] = useState(false);
   const [jsonArray, setJsonArray] = useState([]);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+  const [isTriggerHandleSubmit, setIsTriggerHandleSubmit] = useState(false);
 
   const { registrationStore } = useContext(Context);
+  const dataLabelRegistered = [...registrationStore.getDataListRegistered()];
 
   const dynamicPath = localStorage.getItem('dynamicPath');
-
-  const productRegistered = [...registrationStore.getProductRegistered()];
-
-  // const productNameQuantityMap = {};
-
-  // productRegistered.forEach(item => {
-  //   const { product_name } = item;
-  //   productNameQuantityMap[product_name] = (productNameQuantityMap[product_name] || 0) + 1;
-  // });
-
-  // const transformedData = Object.keys(productNameQuantityMap)
-  //   .filter(product_name => productNameQuantityMap[product_name] !== null)
-  //   .map(product_name => ({
-  //     sku: '1232ABDAMC',
-  //     product_name,
-  //     qty: productNameQuantityMap[product_name],
-  //   }));
 
   const {
     handleSubmit,
@@ -65,10 +49,6 @@ function Screen() {
   } = useForm({
     resolver: yupResolver(schemaSubmitRegistration),
   });
-
-  const rfidNumberToCheck = {
-    rfid_number: jsonArray?.map(item => item.rfid_number),
-  };
 
   const toggleScan = () => {
     const newIsScanning = !isScanning;
@@ -108,32 +88,6 @@ function Screen() {
     });
   }, [jsonArray]);
 
-  const getDataLabelRegistered = () => {
-    LabelRegistrationApi.get({ rfid_number: rfidNumberToCheck.rfid_number })
-      .then(res => {
-        setDataLabelRegistered(res.data);
-      })
-      .catch(error => {
-        Swal.fire({ text: error?.message || error?.originalError, icon: 'error' });
-      });
-  };
-
-  useEffect(() => {
-    getDataLabelRegistered();
-  }, [rfidNumberToCheck.rfid_number]);
-
-  const openConfirmationModal = () => {
-    // setConfirmationData(data);
-    if (productRegistered.length >= 0) {
-      setIsConfirmationModalOpen(true);
-    }
-  };
-
-  const closeConfirmationModal = () => {
-    // setConfirmationData(data);
-    setIsConfirmationModalOpen(false);
-  };
-
   const onSubmitRegistration = data => {
     const { notes, product_id } = data;
     setLoading(true);
@@ -154,10 +108,11 @@ function Screen() {
           confirmButtonColor: '#50B8C1',
           confirmButtonText: `<p class="rounded bg-[#50B8C1] text-[#fff] px-5 py-2 ml-5 font-bold">OK</p>`,
         });
-        // getDataLabelRegistered();
         setJsonArray([]);
         setValue('notes', '');
         setValue('product_id', '');
+        setIsTriggerHandleSubmit(false);
+        localStorage.removeItem('registered');
       })
       .catch(error => {
         setLoading(false);
@@ -169,7 +124,15 @@ function Screen() {
       });
   };
 
-  const getTotalProductRegistered = dataLabelRegistered.reduce((acc, item) => acc + item.qty, 0);
+  const openConfirmationModal = () => {
+    setIsConfirmationModalOpen(true);
+  };
+
+  const closeConfirmationModal = () => {
+    setIsConfirmationModalOpen(false);
+  };
+
+  const getTotalProductRegistered = dataLabelRegistered?.reduce((acc, item) => acc + item.qty, 0);
 
   return (
     <div>
@@ -247,8 +210,6 @@ function Screen() {
                     toggleScan={toggleScan}
                     dynamicPath={dynamicPath}
                     dataRfid={memoizedData}
-                    getDataLabelRegistered={getDataLabelRegistered}
-                    dataLabelRegistered={dataLabelRegistered}
                   />
                   <Button
                     _hover={{
@@ -261,7 +222,13 @@ function Screen() {
                     size="sm"
                     px={12}
                     className="rounded-md bg-[#50B8C1] drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-semibold"
-                    onClick={openConfirmationModal}
+                    onClick={
+                      getTotalProductRegistered <= 0
+                        ? handleSubmit(onSubmitRegistration)
+                        : isTriggerHandleSubmit
+                        ? handleSubmit(onSubmitRegistration)
+                        : openConfirmationModal
+                    }
                   >
                     Submit
                   </Button>
@@ -275,10 +242,10 @@ function Screen() {
       <ModalConfirmation
         isOpen={isConfirmationModalOpen}
         onClose={closeConfirmationModal}
-        onSubmit={onSubmitRegistration}
-        handleSubmit={handleSubmit}
-        productRegistered={dataLabelRegistered}
+        isTriggerHandleSubmit={isTriggerHandleSubmit}
+        productRegistered={getTotalProductRegistered}
         memoizedData={memoizedData}
+        setIsTriggerHandleSubmit={setIsTriggerHandleSubmit}
       />
     </div>
   );

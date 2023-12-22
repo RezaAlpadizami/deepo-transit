@@ -6,6 +6,7 @@ const RegistrationStore = types
     labelRegistered: types.optional(types.array(types.frozen()), []),
     productRegistered: types.optional(types.array(types.frozen()), []),
     dataRfid: types.optional(types.array(types.frozen()), []),
+    dataListRegistered: types.optional(types.array(types.frozen()), []),
   })
   .actions(self => ({
     setDynamicPath(data) {
@@ -31,6 +32,12 @@ const RegistrationStore = types
     },
     getDataRfid() {
       return self.dataRfid;
+    },
+    setDataListRegistered(data) {
+      self.dataListRegistered = data;
+    },
+    getDataListRegistered() {
+      return self.dataListRegistered;
     },
   }));
 

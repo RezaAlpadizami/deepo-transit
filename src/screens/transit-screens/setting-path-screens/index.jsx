@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
@@ -15,17 +15,20 @@ function Screen() {
   });
   const { registrationStore } = useContext(Context);
 
-  // const [isInputEnabled, setIsInputEnabled] = useState(false);
+  const [isInputEnabled, setIsInputEnabled] = useState(false);
 
-  // const toggleInput = () => {
-  //   setIsInputEnabled(!isInputEnabled);
-  // };
+  const toggleInput = () => {
+    setIsInputEnabled(!isInputEnabled);
+  };
 
   const handleSettingPathChange = e => {
-    const newPath = e.target.value;
-    registrationStore.setDynamicPath(newPath);
-    localStorage.setItem('dynamicPath', newPath);
+    if (isInputEnabled) {
+      const newPath = e.target.value;
+      registrationStore.setDynamicPath(newPath);
+      localStorage.setItem('dynamicPath', newPath);
+    }
   };
+
   const defaultPath = registrationStore?.getDynamicPath();
   const pathUpdated = localStorage.getItem('dynamicPath');
 
@@ -34,17 +37,16 @@ function Screen() {
       setValue('setting', defaultPath);
     }
     setValue('setting', pathUpdated);
-  }, []);
+  }, [defaultPath, pathUpdated]);
 
   return (
     <form onChange={handleSettingPathChange}>
-      <Input name="setting" label="Setting Path" control={control} register={register} />
-      {/* <div>
-        <input type="checkbox" id="enableInput" checked={isInputEnabled} onChange={toggleInput} />
-        <label htmlFor="enableInput" className="text-xs">
-          Enable Input
-        </label>
-      </div> */}
+      <Input name="setting" label="Setting Path" control={control} register={register} disabled={!isInputEnabled} />
+      <div className="my-4 mx-2 flex justify-end">
+        <button className="p-2 text-white text-xs rounded-md bg-[#50B8C1]" type="button" onClick={toggleInput}>
+          {isInputEnabled ? 'Disabled' : 'Change Path'}
+        </button>
+      </div>
     </form>
   );
 }

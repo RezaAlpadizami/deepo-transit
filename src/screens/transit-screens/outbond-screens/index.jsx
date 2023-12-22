@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 
 import * as yup from 'yup';
 import Moment from 'moment';
@@ -8,6 +8,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { XIcon } from '@heroicons/react/outline';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { Button, Input, Table, Thead, Tbody, Tr, Th, Td, TableContainer, useMediaQuery, Fade } from '@chakra-ui/react';
+import { useLocation } from 'react-router-dom';
 
 import Allocate from './allocate';
 import Context from '../../../context';
@@ -22,7 +23,7 @@ import InputComponent from '../../../components/input-component';
 import DatePicker from '../../../components/datepicker-component';
 import MagnifyClass from '../../../assets/images/magnify-glass.svg';
 // import LoadingComponent from '../../../components/loading-component';
-import { RequestApi, TransitApi } from '../../../services/api-transit';
+import { RequestApi, TransitApi, AmqpScanApi } from '../../../services/api-transit';
 // import LoadingHover from '../../../components/loading-hover-component';
 import LottiesLoading from '../../../components/lotties-animation-component';
 import { clipboardRequest } from '../../../assets/images';
@@ -101,9 +102,13 @@ function Screen(props) {
   const [productId, setProductId] = useState('');
   const [loadingFile, setLoadingFile] = useState(false);
   const [jsonArray, setJsonArray] = useState([]);
+  const location = useLocation();
+
+  // const { registrationStore } = useContext(Context);
   // const [timer, setTimer] = useState();
 
   useEffect(() => {
+    console.log('warehouseID', store?.getWarehouseId());
     if (activityStore?.getRequestNumber() && activityStore?.getActivityName()?.toLowerCase() === 'outbound') {
       setTimeout(() => {
         setRequestId(activityStore?.getRequestNumber());
@@ -183,7 +188,6 @@ function Screen(props) {
   }, [allocateData]);
 
   const dynamicPath = localStorage.getItem('dynamicPath');
-  console.log('dynamicPath', dynamicPath);
 
   const memoizedData = useMemo(() => {
     return jsonArray.map(i => {
@@ -202,6 +206,31 @@ function Screen(props) {
     const newIsScanning = !isScanning;
     setIsScanning(newIsScanning);
     localStorage.setItem('isScanning', newIsScanning.toString());
+  };
+
+  useEffect(() => {
+    if (location.pathname === '/outbound' && isScanning) {
+      handleAmqpScan();
+    } else if (location.pathname === '/outbound' && !isScanning) {
+      handleAmqpScan();
+    }
+  }, [isScanning]);
+
+  const handleAmqpScan = () => {
+    const body = {
+      type: location.pathname === '/inbound' ? 'INBOUND' : location.pathname === '/outbound' ? 'OUTBOUND' : 'REGIS',
+      logInfo: 'info',
+      message: {
+        scanType: !isScanning ? 'STOP' : 'RUNNING',
+      },
+    };
+    AmqpScanApi.amqpScan(body)
+      .then(res => {
+        console.log('res', res);
+      })
+      .catch(error => {
+        console.log('error', error);
+      });
   };
 
   const onFileChange = newFileContent => {

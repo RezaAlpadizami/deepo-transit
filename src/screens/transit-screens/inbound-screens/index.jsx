@@ -4,11 +4,11 @@ import * as yup from 'yup';
 import Moment from 'moment';
 import Swal from 'sweetalert2';
 // import { StopIcon } from '@heroicons/react/solid';
+import { useLocation } from 'react-router-dom';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { XIcon } from '@heroicons/react/outline';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { Table, Thead, Tbody, Tr, Th, Td, TableContainer, Button, useMediaQuery, Input, Fade } from '@chakra-ui/react';
-
 import Context from '../../../context';
 import SimpleTable from './component/table';
 import { toCalculate } from '../../../utils/helper';
@@ -20,7 +20,7 @@ import InputComponent from '../../../components/input-component';
 import DatePicker from '../../../components/datepicker-component';
 import MagnifyClass from '../../../assets/images/magnify-glass.svg';
 // import LoadingComponent from '../../../components/loading-component';
-import { RequestApi, TransitApi } from '../../../services/api-transit';
+import { AmqpScanApi, RequestApi, TransitApi } from '../../../services/api-transit';
 // import LoadingHover from '../../../components/loading-hover-component';
 import LottiesAnimation from '../../../components/lotties-animation-component';
 import { clipboardRequest } from '../../../assets/images';
@@ -31,9 +31,9 @@ import TableRegistration from '../../../components/table-registration-component'
 const swalButton = Swal.mixin({
   customClass: {
     confirmButton:
-      'ml-4 rounded-full px-6 py-1 bg-primarydeepo drop-shadow-md text-xs text-[#fff] font-bold hover:-translate-y-0.5 hover:ease-in-out hover:duration-200',
+      'ml-4 rounded-md px-6 py-1 bg-[#50B8C1] drop-shadow-md text-xs text-[#fff] font-bold hover:-translate-y-0.5 hover:ease-in-out hover:duration-200',
     cancelButton:
-      'rounded-full px-6 py-1 border border-gray-300 bg-[#fff] text-xs hover:bg-gray-100 hover:text-red-400 text-[#57cc99] font-bold',
+      'rounded-md px-6 py-1 border border-[#50B8C1] bg-[#fff] text-xs hover:bg-gray-100 hover:text-red-400 text-[#50B8C1] font-bold',
   },
   buttonsStyling: false,
 });
@@ -51,152 +51,10 @@ const storage = yup.object({
     }
     return false;
   }),
-  // .test('level', 'cannot select the same level with the same bay in one rack', (value, context) => {
-  //   const parentsData = context.from[1].value;
-
-  //   const { details, onChangeRack, onChangeBay, onChangeLevel } = parentsData;
-  //   const comparison = details.filter(i => i.rack !== '' && i.bay !== '' && i.level !== '');
-
-  //   const failed = [];
-  //   const success = [];
-  //   comparison.map((i, idx) => {
-  //     if (i.product_id !== onChangeRack.item.product_id) {
-  //       if (i.rack === onChangeRack.rack) {
-  //         if (i.bay === onChangeBay.bay) {
-  //           if (i.rack === onChangeLevel.level) {
-  //             failed.push({ state: false, index: idx });
-  //           } else {
-  //             success.push({ state: true, index: idx });
-  //           }
-  //         }
-  //       }
-  //     }
-  //     return i;
-  //   });
-
-  //   if (failed.every(i => i.state === true)) {
-  //     return true;
-  //   }
-  //   if (success.every(i => i.state === false)) {
-  //     return false;
-  //   }
-  //   return false;
-  // }),
-
-  bay: yup.string().test('bay', 'bay is required', value => {
-    if (value) {
-      return true;
-    }
-    return false;
-  }),
-  // .test('bay', 'cannot select the same bay at the same level in one rack', (value, context) => {
-  //   const parentsData = context.from[1].value;
-
-  //   const { details, onChangeBay, onChangeRack, onChangeLevel } = parentsData;
-  //   const comparison = details.filter(i => i.rack !== '' && i.bay !== '' && i.level !== '');
-
-  //   const failed = [];
-  //   const success = [];
-  //   comparison.map((i, idx) => {
-  //     if (i.product_id !== onChangeRack.item.product_id) {
-  //       if (i.rack === onChangeRack.rack) {
-  //         if (i.bay === onChangeBay.bay) {
-  //           if (i.rack === onChangeLevel.level) {
-  //             failed.push({ state: false, index: idx });
-  //           } else {
-  //             success.push({ state: true, index: idx });
-  //           }
-  //         }
-  //       }
-  //     }
-  //     return i;
-  //   });
-
-  //   if (failed.every(i => i.state === true)) {
-  //     return true;
-  //   }
-  //   if (success.every(i => i.state === false)) {
-  //     return false;
-  //   }
-  //   return false;
-  // }),
-
-  actual_qty: yup
-    .string()
-    .test('actual_qty', 'quantity is required field', (value, context) => {
-      const { isSplitted } = context.from[1].value;
-      // console.log('value', value);
-      // console.log('isSplitted', isSplitted);
-      if (!isSplitted && value) {
-        return true;
-      }
-      return false;
-    })
-    .test('actual_qty', 'quantity not equal with the actual quantity', (value, context) => {
-      const { isSplitted, details } = context.from[1].value;
-      if (!isSplitted) {
-        return details
-          .map(i => {
-            return i.qty === Number(i.actual_qty);
-          })
-          .every(i => i === true);
-      }
-      return true;
-    }),
 });
 
 const schema = yup.object({
-  details: yup
-    .array()
-    .of(storage)
-    .min(1, 'must have at least one data')
-    // .test('details', 'quantity not equal with the actual quantity', (value, context) => {
-    //   let pass = true;
-
-    //   const { currentProductId } = context.parent;
-    //   console.log('context parent', context.parent);
-    //   if (value.length > 0) {
-    //     const val = toCalculate(
-    //       value.filter(i => i.product_id === currentProductId),
-    //       'actual_qty'
-    //     );
-    //     console.log('val', val);
-    //     console.log('value', value);
-    //     console.log(
-    //       'value.filter(i => i.qty).find(i => i.product_id === currentProductId)?.qty',
-    //       value.filter(i => i.qty).find(i => i.product_id === currentProductId)?.qty
-    //     );
-    //     if (value.filter(i => i.qty).find(i => i.product_id === currentProductId)?.qty !== val) {
-    //       pass = false;
-    //     } else {
-    //       pass = true;
-    //     }
-    //   }
-    //   return pass;
-    // })
-    .test('details', 'total of splitted quantity must be the same with the actual quantity', (value, context) => {
-      let pass = true;
-
-      const { isSplitted, currentProductId } = context.parent;
-
-      if (isSplitted) {
-        if (value.length > 0) {
-          const val = toCalculate(
-            value.filter(i => i.product_id === currentProductId),
-            'actual_qty'
-          );
-
-          if (value.filter(i => i.qty).find(i => i.product_id === currentProductId)?.qty === val) {
-            return pass;
-          }
-          pass = false;
-        }
-      } else {
-        pass = true;
-      }
-
-      return pass;
-    }),
+  details: yup.array().of(storage).min(1, 'must have at least one data'),
 });
 
 function Screen(props) {
@@ -212,27 +70,32 @@ function Screen(props) {
   } = useForm({
     resolver: yupResolver(schema),
   });
+
+  const location = useLocation();
+  console.log('location', location.pathname);
   const { activityStore, store } = useContext(Context);
   // // 1280px
   const [isLarge] = useMediaQuery('(min-width: 1150px)');
 
-  const { currentProductId } = watch();
-  const { fields, append, remove, insert, update } = useFieldArray({
+  // const { currentProductId } = watch();
+  const { fields, append } = useFieldArray({
     control,
     name: 'details',
   });
 
   const [requestDetailData, setRequestDetailData] = useState([]);
   const [storageData, setStorageData] = useState([]);
-  const [rfidData, setRfidData] = useState([]);
-  const [newData, setNewData] = useState([]);
+  console.log('storageData', storageData);
+  // const [rfidData, setRfidData] = useState([]);
+  // const [newData, setNewData] = useState([]);
 
   const [loadingRequest, setLoadingRequest] = useState(false);
-  const [loadingTransit, setLoadingTransit] = useState(false);
+  // const [loadingTransit, setLoadingTransit] = useState(false);
   const [loadingHover, setLoadingHover] = useState(false);
   const [loadingRFID, setLoadingRFID] = useState(false);
   const [onOverview, setOnOverview] = useState(false);
   const [isScanned, setIsScanned] = useState(false);
+  console.log(isScanned);
   const [scanning] = useState(false);
   const [isSplit, setIsSplit] = useState(false);
   const [onOpen, setOnOpen] = useState(false);
@@ -240,11 +103,8 @@ function Screen(props) {
 
   const [requestId, setRequestId] = useState('');
   const [notes, setNotes] = useState('');
+  console.log('notes', notes);
   const [totalRequest, setTotalRequest] = useState(0);
-  const [totalRFID, setTotalRFID] = useState(0);
-  const [counter, setCounter] = useState(2);
-  // const [setTimer] = useState();
-  const [splitValue, setSplitValue] = useState({});
   const [loadingFile, setLoadingFile] = useState(false);
   const [jsonArray, setJsonArray] = useState([]);
   const [filterParams, setFilterParams] = useState({
@@ -256,6 +116,22 @@ function Screen(props) {
   const [isScanning, setIsScanning] = useState(() => {
     return localStorage.getItem('isScanning') === 'true' || false;
   });
+
+  const { registrationStore } = useContext(Context);
+
+  const checkRfidRegistered = [...registrationStore.getLabelRegistered()];
+
+  const rfidDatas = [...registrationStore.getProductRegistered()];
+  console.log('rfidDatas', rfidDatas);
+
+  const groupedData = rfidDatas.reduce((acc, obj) => {
+    const key = 'data';
+    acc[key] = acc[key] || { product_name: obj.product_name, sku: obj.sku, product_id: obj.product_id, qty: 0 };
+    acc[key].qty += 1;
+    return acc;
+  }, {});
+
+  const dataRfids = Object.values(groupedData);
 
   useEffect(() => {
     if (activityStore?.getRequestNumber() && activityStore?.getActivityName()?.toLowerCase() === 'inbound') {
@@ -290,46 +166,7 @@ function Screen(props) {
     }
   }, [requestId]);
 
-  useEffect(() => {
-    if (isSplit) {
-      setValue('isSplitted', isSplit);
-      setNewData(
-        fields.map((item, index) => {
-          if (splitValue.product_id === item.product_id) {
-            item.index = index;
-
-            if (item.actual_qty !== splitValue.value) {
-              item.actual_qty = splitValue.value;
-            }
-            if (item.resividual_qty) {
-              item.actual_qty = item.resividual_qty;
-              update(index + 1, item);
-              setValue(`details.${index + 1}.actual_qty`, item.actual_qty);
-            }
-          }
-          return item;
-        })
-      );
-
-      if (splitValue.product_id) {
-        setValue('currentProductId', splitValue.product_id);
-      }
-      setLoadingTransit(false);
-    }
-  }, [splitValue]);
-
-  useEffect(() => {
-    if (newData.length > 0) {
-      setValue('details', newData);
-    }
-    if (newData.every(i => !i.actual_qty)) {
-      setIsSplit(false);
-      setValue('isSplitted', false);
-    }
-  }, [newData]);
-
   const dynamicPath = localStorage.getItem('dynamicPath');
-  console.log('dynamicPath', dynamicPath);
 
   const memoizedData = useMemo(() => {
     return jsonArray.map(i => {
@@ -348,6 +185,37 @@ function Screen(props) {
     const newIsScanning = !isScanning;
     setIsScanning(newIsScanning);
     localStorage.setItem('isScanning', newIsScanning.toString());
+
+    // if (location.pathname === '/inbound' && isScanning) {
+    //   handleAmqpScan();
+    // } else if (location.pathname === '/inbound' && !isScanning) {
+    //   handleAmqpScan();
+    // }
+  };
+
+  useEffect(() => {
+    if (location.pathname === '/outbound' && isScanning) {
+      handleAmqpScan();
+    } else if (location.pathname === '/outbound' && !isScanning) {
+      handleAmqpScan();
+    }
+  }, [isScanning]);
+
+  const handleAmqpScan = () => {
+    const body = {
+      type: location.pathname === '/inbound' ? 'INBOUND' : location.pathname === '/outbound' ? 'OUTBOUND' : 'REGIS',
+      logInfo: 'info',
+      message: {
+        scanType: !isScanning ? 'STOP' : 'RUNNING',
+      },
+    };
+    AmqpScanApi.amqpScan(body)
+      .then(res => {
+        registrationStore.setLabelRegistered(res?.data?.data);
+      })
+      .catch(error => {
+        console.log('error', error);
+      });
   };
 
   const onFileChange = newFileContent => {
@@ -359,79 +227,11 @@ function Screen(props) {
     setLoadingFile(false);
   };
 
-  // const getTransitData = () => {
-  //   TransitApi.get({ warehouse_id: store?.getWarehouseId() })
-  //     .then(res => {
-  //       setRfidData(res.data);
-  //       setTotalRFID(toCalculate(res.data, 'qty') || 0);
-  //       getTransit();
-  //       setTimeout(() => {
-  //         setLoadTable(false);
-  //       }, 500);
-  //     })
-  //     .catch(error => {
-  //       Swal.fire({ text: error?.data?.message, icon: 'error' });
-  //     });
-  // };
-
-  // const getTransitDatas = () => {
-  //   TransitApi.get({ warehouse_id: store?.getWarehouseId() })
-  //     .then(res => {
-  //       setRfidData(res.data);
-  //       setTotalRFID(toCalculate(res.data, 'qty') || 0);
-
-  //       setTimeout(() => {
-  //         setLoadTable(false);
-  //       }, 500);
-  //     })
-  //     .catch(error => {
-  //       Swal.fire({ text: error?.data?.message, icon: 'error' });
-  //     });
-  // };
-
-  // const getTransit = () => {
-  //   setTimer(
-  //     setInterval(() => {
-  //       getTransitDatas();
-  //       setLoadTable(true);
-  //     }, 5000)
-  //   );
-  // };
-
-  // const startScanning = () => {
-  //   setScanning(true);
-
-  //   if (!scanning && rfidData.length > 0) {
-  //     setLoadingRFID(true);
-  //     setRfidData([]);
-  //     setTotalRFID();
-  //     setTimeout(() => {
-  //       setLoadingRFID(false);
-  //     }, 500);
-  //     getTransitData();
-  //   } else {
-  //     setLoadTable(true);
-  //     setTimeout(() => {
-  //       getTransitData();
-  //     }, 500);
-  //   }
-  //   setIsScanned(false);
-  // };
-
-  // const stopScanning = () => {
-  //   setScanning(false);
-  //   setIsScanned(true);
-  //   clearInterval(timer);
-  // };
-
   useEffect(() => {
-    Promise.allSettled([
-      StorageApi.get({ warehouse_id: store?.getWarehouseId() }).then(res => res),
-      // StorageApi.get(filterParams).then(res => res),
-      // StorageApi.get(filterBay).then(res => res),
-    ])
+    Promise.allSettled([StorageApi.get({ warehouse_id: store?.getWarehouseId() }).then(res => res)])
       .then(result => {
         setStorageData(result[0].value.data);
+        console.log('storageData', storageData);
         setValue('storageData', result[0].value.data);
 
         setIsSplit(false);
@@ -462,313 +262,78 @@ function Screen(props) {
       }));
     }
   };
+
   const onChangeLevel = (level, item, index) => {
     const onChangeData = { level, item, idx: index };
     setValue('onChangeLevel', onChangeData);
   };
 
-  const onSplit = (id, qty, index) => {
-    // console.log('id', id);
-    // console.log('qty', qty);
-    // console.log('index', index);
-    // console.log('counter', counter);
-    // console.log('fields', fields);
-    setIsSplit(true);
-    setLoadingTransit(true);
+  // const onChangeValue = (rack, item, index) => {
+  //   const onChangeData = { rack, item, idx: index };
+  //   setValue('onChangeRack', onChangeData);
 
-    const findData = fields.filter(i => i.qty)?.find(i => i.product_id === id);
-    const fieldLength = fields.filter(i => i.product_id === id).length;
-    const fieldLengthLess = fields.filter(i => i.product_id < id).length;
-    const fieldLengthMore = fields.filter(i => i.product_id > id).length;
-    // console.log('fieldlength', fieldLength);
-    const value = {
-      product_id: findData.product_id,
-      actual_qty: Math.floor(qty / counter),
-    };
+  //   if (rack) {
+  //     setFilterParams(prev => ({
+  //       ...prev,
+  //       rack_number: rack,
+  //     }));
 
-    const splitVal = { product_id: id, value: Math.floor(qty / counter) };
-    if (Math.floor(qty / counter) > 1) {
-      // console.log('emang ga masuk');
-      if (index === 0) {
-        // console.log('kesini');
-        if (qty % counter === 0) {
-          // console.log('aoaa');
-          if (fieldLength === 1) {
-            // console.log('asd1');
-            insert(fieldLength, value);
+  //     // Filter "Bay" options based on the selected "Rack"
+  //     const filteredBays = storageData.filter(i => i.rack_number === rack).map(i => i.bay);
+  //     setFilterBay(prev => ({
+  //       ...prev,
+  //       bays: filteredBays,
+  //       bay: null, // Reset the selected bay when the rack changes
+  //     }));
+  //   }
+  // };
 
-            setSplitValue(splitVal);
-          } else if (fields.findIndex(i => i.resividual_qty && i.product_id === id) !== -1 && id === currentProductId) {
-            // console.log('asd2');
-            remove(fields.findIndex(i => i.resividual_qty));
-            insert(
-              fields.findIndex(i => i.resividual_qty),
-              value
-            );
+  // const onChangeBay = (bay, item, index) => {
+  //   const onChangeData = { bay, item, idx: index };
+  //   setValue('onChangeBay', onChangeData);
 
-            setSplitValue(splitVal);
-          } else if (
-            fields.findIndex(i => i.resividual_qty && i.product_id === currentProductId) !== -1 &&
-            id !== currentProductId
-          ) {
-            // console.log('asd3');
-            if (counter !== fields.filter(i => i.product_id === currentProductId && !i.resividual_qty).length) {
-              setCounter(
-                fields.filter(i => i.product_id === currentProductId && !i.resividual_qty).length > 0
-                  ? fields.filter(i => i.product_id === currentProductId && !i.resividual_qty).length
-                  : 2
-              );
-            } else if (fields.findIndex(i => i.product_id === currentProductId && i.resividual_qty === -1)) {
-              // console.log('asd4');
-              remove(fields.findIndex(i => i.resividual_qty));
-              insert(
-                fields.findIndex(i => i.resividual_qty),
-                value
-              );
-              setSplitValue(splitVal);
-            }
-          } else {
-            // console.log('4');
-            insert(fieldLength, value);
+  //   if (bay) {
+  //     setFilterBay(prev => ({
+  //       ...prev,
+  //       bay,
+  //     }));
 
-            setSplitValue(splitVal);
-          }
-        } else if (qty % counter !== 0) {
-          if (id === currentProductId) {
-            if (fields.findIndex(i => i.resividual_qty && i.product_id === id) !== -1) {
-              remove(fields.findIndex(i => i.resividual_qty));
-              insert(
-                fields.findIndex(i => i.resividual_qty),
-                {
-                  product_id: findData.product_id,
-                  actual_qty: qty - Math.floor(qty / counter) * counter,
-                }
-              );
-              insert(fields.findIndex(i => i.resividual_qty) + 1, {
-                product_id: findData.product_id,
-                actual_qty: qty - Math.floor(qty / counter) * counter,
-                resividual_qty: qty - Math.floor(qty / counter) * counter,
-              });
-            } else {
-              insert(fieldLength, {
-                product_id: findData.product_id,
-                actual_qty: qty - Math.floor(qty / counter) * counter,
-              });
-              insert(fieldLength + 1, {
-                product_id: findData.product_id,
-                actual_qty: qty - Math.floor(qty / counter) * counter,
-                resividual_qty: qty - Math.floor(qty / counter) * counter,
-              });
-            }
+  //     // Filter "Level" options based on the selected "Rack" and "Bay"
+  //     const filteredLevels = storageData
+  //       .filter(i => i.rack_number === filterParams.rack_number && i.bay === bay)
+  //       .map(i => i.level);
+  //     setFilterBay(prev => ({
+  //       ...prev,
+  //       levels: filteredLevels,
+  //     }));
+  //   } else {
+  //     // If no bay is selected, reset the levels to show all levels for the selected rack
+  //     const allLevels = storageData.filter(i => i.rack_number === filterParams.rack_number).map(i => i.level);
+  //     setFilterBay(prev => ({
+  //       ...prev,
+  //       levels: allLevels,
+  //     }));
+  //   }
+  // };
 
-            setSplitValue(splitVal);
-          } else if (fieldLength === 1) {
-            // console.log('ga kesini');
-            insert(fieldLength, value);
-
-            setSplitValue(splitVal);
-          } else {
-            // console.log('kena else');
-            setCounter(fieldLength > 1 ? fieldLength : 2);
-          }
-        }
-      } else if (index !== 0) {
-        if (fieldLengthLess > 0 && fieldLength > 0) {
-          if (id === currentProductId) {
-            if (qty % counter !== 0) {
-              if (fields.findIndex(i => i.resividual_qty && i.product_id === id) !== -1) {
-                remove(fields.findIndex(i => i.resividual_qty && i.product_id === id));
-                insert(
-                  fields.findIndex(i => i.resividual_qty && i.product_id === id),
-                  value
-                );
-                insert(fields.findIndex(i => i.resividual_qty && i.product_id === id) + 1, {
-                  product_id: findData.product_id,
-                  actual_qty: qty - Math.floor(qty / counter) * counter,
-                  resividual_qty: qty - Math.floor(qty / counter) * counter,
-                });
-                setSplitValue(splitVal);
-              } else {
-                insert(fields.findIndex(i => i.product_id === id) + fieldLength, {
-                  product_id: findData.product_id,
-                  actual_qty: qty - Math.floor(qty / counter) * counter,
-                });
-
-                insert(fields.findIndex(i => i.product_id === id) + fieldLength + 1, {
-                  product_id: findData.product_id,
-                  actual_qty: qty - Math.floor(qty / counter) * counter,
-                  resividual_qty: qty - Math.floor(qty / counter) * counter,
-                });
-              }
-
-              setSplitValue(splitVal);
-            } else if (fields.findIndex(i => i.resividual_qty && i.product_id === id) !== -1) {
-              remove(fields.findIndex(i => i.resividual_qty && i.product_id === id));
-              insert(
-                fields.findIndex(i => i.resividual_qty),
-                value
-              );
-              setSplitValue(splitVal);
-            } else {
-              update(
-                fields.findIndex(i => i.product_id === id),
-                { ...findData, actual_qty: Math.floor(qty / counter) }
-              );
-              insert(fields.findIndex(i => i.product_id === id) + fieldLength, value);
-
-              setSplitValue(splitVal);
-            }
-          } else if (id !== currentProductId) {
-            if (fieldLength > 1 && fields.findIndex(i => i.product_id === id && i.resividual_qty) === -1) {
-              setCounter(fields.findIndex(i => i.product_id === id && i.resividual_qty));
-            } else if (fieldLength > 1 && fields.findIndex(i => i.product_id === id && i.resividual_qty) !== -1) {
-              setCounter(fieldLength);
-              setValue('currentProductId', id);
-            } else {
-              setCounter(2);
-            }
-          }
-        } else if (fieldLengthMore > 0 && fieldLength > 0) {
-          if (id === currentProductId) {
-            if (qty % counter !== 0) {
-              if (fields.findIndex(i => i.resividual_qty && i.product_id === id) !== -1) {
-                remove(fields.findIndex(i => i.resividual_qty && i.product_id === id));
-                insert(
-                  fields.findIndex(i => i.resividual_qty && i.product_id === id),
-                  value
-                );
-                insert(fields.findIndex(i => i.resividual_qty && i.product_id === id) + 1, {
-                  product_id: findData.product_id,
-                  actual_qty: qty - Math.floor(qty / counter) * counter,
-                  resividual_qty: qty - Math.floor(qty / counter) * counter,
-                });
-              } else {
-                insert(fields.findIndex(i => i.product_id === id) + fieldLength, {
-                  product_id: findData.product_id,
-                  actual_qty: qty - Math.floor(qty / counter) * counter,
-                });
-
-                insert(fields.findIndex(i => i.product_id === id) + fieldLength + 1, {
-                  product_id: findData.product_id,
-                  actual_qty: qty - Math.floor(qty / counter) * counter,
-                  resividual_qty: qty - Math.floor(qty / counter) * counter,
-                });
-              }
-
-              setSplitValue(splitVal);
-            } else if (fields.findIndex(i => i.resividual_qty && i.product_id === id) !== -1) {
-              if (qty % counter !== 0) {
-                remove(fields.findIndex(i => i.resividual_qty && i.product_id === id));
-                insert(
-                  fields.findIndex(i => i.resividual_qty && i.product_id === id),
-                  value
-                );
-                insert(fields.findIndex(i => i.resividual_qty && i.product_id === id) + 1, {
-                  product_id: findData.product_id,
-                  actual_qty: qty - Math.floor(qty / counter) * counter,
-                  resividual_qty: qty - Math.floor(qty / counter) * counter,
-                });
-              } else {
-                remove(fields.findIndex(i => i.resividual_qty && i.product_id === id));
-                insert(
-                  fields.findIndex(i => i.resividual_qty && i.product_id === id),
-                  value
-                );
-              }
-
-              setSplitValue(splitVal);
-            } else {
-              update(
-                fields.findIndex(i => i.product_id === id),
-                { ...findData, actual_qty: Math.floor(qty / counter) }
-              );
-              insert(fields.findIndex(i => i.product_id === id) + fieldLength, value);
-
-              setSplitValue(splitVal);
-            }
-          } else if (id !== currentProductId) {
-            if (fieldLength > 1 && fields.findIndex(i => i.product_id === id && i.resividual_qty) === -1) {
-              setCounter(fields.findIndex(i => i.product_id === id && i.resividual_qty));
-            } else if (fieldLength > 1 && fields.findIndex(i => i.product_id === id && i.resividual_qty) !== -1) {
-              setCounter(fieldLength);
-              setValue('currentProductId', id);
-            } else {
-              setCounter(2);
-            }
-          }
-        }
-      }
-    }
-  };
-
-  const onRemove = (idx, id) => {
-    const fieldLength = fields.filter(i => i.product_id === id).length;
-    const dataIndex = newData[newData.findIndex((item, i) => i === idx)];
-    const findData = fields.filter(i => i.qty)?.find(i => i.product_id === dataIndex.product_id);
-
-    const dt = fields.filter((item, i) => item.product_id === id && i !== idx && i !== idx - 1);
-
-    const value = {
-      product_id: findData.product_id,
-      value: Math.floor(findData.qty / fields.filter(i => i.product_id === id && !i.qty).length),
-    };
-    const values = {
-      product_id: findData.product_id,
-      value: Math.floor(findData.qty / dt.length),
-    };
-
-    if (counter <= 3 && fieldLength === 2) {
-      delete findData.actual_qty;
-      setSplitValue(findData);
-      remove(idx);
-      setCounter(2);
-    } else if (findData.qty % findData.actual_qty === 0) {
-      if (findData.qty % value.value !== 0) {
-        remove(idx);
-        remove(idx - 1);
-        setSplitValue(values);
-      } else {
-        if (dt.length === 0) {
-          delete findData.actual_qty;
-          setSplitValue(findData);
-        } else {
-          setSplitValue(value);
-        }
-        remove(idx);
-      }
-    } else if (findData.qty % findData.actual_qty !== 0) {
-      const resividualValue = {
-        product_id: findData.product_id,
-        value: Math.floor(findData.qty / dt.length),
-        resividual_qty: Math.floor(findData.qty / dt.length),
-      };
-      if (findData.qty % value.value !== 0) {
-        if (value.value !== resividualValue.value) {
-          if (fields.findIndex(i => i.resividual_qty) !== -1) {
-            if (newData.findIndex((item, i) => i === idx) === idx) {
-              remove(newData.findIndex((item, i) => i === idx));
-              remove(fields.findIndex(i => i.resividual_qty) - 1);
-            } else {
-              remove(fields.findIndex(i => i.resividual_qty));
-              remove(idx - 1);
-            }
-            setSplitValue(values);
-          } else {
-            remove(idx);
-            setSplitValue(values);
-          }
-        }
-      } else {
-        remove(idx);
-        setSplitValue(values);
-      }
-    }
-  };
+  // const onChangeLevel = (level, item, index) => {
+  //   const onChangeData = { level, item, idx: index };
+  //   setValue('onChangeLevel', onChangeData);
+  // };
 
   const onSubmitRFID = () => {
+    const hasUnregisteredRfid = checkRfidRegistered.some(item => item.product_name === null && item.id === null);
     let pass = onOpen;
-    if (totalRFID === totalRequest) {
-      append(rfidData);
+    if (hasUnregisteredRfid) {
+      swalButton.fire({
+        icon: 'error',
+        title: 'Unregistered RFID',
+        text: 'You have RFID numbers that are not registered. Please register them first.',
+      });
+      return false;
+    }
+    if (jsonArray.length === totalRequest) {
+      append(dataRfids);
       setOnOpen(!pass);
       setErrors(false);
       pass = true;
@@ -776,16 +341,16 @@ function Screen(props) {
       setErrors(true);
       swalButton
         .fire({
-          html: '<b> NOTES </b> <br/> <p class="text-[15px]">The amount of data in Request Detail does not match the data in RFID Detected. Continue process?<p>',
+          html: '<b> NOTES </b> <br/> <p class="text-[15px]">The amount of data in Request Detail does not match the data in RFID Detected, please type Yes to Continue process?<p>',
           input: 'text',
           showCancelButton: true,
           reverseButtons: true,
-          confirmButtonColor: '#3085d6',
+          confirmButtonColor: '#50B8C1',
           preConfirm: pre => {
             if (!pre && pre.length === 0) {
               Swal.showValidationMessage(`notes is a required field`);
-            } else if (pre.length <= 5) {
-              Swal.showValidationMessage(`notes length must be more than 5`);
+            } else if (pre.length <= 2) {
+              Swal.showValidationMessage(`please type yes`);
             }
             return pre;
           },
@@ -793,7 +358,7 @@ function Screen(props) {
         .then(result => {
           if (result.isConfirmed) {
             setNotes(result.value);
-            append(rfidData);
+            append(dataRfids);
             setOnOpen(!pass);
             setErrors(false);
           }
@@ -810,11 +375,11 @@ function Screen(props) {
   };
   const onDisabled = () => {
     let pass = false;
-    if (!isScanned && totalRFID > 0) {
+    if (isScanning && jsonArray.length > 0) {
       pass = true;
-    } else if (!isScanned && !totalRFID) {
+    } else if (!isScanning && !jsonArray.length) {
       pass = true;
-    } else if (isScanned && !totalRFID) {
+    } else if (isScanning && !jsonArray.length) {
       pass = true;
     }
     return pass;
@@ -870,32 +435,42 @@ function Screen(props) {
   const onFinalSubmit = data => {
     if (validateStorageId(data)) {
       if (validateIsDuplicate(data)) {
+        const datas = data.details.map(i => {
+          return storageData.find(f => f.rack_number === i.rack && f.bay === i.bay && f.level === i.level)?.id;
+        });
+        const concatenatedNumber = datas.reduce((accumulator, currentValue) => {
+          if (currentValue !== undefined) {
+            accumulator += currentValue;
+          }
+          return accumulator;
+        }, 0);
         const body = {
           request_id: requestId,
-          notes,
-          detail: data.details.map(i => {
+          notes: 'Inbound masuk',
+          detail: rfidDatas.map(i => {
             return {
               product_id: i.product_id,
+              label_id: i.id,
               warehouse_id: store?.getWarehouseId(),
-              storage_id: storageData.find(f => f.rack_number === i.rack && f.bay === i.bay && f.level === i.level)?.id,
-              qty: i.actual_qty ? i.actual_qty : i.qty,
+              storage_id: concatenatedNumber,
             };
           }),
         };
+
+        console.log('body', body);
 
         TransitApi.inbound(body)
           .then(() => {
             Swal.fire({ text: 'Sucessfully Saved', icon: 'success' });
             setOnOpen(!onOpen);
             reset();
-            setTotalRFID('');
             setTotalRequest('');
             setValue('details', []);
             setValue('request_number', '');
             setValue('activity_date', null);
             setStorageData([]);
             setRequestDetailData([]);
-            setRfidData([]);
+            setJsonArray([]);
             if (activityStore.getRequestNumber() && activityStore.getActivityName()) {
               activityStore.setRequestNumber(0);
               activityStore?.setActivityName('');
@@ -922,9 +497,8 @@ function Screen(props) {
       activityStore.setRequestNumber(0);
       activityStore?.setActivityName('');
     }
-    setRfidData([]);
+    // setRfidData([]);
     setTotalRequest(0);
-    setTotalRFID(0);
     setRequestId('');
     setValue('activity_date', null);
     setValue('request_number', '');
@@ -936,8 +510,8 @@ function Screen(props) {
   return (
     <Fade in={props}>
       <input type="hidden" {...register('filters')} />
-      <input type="hidden" {...register('isSplitted')} value={isSplit} />
-      <input type="hidden" {...register('currentProductId')} />
+      {/* <input type="hidden" {...register('isSplitted')} value={isSplit} />
+      <input type="hidden" {...register('currentProductId')} /> */}
       <input type="hidden" {...register('onChangeRack')} />
       <input type="hidden" {...register('onChangeBay')} />
       <input type="hidden" {...register('onChangeLevel')} />
@@ -1028,21 +602,6 @@ function Screen(props) {
                 animationsData={Loading}
                 classCustom="h-full z-[999] opacity-100 flex flex-col items-center justify-center"
               />
-              {/* {!loadingRFID ? (
-                <SimpleTable
-                  loading={loadtable}
-                  data={rfidData.map(i => {
-                    return {
-                      product_id: i.product_id,
-                      product_name: i.product_name,
-                      product_sku: i.sku,
-                      qty: i.qty,
-                      warehouse_id: i.warehouse_id,
-                    };
-                  })}
-                  isLarge={isLarge}
-                />
-              ) : null} */}
               {loadingFile ? (
                 <div>Loading...</div>
               ) : (
@@ -1062,7 +621,7 @@ function Screen(props) {
               >
                 <div className="flex">
                   <div className="max-sm:text-xs xl:text-md w-1/2 flex-1">Total Request</div>
-                  <div className="font-bold">{totalRequest}</div>
+                  <div className="font-bold">{totalRequest || 0}</div>
                 </div>
                 <div className="flex">
                   <div className="max-sm:text-xs xl:text-md w-1/2 flex-1">
@@ -1074,22 +633,6 @@ function Screen(props) {
 
               <div className="flex justify-end w-full sm:space-x-[20%] md:space-x-[60%] xl:space-x-[70%]">
                 <div className={`${isLarge ? 'flex flex-col gap-2 mx-8 w-[30%]' : 'flex flex-col gap-2 my-2 '}`}>
-                  {/* <Button
-                    _hover={{
-                      shadow: 'md',
-                      transform: 'translateY(-5px)',
-                      transitionDuration: '0.2s',
-                      transitionTimingFunction: 'ease-in-out',
-                    }}
-                    type="button"
-                    size={isLarge ? 'sm' : 'xs'}
-                    px={isLarge ? 5 : 2}
-                    className="rounded-md border border-[#50B8C1] bg-[#fff] hover:bg-[#E4E4E4] text-[#50B8C1] font-semibold"
-                    onClick={scanning ? stopScanning : startScanning}
-                    isDisabled={requestDetailData.length === 0}
-                  >
-                    {scanning ? <StopIcon className="h-6 animate-pulse" /> : <p className="tracking-wide">Scan</p>}
-                  </Button> */}
                   <FilePicker
                     onFileChange={onFileChange}
                     isScanning={isScanning}
@@ -1139,7 +682,7 @@ function Screen(props) {
           </div>
           {error && (
             <p className="text-[#a2002d] text-xs w-full pl-4">
-              {totalRequest !== totalRFID
+              {totalRequest !== jsonArray.length
                 ? 'The amount of data in Request Detail does not match the data in RFID Detected.'
                 : ''}
             </p>
@@ -1154,7 +697,7 @@ function Screen(props) {
           <div className="rounded-md border shadow-lg modal-container bg-white w-[80%] h-3/5 mx-auto z-50 overflow-y-hidden ">
             <div className="grid justify-items-end mb-8">
               <XIcon
-                className="fixed h-6 stroke-2 my-2 pointer-events-auto cursor-pointer"
+                className="fixed h-6 stroke-2 my-2 px-2 pointer-events-auto cursor-pointer"
                 onClick={() => setOnOverview(!onOverview)}
               />
             </div>
@@ -1203,39 +746,31 @@ function Screen(props) {
         >
           {/* <div className="border shadow-lg bg-white w-[80%] h-1/2 mx-auto rounded z-50 overflow-y-auto"> */}
           <form
-            className="px-4 py-2 border shadow-lg bg-white w-[80%] mx-auto rounded z-50"
+            className="px-4 py-2 border shadow-lg bg-white w-[60%] mx-auto rounded z-50"
             onSubmit={handleSubmit(onFinalSubmit)}
           >
             <p className="text-md font-bold py-1 px-4">Dashboard Transit</p>
             <div className="overflow-y-auto h-60 px-6 py-2">
               <TableContainer className="px-4 py-1">
                 <Table>
-                  <Thead className="bg-[#aed9e0]">
+                  <Thead className="bg-[#F5F5F5]">
                     <Tr className="text-bold text-[#000]">
-                      <Th className="text-semibold text-[#000] text-center w-10 py-1.5 pl-2">NO</Th>
-                      <Th className="text-semibold text-[#000] text-center w-20">SKU</Th>
-                      <Th className="text-semibold text-[#000] text-center w-60">PRODUCT</Th>
-                      <Th className="text-semibold text-[#000] text-center w-20 ">QTY</Th>
-                      <Th aria-label="Mute volume" className="w-24" />
-                      <Th aria-label="Mute volume" className="w-24" />
-                      <Th aria-label="Mute volume" className="w-24" />
-                      <Th aria-label="Mute volume" className="w-20" />
-                      <Th aria-label="Mute volume" className="w-24" />
+                      <Th className="text-semibold text-[#000] w-10">NO</Th>
+                      <Th className="text-semibold text-[#000] w-20">SKU</Th>
+                      <Th className="text-semibold text-[#000] w-60">PRODUCT</Th>
+                      <Th className="text-semibold text-[#000] w-20 ">QTY</Th>
+                      <Th className="text-semibold text-[#000] w-20 ">Rack</Th>
+                      <Th className="text-semibold text-[#000] w-20 ">Bay</Th>
+                      <Th className="text-semibold text-[#000] w-20 ">Level</Th>
                     </Tr>
                   </Thead>
-                  {/* <LoadingComponent loading={loadingTransit} /> */}
-                  <LottiesAnimation
-                    animationsData={Loading}
-                    visible={loadingTransit}
-                    classCustom="h-full z-[999] opacity-75 flex flex-col items-center justify-center"
-                  />
-
                   <Tbody>
                     {fields.length > 0 ? (
                       fields.map((item, index) => {
+                        console.log('itemkkk', item);
                         return (
                           <Tr key={item.id} className={`${index % 2 ? 'bg-gray-100' : ''} w-full`}>
-                            <Td className="w-10 text-center px-2">
+                            <Td className="w-10 text-start">
                               {index + 1}
                               <Controller
                                 render={({ field }) => {
@@ -1248,7 +783,7 @@ function Screen(props) {
                                 control={control}
                               />
                             </Td>
-                            <Td className="w-20 text-center px-2">
+                            <Td className="w-20">
                               {item.sku}
                               <Controller
                                 render={({ field }) => {
@@ -1260,7 +795,7 @@ function Screen(props) {
                               />
                             </Td>
 
-                            <Td className="w-60 px-2">
+                            <Td className="w-60">
                               {item.product_name}
                               <Controller
                                 render={({ field }) => {
@@ -1271,7 +806,7 @@ function Screen(props) {
                                 control={control}
                               />
                             </Td>
-                            <Td className="w-20 text-center px-2">
+                            <Td className="w-20">
                               {item.qty}
                               <Controller
                                 render={({ field }) => {
@@ -1285,21 +820,21 @@ function Screen(props) {
                             <Td className="w-24 px-2">
                               <Controller
                                 render={({ field }) => {
+                                  const rackOptions = deleteDuplicates(
+                                    storageData?.map(s => ({
+                                      label: s.rack_number,
+                                      value: s.rack_number,
+                                    })),
+                                    'label'
+                                  );
+
                                   return (
                                     <Select
                                       name={`details.${index}.rack`}
                                       idx={index}
                                       placeholder="Rack"
                                       booleans={isSplit}
-                                      options={deleteDuplicates(
-                                        storageData?.map(s => {
-                                          return {
-                                            label: s.rack_number,
-                                            value: s.rack_number,
-                                          };
-                                        }),
-                                        'label'
-                                      )}
+                                      options={rackOptions}
                                       onChangeValue={e => {
                                         field.onChange(e);
                                         onChangeValue(e, item, index);
@@ -1307,6 +842,7 @@ function Screen(props) {
                                       register={register}
                                       control={control}
                                       errors={errors}
+                                      isAllocate
                                     />
                                   );
                                 }}
@@ -1316,23 +852,25 @@ function Screen(props) {
                             </Td>
                             <Td className="w-24 px-2">
                               <Controller
-                                {...register(`details.${index}.bay`)}
                                 render={({ field }) => {
+                                  const selectedRack = watch(`details.${index}.rack`);
+                                  const bayOptions = deleteDuplicates(
+                                    storageData
+                                      .filter(s => !selectedRack || s.rack_number === selectedRack)
+                                      .map(i => ({
+                                        label: i.bay,
+                                        value: i.bay,
+                                      })),
+                                    'label'
+                                  );
+
                                   return (
                                     <Select
                                       name={`details.${index}.bay`}
                                       idx={index}
                                       placeholder="Bay"
                                       booleans={isSplit}
-                                      options={deleteDuplicates(
-                                        storageData.map(i => {
-                                          return {
-                                            label: i.bay,
-                                            value: i.bay,
-                                          };
-                                        }),
-                                        'label'
-                                      )}
+                                      options={bayOptions}
                                       onChangeValue={e => {
                                         field.onChange(e);
                                         onChangeBay(e, item, index);
@@ -1340,6 +878,7 @@ function Screen(props) {
                                       register={register}
                                       control={control}
                                       errors={errors}
+                                      isAllocate
                                     />
                                   );
                                 }}
@@ -1350,21 +889,29 @@ function Screen(props) {
                             <Td className="w-24 px-2">
                               <Controller
                                 render={({ field }) => {
+                                  const selectedRack = watch(`details.${index}.rack`);
+                                  const selectedBay = watch(`details.${index}.bay`);
+                                  const levelOptions = deleteDuplicates(
+                                    storageData
+                                      .filter(
+                                        s =>
+                                          (!selectedRack || s.rack_number === selectedRack) &&
+                                          (!selectedBay || s.bay === selectedBay)
+                                      )
+                                      .map(i => ({
+                                        label: i.level,
+                                        value: i.level,
+                                      })),
+                                    'label'
+                                  );
+
                                   return (
                                     <Select
                                       name={`details.${index}.level`}
                                       idx={index}
                                       placeholder="Level"
                                       booleans={isSplit}
-                                      options={deleteDuplicates(
-                                        storageData.map(i => {
-                                          return {
-                                            label: i.level,
-                                            value: i.level,
-                                          };
-                                        }),
-                                        'label'
-                                      )}
+                                      options={levelOptions}
                                       onChangeValue={e => {
                                         field.onChange(e);
                                         onChangeLevel(e, item, index);
@@ -1372,6 +919,7 @@ function Screen(props) {
                                       register={register}
                                       control={control}
                                       errors={errors}
+                                      isAllocate
                                     />
                                   );
                                 }}
@@ -1379,88 +927,11 @@ function Screen(props) {
                                 control={control}
                               />
                             </Td>
-                            <Td className="w-24 px-2">
-                              <Controller
-                                render={({ field }) => {
-                                  return (
-                                    <InputComponent
-                                      type="number"
-                                      name={`details.${index}.actual_qty`}
-                                      idx={index}
-                                      {...field}
-                                      errName="details"
-                                      control={control}
-                                      register={register}
-                                      errors={errors}
-                                    />
-                                  );
-                                }}
-                                name={`details.${index}.actual_qty`}
-                                control={control}
-                              />
-                            </Td>
-                            <Td className="w-20 px-4">
-                              {item.qty ? (
-                                <Button
-                                  size="sm"
-                                  type="button"
-                                  px={8}
-                                  className="rounded-full text-center text-white font-bold bg-gradient-to-r from-secondarydeepo to-blue-500 hover:bg-gradient-to-br focus:ring-1 focus:outline-none focus:ring-secondarydeepo mb-4"
-                                  key={index}
-                                  onClick={() => {
-                                    if (index === 0) {
-                                      setCounter(count => count + 1);
-                                    } else if (index !== 0) {
-                                      if (
-                                        item.product_id !== currentProductId &&
-                                        fields.filter(i => i.product_id === item.product_id).length === 1
-                                      ) {
-                                        setCounter(2);
-                                        setValue('currentProductId', item.product_id);
-                                      } else if (item.product_id === currentProductId) {
-                                        setCounter(count => count + 1);
-                                      }
-                                    }
-
-                                    onSplit(item.product_id, item.qty, index, item?.actual_qty, item);
-                                  }}
-                                >
-                                  Split
-                                </Button>
-                              ) : (
-                                <Button
-                                  px={6}
-                                  size="sm"
-                                  type="button"
-                                  className="rounded-full bg-[#eb6058] hover:bg-[#f35a52] text-[#fff] hover:text-gray-600 font-bold"
-                                  key={index}
-                                  onClick={() => {
-                                    const data = newData[newData.findIndex((item, i) => i === index)];
-                                    const findData = fields
-                                      .filter(i => i.qty)
-                                      ?.find(i => i.product_id === data.product_id);
-
-                                    if (findData.qty % counter !== 0) {
-                                      setCounter(count => count - 2);
-                                    } else {
-                                      setCounter(count => {
-                                        if (count > 2) return count - 1;
-                                        return 2;
-                                      });
-                                    }
-
-                                    onRemove(index, item.product_id, item, item?.actual_qty);
-                                  }}
-                                >
-                                  Delete
-                                </Button>
-                              )}
-                            </Td>
                           </Tr>
                         );
                       })
                     ) : (
-                      <tr className="bg-gray-100 w-full border-2 border-solid border-red-500">
+                      <tr className="bg-gray-100 w-full border-2 border-solid">
                         <td className="w-10 text-center px-2  text-red-500 h-[170px]" colSpan={9} rowSpan={5} />
                       </tr>
                     )}
@@ -1490,9 +961,9 @@ function Screen(props) {
                   type="button"
                   size="sm"
                   px={8}
-                  className="rounded-full border border-gray-300 bg-[#fff] hover:bg-[#E4E4E4] text-primarydeepo font-bold"
+                  className="rounded-md border border-gray-300 bg-[#fff] hover:bg-[#E4E4E4] text-[#50B8C1] font-bold"
                   onClick={() => {
-                    setCounter(2);
+                    // setCounter(2);
                     reset();
                     setOnOpen(!onOpen);
                     setNotes('');
@@ -1510,7 +981,7 @@ function Screen(props) {
                   type="submit"
                   size="sm"
                   px={8}
-                  className="ml-4 rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold"
+                  className="ml-4 rounded-md bg-[#50B8C1] drop-shadow-md text-[#fff] hover:text-[#fff] font-bold"
                 >
                   Submit
                 </Button>

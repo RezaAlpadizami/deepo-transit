@@ -17,7 +17,7 @@ function SimpleTable(props) {
             <th className={`text-bold text-[#000] text-center w-[5%] ${isLarge ? 'px-9 text-sm' : 'px-4 text-xs'}`}>
               NO
             </th>
-            <th className={`${th} w-[15%]`}>SKU</th>
+            <th className={`${th} w-[15%] text-sm`}>SKU</th>
             <th className={`${th} w-[60%]`}>PRODUCT</th>
             <th className={`${th} w-[20%]`}>QTY</th>
           </tr>

@@ -15,7 +15,7 @@ function TableRegistration(props) {
   const td = 'text-[#000] text-center py-1.5 break-words';
 
   useEffect(() => {
-    const newArray = data.map(d => {
+    const newArray = data?.map(d => {
       const matchedRegisteredData = registeredData.find(regData => regData.rfid_number === d.rfid_number);
 
       if (matchedRegisteredData && matchedRegisteredData.product_name !== null) {
@@ -50,7 +50,7 @@ function TableRegistration(props) {
     <div className="w-full h-full max-h-[453px] overflow-y-auto overflow-x-hidden">
       <table className="w-full">
         <thead>
-          <tr className="bg-[#F5F5F5] text-bold mx-auto [&>*]:text-md">
+          <tr className="bg-[#F5F5F5] text-bold mx-auto [&>*]:text-xs">
             <th className={`text-bold text-[#000] text-center w-[5%] ${isLarge ? 'px-9' : 'px-4 text-sm'}`}>No</th>
             <th className={`${th} w-[45%]`}>{rfidTable ? 'RFID Number' : panel ? 'RFID Number' : 'SKU'}</th>
             <th className={`${th} w-[45%]`}>Product</th>
@@ -59,7 +59,7 @@ function TableRegistration(props) {
         </thead>
 
         <tbody className="h-16">
-          {data.length > 0 && data[0]?.rfid_number !== '' ? (
+          {data?.length > 0 && data[0]?.rfid_number !== '' ? (
             data?.map((d, i) => {
               const matchedRegisteredData = registeredData.find(regData => regData.rfid_number === d.rfid_number);
               return (

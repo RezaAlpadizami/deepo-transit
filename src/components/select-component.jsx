@@ -12,6 +12,7 @@ function SelectComponent(props) {
     options,
     idx,
     booleans,
+    isAllocate,
     onChangeValue = () => {},
   } = props;
 
@@ -28,9 +29,12 @@ function SelectComponent(props) {
             size="sm"
             name={name}
             id={name}
-            className="w-full text-sm rounded-md border-gray-400 px-5 py-1.5 h-full"
+            iconColor={`${isAllocate ? '#50B8C1' : 'gray'}`}
+            className={`w-full text-sm rounded-md ${
+              isAllocate ? 'border-[#50B8C1] text-[#50B8C1]' : 'border-gray-400'
+            }  px-5 py-1.5 h-full`}
             disabled={disabled}
-            focusBorderColor="#184D47"
+            focusBorderColor={`${isAllocate ? '#50B8C1' : '#184D47'}`}
             onChange={e => onChangeValue(e.target.value)}
             placeholder={!placeholder ? `Select ${label}` : placeholder}
           >
