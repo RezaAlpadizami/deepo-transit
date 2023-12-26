@@ -1,5 +1,4 @@
 import React from 'react';
-// import Loading from './loading';
 import LottiesAnimation from '../../../../components/lotties-animation-component';
 import Loading from '../../../../assets/lotties/Loading.json';
 
@@ -24,7 +23,6 @@ function SimpleTable(props) {
         </thead>
 
         <tbody className="h-16">
-          {/* <Loading visible={loading} isLarge={isLarge} /> */}
           <LottiesAnimation
             animationsData={Loading}
             isLarge={isLarge}

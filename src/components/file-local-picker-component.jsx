@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Button } from '@chakra-ui/react';
 import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 import LottiesAnimation from './lotties-animation-component';
 import StopScanAnimation from '../assets/lotties/Stop-scan.json';
 import Context from '../context';
@@ -11,6 +12,7 @@ function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath, dataRfi
   const [timeoutId, setTimeoutId] = useState(null);
   const [timeoutCheck, setTimeoutCheck] = useState(null);
   const { registrationStore } = useContext(Context);
+  const navigate = useNavigate();
 
   const rfidNumberToCheck = {
     rfid_number: dataRfid?.map(item => item.rfid_number),
@@ -30,41 +32,57 @@ function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath, dataRfi
         registrationStore.setDataListRegistered(res?.data);
       })
       .catch(error => {
-        Swal.fire({ text: error?.message || error?.originalError, icon: 'error' });
+        Swal.fire({
+          text: error?.message || error?.originalError || 'Please check your path file',
+          title: 'The path settings are not correct, please check',
+          icon: 'error',
+        });
+        clearTimeout(timeoutId);
+        clearTimeout(timeoutCheck);
+        navigate('/setting-path');
       });
   };
 
-  const fetchData = async () => {
-    try {
-      const response = await fetch(`${process.env.REACT_APP_UI_URL_PATH}${dynamicPath}`);
-      const text = await response.text();
-      await onFileChange(text);
-    } catch (error) {
-      console.error('Error fetching file:', error);
-    } finally {
-      if (watchingFile) {
-        setTimeoutId(setTimeout(fetchData, 1000));
-      }
-    }
-  };
+  // const fetchData = async () => {
+  //   try {
+  //     const response = await fetch(`${process.env.REACT_APP_UI_URL_PATH}${dynamicPath}`);
+  //     const text = await response.text();
+  //     await onFileChange(text);
+  //   } catch (error) {
+  //     console.log('errorres', error);
+  //     if (error) {
+  //       Swal.fire({ text: 'Your file path is not correct', icon: 'error' });
+  //       clearTimeout(timeoutId);
+  //       clearTimeout(timeoutCheck);
+  //       navigate('/setting-path');
+  //     }
+  //   } finally {
+  //     if (watchingFile) {
+  //       setTimeoutId(setTimeout(fetchData, 1000));
+  //     }
+  //   }
+  // };
 
-  const checkLabelAlreadyRegistered = () => {
-    LabelRegistrationApi.validationRegister(rfidNumberToCheck)
-      .then(res => {
-        console.log('res check', res);
-        registrationStore.setLabelRegistered(res?.data?.data);
-      })
-      .catch(error => {
-        console.log('error', error);
-      })
-      .finally(() => {
-        if (watchingFile) {
-          setTimeoutCheck(setTimeout(checkLabelAlreadyRegistered, 2000));
-        }
-      });
-  };
+  // const checkLabelAlreadyRegistered = () => {
+  //   LabelRegistrationApi.validationRegister(rfidNumberToCheck)
+  //     .then(res => {
+  //       registrationStore.setLabelRegistered(res?.data?.data);
+  //     })
+  //     .catch(error => {
+  //       Swal.fire({ text: error?.message || error?.originalError || 'Please check your path file', icon: 'error' });
+  //       clearTimeout(timeoutId);
+  //       clearTimeout(timeoutCheck);
+  //       navigate('/setting-path');
+  //     })
+  //     .finally(() => {
+  //       if (watchingFile) {
+  //         setTimeoutCheck(setTimeout(checkLabelAlreadyRegistered, 2000));
+  //       }
+  //     });
+  // };
 
   useEffect(() => {
+    let isMounted = true;
     const cleanup = () => {
       setWatchingFile(false);
       if (timeoutId || timeoutCheck) {
@@ -73,13 +91,55 @@ function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath, dataRfi
       }
     };
 
+    console.log('can', isScanning);
+
     if (!isScanning) {
       cleanup();
     } else {
       setWatchingFile(true);
+      const fetchData = async () => {
+        try {
+          const response = await fetch(`${process.env.REACT_APP_UI_URL_PATH}${dynamicPath}`);
+          const text = await response.text();
+          await onFileChange(text);
+        } catch (error) {
+          console.log('errorres', error);
+          if (error) {
+            Swal.fire({ text: 'Your file path is not correct', icon: 'error' });
+            clearTimeout(timeoutId);
+            clearTimeout(timeoutCheck);
+            navigate('/setting-path');
+            return;
+          }
+        } finally {
+          if (isMounted && watchingFile) {
+            setTimeoutId(setTimeout(fetchData, 1000));
+          }
+        }
+      };
+      const checkLabelAlreadyRegistered = () => {
+        LabelRegistrationApi.validationRegister(rfidNumberToCheck)
+          .then(res => {
+            registrationStore.setLabelRegistered(res?.data?.data);
+          })
+          .catch(error => {
+            Swal.fire({ text: error?.message || error?.originalError || 'Please check your path file', icon: 'error' });
+            cleanup(); // Stop timeouts on error
+            navigate('/setting-path');
+          })
+          .finally(() => {
+            if (isMounted && watchingFile) {
+              setTimeoutCheck(setTimeout(checkLabelAlreadyRegistered, 2000));
+            }
+          });
+      };
       fetchData();
       checkLabelAlreadyRegistered();
     }
+    return () => {
+      isMounted = false;
+      cleanup();
+    };
   }, [isScanning, dynamicPath, watchingFile]);
 
   return (

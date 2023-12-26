@@ -1,5 +1,15 @@
 import React, { useState, useEffect, useMemo, useContext } from 'react';
-import { useMediaQuery, Button } from '@chakra-ui/react';
+import {
+  useMediaQuery,
+  Button,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+} from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import Swal from 'sweetalert2';
@@ -13,26 +23,21 @@ import FilePicker from '../../../../components/file-local-picker-component';
 import LabelRegistrationApi from '../../../../services/api-label-registration';
 import LoadingHover from '../../../../components/loading-hover-component';
 import Context from '../../../../context';
-import ModalConfirmation from '../../../../components/modal-confirmation';
 
 const schemaSubmitRegistration = yup.object().shape({
   product_id: yup.string().nullable().required(),
   registration_date: yup.date().nullable(),
-  notes: yup.string().nullable().max(255),
+  notes: yup.string().nullable().max(255).required(),
 });
 
 function Screen() {
   const [dataProduct, setDataProduct] = useState([]);
   const [isLarge] = useMediaQuery('(min-width: 1150px)');
-  const [isScanning, setIsScanning] = useState(() => {
-    return localStorage.getItem('isScanning') === 'true' || false;
-  });
-
+  const [isScanning, setIsScanning] = useState(false);
   const [loadingFile, setLoadingFile] = useState(false);
   const [loading, setLoading] = useState(false);
   const [jsonArray, setJsonArray] = useState([]);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
-  const [isTriggerHandleSubmit, setIsTriggerHandleSubmit] = useState(false);
 
   const { registrationStore } = useContext(Context);
   const dataLabelRegistered = [...registrationStore.getDataListRegistered()];
@@ -41,7 +46,6 @@ function Screen() {
 
   const {
     handleSubmit,
-    // reset,
     register,
     setValue,
     control,
@@ -53,7 +57,6 @@ function Screen() {
   const toggleScan = () => {
     const newIsScanning = !isScanning;
     setIsScanning(newIsScanning);
-    localStorage.setItem('isScanning', newIsScanning.toString());
   };
 
   const onFileChange = newFileContent => {
@@ -88,7 +91,7 @@ function Screen() {
     });
   }, [jsonArray]);
 
-  const onSubmitRegistration = data => {
+  const onSubmitRegistration = async data => {
     const { notes, product_id } = data;
     setLoading(true);
 
@@ -98,7 +101,7 @@ function Screen() {
       notes,
     }));
 
-    LabelRegistrationApi.labelRegister(arrayJson)
+    await LabelRegistrationApi.labelRegister(arrayJson)
       .then(() => {
         setLoading(false);
         Swal.fire({
@@ -111,8 +114,8 @@ function Screen() {
         setJsonArray([]);
         setValue('notes', '');
         setValue('product_id', '');
-        setIsTriggerHandleSubmit(false);
         localStorage.removeItem('registered');
+        closeConfirmationModal();
       })
       .catch(error => {
         setLoading(false);
@@ -146,13 +149,14 @@ function Screen() {
             name="product_id"
             label="Product"
             placeholder="Product"
-            options={dataProduct?.map((i, index) => {
-              return {
+            options={[
+              { value: null, label: 'None' },
+              ...(dataProduct?.map((i, index) => ({
                 key: index,
                 value: i.id,
                 label: i.product_name,
-              };
-            })}
+              })) || []),
+            ]}
             register={register}
             errors={errors}
             isDefaultOptions
@@ -223,11 +227,7 @@ function Screen() {
                     px={12}
                     className="rounded-md bg-[#50B8C1] drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-semibold"
                     onClick={
-                      getTotalProductRegistered <= 0
-                        ? handleSubmit(onSubmitRegistration)
-                        : isTriggerHandleSubmit
-                        ? handleSubmit(onSubmitRegistration)
-                        : openConfirmationModal
+                      getTotalProductRegistered <= 0 ? handleSubmit(onSubmitRegistration) : openConfirmationModal
                     }
                   >
                     Submit
@@ -239,14 +239,32 @@ function Screen() {
         </div>
       </div>
       {loading && <LoadingHover visible={loading} />}
-      <ModalConfirmation
-        isOpen={isConfirmationModalOpen}
-        onClose={closeConfirmationModal}
-        isTriggerHandleSubmit={isTriggerHandleSubmit}
-        productRegistered={getTotalProductRegistered}
-        memoizedData={memoizedData}
-        setIsTriggerHandleSubmit={setIsTriggerHandleSubmit}
-      />
+      <Modal isOpen={isConfirmationModalOpen} onClose={closeConfirmationModal}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Confirm Replace RFID Label</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            {getTotalProductRegistered} of {memoizedData.length} RFID Label already registered. Are you sure want to
+            replace those RFID Label?
+          </ModalBody>
+
+          <ModalFooter>
+            <Button variant="ghost" mr={3} onClick={closeConfirmationModal}>
+              Close
+            </Button>
+            <Button
+              bg="#50B8C1"
+              color="#fff"
+              colorScheme="#50B8C1"
+              width={20}
+              onClick={handleSubmit(onSubmitRegistration)}
+            >
+              Yes
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

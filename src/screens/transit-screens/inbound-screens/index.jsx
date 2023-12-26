@@ -3,30 +3,28 @@ import React, { useEffect, useState, useContext, useMemo } from 'react';
 import * as yup from 'yup';
 import Moment from 'moment';
 import Swal from 'sweetalert2';
-// import { StopIcon } from '@heroicons/react/solid';
 import { useLocation } from 'react-router-dom';
-import { yupResolver } from '@hookform/resolvers/yup';
 import { XIcon } from '@heroicons/react/outline';
+import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { Table, Thead, Tbody, Tr, Th, Td, TableContainer, Button, useMediaQuery, Input, Fade } from '@chakra-ui/react';
+
 import Context from '../../../context';
 import SimpleTable from './component/table';
 import { toCalculate } from '../../../utils/helper';
+import { clipboardRequest } from '../../../assets/images';
 import { StorageApi } from '../../../services/api-master';
 import Select from '../../../components/select-component';
 import Loading from '../../../assets/lotties/Loading.json';
+import TextArea from '../../../components/textarea-component';
 import Datatable from '../../../components/datatable-component';
 import InputComponent from '../../../components/input-component';
 import DatePicker from '../../../components/datepicker-component';
 import MagnifyClass from '../../../assets/images/magnify-glass.svg';
-// import LoadingComponent from '../../../components/loading-component';
-import { AmqpScanApi, RequestApi, TransitApi } from '../../../services/api-transit';
-// import LoadingHover from '../../../components/loading-hover-component';
-import LottiesAnimation from '../../../components/lotties-animation-component';
-import { clipboardRequest } from '../../../assets/images';
-import TextArea from '../../../components/textarea-component';
 import FilePicker from '../../../components/file-local-picker-component';
+import LottiesAnimation from '../../../components/lotties-animation-component';
 import TableRegistration from '../../../components/table-registration-component';
+import { AmqpScanApi, RequestApi, TransitApi } from '../../../services/api-transit';
 
 const swalButton = Swal.mixin({
   customClass: {
@@ -37,6 +35,7 @@ const swalButton = Swal.mixin({
   },
   buttonsStyling: false,
 });
+
 const storage = yup.object({
   rack: yup.string().test('rack', 'rack is required', value => {
     if (value) {
@@ -44,7 +43,6 @@ const storage = yup.object({
     }
     return false;
   }),
-
   level: yup.string().test('level', 'level is required', value => {
     if (value) {
       return true;
@@ -72,60 +70,41 @@ function Screen(props) {
   });
 
   const location = useLocation();
-  console.log('location', location.pathname);
-  const { activityStore, store } = useContext(Context);
-  // // 1280px
-  const [isLarge] = useMediaQuery('(min-width: 1150px)');
+  const { store, activityStore, registrationStore } = useContext(Context);
 
-  // const { currentProductId } = watch();
+  const [scanning] = useState(false);
+  const [notes, setNotes] = useState('');
+  console.log('notes', notes);
+  const [error, setErrors] = useState(false);
   const { fields, append } = useFieldArray({
     control,
     name: 'details',
   });
-
-  const [requestDetailData, setRequestDetailData] = useState([]);
-  const [storageData, setStorageData] = useState([]);
-  console.log('storageData', storageData);
-  // const [rfidData, setRfidData] = useState([]);
-  // const [newData, setNewData] = useState([]);
-
-  const [loadingRequest, setLoadingRequest] = useState(false);
-  // const [loadingTransit, setLoadingTransit] = useState(false);
-  const [loadingHover, setLoadingHover] = useState(false);
-  const [loadingRFID, setLoadingRFID] = useState(false);
-  const [onOverview, setOnOverview] = useState(false);
-  const [isScanned, setIsScanned] = useState(false);
-  console.log(isScanned);
-  const [scanning] = useState(false);
-  const [isSplit, setIsSplit] = useState(false);
   const [onOpen, setOnOpen] = useState(false);
-  const [error, setErrors] = useState(false);
-
-  const [requestId, setRequestId] = useState('');
-  const [notes, setNotes] = useState('');
-  console.log('notes', notes);
-  const [totalRequest, setTotalRequest] = useState(0);
-  const [loadingFile, setLoadingFile] = useState(false);
-  const [jsonArray, setJsonArray] = useState([]);
-  const [filterParams, setFilterParams] = useState({
-    warehouse_id: store?.getWarehouseId(),
-  });
   const [filterBay, setFilterBay] = useState({
     warehouse_id: store?.getWarehouseId(),
   });
-  const [isScanning, setIsScanning] = useState(() => {
-    return localStorage.getItem('isScanning') === 'true' || false;
+  const [isSplit, setIsSplit] = useState(false);
+  const [requestId, setRequestId] = useState('');
+  const [jsonArray, setJsonArray] = useState([]);
+  const [storageData, setStorageData] = useState([]);
+  const [filterParams, setFilterParams] = useState({
+    warehouse_id: store?.getWarehouseId(),
   });
-
-  const { registrationStore } = useContext(Context);
-
-  const checkRfidRegistered = [...registrationStore.getLabelRegistered()];
+  const [totalRequest, setTotalRequest] = useState(0);
+  const [onOverview, setOnOverview] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
+  const [loadingRFID, setLoadingRFID] = useState(false);
+  const [isLarge] = useMediaQuery('(min-width: 1150px)');
+  const [loadingHover, setLoadingHover] = useState(false);
+  const [loadingRequest, setLoadingRequest] = useState(false);
+  const [requestDetailData, setRequestDetailData] = useState([]);
 
   const rfidDatas = [...registrationStore.getProductRegistered()];
-  console.log('rfidDatas', rfidDatas);
+  const checkRfidRegistered = [...registrationStore.getLabelRegistered()];
 
   const groupedData = rfidDatas.reduce((acc, obj) => {
-    const key = 'data';
+    const key = obj.product_id;
     acc[key] = acc[key] || { product_name: obj.product_name, sku: obj.sku, product_id: obj.product_id, qty: 0 };
     acc[key].qty += 1;
     return acc;
@@ -184,31 +163,19 @@ function Screen(props) {
   const toggleScan = () => {
     const newIsScanning = !isScanning;
     setIsScanning(newIsScanning);
-    localStorage.setItem('isScanning', newIsScanning.toString());
-
-    if (location.pathname === '/inbound' && isScanning) {
-      handleAmqpScan();
-    } else if (location.pathname === '/inbound' && !isScanning) {
-      handleAmqpScan();
-    }
+    handleAmqpScan(newIsScanning);
   };
 
-  // useEffect(() => {
-  //   if (location.pathname === '/outbound' && isScanning) {
-  //     handleAmqpScan();
-  //   } else if (location.pathname === '/outbound' && !isScanning) {
-  //     handleAmqpScan();
-  //   }
-  // }, [isScanning]);
-
-  const handleAmqpScan = () => {
+  const handleAmqpScan = isScanning => {
+    const scanType = isScanning ? 'STOP' : 'RUNNING';
     const body = {
       type: location.pathname === '/inbound' ? 'INBOUND' : location.pathname === '/outbound' ? 'OUTBOUND' : 'REGIS',
       logInfo: 'info',
       message: {
-        scanType: !isScanning ? 'RUNNING' : 'STOP',
+        scanType,
       },
     };
+
     AmqpScanApi.amqpScan(body)
       .then(res => {
         console.log('res', res);
@@ -219,12 +186,12 @@ function Screen(props) {
   };
 
   const onFileChange = newFileContent => {
-    setLoadingFile(true);
+    setLoadingRFID(true);
 
     const lines = newFileContent.split('\n');
     const newJsonArray = lines.filter(line => line.trim() !== '').map(line => ({ rfid_number: line.trim() }));
     setJsonArray(newJsonArray);
-    setLoadingFile(false);
+    setLoadingRFID(false);
   };
 
   useEffect(() => {
@@ -252,6 +219,7 @@ function Screen(props) {
       }));
     }
   };
+
   const onChangeBay = (bay, item, index) => {
     const onChangeData = { bay, item, idx: index };
     setValue('onChangeBay', onChangeData);
@@ -267,59 +235,6 @@ function Screen(props) {
     const onChangeData = { level, item, idx: index };
     setValue('onChangeLevel', onChangeData);
   };
-
-  // const onChangeValue = (rack, item, index) => {
-  //   const onChangeData = { rack, item, idx: index };
-  //   setValue('onChangeRack', onChangeData);
-
-  //   if (rack) {
-  //     setFilterParams(prev => ({
-  //       ...prev,
-  //       rack_number: rack,
-  //     }));
-
-  //     // Filter "Bay" options based on the selected "Rack"
-  //     const filteredBays = storageData.filter(i => i.rack_number === rack).map(i => i.bay);
-  //     setFilterBay(prev => ({
-  //       ...prev,
-  //       bays: filteredBays,
-  //       bay: null, // Reset the selected bay when the rack changes
-  //     }));
-  //   }
-  // };
-
-  // const onChangeBay = (bay, item, index) => {
-  //   const onChangeData = { bay, item, idx: index };
-  //   setValue('onChangeBay', onChangeData);
-
-  //   if (bay) {
-  //     setFilterBay(prev => ({
-  //       ...prev,
-  //       bay,
-  //     }));
-
-  //     // Filter "Level" options based on the selected "Rack" and "Bay"
-  //     const filteredLevels = storageData
-  //       .filter(i => i.rack_number === filterParams.rack_number && i.bay === bay)
-  //       .map(i => i.level);
-  //     setFilterBay(prev => ({
-  //       ...prev,
-  //       levels: filteredLevels,
-  //     }));
-  //   } else {
-  //     // If no bay is selected, reset the levels to show all levels for the selected rack
-  //     const allLevels = storageData.filter(i => i.rack_number === filterParams.rack_number).map(i => i.level);
-  //     setFilterBay(prev => ({
-  //       ...prev,
-  //       levels: allLevels,
-  //     }));
-  //   }
-  // };
-
-  // const onChangeLevel = (level, item, index) => {
-  //   const onChangeData = { level, item, idx: index };
-  //   setValue('onChangeLevel', onChangeData);
-  // };
 
   const onSubmitRFID = () => {
     const hasUnregisteredRfid = checkRfidRegistered.some(item => item.product_name === null && item.id === null);
@@ -373,6 +288,7 @@ function Screen(props) {
       setOnOverview(!onOverview);
     }
   };
+
   const onDisabled = () => {
     let pass = false;
     if (isScanning && jsonArray.length > 0) {
@@ -457,8 +373,6 @@ function Screen(props) {
           }),
         };
 
-        console.log('body', body);
-
         TransitApi.inbound(body)
           .then(() => {
             Swal.fire({ text: 'Sucessfully Saved', icon: 'success' });
@@ -491,15 +405,14 @@ function Screen(props) {
   const onReset = () => {
     setLoadingRequest(true);
     setLoadingRFID(true);
-    setIsScanned(false);
     setRequestDetailData([]);
     if (activityStore.getRequestNumber() && activityStore.getActivityName()) {
       activityStore.setRequestNumber(0);
       activityStore?.setActivityName('');
     }
-    // setRfidData([]);
     setTotalRequest(0);
     setRequestId('');
+    setJsonArray([]);
     setValue('activity_date', null);
     setValue('request_number', '');
     setTimeout(() => {
@@ -507,15 +420,13 @@ function Screen(props) {
       setLoadingRFID(false);
     }, 500);
   };
+
   return (
     <Fade in={props}>
       <input type="hidden" {...register('filters')} />
-      {/* <input type="hidden" {...register('isSplitted')} value={isSplit} />
-      <input type="hidden" {...register('currentProductId')} /> */}
       <input type="hidden" {...register('onChangeRack')} />
       <input type="hidden" {...register('onChangeBay')} />
       <input type="hidden" {...register('onChangeLevel')} />
-      {/* {loadingHover && <LoadingHover left="[20%]" top="[9%]" />} */}
       {loadingHover && (
         <LottiesAnimation
           animationsData={Loading}
@@ -525,8 +436,6 @@ function Screen(props) {
       <div className="grid grid-rows-7 px-8 py-1 rounded-md w-full">
         <div className="mb-2">
           <fieldset className="w-full px-8 py-2">
-            {/* <legend className="sm:text-xl xl:text-3xl text-primarydeepo font-semibold p-2">Request</legend> */}
-
             <div className="flex">
               <button
                 type="submit"
@@ -539,10 +448,8 @@ function Screen(props) {
                 <p className="md:text-sm xl:text-md text-xs text-[#50B8C1] sm:font-semibold xl:font-semibold">
                   Request
                 </p>
-                {/* <CalculatorIcon className={`${scanning ? 'bg-[#ffc108]' : 'bg-white'} w-28 stroke-[#50B8C1] mx-auto`} /> */}
                 <img src={clipboardRequest} alt="icon-request" width={120} />
               </button>
-              {/* w-full  */}
               <div className={`${isLarge ? 'flex gap-8' : ''} w-full pl-8 pb-2`}>
                 <div className="flex-col w-[70%]">
                   <InputComponent
@@ -572,14 +479,12 @@ function Screen(props) {
 
         <div className={`${isLarge ? 'flex gap-6' : ''} h-full w-full row-span-2 px-8 justify-center`}>
           <div className="w-full mb-2">
-            {/* <h1 className="px-3 text-gray-400">Request Detail</h1> */}
             <fieldset
               className={`${
                 isLarge ? 'min-h-[507px] py-8' : 'h-1/2 py-4'
               } bg-white border border-[#C2C2C2] w-full min-h-[507px]  rounded-md px-2`}
             >
               <legend className="px-2 text-lg text-gray-400">Request Detail</legend>
-              {/* <LoadingComponent visible={loadingRequest} /> */}
               <LottiesAnimation
                 animationsData={Loading}
                 visible={loadingRequest}
@@ -589,21 +494,18 @@ function Screen(props) {
             </fieldset>
           </div>
           <div className="w-full mb-6">
-            {/* <h2 className="px-3 text-gray-400">RFID Detected</h2> */}
             <fieldset
               className={`${
                 isLarge ? 'min-h-[507px] py-8' : 'h-1/2 py-4'
               } bg-white border border-[#C2C2C2] w-full min-h-[507px]  rounded-md px-2`}
             >
               <legend className="px-2 text-lg text-gray-400">RFID Detected</legend>
-              {/* <LoadingComponent visible={loadingRFID} /> */}
-              <LottiesAnimation
-                visible={loadingRFID}
-                animationsData={Loading}
-                classCustom="h-full z-[999] opacity-100 flex flex-col items-center justify-center"
-              />
-              {loadingFile ? (
-                <div>Loading...</div>
+              {loadingRFID ? (
+                <LottiesAnimation
+                  visible={loadingRFID}
+                  animationsData={Loading}
+                  classCustom="h-full z-[999] opacity-100 flex flex-col items-center justify-center"
+                />
               ) : (
                 <TableRegistration data={memoizedData} isLarge={isLarge} rfidTable />
               )}
@@ -744,7 +646,6 @@ function Screen(props) {
           className="fixed w-full inset-0 z-50 overflow-hidden flex justify-center items-center"
           style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
         >
-          {/* <div className="border shadow-lg bg-white w-[80%] h-1/2 mx-auto rounded z-50 overflow-y-auto"> */}
           <form
             className="px-4 py-2 border shadow-lg bg-white w-[60%] mx-auto rounded z-50"
             onSubmit={handleSubmit(onFinalSubmit)}
@@ -963,7 +864,6 @@ function Screen(props) {
                   px={8}
                   className="rounded-md border border-gray-300 bg-[#fff] hover:bg-[#E4E4E4] text-[#50B8C1] font-bold"
                   onClick={() => {
-                    // setCounter(2);
                     reset();
                     setOnOpen(!onOpen);
                     setNotes('');

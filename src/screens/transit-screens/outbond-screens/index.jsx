@@ -87,12 +87,8 @@ function Screen(props) {
   const [loadingRFID, setLoadingRFID] = useState(false);
   const [onAllocate, setOnAllocate] = useState(false);
   const [onOverview, setOnOverview] = useState(false);
-  // const [loadtable, setLoadTable] = useState(false);
   const [isScanned, setIsScanned] = useState(false);
-  // const [scanning, setScanning] = useState(false);
-  const [isScanning, setIsScanning] = useState(() => {
-    return localStorage.getItem('isScanning') === 'true' || false;
-  });
+  const [isScanning, setIsScanning] = useState(false);
   const [error, setErrors] = useState(false);
 
   const [totalRequest, setTotalRequest] = useState(0);
@@ -100,15 +96,10 @@ function Screen(props) {
   const [totalRFID, setTotalRFID] = useState(0);
   const [requestId, setRequestId] = useState('');
   const [productId, setProductId] = useState('');
-  const [loadingFile, setLoadingFile] = useState(false);
   const [jsonArray, setJsonArray] = useState([]);
   const location = useLocation();
 
-  // const { registrationStore } = useContext(Context);
-  // const [timer, setTimer] = useState();
-
   useEffect(() => {
-    console.log('warehouseID', store?.getWarehouseId());
     if (activityStore?.getRequestNumber() && activityStore?.getActivityName()?.toLowerCase() === 'outbound') {
       setTimeout(() => {
         setRequestId(activityStore?.getRequestNumber());
@@ -205,25 +196,19 @@ function Screen(props) {
   const toggleScan = () => {
     const newIsScanning = !isScanning;
     setIsScanning(newIsScanning);
-    localStorage.setItem('isScanning', newIsScanning.toString());
+    handleAmqpScan(newIsScanning);
   };
 
-  useEffect(() => {
-    if (location.pathname === '/outbound' && isScanning) {
-      handleAmqpScan();
-    } else if (location.pathname === '/outbound' && !isScanning) {
-      handleAmqpScan();
-    }
-  }, [isScanning]);
-
-  const handleAmqpScan = () => {
+  const handleAmqpScan = isScanning => {
+    const scanType = isScanning ? 'STOP' : 'RUNNING';
     const body = {
       type: location.pathname === '/inbound' ? 'INBOUND' : location.pathname === '/outbound' ? 'OUTBOUND' : 'REGIS',
       logInfo: 'info',
       message: {
-        scanType: !isScanning ? 'STOP' : 'RUNNING',
+        scanType,
       },
     };
+
     AmqpScanApi.amqpScan(body)
       .then(res => {
         console.log('res', res);
@@ -234,12 +219,12 @@ function Screen(props) {
   };
 
   const onFileChange = newFileContent => {
-    setLoadingFile(true);
+    setLoadingRFID(true);
 
     const lines = newFileContent.split('\n');
     const newJsonArray = lines.filter(line => line.trim() !== '').map(line => ({ rfid_number: line.trim() }));
     setJsonArray(newJsonArray);
-    setLoadingFile(false);
+    setLoadingRFID(false);
   };
 
   // const getTransitData = () => {
@@ -320,7 +305,7 @@ function Screen(props) {
     setLoadingRequest(true);
     setLoadingRFID(true);
     setIsScanned(false);
-    // setRfidData([]);
+    setJsonArray([]);
     setTransitData([]);
     setAllocateData([]);
     setproductInfoData([]);
@@ -596,29 +581,12 @@ function Screen(props) {
               } bg-white border border-[#C2C2C2] w-full rounded-md px-2`}
             >
               <legend className="px-2 text-lg text-gray-400">RFID Detected</legend>
-              {/* <LoadingComponent visible={loadingRFID} /> */}
-              <LottiesLoading
-                visible={loadingRFID}
-                animationsData={Loading}
-                classCustom="h-full z-[999] opacity-100 flex flex-col items-center justify-center"
-              />
-              {/* {!loadingRFID ? (
-                <SimpleTable
-                  loading={loadtable}
-                  data={rfidData.map(i => {
-                    return {
-                      product_id: i.product_id,
-                      product_name: i.product_name,
-                      product_sku: i.sku,
-                      qty: i.qty,
-                      warehouse_id: i.warehouse_id,
-                    };
-                  })}
-                  isLarge={isLarge}
+              {loadingRFID ? (
+                <LottiesLoading
+                  visible={loadingRFID}
+                  animationsData={Loading}
+                  classCustom="h-full z-[999] opacity-100 flex flex-col items-center justify-center"
                 />
-              ) : null} */}
-              {loadingFile ? (
-                <div>Loading...</div>
               ) : (
                 <TableRegistration data={memoizedData} isLarge={isLarge} rfidTable />
               )}
@@ -648,22 +616,6 @@ function Screen(props) {
 
               <div className="flex justify-end w-full sm:space-x-[20%] md:space-x-[60%] xl:space-x-[70%]">
                 <div className={`${isLarge ? 'flex flex-col gap-2 mx-8 w-[30%]' : 'flex flex-col gap-2 my-2 '}`}>
-                  {/* <Button
-                    _hover={{
-                      shadow: 'md',
-                      transform: 'translateY(-5px)',
-                      transitionDuration: '0.2s',
-                      transitionTimingFunction: 'ease-in-out',
-                    }}
-                    type="button"
-                    size={isLarge ? 'sm' : 'xs'}
-                    px={isLarge ? 5 : 2}
-                    className="rounded-md border border-[#50B8C1] bg-[#fff] hover:bg-[#E4E4E4] text-[#50B8C1] font-semibold"
-                    onClick={scanning ? stopScanning : startScanning}
-                    isDisabled={transitData ? transitData?.details?.length === 0 || transitData?.length === 0 : true}
-                  >
-                    {scanning ? <StopIcon className="h-6 animate-pulse" /> : <p className="tracking-wide">Scan</p>}
-                  </Button> */}
                   <FilePicker
                     onFileChange={onFileChange}
                     isScanning={isScanning}
