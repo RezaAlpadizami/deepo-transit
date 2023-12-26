@@ -104,7 +104,7 @@ function Screen(props) {
   const checkRfidRegistered = [...registrationStore.getLabelRegistered()];
 
   const groupedData = rfidDatas.reduce((acc, obj) => {
-    const key = obj.product_id;
+    const key = 'data';
     acc[key] = acc[key] || { product_name: obj.product_name, sku: obj.sku, product_id: obj.product_id, qty: 0 };
     acc[key].qty += 1;
     return acc;
@@ -668,7 +668,6 @@ function Screen(props) {
                   <Tbody>
                     {fields.length > 0 ? (
                       fields.map((item, index) => {
-                        console.log('itemkkk', item);
                         return (
                           <Tr key={item.id} className={`${index % 2 ? 'bg-gray-100' : ''} w-full`}>
                             <Td className="w-10 text-start">

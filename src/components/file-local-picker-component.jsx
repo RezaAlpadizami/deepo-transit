@@ -34,7 +34,6 @@ function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath, dataRfi
       .catch(error => {
         Swal.fire({
           text: error?.message || error?.originalError || 'Please check your path file',
-          title: 'The path settings are not correct, please check',
           icon: 'error',
         });
         clearTimeout(timeoutId);
@@ -90,8 +89,6 @@ function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath, dataRfi
         clearTimeout(timeoutCheck);
       }
     };
-
-    console.log('can', isScanning);
 
     if (!isScanning) {
       cleanup();

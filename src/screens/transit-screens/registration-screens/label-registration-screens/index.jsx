@@ -78,6 +78,10 @@ function Screen() {
       });
   }, []);
 
+  useEffect(() => {
+    setValue('registration_date', new Date());
+  }, [setValue]);
+
   const memoizedData = useMemo(() => {
     return jsonArray.map(i => {
       return {

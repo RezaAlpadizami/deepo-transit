@@ -34,8 +34,8 @@ import FilePicker from '../../../components/file-local-picker-component';
 const swalButton = Swal.mixin({
   customClass: {
     confirmButton:
-      'rounded-full bg-primarydeepo px-6 py-1 drop-shadow-md text-[#fff] font-bold ml-4 hover:-translate-y-[5px] hover:ease-in-out hover:duration-200',
-    cancelButton: 'rounded-full border border-gray-300 px-6 py-1 bg-[#fff] hover:bg-gray-100 text-[#57cc99] font-bold',
+      'rounded-md bg-[#50B8C1] px-6 py-1 drop-shadow-md text-[#fff] font-bold ml-4 hover:-translate-y-[5px] hover:ease-in-out hover:duration-200',
+    cancelButton: 'rounded-md border border-[#50B8C1] px-6 py-1 bg-[#fff] hover:bg-gray-100 text-[#50B8C1] font-bold',
   },
   buttonsStyling: false,
 });
@@ -504,12 +504,16 @@ function Screen(props) {
                 type="submit"
                 onClick={() => setOnOverview(!onOverview)}
                 className={`${
-                  isScanning ? 'bg-[#ffc108]' : 'bg-white'
+                  isScanning ? 'bg-[#50B8C1]' : 'bg-white'
                 }  h-3/4 rounded-md border border-[#C2C2C2] px-3 ${isLarge ? 'py-2' : 'my-auto pb-2'} `}
                 disabled={isScanning}
               >
-                <p className="md:text-sm xl:text-md text-xs text-[#50B8C1] sm:font-semibold xl:font-semibold">
-                  Request
+                <p
+                  className={`md:text-sm xl:text-md text-xs ${
+                    isScanning ? 'text-[#FFF]' : 'text-[#50B8C1]'
+                  } sm:font-semibold xl:font-semibold`}
+                >
+                  {isScanning ? 'Request is Scanning . .' : 'Request'}
                 </p>
                 {/* <CalculatorIcon className={`${scanning ? 'bg-[#ffc108]' : 'bg-white'} w-28 stroke-[#50B8C1] mx-auto`} /> */}
                 <img src={clipboardRequest} alt="icon-request" width={120} />
@@ -734,7 +738,7 @@ function Screen(props) {
                 <TableContainer className="px-4 py-1">
                   <Table>
                     <Thead>
-                      <Tr className="bg-[#aed9e0] text-bold text-[#000] w-full">
+                      <Tr className="bg-[#F5F5F5] text-bold text-[#000] w-full">
                         <Th className="text-semibold text-[#000] text-center w-10 py-1.5 pl-2">NO</Th>
                         <Th className="text-semibold text-[#000] text-center w-20">SKU</Th>
                         <Th className="text-bold text-[#000] text-cente w-60">PRODUCT</Th>
@@ -839,7 +843,7 @@ function Screen(props) {
                                   size="sm"
                                   type="button"
                                   px={6}
-                                  className="rounded-full border-2 border-[#9bd0b4] bg-[#fff] hover:bg-[#E4E4E4] text-[#5dc08b] font-bold"
+                                  className="rounded-md border-2 border-[#50B8C1] bg-[#fff] hover:bg-[#E4E4E4] text-[#50B8C1] font-bold"
                                   key={index}
                                   onClick={() => {
                                     setProductId(item.product_id);
@@ -888,7 +892,7 @@ function Screen(props) {
                     type="button"
                     size="sm"
                     px={8}
-                    className="rounded-full border border-gray-300 bg-[#fff] hover:bg-[#E4E4E4] text-primarydeepo font-bold"
+                    className="rounded-md border border-[#50B8C1] bg-[#fff] hover:bg-[#E4E4E4] text-[#50B8C1] font-bold"
                     onClick={onCancel}
                   >
                     Cancel
@@ -903,7 +907,7 @@ function Screen(props) {
                     type="submit"
                     size="sm"
                     px={8}
-                    className="ml-4 rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold"
+                    className="ml-4 rounded-md bg-[#50B8C1] drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold"
                   >
                     Submit
                   </Button>

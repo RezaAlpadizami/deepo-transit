@@ -80,7 +80,6 @@ function DataTable(props) {
   const columns = React.useMemo(
     () =>
       propsColumn.map(d => {
-        console.log('d', d);
         return {
           Header: d.header,
           accessor: d.value,
@@ -207,7 +206,6 @@ function DataTable(props) {
     api
       .get({ ...filterData, ...defaultSort, ...filterParams })
       .then(res => {
-        console.log('res LIST REQUEST', res);
         setLoading(false);
         setDatas(res.data);
         setTotalData(res.query.total);
