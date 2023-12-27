@@ -104,7 +104,7 @@ function Screen(props) {
   const checkRfidRegistered = [...registrationStore.getLabelRegistered()];
 
   const groupedData = rfidDatas.reduce((acc, obj) => {
-    const key = 'data';
+    const key = obj.product_id;
     acc[key] = acc[key] || { product_name: obj.product_name, sku: obj.sku, product_id: obj.product_id, qty: 0 };
     acc[key].qty += 1;
     return acc;

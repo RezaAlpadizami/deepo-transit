@@ -121,7 +121,6 @@ function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath, dataRfi
           })
           .catch(error => {
             Swal.fire({ text: error?.message || error?.originalError || 'Please check your path file', icon: 'error' });
-            cleanup(); // Stop timeouts on error
             navigate('/setting-path');
           })
           .finally(() => {
