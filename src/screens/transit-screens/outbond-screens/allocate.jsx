@@ -65,6 +65,8 @@ function Allocate(props) {
     name: 'allocate',
   });
 
+  console.log('dataInfo', data.product_info);
+
   const filter = allocated.filter(i => i.product_id === productId && i.actual_qty !== undefined);
   useEffect(() => {
     if (filter.length === 0) {
@@ -146,7 +148,7 @@ function Allocate(props) {
                         />
                       </Td>
                       <Td className="text-center px-2">
-                        {item.product_sku}
+                        {item?.storage_code}
                         <Controller
                           render={({ field }) => {
                             return <Input variant="unstyled" {...field} disabled className="hidden" />;

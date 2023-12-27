@@ -200,7 +200,7 @@ function Screen(props) {
   };
 
   const handleAmqpScan = isScanning => {
-    const scanType = isScanning ? 'STOP' : 'RUNNING';
+    const scanType = isScanning ? 'RUNNING' : 'STOP';
     const body = {
       type: location.pathname === '/inbound' ? 'INBOUND' : location.pathname === '/outbound' ? 'OUTBOUND' : 'REGIS',
       logInfo: 'info',
