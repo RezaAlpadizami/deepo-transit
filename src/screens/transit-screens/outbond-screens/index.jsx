@@ -196,11 +196,10 @@ function Screen(props) {
   const toggleScan = () => {
     const newIsScanning = !isScanning;
     setIsScanning(newIsScanning);
-    handleAmqpScan(newIsScanning);
   };
 
-  const handleAmqpScan = isScanning => {
-    const scanType = isScanning ? 'RUNNING' : 'STOP';
+  const handleAmqpScan = () => {
+    const scanType = 'RUNNING';
     const body = {
       type: location.pathname === '/inbound' ? 'INBOUND' : location.pathname === '/outbound' ? 'OUTBOUND' : 'REGIS',
       logInfo: 'info',
@@ -298,6 +297,7 @@ function Screen(props) {
       setRequestId(id);
       setOnOverview(!onOverview);
       setOnOpenTransit(!onOpenTransit);
+      handleAmqpScan();
     }
   };
 

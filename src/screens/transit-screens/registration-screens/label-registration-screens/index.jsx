@@ -38,6 +38,7 @@ function Screen() {
   const [loading, setLoading] = useState(false);
   const [jsonArray, setJsonArray] = useState([]);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+  const [isLoadingCheckLabel, setIsLoadingCheckLabel] = useState(false);
 
   const { registrationStore } = useContext(Context);
   const dataLabelRegistered = [...registrationStore.getDataListRegistered()];
@@ -131,6 +132,11 @@ function Screen() {
       });
   };
 
+  const onReset = () => {
+    setIsScanning(false);
+    setJsonArray([]);
+  };
+
   const openConfirmationModal = () => {
     setIsConfirmationModalOpen(true);
   };
@@ -189,7 +195,12 @@ function Screen() {
               {loadingFile ? (
                 <div>Loading...</div>
               ) : (
-                <TableRegistration data={memoizedData} isLarge={isLarge} rfidTable />
+                <TableRegistration
+                  data={memoizedData}
+                  isLarge={isLarge}
+                  isLoadingCheckLabel={isLoadingCheckLabel}
+                  rfidTable
+                />
               )}
             </fieldset>
           </div>
@@ -218,7 +229,24 @@ function Screen() {
                     toggleScan={toggleScan}
                     dynamicPath={dynamicPath}
                     dataRfid={memoizedData}
+                    setIsLoadingCheckLabel={setIsLoadingCheckLabel}
                   />
+                  <Button
+                    _hover={{
+                      shadow: 'md',
+                      transform: 'translateY(-5px)',
+                      transitionDuration: '0.2s',
+                      transitionTimingFunction: 'ease-in-out',
+                    }}
+                    type="button"
+                    size={isLarge ? 'sm' : 'xs'}
+                    px={isLarge ? 5 : 2}
+                    className="rounded-md border border-[#757575] bg-[#fff] hover:bg-[#E4E4E4] text-[#757575] font-semibold"
+                    onClick={onReset}
+                    isDisabled={isScanning}
+                  >
+                    <p className="tracking-wide">Reset</p>
+                  </Button>
                   <Button
                     _hover={{
                       shadow: 'md',

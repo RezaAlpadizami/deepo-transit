@@ -6,7 +6,7 @@ import Loading from '../assets/lotties/Loading.json';
 import { alertCircle, checkSquare } from '../assets/images';
 
 function TableRegistration(props) {
-  const { data, isLarge, rfidTable, loading, productRegistered, panel } = props;
+  const { data, isLarge, rfidTable, loading, productRegistered, panel, isLoadingCheckLabel } = props;
   const { registrationStore } = useContext(Context);
   const registeredData = [...registrationStore.getLabelRegistered()];
   const [collectProductRegistered, setCollectProductRegistered] = useState([]);
@@ -27,12 +27,15 @@ function TableRegistration(props) {
 
     const filteredArray = newArray.filter(item => item !== null);
 
-    setCollectProductRegistered(filteredArray);
+    setCollectProductRegistered(prevCollectProductRegistered => {
+      registrationStore.setProductRegistered(prevCollectProductRegistered);
+      return filteredArray;
+    });
 
     registrationStore.setProductRegistered(collectProductRegistered);
   }, [data]);
 
-  if (loading) {
+  if (loading || isLoadingCheckLabel) {
     return (
       <div className="w-full h-full max-h-[453px] overflow-y-auto overflow-x-hidden">
         <LottiesAnimation

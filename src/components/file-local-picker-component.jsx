@@ -7,10 +7,10 @@ import StopScanAnimation from '../assets/lotties/Stop-scan.json';
 import Context from '../context';
 import LabelRegistrationApi from '../services/api-label-registration';
 
-function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath, dataRfid }) {
+function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath, dataRfid, setIsLoadingCheckLabel }) {
   const [watchingFile, setWatchingFile] = useState(false);
   const [timeoutId, setTimeoutId] = useState(null);
-  const [timeoutCheck, setTimeoutCheck] = useState(null);
+  // const [timeoutCheck, setTimeoutCheck] = useState(null);
   const { registrationStore } = useContext(Context);
   const navigate = useNavigate();
 
@@ -37,7 +37,6 @@ function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath, dataRfi
           icon: 'error',
         });
         clearTimeout(timeoutId);
-        clearTimeout(timeoutCheck);
         navigate('/setting-path');
       });
   };
@@ -84,9 +83,8 @@ function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath, dataRfi
     let isMounted = true;
     const cleanup = () => {
       setWatchingFile(false);
-      if (timeoutId || timeoutCheck) {
+      if (timeoutId) {
         clearTimeout(timeoutId);
-        clearTimeout(timeoutCheck);
       }
     };
 
@@ -100,11 +98,9 @@ function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath, dataRfi
           const text = await response.text();
           await onFileChange(text);
         } catch (error) {
-          console.log('errorres', error);
           if (error) {
             Swal.fire({ text: 'Your file path is not correct', icon: 'error' });
             clearTimeout(timeoutId);
-            clearTimeout(timeoutCheck);
             navigate('/setting-path');
             return;
           }
@@ -115,18 +111,16 @@ function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath, dataRfi
         }
       };
       const checkLabelAlreadyRegistered = () => {
+        setIsLoadingCheckLabel(true);
         LabelRegistrationApi.validationRegister(rfidNumberToCheck)
           .then(res => {
+            setIsLoadingCheckLabel(false);
             registrationStore.setLabelRegistered(res?.data?.data);
           })
           .catch(error => {
+            setIsLoadingCheckLabel(false);
             Swal.fire({ text: error?.message || error?.originalError || 'Please check your path file', icon: 'error' });
             navigate('/setting-path');
-          })
-          .finally(() => {
-            if (isMounted && watchingFile) {
-              setTimeoutCheck(setTimeout(checkLabelAlreadyRegistered, 2000));
-            }
           });
       };
       fetchData();

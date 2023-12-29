@@ -14,7 +14,6 @@ import {
   Button,
   useMediaQuery,
 } from '@chakra-ui/react';
-
 import Context from '../context';
 import menuItem from '../navigation/menu-item';
 import { logoApp } from '../assets/images';
@@ -33,11 +32,24 @@ function Header() {
   store.setWarehouseId(id);
 
   const handleChangeWarehouse = () => {
-    CookieService.removeCookies();
-    LocalStorage.remove('Warehouse');
-    navigate('/');
-    window.location.reload();
+    try {
+      CookieService.removeCookies();
+      LocalStorage.remove('Warehouse');
+
+      store.setWarehouseId('');
+
+      navigate('/');
+      window.location.reload();
+    } catch (error) {
+      console.error('Logout failed', error);
+    }
   };
+
+  // const handleChangeWarehouse = () => {
+  //   CookieService.removeCookies();
+  //   LocalStorage.remove('Warehouse');
+  //   navigate('/');
+  // };
 
   return (
     <header className="relative flex p-5 bg-[#fff] drop-shadow-sm">

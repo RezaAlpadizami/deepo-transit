@@ -99,8 +99,10 @@ function Screen(props) {
   const [loadingHover, setLoadingHover] = useState(false);
   const [loadingRequest, setLoadingRequest] = useState(false);
   const [requestDetailData, setRequestDetailData] = useState([]);
+  const [isLoadingCheckLabel, setIsLoadingCheckLabel] = useState(false);
 
   const rfidDatas = [...registrationStore.getProductRegistered()];
+  console.log('rfidDatas', rfidDatas);
   const checkRfidRegistered = [...registrationStore.getLabelRegistered()];
 
   const groupedData = rfidDatas.reduce((acc, obj) => {
@@ -163,19 +165,12 @@ function Screen(props) {
   const toggleScan = () => {
     const newIsScanning = !isScanning;
     setIsScanning(newIsScanning);
-    handleAmqpScan(newIsScanning);
   };
 
-  const handleAmqpScan = isScanning => {
-    const scanType = isScanning ? 'RUNNING' : 'STOP';
+  const handleAmqpScan = () => {
+    const scanType = 'RUNNING';
     const body = {
-      type: !isScanning
-        ? 'OFF'
-        : location.pathname === '/inbound'
-        ? 'INBOUND'
-        : location.pathname === '/outbound'
-        ? 'OUTBOUND'
-        : 'REGIS',
+      type: location.pathname === '/inbound' ? 'INBOUND' : location.pathname === '/outbound' ? 'OUTBOUND' : 'REGIS',
       logInfo: 'info',
       message: {
         scanType,
@@ -243,7 +238,7 @@ function Screen(props) {
   };
 
   const onSubmitRFID = () => {
-    const hasUnregisteredRfid = checkRfidRegistered.some(item => item.product_name === null && item.id === null);
+    const hasUnregisteredRfid = checkRfidRegistered.some(item => item?.product_name === null && item?.id === null);
     let pass = onOpen;
     if (hasUnregisteredRfid) {
       swalButton.fire({
@@ -292,6 +287,7 @@ function Screen(props) {
     if (id) {
       setRequestId(id);
       setOnOverview(!onOverview);
+      handleAmqpScan();
     }
   };
 
@@ -427,6 +423,8 @@ function Screen(props) {
     }, 500);
   };
 
+  console.log('field', fields);
+
   return (
     <Fade in={props}>
       <input type="hidden" {...register('filters')} />
@@ -513,7 +511,12 @@ function Screen(props) {
                   classCustom="h-full z-[999] opacity-100 flex flex-col items-center justify-center"
                 />
               ) : (
-                <TableRegistration data={memoizedData} isLarge={isLarge} rfidTable />
+                <TableRegistration
+                  data={memoizedData}
+                  isLarge={isLarge}
+                  isLoadingCheckLabel={isLoadingCheckLabel}
+                  rfidTable
+                />
               )}
             </fieldset>
           </div>
@@ -547,6 +550,7 @@ function Screen(props) {
                     toggleScan={toggleScan}
                     dynamicPath={dynamicPath}
                     dataRfid={memoizedData}
+                    setIsLoadingCheckLabel={setIsLoadingCheckLabel}
                   />
 
                   <Button

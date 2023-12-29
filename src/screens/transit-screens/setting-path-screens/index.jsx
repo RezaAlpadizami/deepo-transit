@@ -44,7 +44,7 @@ function Screen() {
       <Input name="setting" label="Setting Path" control={control} register={register} disabled={!isInputEnabled} />
       <div className="my-4 mx-2 flex justify-end">
         <button className="p-2 text-white text-xs rounded-md bg-[#50B8C1]" type="button" onClick={toggleInput}>
-          {isInputEnabled ? 'Disabled' : 'Change Path'}
+          {isInputEnabled ? 'Apply New Path' : 'Change Path'}
         </button>
       </div>
     </form>

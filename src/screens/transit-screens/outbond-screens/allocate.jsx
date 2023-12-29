@@ -126,7 +126,7 @@ function Allocate(props) {
                 <Th className="text-bold text-[#000] text-center">Rack</Th>
                 <Th className="text-bold text-[#000] text-center">Bay</Th>
                 <Th className="text-bold text-[#000] text-center">Level</Th>
-                <Th className="text-bold text-[#000] text-center">Total Storage</Th>
+                <Th className="text-bold text-[#000] text-center">Total Produk</Th>
                 <Th aria-label="Mute volume" className="w-20" />
               </Tr>
             </Thead>
