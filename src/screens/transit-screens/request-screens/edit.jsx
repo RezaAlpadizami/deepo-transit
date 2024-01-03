@@ -109,8 +109,6 @@ function Screen() {
       });
   };
 
-  console.log('datarequest', dataRequesById);
-
   const onAddProdRequestDetail = dataInput => {
     setIsDelete(false);
     const dataNewItem = [];

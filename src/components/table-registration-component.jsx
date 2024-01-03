@@ -6,7 +6,7 @@ import Loading from '../assets/lotties/Loading.json';
 import { alertCircle, checkSquare } from '../assets/images';
 
 function TableRegistration(props) {
-  const { data, isLarge, rfidTable, loading, productRegistered, panel } = props;
+  const { data, isLarge, rfidTable, loading, productRegistered, panel, isLoadingCheckLabel } = props;
   const { registrationStore } = useContext(Context);
   const registeredData = [...registrationStore.getLabelRegistered()];
   const [collectProductRegistered, setCollectProductRegistered] = useState([]);
@@ -15,7 +15,7 @@ function TableRegistration(props) {
   const td = 'text-[#000] text-center py-1.5 break-words';
 
   useEffect(() => {
-    const newArray = data.map(d => {
+    const newArray = data?.map(d => {
       const matchedRegisteredData = registeredData.find(regData => regData.rfid_number === d.rfid_number);
 
       if (matchedRegisteredData && matchedRegisteredData.product_name !== null) {
@@ -27,10 +27,15 @@ function TableRegistration(props) {
 
     const filteredArray = newArray.filter(item => item !== null);
 
-    setCollectProductRegistered(filteredArray);
-
-    registrationStore.setProductRegistered(collectProductRegistered);
+    setCollectProductRegistered(prevCollectProductRegistered => {
+      registrationStore.setProductRegistered(prevCollectProductRegistered);
+      return filteredArray;
+    });
   }, [data]);
+
+  useEffect(() => {
+    console.log('collectProductRegistered changed:', collectProductRegistered);
+  }, [collectProductRegistered]);
 
   if (loading) {
     return (
@@ -50,7 +55,7 @@ function TableRegistration(props) {
     <div className="w-full h-full max-h-[453px] overflow-y-auto overflow-x-hidden">
       <table className="w-full">
         <thead>
-          <tr className="bg-[#F5F5F5] text-bold mx-auto [&>*]:text-md">
+          <tr className="bg-[#F5F5F5] text-bold mx-auto [&>*]:text-xs">
             <th className={`text-bold text-[#000] text-center w-[5%] ${isLarge ? 'px-9' : 'px-4 text-sm'}`}>No</th>
             <th className={`${th} w-[45%]`}>{rfidTable ? 'RFID Number' : panel ? 'RFID Number' : 'SKU'}</th>
             <th className={`${th} w-[45%]`}>Product</th>
@@ -59,7 +64,7 @@ function TableRegistration(props) {
         </thead>
 
         <tbody className="h-16">
-          {data.length > 0 && data[0]?.rfid_number !== '' ? (
+          {data?.length > 0 && data[0]?.rfid_number !== '' ? (
             data?.map((d, i) => {
               const matchedRegisteredData = registeredData.find(regData => regData.rfid_number === d.rfid_number);
               return (
@@ -86,8 +91,8 @@ function TableRegistration(props) {
                       : d.sku}
                   </td>
                   <td className={`${td} w-[60%]`}>
-                    {matchedRegisteredData && matchedRegisteredData.product_name !== null
-                      ? matchedRegisteredData.product_name
+                    {matchedRegisteredData && matchedRegisteredData?.product_name !== null
+                      ? matchedRegisteredData?.product_name
                       : d.product_name === undefined || d.product_name === ''
                       ? '--Not Registered--'
                       : d.product_name}
@@ -111,6 +116,14 @@ function TableRegistration(props) {
                 </tr>
               );
             })
+          ) : isLoadingCheckLabel ? (
+            <LottiesAnimation
+              animationsData={Loading}
+              visible={isLoadingCheckLabel}
+              classCustom={`absolute z-[999] ${
+                isLarge ? 'right-7 left-[60%] top-[42%]' : 'right-8 left-8'
+              } opacity-100 flex flex-col items-center justify-center`}
+            />
           ) : (
             <tr>
               <td colSpan={4} className="text-center bg-[#fff] py-1.5 text-[#868689] tracking-wide">

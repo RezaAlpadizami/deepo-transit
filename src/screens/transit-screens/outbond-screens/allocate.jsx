@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 
 import * as yup from 'yup';
-import Moment from 'moment';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { Table, Thead, Tbody, Tr, Th, Td, TableContainer, Input, Button } from '@chakra-ui/react';
@@ -65,6 +64,7 @@ function Allocate(props) {
     control,
     name: 'allocate',
   });
+
   const filter = allocated.filter(i => i.product_id === productId && i.actual_qty !== undefined);
   useEffect(() => {
     if (filter.length === 0) {
@@ -112,18 +112,19 @@ function Allocate(props) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <p className="text-md font-bold py-2 px-4">Dashboard Transit</p>
+      <p className="text-md font-bold py-2 mt-4 px-5">Dashboard Transit</p>
       <div className="max-h-80 overflow-y-auto overflow-x-hidden p-5">
         <TableContainer>
           <Table>
             <Thead>
               <Tr className="bg-gray-200 text-bold text-[#000] w-full">
                 <Th className="text-semibold text-[#000] text-center w-10 py-1.5 pl-2">NO</Th>
-                <Th className="text-bold text-[#000] text-center">Inbound Date</Th>
+                <Th className="text-bold text-[#000] text-center">SKU</Th>
+                <Th className="text-bold text-[#000] text-center">PRODUCT</Th>
                 <Th className="text-bold text-[#000] text-center">Rack</Th>
                 <Th className="text-bold text-[#000] text-center">Bay</Th>
                 <Th className="text-bold text-[#000] text-center">Level</Th>
-                <Th className="text-bold text-[#000] text-center">Qty</Th>
+                <Th className="text-bold text-[#000] text-center">Total Produk</Th>
                 <Th aria-label="Mute volume" className="w-20" />
               </Tr>
             </Thead>
@@ -145,19 +146,30 @@ function Allocate(props) {
                         />
                       </Td>
                       <Td className="text-center px-2">
-                        {Moment(item.date).format('DD MMM YYYY')}
+                        {item?.storage_code}
                         <Controller
                           render={({ field }) => {
                             return <Input variant="unstyled" {...field} disabled className="hidden" />;
                           }}
-                          name={`allocate.${index}.date`}
+                          name={`allocate.${index}.product_sku`}
+                          className="hidden"
+                          control={control}
+                        />
+                      </Td>
+                      <Td className="text-center px-2">
+                        {item.product_name}
+                        <Controller
+                          render={({ field }) => {
+                            return <Input variant="unstyled" {...field} disabled className="hidden" />;
+                          }}
+                          name={`allocate.${index}.product_name`}
                           className="hidden"
                           control={control}
                         />
                       </Td>
 
-                      <Td className="text-center px-2">
-                        {item.rack}
+                      <Td className="text-center px-2 py-4">
+                        <div className="border py-2 rounded-md border-[#50B8C1] text-[#50B8C1]">{item.rack}</div>
                         <Controller
                           render={({ field }) => {
                             return <Input variant="unstyled" {...field} disabled className="hidden" />;
@@ -168,7 +180,7 @@ function Allocate(props) {
                         />
                       </Td>
                       <Td className="text-center px-2">
-                        {item.bay}
+                        <div className="border py-2 rounded-md border-[#50B8C1] text-[#50B8C1]">{item.bay}</div>
                         <Controller
                           render={({ field }) => {
                             return <Input variant="unstyled" {...field} disabled className="hidden" />;
@@ -179,7 +191,7 @@ function Allocate(props) {
                         />
                       </Td>
                       <Td className="text-center px-2">
-                        {item.level}
+                        <div className="border py-2 rounded-md border-[#50B8C1] text-[#50B8C1]">{item.level}</div>
                         <Controller
                           render={({ field }) => {
                             return <Input variant="unstyled" {...field} disabled className="hidden" />;
@@ -247,7 +259,7 @@ function Allocate(props) {
             type="button"
             size="sm"
             px={8}
-            className="rounded-full border border-gray-300 bg-[#fff] hover:bg-[#E4E4E4] text-primarydeepo font-bold"
+            className="rounded-md border border-[#50B8C1] bg-[#fff] hover:bg-[#E4E4E4] text-[#50B8C1] font-bold"
             onClick={() => {
               setOnAllocate(!onAllocate);
             }}
@@ -264,7 +276,7 @@ function Allocate(props) {
             type="submit"
             size="sm"
             px={8}
-            className="ml-4 rounded-full bg-primarydeepo drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold"
+            className="ml-4 rounded-md bg-[#50B8C1] drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-bold"
           >
             Submit
           </Button>

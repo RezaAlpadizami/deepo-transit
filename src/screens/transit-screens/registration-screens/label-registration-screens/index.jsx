@@ -1,5 +1,15 @@
 import React, { useState, useEffect, useMemo, useContext } from 'react';
-import { useMediaQuery, Button } from '@chakra-ui/react';
+import {
+  useMediaQuery,
+  Button,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+} from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import Swal from 'sweetalert2';
@@ -13,51 +23,31 @@ import FilePicker from '../../../../components/file-local-picker-component';
 import LabelRegistrationApi from '../../../../services/api-label-registration';
 import LoadingHover from '../../../../components/loading-hover-component';
 import Context from '../../../../context';
-import ModalConfirmation from '../../../../components/modal-confirmation';
+import { AmqpScanApi } from '../../../../services/api-transit';
 
 const schemaSubmitRegistration = yup.object().shape({
   product_id: yup.string().nullable().required(),
   registration_date: yup.date().nullable(),
-  notes: yup.string().nullable().max(255),
+  notes: yup.string().nullable().max(255).required(),
 });
 
 function Screen() {
   const [dataProduct, setDataProduct] = useState([]);
   const [isLarge] = useMediaQuery('(min-width: 1150px)');
-  const [isScanning, setIsScanning] = useState(() => {
-    return localStorage.getItem('isScanning') === 'true' || false;
-  });
-
-  const [dataLabelRegistered, setDataLabelRegistered] = useState([]);
+  const [isScanning, setIsScanning] = useState(false);
   const [loadingFile, setLoadingFile] = useState(false);
   const [loading, setLoading] = useState(false);
   const [jsonArray, setJsonArray] = useState([]);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+  const [isLoadingCheckLabel, setIsLoadingCheckLabel] = useState(false);
 
   const { registrationStore } = useContext(Context);
+  const dataLabelRegistered = [...registrationStore.getDataListRegistered()];
 
   const dynamicPath = localStorage.getItem('dynamicPath');
 
-  const productRegistered = [...registrationStore.getProductRegistered()];
-
-  // const productNameQuantityMap = {};
-
-  // productRegistered.forEach(item => {
-  //   const { product_name } = item;
-  //   productNameQuantityMap[product_name] = (productNameQuantityMap[product_name] || 0) + 1;
-  // });
-
-  // const transformedData = Object.keys(productNameQuantityMap)
-  //   .filter(product_name => productNameQuantityMap[product_name] !== null)
-  //   .map(product_name => ({
-  //     sku: '1232ABDAMC',
-  //     product_name,
-  //     qty: productNameQuantityMap[product_name],
-  //   }));
-
   const {
     handleSubmit,
-    // reset,
     register,
     setValue,
     control,
@@ -66,14 +56,9 @@ function Screen() {
     resolver: yupResolver(schemaSubmitRegistration),
   });
 
-  const rfidNumberToCheck = {
-    rfid_number: jsonArray?.map(item => item.rfid_number),
-  };
-
   const toggleScan = () => {
     const newIsScanning = !isScanning;
     setIsScanning(newIsScanning);
-    localStorage.setItem('isScanning', newIsScanning.toString());
   };
 
   const onFileChange = newFileContent => {
@@ -95,6 +80,26 @@ function Screen() {
       });
   }, []);
 
+  useEffect(() => {
+    setValue('registration_date', new Date());
+  }, [setValue]);
+
+  const handleAmqpScan = () => {
+    const body = {
+      type: 'RESET',
+      logInfo: 'resetListOfTags',
+      message: true,
+    };
+
+    AmqpScanApi.amqpScan(body)
+      .then(res => {
+        console.log('res', res);
+      })
+      .catch(error => {
+        console.log('error', error);
+      });
+  };
+
   const memoizedData = useMemo(() => {
     return jsonArray.map(i => {
       return {
@@ -108,33 +113,7 @@ function Screen() {
     });
   }, [jsonArray]);
 
-  const getDataLabelRegistered = () => {
-    LabelRegistrationApi.get({ rfid_number: rfidNumberToCheck.rfid_number })
-      .then(res => {
-        setDataLabelRegistered(res.data);
-      })
-      .catch(error => {
-        Swal.fire({ text: error?.message || error?.originalError, icon: 'error' });
-      });
-  };
-
-  useEffect(() => {
-    getDataLabelRegistered();
-  }, [rfidNumberToCheck.rfid_number]);
-
-  const openConfirmationModal = () => {
-    // setConfirmationData(data);
-    if (productRegistered.length >= 0) {
-      setIsConfirmationModalOpen(true);
-    }
-  };
-
-  const closeConfirmationModal = () => {
-    // setConfirmationData(data);
-    setIsConfirmationModalOpen(false);
-  };
-
-  const onSubmitRegistration = data => {
+  const onSubmitRegistration = async data => {
     const { notes, product_id } = data;
     setLoading(true);
 
@@ -144,7 +123,7 @@ function Screen() {
       notes,
     }));
 
-    LabelRegistrationApi.labelRegister(arrayJson)
+    await LabelRegistrationApi.labelRegister(arrayJson)
       .then(() => {
         setLoading(false);
         Swal.fire({
@@ -154,10 +133,11 @@ function Screen() {
           confirmButtonColor: '#50B8C1',
           confirmButtonText: `<p class="rounded bg-[#50B8C1] text-[#fff] px-5 py-2 ml-5 font-bold">OK</p>`,
         });
-        // getDataLabelRegistered();
         setJsonArray([]);
         setValue('notes', '');
         setValue('product_id', '');
+        localStorage.removeItem('registered');
+        closeConfirmationModal();
       })
       .catch(error => {
         setLoading(false);
@@ -169,7 +149,22 @@ function Screen() {
       });
   };
 
-  const getTotalProductRegistered = dataLabelRegistered.reduce((acc, item) => acc + item.qty, 0);
+  const onReset = () => {
+    setIsScanning(false);
+    setJsonArray([]);
+    registrationStore.setDataListRegistered([]);
+    handleAmqpScan();
+  };
+
+  const openConfirmationModal = () => {
+    setIsConfirmationModalOpen(true);
+  };
+
+  const closeConfirmationModal = () => {
+    setIsConfirmationModalOpen(false);
+  };
+
+  const getTotalProductRegistered = dataLabelRegistered?.reduce((acc, item) => acc + item.qty, 0);
 
   return (
     <div>
@@ -183,13 +178,14 @@ function Screen() {
             name="product_id"
             label="Product"
             placeholder="Product"
-            options={dataProduct?.map((i, index) => {
-              return {
+            options={[
+              { value: null, label: 'None' },
+              ...(dataProduct?.map((i, index) => ({
                 key: index,
                 value: i.id,
                 label: i.product_name,
-              };
-            })}
+              })) || []),
+            ]}
             register={register}
             errors={errors}
             isDefaultOptions
@@ -218,7 +214,12 @@ function Screen() {
               {loadingFile ? (
                 <div>Loading...</div>
               ) : (
-                <TableRegistration data={memoizedData} isLarge={isLarge} rfidTable />
+                <TableRegistration
+                  data={memoizedData}
+                  isLarge={isLarge}
+                  isLoadingCheckLabel={isLoadingCheckLabel}
+                  rfidTable
+                />
               )}
             </fieldset>
           </div>
@@ -247,9 +248,24 @@ function Screen() {
                     toggleScan={toggleScan}
                     dynamicPath={dynamicPath}
                     dataRfid={memoizedData}
-                    getDataLabelRegistered={getDataLabelRegistered}
-                    dataLabelRegistered={dataLabelRegistered}
+                    setIsLoadingCheckLabel={setIsLoadingCheckLabel}
                   />
+                  <Button
+                    _hover={{
+                      shadow: 'md',
+                      transform: 'translateY(-5px)',
+                      transitionDuration: '0.2s',
+                      transitionTimingFunction: 'ease-in-out',
+                    }}
+                    type="button"
+                    size={isLarge ? 'sm' : 'xs'}
+                    px={isLarge ? 5 : 2}
+                    className="rounded-md border border-[#757575] bg-[#fff] hover:bg-[#E4E4E4] text-[#757575] font-semibold"
+                    onClick={onReset}
+                    isDisabled={isScanning}
+                  >
+                    <p className="tracking-wide">Reset</p>
+                  </Button>
                   <Button
                     _hover={{
                       shadow: 'md',
@@ -261,7 +277,9 @@ function Screen() {
                     size="sm"
                     px={12}
                     className="rounded-md bg-[#50B8C1] drop-shadow-md text-[#fff] hover:text-[#E4E4E4] font-semibold"
-                    onClick={openConfirmationModal}
+                    onClick={
+                      getTotalProductRegistered <= 0 ? handleSubmit(onSubmitRegistration) : openConfirmationModal
+                    }
                   >
                     Submit
                   </Button>
@@ -272,14 +290,32 @@ function Screen() {
         </div>
       </div>
       {loading && <LoadingHover visible={loading} />}
-      <ModalConfirmation
-        isOpen={isConfirmationModalOpen}
-        onClose={closeConfirmationModal}
-        onSubmit={onSubmitRegistration}
-        handleSubmit={handleSubmit}
-        productRegistered={dataLabelRegistered}
-        memoizedData={memoizedData}
-      />
+      <Modal isOpen={isConfirmationModalOpen} onClose={closeConfirmationModal}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Confirm Replace RFID Label</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            {getTotalProductRegistered} of {memoizedData.length} RFID Label already registered. Are you sure want to
+            replace those RFID Label?
+          </ModalBody>
+
+          <ModalFooter>
+            <Button variant="ghost" mr={3} onClick={closeConfirmationModal}>
+              Close
+            </Button>
+            <Button
+              bg="#50B8C1"
+              color="#fff"
+              colorScheme="#50B8C1"
+              width={20}
+              onClick={handleSubmit(onSubmitRegistration)}
+            >
+              Yes
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

@@ -38,7 +38,7 @@ function SidebarComponent() {
             (d, idx) =>
               d.showmenu &&
               (store.user.hasRole(d.role) || d.role === '') && (
-                <Link to={d.route} key={idx}>
+                <Link to={d.route} key={idx} disabled>
                   <li
                     className={`${
                       findTree([d], location).length > 0

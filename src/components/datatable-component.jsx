@@ -80,7 +80,6 @@ function DataTable(props) {
   const columns = React.useMemo(
     () =>
       propsColumn.map(d => {
-        console.log('d', d);
         return {
           Header: d.header,
           accessor: d.value,
@@ -679,8 +678,8 @@ function DataTable(props) {
 
             {!loading && data.length <= 0 && (
               <div className="grid place-content-center text-center h-[250px]">
-                <p className="font-bold text-xl">No data {displayName}</p>
-                <p className="font-medium">Please first add a {displayName}</p>
+                <p className="font-bold text-xl">No data {displayName || 'Request'}</p>
+                <p className="font-medium">Please first add {displayName || 'Request'}</p>
               </div>
             )}
 

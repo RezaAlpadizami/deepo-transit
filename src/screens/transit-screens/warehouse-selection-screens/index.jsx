@@ -106,14 +106,14 @@ function Screen() {
   const opt = useCallback(getDebounce(onSubmit), []);
 
   return (
-    <div className="max-[640px]:w-[280px]">
+    <div className="max-[640px]:w-[280px] max-h-[600px]">
       <div className="flex justify-center mb-6 max-[640px]:text-center">
         <h1 className="font-bold text-2xl">SELECT YOUR WORK AREA</h1>
       </div>
       <div className="pb-12 px-8 max-h-[600px] overflow-y-scroll scrollbar drop-shadow-md 2xl:max-h-[520px] min-[1607px]:max-h-[600px]">
         <div
           className="sticky top-0
-          pt-12 h-24 w-[100%] z-10 transition-all duration-500"
+          my-2 h-12 w-[100%] z-50 transition-all duration-500"
         >
           <form onChange={handleSubmit(opt)} className="max-[640px]:w-full">
             <Input
@@ -122,7 +122,7 @@ function Screen() {
               addOnRight
               register={register}
               control={control}
-              icon={<img src={Search} alt="search" className="h-6" />}
+              icon={<img src={Search} alt="search" className="h-4 mb-2" />}
             />
           </form>
         </div>
@@ -133,14 +133,14 @@ function Screen() {
         )}
         {groupingByLocation.map(group => {
           return (
-            <div className="mt-10 mx-1">
+            <div className="mx-1">
               <h2 className="font-bold mb-2 ml-1 my-6 text-lg">{group.location}</h2>
               <div className="grid gap-x-5 gap-y-9 grid-cols-4 max-[640px]:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 text-center">
                 {group.data.map(d => {
                   return (
                     <div
                       className={`justify-items-center w-full ${
-                        isSelected === d.id ? 'border border-primarydeepo text-primarydeepo' : 'border border-gray-300'
+                        isSelected === d.id ? 'border border-[#50B8C1] text-[#50B8C1]' : 'border border-gray-300'
                       } bg-white py-4 px-4 rounded-[20px] drop-shadow-md hover:bg-gray-100 cursor-pointer`}
                       onClick={() => clickAddressCard(d)}
                     >
@@ -166,7 +166,7 @@ function Screen() {
               isDisabled={isSelected === -1}
               px={8}
               size="md"
-              className="text-white bg-gradient-to-r from-secondarydeepo to-primarydeepo hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-secondarydeepo font-medium rounded-full text-sm px-5 py-2.5 text-center mb-2"
+              className="text-white bg-gradient-to-r from-[#50B8C1] to-[#50B8C1] hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-[#50B8C1] font-medium rounded-md text-sm px-5 py-2.5 text-center mb-2"
             >
               Continue
             </Button>

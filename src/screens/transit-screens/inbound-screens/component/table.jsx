@@ -11,18 +11,18 @@ function SimpleTable(props) {
   const td = 'text-[#000] text-center py-1.5 break-words';
 
   return (
-    <div className="w-full h-full max-h-60 overflow-y-auto overflow-x-hidden">
+    <div className="w-full h-full max-h-[453px] overflow-y-auto overflow-x-hidden">
       <table className="w-full">
         <thead>
-          <tr className="bg-[#F5F5F5] text-bold mx-auto">
+          <tr className="bg-[#F5F5F5] text-bold mx-auto [&>*]:text-xs">
             {/* {!register && ( */}
             <th className={`text-bold text-[#000] text-center w-[5%] ${isLarge ? 'px-9 text-sm' : 'px-4 text-xs'}`}>
-              {`${!register ? 'NO' : ''}`}
+              {`${!register ? 'No' : ''}`}
             </th>
             {/* )} */}
             <th className={`${th} w-[20%]`}>SKU</th>
-            <th className={`${th} w-[60%]`}>PRODUCT</th>
-            <th className={`${th} w-[20%]`}>QTY</th>
+            <th className={`${th} w-[60%]`}>Product</th>
+            <th className={`${th} w-[20%]`}>Qty</th>
           </tr>
         </thead>
 
@@ -37,10 +37,10 @@ function SimpleTable(props) {
               isLarge ? 'right-7 left-[52%]' : 'right-8 left-8'
             } opacity-100 flex flex-col items-center justify-center`}
           />
-          {data.length > 0 ? (
+          {data?.length > 0 ? (
             data?.map((d, i) => {
               return (
-                <tr key={i} className={i % 2 ? 'bg-[#f3f4f6]' : 'bg-[#ffff]'}>
+                <tr key={i} className={i % 2 ? 'bg-[#f3f4f6] [&>*]:text-xs' : 'bg-[#ffff] [&>*]:text-xs'}>
                   <td className={`${td} w-[9%]`}>
                     {!register ? (
                       i + 1
