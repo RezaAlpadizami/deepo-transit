@@ -188,6 +188,22 @@ function Screen(props) {
       });
   };
 
+  const handleAmqpScanReset = () => {
+    const body = {
+      type: 'RESET',
+      logInfo: 'resetListOfTags',
+      message: 'true',
+    };
+
+    AmqpScanApi.amqpScan(body)
+      .then(res => {
+        console.log('res', res);
+      })
+      .catch(error => {
+        console.log('error', error);
+      });
+  };
+
   const onFileChange = newFileContent => {
     setLoadingRFID(true);
 
@@ -424,6 +440,7 @@ function Screen(props) {
     setJsonArray([]);
     setValue('activity_date', null);
     setValue('request_number', '');
+    handleAmqpScanReset();
     setTimeout(() => {
       setLoadingRequest(false);
       setLoadingRFID(false);

@@ -84,11 +84,11 @@ function Screen() {
     setValue('registration_date', new Date());
   }, [setValue]);
 
-  const handleAmqpScan = () => {
+  const handleAmqpScanReset = () => {
     const body = {
       type: 'RESET',
       logInfo: 'resetListOfTags',
-      message: true,
+      message: 'true',
     };
 
     AmqpScanApi.amqpScan(body)
@@ -153,7 +153,7 @@ function Screen() {
     setIsScanning(false);
     setJsonArray([]);
     registrationStore.setDataListRegistered([]);
-    handleAmqpScan();
+    handleAmqpScanReset();
   };
 
   const openConfirmationModal = () => {

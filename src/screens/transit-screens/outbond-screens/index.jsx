@@ -203,6 +203,22 @@ function Screen(props) {
     setIsScanning(newIsScanning);
   };
 
+  const handleAmqpScanReset = () => {
+    const body = {
+      type: 'RESET',
+      logInfo: 'resetListOfTags',
+      message: 'true',
+    };
+
+    AmqpScanApi.amqpScan(body)
+      .then(res => {
+        console.log('res', res);
+      })
+      .catch(error => {
+        console.log('error', error);
+      });
+  };
+
   const handleAmqpScan = status => {
     const scanType = status;
     const body = {
@@ -314,6 +330,7 @@ function Screen(props) {
     setTransitData([]);
     setAllocateData([]);
     setproductInfoData([]);
+    handleAmqpScanReset();
     if (allocated.length > 0) {
       allocated.length = 0;
     }
