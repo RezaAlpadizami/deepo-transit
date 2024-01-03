@@ -169,8 +169,8 @@ function Screen(props) {
     setIsScanning(newIsScanning);
   };
 
-  const handleAmqpScan = () => {
-    const scanType = 'RUNNING';
+  const handleAmqpScan = status => {
+    const scanType = status;
     const body = {
       type: location.pathname === '/inbound' ? 'INBOUND' : location.pathname === '/outbound' ? 'OUTBOUND' : 'REGIS',
       logInfo: 'info',
@@ -290,7 +290,7 @@ function Screen(props) {
     if (id) {
       setRequestId(id);
       setOnOverview(!onOverview);
-      handleAmqpScan();
+      handleAmqpScan('RUNNING');
     }
   };
 
@@ -393,6 +393,7 @@ function Screen(props) {
             setStorageData([]);
             setRequestDetailData([]);
             setJsonArray([]);
+            handleAmqpScan('STOP');
             if (activityStore.getRequestNumber() && activityStore.getActivityName()) {
               activityStore.setRequestNumber(0);
               activityStore?.setActivityName('');

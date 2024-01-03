@@ -203,8 +203,8 @@ function Screen(props) {
     setIsScanning(newIsScanning);
   };
 
-  const handleAmqpScan = () => {
-    const scanType = 'RUNNING';
+  const handleAmqpScan = status => {
+    const scanType = status;
     const body = {
       type: location.pathname === '/inbound' ? 'INBOUND' : location.pathname === '/outbound' ? 'OUTBOUND' : 'REGIS',
       logInfo: 'info',
@@ -302,7 +302,7 @@ function Screen(props) {
       setRequestId(id);
       setOnOverview(!onOverview);
       setOnOpenTransit(!onOpenTransit);
-      handleAmqpScan();
+      handleAmqpScan('RUNNING');
     }
   };
 
@@ -440,6 +440,7 @@ function Screen(props) {
         }),
       };
       storeOutbound(body);
+      handleAmqpScan('STOP');
     } else {
       swalButton
         .fire({
@@ -479,6 +480,7 @@ function Screen(props) {
               }),
             };
             storeOutbound(body);
+            handleAmqpScan('STOP');
           }
         });
     }
