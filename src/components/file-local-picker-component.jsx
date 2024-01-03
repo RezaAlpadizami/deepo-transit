@@ -94,7 +94,7 @@ function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath, dataRfi
       setWatchingFile(true);
       const fetchData = async () => {
         try {
-          const response = await fetch(`${process.env.REACT_APP_UI_URL_PATH}${dynamicPath}`);
+          const response = await fetch(`${process.env.REACT_APP_UI_PATH}${dynamicPath}`);
           const text = await response.text();
           await onFileChange(text);
         } catch (error) {
