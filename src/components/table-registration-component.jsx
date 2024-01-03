@@ -31,11 +31,13 @@ function TableRegistration(props) {
       registrationStore.setProductRegistered(prevCollectProductRegistered);
       return filteredArray;
     });
-
-    registrationStore.setProductRegistered(collectProductRegistered);
   }, [data]);
 
-  if (loading || isLoadingCheckLabel) {
+  useEffect(() => {
+    console.log('collectProductRegistered changed:', collectProductRegistered);
+  }, [collectProductRegistered]);
+
+  if (loading) {
     return (
       <div className="w-full h-full max-h-[453px] overflow-y-auto overflow-x-hidden">
         <LottiesAnimation
@@ -89,8 +91,8 @@ function TableRegistration(props) {
                       : d.sku}
                   </td>
                   <td className={`${td} w-[60%]`}>
-                    {matchedRegisteredData && matchedRegisteredData.product_name !== null
-                      ? matchedRegisteredData.product_name
+                    {matchedRegisteredData && matchedRegisteredData?.product_name !== null
+                      ? matchedRegisteredData?.product_name
                       : d.product_name === undefined || d.product_name === ''
                       ? '--Not Registered--'
                       : d.product_name}
@@ -114,6 +116,14 @@ function TableRegistration(props) {
                 </tr>
               );
             })
+          ) : isLoadingCheckLabel ? (
+            <LottiesAnimation
+              animationsData={Loading}
+              visible={isLoadingCheckLabel}
+              classCustom={`absolute z-[999] ${
+                isLarge ? 'right-7 left-[60%] top-[42%]' : 'right-8 left-8'
+              } opacity-100 flex flex-col items-center justify-center`}
+            />
           ) : (
             <tr>
               <td colSpan={4} className="text-center bg-[#fff] py-1.5 text-[#868689] tracking-wide">

@@ -37,7 +37,7 @@ function SimpleTable(props) {
               isLarge ? 'right-7 left-[52%]' : 'right-8 left-8'
             } opacity-100 flex flex-col items-center justify-center`}
           />
-          {data.length > 0 ? (
+          {data?.length > 0 ? (
             data?.map((d, i) => {
               return (
                 <tr key={i} className={i % 2 ? 'bg-[#f3f4f6] [&>*]:text-xs' : 'bg-[#ffff] [&>*]:text-xs'}>

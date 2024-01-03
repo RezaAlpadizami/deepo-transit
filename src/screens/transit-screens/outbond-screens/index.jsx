@@ -30,6 +30,7 @@ import { clipboardRequest } from '../../../assets/images';
 import TextArea from '../../../components/textarea-component';
 import TableRegistration from '../../../components/table-registration-component';
 import FilePicker from '../../../components/file-local-picker-component';
+import CookieService from '../../../services/cookies/cookie-service';
 
 const swalButton = Swal.mixin({
   customClass: {
@@ -73,7 +74,8 @@ function Screen(props) {
     name: 'details',
   });
 
-  const { activityStore, store } = useContext(Context);
+  const { activityStore, store, registrationStore } = useContext(Context);
+  const getWarehouseId = CookieService.getCookies('warehouse_id');
   const [isLarge] = useMediaQuery('(min-width: 1150px)');
   const [transitData, setTransitData] = useState();
   const [allocateData, setAllocateData] = useState([]);
@@ -87,17 +89,20 @@ function Screen(props) {
   const [loadingRFID, setLoadingRFID] = useState(false);
   const [onAllocate, setOnAllocate] = useState(false);
   const [onOverview, setOnOverview] = useState(false);
-  const [isScanned, setIsScanned] = useState(false);
+  // const [isScanned, setIsScanned] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [error, setErrors] = useState(false);
+  const [isLoadingCheckLabel, setIsLoadingCheckLabel] = useState(false);
 
   const [totalRequest, setTotalRequest] = useState(0);
   const [errMessage, setErrMessage] = useState('');
-  const [totalRFID, setTotalRFID] = useState(0);
+  // const [totalRFID, setTotalRFID] = useState(0);
   const [requestId, setRequestId] = useState('');
   const [productId, setProductId] = useState('');
   const [jsonArray, setJsonArray] = useState([]);
   const location = useLocation();
+
+  const rfidDatas = [...registrationStore.getProductRegistered()];
 
   useEffect(() => {
     if (activityStore?.getRequestNumber() && activityStore?.getActivityName()?.toLowerCase() === 'outbound') {
@@ -304,7 +309,7 @@ function Screen(props) {
   const onReset = () => {
     setLoadingRequest(true);
     setLoadingRFID(true);
-    setIsScanned(false);
+    // setIsScanned(false);
     setJsonArray([]);
     setTransitData([]);
     setAllocateData([]);
@@ -318,7 +323,7 @@ function Screen(props) {
     }
 
     setRequestId('');
-    setTotalRFID();
+    // setTotalRFID();
     setTotalRequest('');
     setValue('details', []);
     setValue('activity_date', null);
@@ -356,11 +361,11 @@ function Screen(props) {
   const onDisabled = () => {
     let pass = false;
 
-    if (!isScanned && totalRFID > 0) {
+    if (isScanning && jsonArray.length > 0) {
       pass = true;
-    } else if (!isScanned && !totalRFID) {
+    } else if (!isScanning && !jsonArray.length) {
       pass = true;
-    } else if (isScanned && !totalRFID) {
+    } else if (isScanning && !jsonArray.length) {
       pass = true;
     }
     return pass;
@@ -369,7 +374,7 @@ function Screen(props) {
   const validateValue = () => {
     let pass = true;
 
-    if (totalRequest === totalRFID) {
+    if (totalRequest === jsonArray.length) {
       pass = true;
       setErrors(false);
       setErrMessage('');
@@ -399,7 +404,7 @@ function Screen(props) {
           activityStore?.setActivityName('');
         }
         setRequestId('');
-        setTotalRFID();
+        // setTotalRFID();
         setTotalRequest('');
         setValue('details', []);
         setValue('activity_date', null);
@@ -420,22 +425,17 @@ function Screen(props) {
     if (validateValue()) {
       const body = {
         request_id: requestId,
-        notes: '',
-        warehouse_id: store?.getWarehouseId(),
-        details: transitData.details.map(i => {
+        warehouse_id: CookieService.getCookies('warehouse_id'),
+        detail: rfidDatas.map(i => {
+          const allocatedItems = allocated
+            .filter(f => f.product_id === i.product_id && f.actual_qty !== undefined)
+            .map(item => item.storage_id);
+
+          const storage_id = allocatedItems.length > 0 ? allocatedItems[0] : null;
           return {
             product_id: i.product_id,
-            qty: i.qty,
-            allocate: allocated
-              .filter(f => f.product_id === i.product_id && f.actual_qty !== undefined)
-              .map(item => {
-                return {
-                  id: item.product_info_id,
-                  storage_id: item.storage_id,
-                  product_id: item.product_id,
-                  actual_qty: Number(item.actual_qty),
-                };
-              }),
+            label_id: i.id,
+            storage_id,
           };
         }),
       };
@@ -462,8 +462,8 @@ function Screen(props) {
             const body = {
               request_id: requestId,
               notes: result.value,
-              warehouse_id: Number(store?.getWarehouseId()),
-              details: transitData.details.map(i => {
+              warehouse_id: getWarehouseId,
+              details: rfidDatas.map(i => {
                 return {
                   product_id: i.product_id,
                   qty: i.qty,
@@ -471,9 +471,7 @@ function Screen(props) {
                     .filter(f => f.product_id === i.product_id && f.actual_qty !== undefined)
                     .map(item => {
                       return {
-                        id: item.product_info_id,
                         storage_id: item.storage_id,
-                        product_id: item.product_id,
                         actual_qty: Number(item.actual_qty),
                       };
                     }),
@@ -592,7 +590,12 @@ function Screen(props) {
                   classCustom="h-full z-[999] opacity-100 flex flex-col items-center justify-center"
                 />
               ) : (
-                <TableRegistration data={memoizedData} isLarge={isLarge} rfidTable />
+                <TableRegistration
+                  data={memoizedData}
+                  isLarge={isLarge}
+                  rfidTable
+                  isLoadingCheckLabel={isLoadingCheckLabel}
+                />
               )}
             </fieldset>
           </div>
@@ -626,6 +629,7 @@ function Screen(props) {
                     toggleScan={toggleScan}
                     dynamicPath={dynamicPath}
                     dataRfid={memoizedData}
+                    setIsLoadingCheckLabel={setIsLoadingCheckLabel}
                   />
 
                   <Button
@@ -669,7 +673,7 @@ function Screen(props) {
           </div>
           {error && (
             <p className="text-[#a2002d] pl-10">
-              {totalRequest !== totalRFID
+              {totalRequest !== jsonArray.length
                 ? 'The amount of data in Request Detail does not match the data in RFID Detected.'
                 : errMessage}
             </p>

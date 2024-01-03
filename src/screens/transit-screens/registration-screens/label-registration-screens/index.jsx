@@ -23,6 +23,7 @@ import FilePicker from '../../../../components/file-local-picker-component';
 import LabelRegistrationApi from '../../../../services/api-label-registration';
 import LoadingHover from '../../../../components/loading-hover-component';
 import Context from '../../../../context';
+import { AmqpScanApi } from '../../../../services/api-transit';
 
 const schemaSubmitRegistration = yup.object().shape({
   product_id: yup.string().nullable().required(),
@@ -83,6 +84,22 @@ function Screen() {
     setValue('registration_date', new Date());
   }, [setValue]);
 
+  const handleAmqpScan = () => {
+    const body = {
+      type: 'RESET',
+      logInfo: 'resetListOfTags',
+      message: true,
+    };
+
+    AmqpScanApi.amqpScan(body)
+      .then(res => {
+        console.log('res', res);
+      })
+      .catch(error => {
+        console.log('error', error);
+      });
+  };
+
   const memoizedData = useMemo(() => {
     return jsonArray.map(i => {
       return {
@@ -135,6 +152,8 @@ function Screen() {
   const onReset = () => {
     setIsScanning(false);
     setJsonArray([]);
+    registrationStore.setDataListRegistered([]);
+    handleAmqpScan();
   };
 
   const openConfirmationModal = () => {

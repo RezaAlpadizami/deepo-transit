@@ -10,7 +10,7 @@ import LabelRegistrationApi from '../services/api-label-registration';
 function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath, dataRfid, setIsLoadingCheckLabel }) {
   const [watchingFile, setWatchingFile] = useState(false);
   const [timeoutId, setTimeoutId] = useState(null);
-  // const [timeoutCheck, setTimeoutCheck] = useState(null);
+  const [timeoutCheck, setTimeoutCheck] = useState(null);
   const { registrationStore } = useContext(Context);
   const navigate = useNavigate();
 
@@ -110,9 +110,9 @@ function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath, dataRfi
           }
         }
       };
-      const checkLabelAlreadyRegistered = () => {
+      const checkLabelAlreadyRegistered = async () => {
         setIsLoadingCheckLabel(true);
-        LabelRegistrationApi.validationRegister(rfidNumberToCheck)
+        await LabelRegistrationApi.validationRegister(rfidNumberToCheck)
           .then(res => {
             setIsLoadingCheckLabel(false);
             registrationStore.setLabelRegistered(res?.data?.data);
@@ -120,9 +120,17 @@ function FilePicker({ onFileChange, isScanning, toggleScan, dynamicPath, dataRfi
           .catch(error => {
             setIsLoadingCheckLabel(false);
             Swal.fire({ text: error?.message || error?.originalError || 'Please check your path file', icon: 'error' });
+            clearTimeout(timeoutCheck);
             navigate('/setting-path');
+          })
+          .finally(() => {
+            setIsLoadingCheckLabel(false);
+            if (isMounted && watchingFile) {
+              setTimeoutCheck(setTimeout(checkLabelAlreadyRegistered, 2000));
+            }
           });
       };
+      setIsLoadingCheckLabel(false);
       fetchData();
       checkLabelAlreadyRegistered();
     }

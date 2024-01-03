@@ -65,8 +65,6 @@ function Allocate(props) {
     name: 'allocate',
   });
 
-  console.log('dataInfo', data.product_info);
-
   const filter = allocated.filter(i => i.product_id === productId && i.actual_qty !== undefined);
   useEffect(() => {
     if (filter.length === 0) {

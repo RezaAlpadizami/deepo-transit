@@ -25,6 +25,7 @@ import FilePicker from '../../../components/file-local-picker-component';
 import LottiesAnimation from '../../../components/lotties-animation-component';
 import TableRegistration from '../../../components/table-registration-component';
 import { AmqpScanApi, RequestApi, TransitApi } from '../../../services/api-transit';
+import CookieService from '../../../services/cookies/cookie-service';
 
 const swalButton = Swal.mixin({
   customClass: {
@@ -70,7 +71,8 @@ function Screen(props) {
   });
 
   const location = useLocation();
-  const { store, activityStore, registrationStore } = useContext(Context);
+  const { activityStore, registrationStore } = useContext(Context);
+  const getWarehouseId = CookieService.getCookies('warehouse_id');
 
   const [scanning] = useState(false);
   const [notes, setNotes] = useState('');
@@ -82,14 +84,14 @@ function Screen(props) {
   });
   const [onOpen, setOnOpen] = useState(false);
   const [filterBay, setFilterBay] = useState({
-    warehouse_id: store?.getWarehouseId(),
+    warehouse_id: getWarehouseId,
   });
   const [isSplit, setIsSplit] = useState(false);
   const [requestId, setRequestId] = useState('');
   const [jsonArray, setJsonArray] = useState([]);
   const [storageData, setStorageData] = useState([]);
   const [filterParams, setFilterParams] = useState({
-    warehouse_id: store?.getWarehouseId(),
+    warehouse_id: getWarehouseId,
   });
   const [totalRequest, setTotalRequest] = useState(0);
   const [onOverview, setOnOverview] = useState(false);
@@ -136,7 +138,7 @@ function Screen(props) {
           setValue('activity_date', res?.activity_date ? Moment(res?.activity_date).toDate() : null);
           setValue('request_number', res?.request_number ? res?.request_number : '-');
           setTotalRequest(toCalculate(res.detail, 'qty'));
-          setRequestDetailData(res.detail);
+          setRequestDetailData(res?.detail);
           setLoadingRequest(false);
           setLoadingRFID(false);
           setLoadingHover(false);
@@ -196,10 +198,9 @@ function Screen(props) {
   };
 
   useEffect(() => {
-    Promise.allSettled([StorageApi.get({ warehouse_id: store?.getWarehouseId() }).then(res => res)])
+    Promise.allSettled([StorageApi.get({ warehouse_id: getWarehouseId }).then(res => res)])
       .then(result => {
         setStorageData(result[0].value.data);
-        console.log('storageData', storageData);
         setValue('storageData', result[0].value.data);
 
         setIsSplit(false);
@@ -249,7 +250,9 @@ function Screen(props) {
       return false;
     }
     if (jsonArray.length === totalRequest) {
-      append(dataRfids);
+      if (dataRfids.length > 0) {
+        append(dataRfids);
+      }
       setOnOpen(!pass);
       setErrors(false);
       pass = true;
@@ -354,23 +357,26 @@ function Screen(props) {
     if (validateStorageId(data)) {
       if (validateIsDuplicate(data)) {
         const datas = data.details.map(i => {
-          return storageData.find(f => f.rack_number === i.rack && f.bay === i.bay && f.level === i.level)?.id;
-        });
-        const concatenatedNumber = datas.reduce((accumulator, currentValue) => {
-          if (currentValue !== undefined) {
-            accumulator += currentValue;
+          const foundItem = storageData.find(f => f.rack_number === i.rack && f.bay === i.bay && f.level === i.level);
+
+          if (foundItem) {
+            return {
+              id: foundItem.id,
+              product_id: i.product_id,
+            };
           }
-          return accumulator;
-        }, 0);
+          return null;
+        });
         const body = {
           request_id: requestId,
           notes: 'Inbound masuk',
           detail: rfidDatas.map(i => {
+            const matchingData = datas.find(dataItem => dataItem.product_id === i.product_id);
             return {
               product_id: i.product_id,
               label_id: i.id,
-              warehouse_id: store?.getWarehouseId(),
-              storage_id: concatenatedNumber,
+              warehouse_id: CookieService.getCookies('warehouse_id'),
+              storage_id: matchingData ? matchingData.id : null,
             };
           }),
         };
@@ -426,7 +432,7 @@ function Screen(props) {
   console.log('field', fields);
 
   return (
-    <Fade in={props}>
+    <Fade in={props} className="z-10">
       <input type="hidden" {...register('filters')} />
       <input type="hidden" {...register('onChangeRack')} />
       <input type="hidden" {...register('onChangeBay')} />
@@ -437,7 +443,7 @@ function Screen(props) {
           classCustom="z-[999] right-0 left-[20%] top-[9%] absolute bottom-0 overflow-hidden bg-[#f2f2f2] opacity-75 flex flex-col items-center justify-center"
         />
       )}
-      <div className="grid grid-rows-7 px-8 py-1 rounded-md w-full">
+      <div className="grid grid-rows-7 px-8 py-1 rounded-md w-full z-0">
         <div className="mb-2">
           <fieldset className="w-full px-8 py-2">
             <div className="flex">
@@ -473,7 +479,7 @@ function Screen(props) {
                     disabled
                   />
                 </div>
-                <div className="w-full">
+                <div className="w-full z-[10]">
                   <TextArea name="notes" label="Notes" register={register} errors={errors} />
                 </div>
               </div>
@@ -616,7 +622,7 @@ function Screen(props) {
             <div className="modal-content py-4 text-left px-6">
               <Datatable
                 api={RequestApi}
-                filterParams={{ status: 'PENDING', warehouse_id: store?.getWarehouseId(), activity_name: 'INBOUND' }}
+                filterParams={{ status: 'PENDING', warehouse_id: getWarehouseId, activity_name: 'INBOUND' }}
                 filterEnd
                 limit={5}
                 filters={[

@@ -11,8 +11,10 @@ import {
   PopoverBody,
   PopoverFooter,
   PopoverArrow,
+  Box,
   Button,
   useMediaQuery,
+  Portal,
 } from '@chakra-ui/react';
 import Context from '../context';
 import menuItem from '../navigation/menu-item';
@@ -52,13 +54,13 @@ function Header() {
   // };
 
   return (
-    <header className="relative flex p-5 bg-[#fff] drop-shadow-sm">
+    <header className="flex p-5 bg-[#fff] drop-shadow-sm">
       {isLarge ? (
-        <div className="mx-3 mt-0.5 cursor-pointer z-10" onClick={() => store.toggleDrawer()}>
+        <div className="mx-3 mt-0.5 cursor-pointer" onClick={() => store.toggleDrawer()}>
           <img src={logoApp} alt="logo" width={200} />
         </div>
       ) : (
-        <div className="mx-1 h-8 cursor-pointer z-20" onClick={() => store.toggleDrawer()}>
+        <div className="mx-1 h-8 cursor-pointer" onClick={() => store.toggleDrawer()}>
           <img src={HamburgerMenu} alt="hamburger-icon" className="h-8" />
         </div>
       )}
@@ -83,7 +85,7 @@ function Header() {
       </ul>
 
       <div className="flex">
-        <div className="flex items-center justify-center mx-4">
+        <div className="flex items-center justify-center mx-4 ">
           <BellIcon className="w-5 h-5 mx-4 text-[#757575]" />
           {/* <UserIcon className="w-5 h-5 text-[#757575]" />
           <ChevronDownIcon className="w-4 h-4 text-[#757575]" /> */}
@@ -99,29 +101,33 @@ function Header() {
                   size="xs"
                 />
               </PopoverTrigger>
-              <PopoverContent marginEnd={6} width="auto">
-                <PopoverArrow />
-                <PopoverBody className="py-3 px-4 text-sm text-[#50B8C1]">
-                  <div className="flex">
-                    <OfficeBuildingIcon className="w-10 h-10" />
-                    <div>
-                      <p>{getWarehouse()?.name}</p>
-                      <p className="font-medium truncate text-center">
-                        {getWarehouse()?.address !== null ? getWarehouse()?.address : '-'}
-                      </p>
-                    </div>
-                  </div>
-                </PopoverBody>
-                <PopoverFooter className="py-1">
-                  <button
-                    onClick={handleChangeWarehouse}
-                    type="button"
-                    className="block w-full py-2 px-4 text-sm text-white bg-gray-300 rounded-md hover:bg-[#50B8C1]"
-                  >
-                    Change Area
-                  </button>
-                </PopoverFooter>
-              </PopoverContent>
+              <Portal>
+                <Box zIndex="full" w="full" h="full">
+                  <PopoverContent width="auto" marginRight={2}>
+                    <PopoverArrow />
+                    <PopoverBody className="py-3 px-4 text-sm text-[#50B8C1] ">
+                      <div className="flex">
+                        <OfficeBuildingIcon className="w-10 h-10" />
+                        <div>
+                          <p>{getWarehouse()?.name}</p>
+                          <p className="font-medium truncate text-center">
+                            {getWarehouse()?.address !== null ? getWarehouse()?.address : '-'}
+                          </p>
+                        </div>
+                      </div>
+                    </PopoverBody>
+                    <PopoverFooter className="py-1">
+                      <button
+                        onClick={handleChangeWarehouse}
+                        type="button"
+                        className="w-full py-2 px-4 text-sm text-white bg-gray-300 rounded-md hover:bg-[#50B8C1]"
+                      >
+                        Change Area
+                      </button>
+                    </PopoverFooter>
+                  </PopoverContent>
+                </Box>
+              </Portal>
             </Popover>
           </div>
         </div>
